@@ -273,44 +273,6 @@ def generatelistfromfile(dmobject):
             pass
 
 
-def getparammapping(dmobject, dmparam):
-    hasmapping = 0
-    mapping = ""
-    if "tr-104" in sys.argv[1]:
-        param = "Device.Services." + dmobject.get('name') + dmparam.get('name')
-    else:
-        param = dmobject.get('name') + dmparam.get('name')
-    for value in listmapping:
-        if param in value:
-            hasmapping = 1
-            config_type = value.split("!")
-            mapping = config_type[1]
-            mapping = mapping.replace("*/\n", "")
-            break
-
-    return hasmapping, mapping
-
-
-def getobjmapping(dmobject):
-    hasmapping = 0
-    mapping = ""
-    if "tr-104" in sys.argv[1]:
-        obj = "Device.Services." + dmobject.get('name')
-    else:
-        obj = dmobject.get('name')
-    for value in listmapping:
-        config_type = value.split("!")
-        mapping = config_type[0]
-        mapping = mapping.replace("/*#", "")
-        if obj == mapping:
-            hasmapping = 1
-            mapping = config_type[1]
-            mapping = mapping.replace("*/\n", "")
-            break
-
-    return hasmapping, mapping
-
-
 def objhaschild(parentname, level, check_obj):
     hasobj = 0
     model = model2 if check_obj == 0 else model1
@@ -398,69 +360,6 @@ def printOBJMaPPING(mapping):
     print("}\n}", file=fp)
     fp.close()
 
-
-def printPARAMMaPPING(mapping):
-    fp = open('./.json_tmp', 'a', encoding='utf-8')
-    lst = mapping.split("&")
-    print("\"mapping\": [", file=fp)
-    for i in range(len(lst)):
-        config_type = lst[i].split(":", 1)
-        config = config_type[1].split("/")
-
-        print("{", file=fp)
-        print("\"type\": \"%s\"," % config_type[0].lower(), file=fp)
-
-        # SYSFS || PROCFS
-        if config_type[0] == "SYSFS" or config_type[0] == "PROCFS":
-            print("\"file\": \"%s\"" % config_type[1], file=fp)
-
-        # UCI, UBUS, CLI
-        else:
-            # Only for UCI, UBUS, CLI
-            print("\"%s\": {" % config_type[0].lower(), file=fp)
-
-            # UCI
-            if config_type[0] == "UCI":
-                print("\"file\": \"%s\"," % config[0], file=fp)
-                print("\"section\": {", file=fp)
-                var = config[1].split(",")
-                if len(var) == 1:
-                    print("\"type\": \"%s\"" % var[0], file=fp)
-                elif len(var) > 1 and "@i" in var[1]:
-                    print("\"type\": \"%s\"," % var[0], file=fp)
-                    print("\"index\": \"%s\"" % var[1], file=fp)
-                elif len(var) > 1:
-                    print("\"type\": \"%s\"," % var[0], file=fp)
-                    print("\"name\": \"%s\"" % var[1], file=fp)
-                print("}", file=fp)
-                if len(var) > 1:
-                    print("\"option\": {", file=fp)
-                    print("\"name\": \"%s\"" % config[2], file=fp)
-                    print("}", file=fp)
-
-            # UBUS
-            elif config_type[0] == "UBUS":
-                print("\"object\": \"%s\"," % config[0], file=fp)
-                print("\"method\": \"%s\"," % config[1], file=fp)
-                print("\"args\": {", file=fp)
-                if config[2] != "":
-                    args = config[2].split(",")
-                    print("\"%s\": \"%s\"" % (args[0], args[1]), file=fp)
-                print("}", file=fp)
-                print("\"key\": \"%s\"" % config[3], file=fp)
-
-            # CLI
-            elif config_type[0] == "CLI":
-                print("\"command\": \"%s\"," % config[0], file=fp)
-                print("\"args\": \"%s\"" % config[1], file=fp)
-
-            print("}", file=fp)
-
-        print("}", file=fp)
-    print("]\n}", file=fp)
-    fp.close()
-
-
 def removelastline():
     file = open("./.json_tmp", encoding='utf-8')
     lines = file.readlines()
@@ -502,7 +401,6 @@ def removetmpfiles():
 
 def printOBJ(dmobject, hasobj, hasparam, bbfdm_type):
     uniquekeys = getuniquekeys(dmobject)
-    hasmapping, mapping = getobjmapping(dmobject)
     if (dmobject.get('name')).endswith(".{i}."):
         fbrowse = "true"
     else:
@@ -511,8 +409,9 @@ def printOBJ(dmobject, hasobj, hasparam, bbfdm_type):
     fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("\"type\" : \"object\",", file=fp)
 
-    if dmobject.get('version'):
-        print("\"version\" : \"%s\"," % dmobject.get('version'), file=fp)
+    status = dmobject.get('status')
+    if status in {"deprecated", "obsoleted", "deleted"}:
+        print("\"obsolete\" : true,", file=fp)
 
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
     print("\"description\" : \"%s\"," % getParamDesc(dmobject, None), file=fp)
@@ -527,12 +426,9 @@ def printOBJ(dmobject, hasobj, hasparam, bbfdm_type):
     else:
         print("\"array\" : %s" % fbrowse, file=fp)
     fp.close()
-    if hasmapping:
-        printOBJMaPPING(mapping)
 
 
 def printPARAM(dmparam, dmobject, bbfdm_type):
-    hasmapping, mapping = getparammapping(dmobject, dmparam)
     islist, datatype, paramvalrange, paramenum, paramunit, parampattern, listminItem, listmaxItem, listmaxsize = getparamoption(dmparam)
 
     fp = open('./.json_tmp', 'a', encoding='utf-8')
@@ -545,8 +441,9 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
     if dmparam.get('mandatory') == "true":
         print("\"mandatory\" : true,", file=fp)
 
-    if dmparam.get('version'):
-        print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
+    status = dmobject.get('status') or dmparam.get('status')
+    if status in {"deprecated", "obsoleted", "deleted"}:
+        print("\"obsolete\" : true,", file=fp)
 
     print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
     print("\"description\" : \"%s\"," % getParamDesc(dmparam, datatype), file=fp)
@@ -561,7 +458,7 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
 
     # add datatype
     print(("\"datatype\" : \"%s\"," % datatype) if (listmaxsize is not None or listminItem is not None or listmaxItem is not None or paramvalrange is not None or paramunit is not
-          None or paramenum is not None or parampattern is not None or (hasmapping and islist == 0)) else ("\"datatype\" : \"%s\"" % datatype), file=fp)
+          None or paramenum is not None or parampattern is not None) else ("\"datatype\" : \"%s\"" % datatype), file=fp)
 
     if islist == 1:
         # add maximum size of list
@@ -609,35 +506,26 @@ def printPARAM(dmparam, dmobject, bbfdm_type):
                 print("\"max\" : %s" % valrange[1], file=fp)
                 print(("},") if (eachvalrange ==
                       valranges[len(valranges)-1]) else ("}"), file=fp)
-        print(("],") if (paramunit is not None or paramenum is not None or parampattern is not None
-              or (hasmapping and islist == 0)) else ("]"), file=fp)
+        print(("],") if (paramunit is not None or paramenum is not None or parampattern is not None) else ("]"), file=fp)
 
     # add unit
     if paramunit is not None:
-        print(("\"unit\" : \"%s\"," % paramunit) if (paramenum is not None or parampattern is not None or (
-            hasmapping and islist == 0)) else ("\"unit\" : \"%s\"" % paramunit), file=fp)
+        print(("\"unit\" : \"%s\"," % paramunit) if (paramenum is not None or parampattern is not None) else ("\"unit\" : \"%s\"" % paramunit), file=fp)
 
     # add enumaration
     if paramenum is not None:
-        print(("\"enumerations\" : [%s]," % paramenum) if (parampattern is not None or (
-            hasmapping and islist == 0)) else ("\"enumerations\" : [%s]" % paramenum), file=fp)
+        print(("\"enumerations\" : [%s]," % paramenum) if (parampattern is not None) else ("\"enumerations\" : [%s]" % paramenum), file=fp)
 
     # add pattern
     if parampattern is not None:
-        print(("\"pattern\" : [%s]," % parampattern.replace("\\", "\\\\")) if (
-            hasmapping and islist == 0) else ("\"pattern\" : [%s]" % parampattern.replace("\\", "\\\\")), file=fp)
+        print(("\"pattern\" : [%s]" % parampattern.replace("\\", "\\\\")), file=fp)
 
     # close list
     if islist == 1:
-        print(("},") if hasmapping else ("}"), file=fp)
-
-    # add mapping
-    if hasmapping:
-        fp.close()
-        printPARAMMaPPING(mapping)
-    else:
         print("}", file=fp)
-        fp.close()
+
+    print("}", file=fp)
+    fp.close()
 
 
 def printCOMMAND(dmparam, dmobject, _bbfdm_type):
@@ -646,9 +534,6 @@ def printCOMMAND(dmparam, dmobject, _bbfdm_type):
     print("\"type\" : \"command\",", file=fp)
     print("\"async\" : %s," %
           ("true" if dmparam.get('async') is not None else "false"), file=fp)
-
-    if dmparam.get('version'):
-        print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
 
     inputfound = 0
     outputfound = 0
@@ -688,9 +573,6 @@ def printEVENT(dmparam, dmobject, _bbfdm_type):
     fp = open('./.json_tmp', 'a', encoding='utf-8')
     print("\"%s\" : {" % dmparam.get('name'), file=fp)
     print("\"type\" : \"event\",", file=fp)
-
-    if dmparam.get('version'):
-        print("\"version\" : \"%s\"," % dmparam.get('version'), file=fp)
 
     has_param = 0
     for c in dmparam:

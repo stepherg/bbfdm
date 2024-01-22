@@ -1,7 +1,6 @@
 {
 	"Device.": {
 		"type": "object",
-		"version": "2.0",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -363,7 +362,6 @@
 		},
 		"Device.Services.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -374,7 +372,6 @@
 		},
 		"Device.DeviceInfo.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -802,7 +799,6 @@
 			},
 			"Device.DeviceInfo.VendorConfigFile.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1059,7 +1055,6 @@
 			},
 			"Device.DeviceInfo.MemoryStatus.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1118,7 +1113,6 @@
 			},
 			"Device.DeviceInfo.ProcessStatus.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1156,7 +1150,6 @@
 				},
 				"Device.DeviceInfo.ProcessStatus.Process.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1257,7 +1250,6 @@
 			},
 			"Device.DeviceInfo.TemperatureStatus.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1278,7 +1270,6 @@
 				},
 				"Device.DeviceInfo.TemperatureStatus.TemperatureSensor.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1533,7 +1524,6 @@
 			},
 			"Device.DeviceInfo.NetworkProperties.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1575,7 +1565,6 @@
 			},
 			"Device.DeviceInfo.Processor.{i}.": {
 				"type": "object",
-				"version": "2.1",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1628,7 +1617,6 @@
 			},
 			"Device.DeviceInfo.LogRotate.{i}.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1763,7 +1751,6 @@
 				},
 				"Device.DeviceInfo.LogRotate.{i}.LogFile.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1834,7 +1821,6 @@
 			},
 			"Device.DeviceInfo.VendorLogFile.{i}.": {
 				"type": "object",
-				"version": "2.1",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1956,7 +1942,6 @@
 			},
 			"Device.DeviceInfo.Location.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2053,7 +2038,6 @@
 			},
 			"Device.DeviceInfo.DeviceImageFile.{i}.": {
 				"type": "object",
-				"version": "2.11",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2114,7 +2098,6 @@
 			},
 			"Device.DeviceInfo.FirmwareImage.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2326,7 +2309,6 @@
 			},
 			"Device.DeviceInfo.KernelFaults.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2410,7 +2392,6 @@
 				},
 				"Device.DeviceInfo.KernelFaults.KernelFault.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2566,7 +2547,6 @@
 			},
 			"Device.DeviceInfo.ProcessFaults.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2650,7 +2630,6 @@
 				},
 				"Device.DeviceInfo.ProcessFaults.ProcessFault.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2817,7 +2796,6 @@
 			},
 			"Device.DeviceInfo.SupportedDataModel.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp"
 				],
@@ -2903,7 +2881,6 @@
 			},
 			"Device.DeviceInfo.ProxierInfo.": {
 				"type": "object",
-				"version": "2.3",
 				"protocols": [
 					"cwmp"
 				],
@@ -2979,7 +2956,6 @@
 		},
 		"Device.ManagementServer.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp"
 			],
@@ -3623,7 +3599,6 @@
 			},
 			"Device.ManagementServer.ManageableDevice.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp"
 				],
@@ -3639,6 +3614,7 @@
 					"type": "string",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp"
 					],
@@ -3715,7 +3691,6 @@
 			},
 			"Device.ManagementServer.AutonomousTransferCompletePolicy.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp"
 				],
@@ -3785,7 +3760,6 @@
 			},
 			"Device.ManagementServer.DownloadAvailability.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp"
 				],
@@ -3794,7 +3768,6 @@
 				"array": false,
 				"Device.ManagementServer.DownloadAvailability.Announcement.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -3838,7 +3811,6 @@
 					},
 					"Device.ManagementServer.DownloadAvailability.Announcement.Group.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp"
 						],
@@ -3905,7 +3877,6 @@
 				},
 				"Device.ManagementServer.DownloadAvailability.Query.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -3951,7 +3922,6 @@
 			},
 			"Device.ManagementServer.DUStateChangeComplPolicy.": {
 				"type": "object",
-				"version": "2.1",
 				"protocols": [
 					"cwmp"
 				],
@@ -4036,7 +4006,6 @@
 			},
 			"Device.ManagementServer.EmbeddedDevice.{i}.": {
 				"type": "object",
-				"version": "2.3",
 				"protocols": [
 					"cwmp"
 				],
@@ -4214,7 +4183,6 @@
 			},
 			"Device.ManagementServer.VirtualDevice.{i}.": {
 				"type": "object",
-				"version": "2.3",
 				"protocols": [
 					"cwmp"
 				],
@@ -4349,7 +4317,6 @@
 			},
 			"Device.ManagementServer.StandbyPolicy.": {
 				"type": "object",
-				"version": "2.7",
 				"protocols": [
 					"cwmp"
 				],
@@ -4455,7 +4422,6 @@
 			},
 			"Device.ManagementServer.InformParameter.{i}.": {
 				"type": "object",
-				"version": "2.8",
 				"protocols": [
 					"cwmp"
 				],
@@ -4522,7 +4488,6 @@
 			},
 			"Device.ManagementServer.HeartbeatPolicy.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp"
 				],
@@ -4569,7 +4534,6 @@
 		},
 		"Device.Time.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -4610,6 +4574,7 @@
 				"type": "string",
 				"read": true,
 				"write": true,
+				"obsolete": true,
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -4626,6 +4591,7 @@
 				"type": "string",
 				"read": true,
 				"write": true,
+				"obsolete": true,
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -4642,6 +4608,7 @@
 				"type": "string",
 				"read": true,
 				"write": true,
+				"obsolete": true,
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -4658,6 +4625,7 @@
 				"type": "string",
 				"read": true,
 				"write": true,
+				"obsolete": true,
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -4674,6 +4642,7 @@
 				"type": "string",
 				"read": true,
 				"write": true,
+				"obsolete": true,
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -4737,7 +4706,6 @@
 			},
 			"Device.Time.Client.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -4975,7 +4943,6 @@
 				},
 				"Device.Time.Client.{i}.Authentication.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5027,7 +4994,6 @@
 				},
 				"Device.Time.Client.{i}.Stats.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5083,7 +5049,6 @@
 			},
 			"Device.Time.Server.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -5267,7 +5232,6 @@
 				},
 				"Device.Time.Server.{i}.Authentication.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5314,7 +5278,6 @@
 				},
 				"Device.Time.Server.{i}.Stats.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5371,7 +5334,6 @@
 		},
 		"Device.UserInterface.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -5722,7 +5684,6 @@
 			},
 			"Device.UserInterface.HTTPAccess.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6028,7 +5989,6 @@
 				},
 				"Device.UserInterface.HTTPAccess.{i}.Session.{i}.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6137,7 +6097,7 @@
 			},
 			"Device.UserInterface.RemoteAccess.": {
 				"type": "object",
-				"version": "2.0",
+				"obsolete": true,
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6149,6 +6109,7 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6160,6 +6121,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6176,6 +6138,7 @@
 					"type": "string",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6193,6 +6156,7 @@
 					"type": "string",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6203,7 +6167,6 @@
 			},
 			"Device.UserInterface.LocalDisplay.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6308,7 +6271,6 @@
 			},
 			"Device.UserInterface.Messages.": {
 				"type": "object",
-				"version": "2.11",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6485,7 +6447,6 @@
 		},
 		"Device.InterfaceStack.{i}.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -6581,7 +6542,6 @@
 		},
 		"Device.DSL.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -6624,7 +6584,6 @@
 			},
 			"Device.DSL.Line.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6786,6 +6745,7 @@
 					"type": "string",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6844,6 +6804,7 @@
 					"type": "string",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7830,7 +7791,6 @@
 				},
 				"Device.DSL.Line.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7988,7 +7948,6 @@
 					},
 					"Device.DSL.Line.{i}.Stats.Total.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -8023,7 +7982,6 @@
 					},
 					"Device.DSL.Line.{i}.Stats.Showtime.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -8058,7 +8016,6 @@
 					},
 					"Device.DSL.Line.{i}.Stats.LastShowtime.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -8093,7 +8050,6 @@
 					},
 					"Device.DSL.Line.{i}.Stats.CurrentDay.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -8128,7 +8084,6 @@
 					},
 					"Device.DSL.Line.{i}.Stats.QuarterHour.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -8164,7 +8119,6 @@
 				},
 				"Device.DSL.Line.{i}.TestParams.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8447,7 +8401,6 @@
 				},
 				"Device.DSL.Line.{i}.DataGathering.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8499,7 +8452,6 @@
 			},
 			"Device.DSL.Channel.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -8799,7 +8751,6 @@
 				},
 				"Device.DSL.Channel.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8957,7 +8908,6 @@
 					},
 					"Device.DSL.Channel.{i}.Stats.Total.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9034,7 +8984,6 @@
 					},
 					"Device.DSL.Channel.{i}.Stats.Showtime.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9111,7 +9060,6 @@
 					},
 					"Device.DSL.Channel.{i}.Stats.LastShowtime.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9188,7 +9136,6 @@
 					},
 					"Device.DSL.Channel.{i}.Stats.CurrentDay.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9265,7 +9212,6 @@
 					},
 					"Device.DSL.Channel.{i}.Stats.QuarterHour.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9344,7 +9290,6 @@
 			},
 			"Device.DSL.BondingGroup.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -9625,7 +9570,6 @@
 				},
 				"Device.DSL.BondingGroup.{i}.BondedChannel.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9671,7 +9615,6 @@
 					},
 					"Device.DSL.BondingGroup.{i}.BondedChannel.{i}.Ethernet.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9681,7 +9624,6 @@
 						"array": false,
 						"Device.DSL.BondingGroup.{i}.BondedChannel.{i}.Ethernet.Stats.": {
 							"type": "object",
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9782,7 +9724,6 @@
 				},
 				"Device.DSL.BondingGroup.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9993,7 +9934,6 @@
 					},
 					"Device.DSL.BondingGroup.{i}.Stats.Total.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -10140,7 +10080,6 @@
 					},
 					"Device.DSL.BondingGroup.{i}.Stats.CurrentDay.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -10287,7 +10226,6 @@
 					},
 					"Device.DSL.BondingGroup.{i}.Stats.QuarterHour.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -10435,7 +10373,6 @@
 				},
 				"Device.DSL.BondingGroup.{i}.Ethernet.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10445,7 +10382,6 @@
 					"array": false,
 					"Device.DSL.BondingGroup.{i}.Ethernet.Stats.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -10634,7 +10570,6 @@
 			},
 			"Device.DSL.Diagnostics.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -11514,7 +11449,6 @@
 				},
 				"Device.DSL.Diagnostics.ADSLLineTest.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -11938,7 +11872,6 @@
 				},
 				"Device.DSL.Diagnostics.SELTUER.": {
 					"type": "object",
-					"version": "2.13",
 					"protocols": [
 						"cwmp"
 					],
@@ -12070,7 +12003,6 @@
 				},
 				"Device.DSL.Diagnostics.SELTQLN.": {
 					"type": "object",
-					"version": "2.13",
 					"protocols": [
 						"cwmp"
 					],
@@ -12173,7 +12105,6 @@
 				},
 				"Device.DSL.Diagnostics.SELTP.": {
 					"type": "object",
-					"version": "2.13",
 					"protocols": [
 						"cwmp"
 					],
@@ -12387,7 +12318,6 @@
 		},
 		"Device.FAST.": {
 			"type": "object",
-			"version": "2.11",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -12408,7 +12338,6 @@
 			},
 			"Device.FAST.Line.{i}.": {
 				"type": "object",
-				"version": "2.11",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12935,7 +12864,6 @@
 				},
 				"Device.FAST.Line.{i}.Stats.": {
 					"type": "object",
-					"version": "2.11",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13093,7 +13021,6 @@
 					},
 					"Device.FAST.Line.{i}.Stats.Total.": {
 						"type": "object",
-						"version": "2.11",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13241,7 +13168,6 @@
 					},
 					"Device.FAST.Line.{i}.Stats.Showtime.": {
 						"type": "object",
-						"version": "2.11",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13389,7 +13315,6 @@
 					},
 					"Device.FAST.Line.{i}.Stats.LastShowtime.": {
 						"type": "object",
-						"version": "2.11",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13537,7 +13462,6 @@
 					},
 					"Device.FAST.Line.{i}.Stats.CurrentDay.": {
 						"type": "object",
-						"version": "2.11",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13685,7 +13609,6 @@
 					},
 					"Device.FAST.Line.{i}.Stats.QuarterHour.": {
 						"type": "object",
-						"version": "2.11",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13834,7 +13757,6 @@
 				},
 				"Device.FAST.Line.{i}.TestParams.": {
 					"type": "object",
-					"version": "2.11",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13987,7 +13909,6 @@
 		},
 		"Device.Optical.": {
 			"type": "object",
-			"version": "2.4",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -14008,7 +13929,6 @@
 			},
 			"Device.Optical.Interface.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14135,6 +14055,7 @@
 					"type": "int",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14146,6 +14067,7 @@
 					"type": "int",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14168,6 +14090,7 @@
 					"type": "int",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14179,6 +14102,7 @@
 					"type": "int",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14188,7 +14112,6 @@
 				},
 				"Device.Optical.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.4",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14289,7 +14212,6 @@
 		},
 		"Device.Cellular.": {
 			"type": "object",
-			"version": "2.8",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -14347,7 +14269,6 @@
 			},
 			"Device.Cellular.Interface.{i}.": {
 				"type": "object",
-				"version": "2.8",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14637,7 +14558,6 @@
 				},
 				"Device.Cellular.Interface.{i}.USIM.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14758,7 +14678,6 @@
 				},
 				"Device.Cellular.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14935,7 +14854,6 @@
 			},
 			"Device.Cellular.AccessPoint.{i}.": {
 				"type": "object",
-				"version": "2.8",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -15071,7 +14989,6 @@
 		},
 		"Device.ATM.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -15092,7 +15009,6 @@
 			},
 			"Device.ATM.Link.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -15306,7 +15222,6 @@
 				},
 				"Device.ATM.Link.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -15526,7 +15441,6 @@
 				},
 				"Device.ATM.Link.{i}.QoS.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -15594,7 +15508,6 @@
 			},
 			"Device.ATM.Diagnostics.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -15734,7 +15647,6 @@
 				},
 				"Device.ATM.Diagnostics.F5Loopback.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -15862,7 +15774,6 @@
 		},
 		"Device.DOCSIS.": {
 			"type": "object",
-			"version": "2.15",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -15969,7 +15880,6 @@
 			},
 			"Device.DOCSIS.Downstream.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -16126,7 +16036,6 @@
 				},
 				"Device.DOCSIS.Downstream.{i}.Stats.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -16303,7 +16212,6 @@
 			},
 			"Device.DOCSIS.Upstream.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -16460,7 +16368,6 @@
 				},
 				"Device.DOCSIS.Upstream.{i}.Stats.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -16637,7 +16544,6 @@
 			},
 			"Device.DOCSIS.DownstreamChannel.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -16786,7 +16692,6 @@
 				},
 				"Device.DOCSIS.DownstreamChannel.{i}.SignalQuality.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -16880,7 +16785,6 @@
 				},
 				"Device.DOCSIS.DownstreamChannel.{i}.SignalQualityExt.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -16925,7 +16829,6 @@
 			},
 			"Device.DOCSIS.UpstreamChannel.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -17098,7 +17001,6 @@
 				},
 				"Device.DOCSIS.UpstreamChannel.{i}.Status.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -17234,7 +17136,6 @@
 			},
 			"Device.DOCSIS.Interface.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -17435,7 +17336,6 @@
 				},
 				"Device.DOCSIS.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -17611,7 +17511,6 @@
 				},
 				"Device.DOCSIS.Interface.{i}.ConnectivityStatus.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -17768,7 +17667,6 @@
 			},
 			"Device.DOCSIS.SpectrumAnalysis.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -17941,7 +17839,6 @@
 				},
 				"Device.DOCSIS.SpectrumAnalysis.Result.{i}.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -18007,7 +17904,6 @@
 		},
 		"Device.PTM.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -18028,7 +17924,6 @@
 			},
 			"Device.PTM.Link.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -18153,7 +18048,6 @@
 				},
 				"Device.PTM.Link.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -18331,7 +18225,6 @@
 		},
 		"Device.Ethernet.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -18418,7 +18311,6 @@
 			},
 			"Device.Ethernet.Interface.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -18649,7 +18541,6 @@
 				},
 				"Device.Ethernet.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -18826,7 +18717,6 @@
 			},
 			"Device.Ethernet.Link.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -18976,7 +18866,6 @@
 				},
 				"Device.Ethernet.Link.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -19153,7 +19042,6 @@
 			},
 			"Device.Ethernet.VLANTermination.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -19287,7 +19175,6 @@
 				},
 				"Device.Ethernet.VLANTermination.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -19464,7 +19351,6 @@
 			},
 			"Device.Ethernet.RMONStats.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -19776,7 +19662,6 @@
 			},
 			"Device.Ethernet.WoL.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -19864,7 +19749,6 @@
 			},
 			"Device.Ethernet.LAG.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -19988,7 +19872,6 @@
 				},
 				"Device.Ethernet.LAG.{i}.Stats.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -20166,7 +20049,6 @@
 		},
 		"Device.USB.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -20198,7 +20080,6 @@
 			},
 			"Device.USB.Interface.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -20360,7 +20241,6 @@
 				},
 				"Device.USB.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -20537,7 +20417,6 @@
 			},
 			"Device.USB.Port.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -20667,7 +20546,6 @@
 			},
 			"Device.USB.USBHosts.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -20688,7 +20566,6 @@
 				},
 				"Device.USB.USBHosts.Host.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -20817,7 +20694,6 @@
 					},
 					"Device.USB.USBHosts.Host.{i}.Device.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -21100,7 +20976,6 @@
 						},
 						"Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration.{i}.": {
 							"type": "object",
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -21135,7 +21010,6 @@
 							},
 							"Device.USB.USBHosts.Host.{i}.Device.{i}.Configuration.{i}.Interface.{i}.": {
 								"type": "object",
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -21218,7 +21092,6 @@
 		},
 		"Device.HPNA.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -21239,7 +21112,6 @@
 			},
 			"Device.HPNA.Interface.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -21621,7 +21493,6 @@
 				},
 				"Device.HPNA.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -21797,7 +21668,6 @@
 				},
 				"Device.HPNA.Interface.{i}.QoS.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -21818,7 +21688,6 @@
 					},
 					"Device.HPNA.Interface.{i}.QoS.FlowSpec.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -22045,7 +21914,6 @@
 				},
 				"Device.HPNA.Interface.{i}.AssociatedDevice.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -22159,7 +22027,6 @@
 			},
 			"Device.HPNA.Diagnostics.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -22370,7 +22237,6 @@
 				},
 				"Device.HPNA.Diagnostics.PHYThroughput.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -22508,7 +22374,6 @@
 					},
 					"Device.HPNA.Diagnostics.PHYThroughput.Result.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp"
 						],
@@ -22615,7 +22480,6 @@
 				},
 				"Device.HPNA.Diagnostics.PerformanceMonitoring.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -22667,7 +22531,6 @@
 					},
 					"Device.HPNA.Diagnostics.PerformanceMonitoring.Nodes.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp"
 						],
@@ -22706,7 +22569,6 @@
 						},
 						"Device.HPNA.Diagnostics.PerformanceMonitoring.Nodes.Node.{i}.": {
 							"type": "object",
-							"version": "2.0",
 							"protocols": [
 								"cwmp"
 							],
@@ -23006,7 +22868,6 @@
 					},
 					"Device.HPNA.Diagnostics.PerformanceMonitoring.Channels.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp"
 						],
@@ -23035,7 +22896,6 @@
 						},
 						"Device.HPNA.Diagnostics.PerformanceMonitoring.Channels.Channel.{i}.": {
 							"type": "object",
-							"version": "2.0",
 							"protocols": [
 								"cwmp"
 							],
@@ -23207,7 +23067,6 @@
 		},
 		"Device.MoCA.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -23228,7 +23087,6 @@
 			},
 			"Device.MoCA.Interface.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -23622,6 +23480,7 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -24512,6 +24371,7 @@
 					"type": "string",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -25600,7 +25460,6 @@
 				},
 				"Device.MoCA.Interface.{i}.AccessControl.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -25646,7 +25505,6 @@
 				},
 				"Device.MoCA.Interface.{i}.Rlapm.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -25749,7 +25607,6 @@
 				},
 				"Device.MoCA.Interface.{i}.Sapm.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -25853,7 +25710,6 @@
 				},
 				"Device.MoCA.Interface.{i}.Aca.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -26061,7 +25917,6 @@
 				},
 				"Device.MoCA.Interface.{i}.Reset.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -26122,7 +25977,6 @@
 				},
 				"Device.MoCA.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -26309,7 +26163,6 @@
 				},
 				"Device.MoCA.Interface.{i}.QoS.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -26352,7 +26205,6 @@
 					},
 					"Device.MoCA.Interface.{i}.QoS.FlowStats.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -26600,7 +26452,6 @@
 				},
 				"Device.MoCA.Interface.{i}.AssociatedDevice.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -26707,6 +26558,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -26718,6 +26570,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -26847,6 +26700,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -27088,7 +26942,6 @@
 				},
 				"Device.MoCA.Interface.{i}.Mesh.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -27255,7 +27108,6 @@
 				},
 				"Device.MoCA.Interface.{i}.Bridge.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -27308,7 +27160,6 @@
 				},
 				"Device.MoCA.Interface.{i}.MeshScMod.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -27424,7 +27275,6 @@
 		},
 		"Device.Ghn.": {
 			"type": "object",
-			"version": "2.4",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -27445,7 +27295,6 @@
 			},
 			"Device.Ghn.Interface.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -27597,6 +27446,7 @@
 					"type": "string",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -27937,7 +27787,6 @@
 				},
 				"Device.Ghn.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.4",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -28201,7 +28050,6 @@
 				},
 				"Device.Ghn.Interface.{i}.AssociatedDevice.{i}.": {
 					"type": "object",
-					"version": "2.4",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -28281,7 +28129,6 @@
 				},
 				"Device.Ghn.Interface.{i}.DMInfo.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -28446,7 +28293,6 @@
 				},
 				"Device.Ghn.Interface.{i}.SCInfo.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -28512,7 +28358,6 @@
 				},
 				"Device.Ghn.Interface.{i}.SMMaskedBand.{i}.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -28571,7 +28416,6 @@
 			},
 			"Device.Ghn.Diagnostics.": {
 				"type": "object",
-				"version": "2.8",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -28756,7 +28600,6 @@
 				},
 				"Device.Ghn.Diagnostics.PHYThroughput.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp"
 					],
@@ -28783,7 +28626,6 @@
 				},
 				"Device.Ghn.Diagnostics.PerformanceMonitoring.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp"
 					],
@@ -28897,7 +28739,6 @@
 					},
 					"Device.Ghn.Diagnostics.PerformanceMonitoring.Nodes.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp"
 						],
@@ -28936,7 +28777,6 @@
 						},
 						"Device.Ghn.Diagnostics.PerformanceMonitoring.Nodes.Node.{i}.": {
 							"type": "object",
-							"version": "2.8",
 							"protocols": [
 								"cwmp"
 							],
@@ -29199,7 +29039,6 @@
 					},
 					"Device.Ghn.Diagnostics.PerformanceMonitoring.Channels.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp"
 						],
@@ -29228,7 +29067,6 @@
 						},
 						"Device.Ghn.Diagnostics.PerformanceMonitoring.Channels.Channel.{i}.": {
 							"type": "object",
-							"version": "2.8",
 							"protocols": [
 								"cwmp"
 							],
@@ -29277,7 +29115,6 @@
 		},
 		"Device.HomePlug.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -29298,7 +29135,6 @@
 			},
 			"Device.HomePlug.Interface.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -29545,7 +29381,6 @@
 				},
 				"Device.HomePlug.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -29776,7 +29611,6 @@
 				},
 				"Device.HomePlug.Interface.{i}.AssociatedDevice.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -29901,7 +29735,6 @@
 		},
 		"Device.UPA.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -29922,7 +29755,6 @@
 			},
 			"Device.UPA.Interface.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -30232,7 +30064,6 @@
 				},
 				"Device.UPA.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -30408,7 +30239,6 @@
 				},
 				"Device.UPA.Interface.{i}.AssociatedDevice.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -30583,7 +30413,6 @@
 				},
 				"Device.UPA.Interface.{i}.ActiveNotch.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -30661,7 +30490,6 @@
 				},
 				"Device.UPA.Interface.{i}.BridgeFor.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -30730,7 +30558,6 @@
 			},
 			"Device.UPA.Diagnostics.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -30842,7 +30669,6 @@
 				},
 				"Device.UPA.Diagnostics.InterfaceMeasurement.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -30943,7 +30769,6 @@
 		},
 		"Device.WiFi.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -31065,7 +30890,7 @@
 			},
 			"Device.WiFi.MultiAP.": {
 				"type": "object",
-				"version": "2.13",
+				"obsolete": true,
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -31077,6 +30902,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -31086,7 +30912,7 @@
 				},
 				"Device.WiFi.MultiAP.SteeringSummaryStats.": {
 					"type": "object",
-					"version": "2.13",
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -31098,6 +30924,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31109,6 +30936,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31120,6 +30948,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31131,6 +30960,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31142,6 +30972,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31153,6 +30984,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31164,6 +30996,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31175,6 +31008,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31185,7 +31019,7 @@
 				},
 				"Device.WiFi.MultiAP.APDevice.{i}.": {
 					"type": "object",
-					"version": "2.13",
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -31200,6 +31034,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31220,6 +31055,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31231,6 +31067,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31251,6 +31088,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31267,6 +31105,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31283,6 +31122,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31299,6 +31139,7 @@
 						"type": "dateTime",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31310,6 +31151,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31321,6 +31163,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31342,6 +31185,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31362,6 +31206,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31373,6 +31218,7 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31384,6 +31230,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31401,6 +31248,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31418,6 +31266,7 @@
 						"type": "string",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31432,6 +31281,7 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31443,6 +31293,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31452,7 +31303,7 @@
 					},
 					"Device.WiFi.MultiAP.APDevice.{i}.Radio.{i}.": {
 						"type": "object",
-						"version": "2.13",
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -31467,6 +31318,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31487,6 +31339,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31503,6 +31356,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31524,6 +31378,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31541,6 +31396,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31557,6 +31413,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31571,6 +31428,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31588,6 +31446,7 @@
 							"type": "int",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31609,6 +31468,7 @@
 							"type": "int",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31627,6 +31487,7 @@
 							"type": "int",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31645,6 +31506,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31654,7 +31516,7 @@
 						},
 						"Device.WiFi.MultiAP.APDevice.{i}.Radio.{i}.AP.{i}.": {
 							"type": "object",
-							"version": "2.13",
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -31669,6 +31531,7 @@
 								"type": "string",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -31689,6 +31552,7 @@
 								"type": "string",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -31700,6 +31564,7 @@
 								"type": "unsignedLong",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -31711,6 +31576,7 @@
 								"type": "unsignedLong",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -31722,6 +31588,7 @@
 								"type": "unsignedLong",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -31733,6 +31600,7 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -31742,7 +31610,7 @@
 							},
 							"Device.WiFi.MultiAP.APDevice.{i}.Radio.{i}.AP.{i}.AssociatedDevice.{i}.": {
 								"type": "object",
-								"version": "2.13",
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -31757,6 +31625,7 @@
 									"type": "string",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31777,6 +31646,7 @@
 									"type": "string",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31796,6 +31666,7 @@
 									"type": "boolean",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31807,6 +31678,7 @@
 									"type": "dateTime",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31818,6 +31690,7 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31830,6 +31703,7 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31842,6 +31716,7 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31859,6 +31734,7 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31875,6 +31751,7 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31884,7 +31761,7 @@
 								},
 								"Device.WiFi.MultiAP.APDevice.{i}.Radio.{i}.AP.{i}.AssociatedDevice.{i}.Stats.": {
 									"type": "object",
-									"version": "2.13",
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31896,6 +31773,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -31907,6 +31785,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -31918,6 +31797,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -31929,6 +31809,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -31940,6 +31821,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -31951,6 +31833,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -31962,6 +31845,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -31972,7 +31856,7 @@
 								},
 								"Device.WiFi.MultiAP.APDevice.{i}.Radio.{i}.AP.{i}.AssociatedDevice.{i}.SteeringSummaryStats.": {
 									"type": "object",
-									"version": "2.13",
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -31984,6 +31868,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -31995,6 +31880,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32006,6 +31892,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32017,6 +31904,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32028,6 +31916,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32039,6 +31928,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32050,6 +31940,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32061,6 +31952,7 @@
 										"type": "unsignedLong",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32072,6 +31964,7 @@
 										"type": "unsignedInt",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32083,7 +31976,7 @@
 								},
 								"Device.WiFi.MultiAP.APDevice.{i}.Radio.{i}.AP.{i}.AssociatedDevice.{i}.SteeringHistory.{i}.": {
 									"type": "object",
-									"version": "2.13",
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -32100,6 +31993,7 @@
 										"type": "dateTime",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32111,6 +32005,7 @@
 										"type": "string",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32122,6 +32017,7 @@
 										"type": "string",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32139,6 +32035,7 @@
 										"type": "string",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32155,6 +32052,7 @@
 										"type": "string",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32166,6 +32064,7 @@
 										"type": "unsignedInt",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -32182,7 +32081,6 @@
 			},
 			"Device.WiFi.DataElements.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -32192,7 +32090,6 @@
 				"array": false,
 				"Device.WiFi.DataElements.Network.": {
 					"type": "object",
-					"version": "2.13",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -32756,7 +32653,6 @@
 					},
 					"Device.WiFi.DataElements.Network.SSID.{i}.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -32927,7 +32823,6 @@
 					},
 					"Device.WiFi.DataElements.Network.STABlock.{i}.": {
 						"type": "object",
-						"version": "2.17",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -32993,7 +32888,6 @@
 						},
 						"Device.WiFi.DataElements.Network.STABlock.{i}.Schedule.{i}.": {
 							"type": "object",
-							"version": "2.17",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -33083,7 +32977,6 @@
 					},
 					"Device.WiFi.DataElements.Network.MultiAPSteeringSummaryStats.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -33182,7 +33075,6 @@
 					},
 					"Device.WiFi.DataElements.Network.Device.{i}.": {
 						"type": "object",
-						"version": "2.13",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -33412,6 +33304,7 @@
 							"type": "boolean",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -33506,6 +33399,7 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -34045,7 +33939,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.Default8021Q.{i}.": {
 							"type": "object",
-							"version": "2.15",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -34103,7 +33996,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.SSIDtoVIDMapping.{i}.": {
 							"type": "object",
-							"version": "2.15",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -34149,7 +34041,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.CACStatus.{i}.": {
 							"type": "object",
-							"version": "2.15",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -34206,7 +34097,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.CACStatus.{i}.CACAvailableChannel.{i}.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -34269,7 +34159,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.CACStatus.{i}.CACNonOccupancyChannel.{i}.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -34332,7 +34221,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.CACStatus.{i}.CACActiveChannel.{i}.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -34391,7 +34279,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.SPRule.{i}.": {
 							"type": "object",
-							"version": "2.15",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -34459,7 +34346,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.IEEE1905Security.{i}.": {
 							"type": "object",
-							"version": "2.15",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -34506,7 +34392,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.AnticipatedChannels.{i}.": {
 							"type": "object",
-							"version": "2.15",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -34554,7 +34439,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.AnticipatedChannelUsage.{i}.": {
 							"type": "object",
-							"version": "2.15",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -34630,7 +34514,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.AnticipatedChannelUsage.{i}.Entry.{i}.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -34765,7 +34648,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice.": {
 							"type": "object",
-							"version": "2.15",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -34849,7 +34731,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice.Backhaul.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -35022,7 +34903,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice.Backhaul.CurrentOperatingClassProfile.{i}.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -35097,7 +34977,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.MultiAPDevice.Backhaul.Stats.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -35245,7 +35124,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.": {
 							"type": "object",
-							"version": "2.13",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -35948,7 +35826,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.": {
 								"type": "object",
-								"version": "2.14",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -36003,7 +35880,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.": {
 									"type": "object",
-									"version": "2.14",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -36043,7 +35919,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.ChannelScan.{i}.": {
 										"type": "object",
-										"version": "2.14",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -36147,7 +36022,6 @@
 										},
 										"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanResult.{i}.OpClassScan.{i}.ChannelScan.{i}.NeighborBSS.{i}.": {
 											"type": "object",
-											"version": "2.14",
 											"protocols": [
 												"cwmp",
 												"usp"
@@ -36328,7 +36202,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BackhaulSta.": {
 								"type": "object",
-								"version": "2.13",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -36359,7 +36232,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanCapability.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -36419,7 +36291,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.ScanCapability.OpClassChannels.{i}.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -36468,7 +36339,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CACCapability.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -36489,7 +36359,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CACCapability.CACMethod.{i}.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -36536,7 +36405,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CACCapability.CACMethod.{i}.OpClassChannels.{i}.": {
 										"type": "object",
-										"version": "2.15",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -36586,7 +36454,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.": {
 								"type": "object",
-								"version": "2.13",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -36632,6 +36499,7 @@
 									"type": "base64",
 									"read": true,
 									"write": false,
+									"obsolete": true,
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -36735,7 +36603,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi6APRole.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -37025,7 +36892,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi6bSTARole.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -37315,7 +37181,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7APRole.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -37424,7 +37289,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7APRole.EMLMRFreqSeparation.{i}.": {
 										"type": "object",
-										"version": "2.17",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -37461,7 +37325,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7APRole.EMLSRFreqSeparation.{i}.": {
 										"type": "object",
-										"version": "2.17",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -37498,7 +37361,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7APRole.STRFreqSeparation.{i}.": {
 										"type": "object",
-										"version": "2.17",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -37535,7 +37397,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7APRole.NSTRFreqSeparation.{i}.": {
 										"type": "object",
-										"version": "2.17",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -37573,7 +37434,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7bSTARole.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -37682,7 +37542,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7bSTARole.EMLMRFreqSeparation.{i}.": {
 										"type": "object",
-										"version": "2.17",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -37719,7 +37578,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7bSTARole.EMLSRFreqSeparation.{i}.": {
 										"type": "object",
-										"version": "2.17",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -37756,7 +37614,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7bSTARole.STRFreqSeparation.{i}.": {
 										"type": "object",
-										"version": "2.17",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -37793,7 +37650,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.WiFi7bSTARole.NSTRFreqSeparation.{i}.": {
 										"type": "object",
-										"version": "2.17",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -37831,7 +37687,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.AKMFrontHaul.{i}.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -37872,7 +37727,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.AKMBackhaul.{i}.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -37913,7 +37767,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.Capabilities.CapableOperatingClassProfile.{i}.": {
 									"type": "object",
-									"version": "2.13",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -37991,7 +37844,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.CurrentOperatingClassProfile.{i}.": {
 								"type": "object",
-								"version": "2.13",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -38084,7 +37936,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.DisAllowedOpClassChannels.{i}.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -38144,7 +37995,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.SpatialReuse.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -38305,7 +38155,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.": {
 								"type": "object",
-								"version": "2.13",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -39009,7 +38858,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.QMDescriptor.{i}.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -39074,7 +38922,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.MUConfig.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -39129,7 +38976,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.MUStats.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -39426,7 +39272,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.MultiAPSteering.": {
 									"type": "object",
-									"version": "2.15",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -39470,7 +39315,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.ThroughputTestResult.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -39604,7 +39448,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.LatencyTestResult.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -39772,7 +39615,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.": {
 									"type": "object",
-									"version": "2.13",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -39852,6 +39694,7 @@
 										"type": "base64",
 										"read": true,
 										"write": false,
+										"obsolete": true,
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -40354,7 +40197,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.MultiAPSTA.": {
 										"type": "object",
-										"version": "2.15",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -40570,7 +40412,6 @@
 										},
 										"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.MultiAPSTA.SteeringSummaryStats.": {
 											"type": "object",
-											"version": "2.15",
 											"protocols": [
 												"cwmp",
 												"usp"
@@ -40681,7 +40522,6 @@
 										},
 										"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.MultiAPSTA.SteeringHistory.{i}.": {
 											"type": "object",
-											"version": "2.15",
 											"protocols": [
 												"cwmp",
 												"usp"
@@ -40776,7 +40616,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.WiFi6Capabilities.": {
 										"type": "object",
-										"version": "2.15",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -41066,7 +40905,6 @@
 									},
 									"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.TIDQueueSizes.{i}.": {
 										"type": "object",
-										"version": "2.15",
 										"protocols": [
 											"cwmp",
 											"usp"
@@ -41114,7 +40952,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.MultiAPRadio.": {
 								"type": "object",
-								"version": "2.15",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -41287,7 +41124,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.UnassociatedSTA.{i}.": {
 								"type": "object",
-								"version": "2.13",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -41371,7 +41207,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.WPS.": {
 							"type": "object",
-							"version": "2.17",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -41412,7 +41247,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.APMLD.{i}.": {
 							"type": "object",
-							"version": "2.17",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -41478,7 +41312,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.APMLD.{i}.APMLDConfig.": {
 								"type": "object",
-								"version": "2.17",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -41544,7 +41377,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.APMLD.{i}.TIDLinkMap.{i}.": {
 								"type": "object",
-								"version": "2.17",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -41627,7 +41459,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.APMLD.{i}.AffiliatedAP.{i}.": {
 								"type": "object",
-								"version": "2.17",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -41873,7 +41704,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.APMLD.{i}.STAMLD.{i}.": {
 								"type": "object",
-								"version": "2.17",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -42070,7 +41900,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.APMLD.{i}.STAMLD.{i}.WiFi7Capabilities.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -42136,7 +41965,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.APMLD.{i}.STAMLD.{i}.STAMLDConfig.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -42202,7 +42030,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.APMLD.{i}.STAMLD.{i}.STATIDLinkMap.{i}.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -42285,7 +42112,6 @@
 								},
 								"Device.WiFi.DataElements.Network.Device.{i}.APMLD.{i}.STAMLD.{i}.AffiliatedSTA.{i}.": {
 									"type": "object",
-									"version": "2.17",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -42485,7 +42311,6 @@
 						},
 						"Device.WiFi.DataElements.Network.Device.{i}.bSTAMLD.": {
 							"type": "object",
-							"version": "2.17",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42557,7 +42382,6 @@
 							},
 							"Device.WiFi.DataElements.Network.Device.{i}.bSTAMLD.bSTAMLDConfig.": {
 								"type": "object",
-								"version": "2.17",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -42626,7 +42450,6 @@
 				},
 				"Device.WiFi.DataElements.AssociationEvent.": {
 					"type": "object",
-					"version": "2.13",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -42638,6 +42461,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -42745,6 +42569,7 @@
 								"type": "base64",
 								"read": true,
 								"write": true,
+								"obsolete": true,
 								"protocols": [
 									"usp"
 								],
@@ -42771,7 +42596,7 @@
 					},
 					"Device.WiFi.DataElements.AssociationEvent.AssociationEventData.{i}.": {
 						"type": "object",
-						"version": "2.13",
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -42783,6 +42608,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42794,6 +42620,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42814,6 +42641,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42834,6 +42662,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42845,6 +42674,7 @@
 							"type": "base64",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42862,6 +42692,7 @@
 							"type": "base64",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42879,6 +42710,7 @@
 							"type": "base64",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42896,6 +42728,7 @@
 							"type": "base64",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42905,7 +42738,7 @@
 						},
 						"Device.WiFi.DataElements.AssociationEvent.AssociationEventData.{i}.WiFi6Capabilities.": {
 							"type": "object",
-							"version": "2.15",
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -42917,6 +42750,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -42928,6 +42762,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -42939,6 +42774,7 @@
 								"type": "base64",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -42956,6 +42792,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -42967,6 +42804,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -42978,6 +42816,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -42989,6 +42828,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43000,6 +42840,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43011,6 +42852,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43022,6 +42864,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43033,6 +42876,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43044,6 +42888,7 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43060,6 +42905,7 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43076,6 +42922,7 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43092,6 +42939,7 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43108,6 +42956,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43119,6 +42968,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43130,6 +42980,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43141,6 +42992,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43152,6 +43004,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43163,6 +43016,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43174,6 +43028,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43185,6 +43040,7 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
+								"obsolete": true,
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -43197,7 +43053,6 @@
 				},
 				"Device.WiFi.DataElements.DisassociationEvent.": {
 					"type": "object",
-					"version": "2.13",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -43209,6 +43064,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -43479,7 +43335,7 @@
 					},
 					"Device.WiFi.DataElements.DisassociationEvent.DisassociationEventData.{i}.": {
 						"type": "object",
-						"version": "2.13",
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -43491,6 +43347,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43511,6 +43368,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43531,6 +43389,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43542,6 +43401,7 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43553,6 +43413,7 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43564,6 +43425,7 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43575,6 +43437,7 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43586,6 +43449,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43597,6 +43461,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43608,6 +43473,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43619,6 +43485,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43630,6 +43497,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43642,6 +43510,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43654,6 +43523,7 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43666,6 +43536,7 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43678,6 +43549,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43690,6 +43562,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43702,6 +43575,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43719,6 +43593,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43731,6 +43606,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43747,6 +43623,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43765,7 +43642,6 @@
 				},
 				"Device.WiFi.DataElements.FailedConnectionEvent.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -43777,6 +43653,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -43862,7 +43739,7 @@
 					},
 					"Device.WiFi.DataElements.FailedConnectionEvent.FailedConnectionEventData.{i}.": {
 						"type": "object",
-						"version": "2.15",
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -43874,6 +43751,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43894,6 +43772,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43914,6 +43793,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43925,6 +43805,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43936,6 +43817,7 @@
 							"type": "string",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -43948,7 +43830,6 @@
 			},
 			"Device.WiFi.Radio.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -44391,6 +44272,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -44402,6 +44284,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -45121,7 +45004,6 @@
 				},
 				"Device.WiFi.Radio.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -45453,7 +45335,6 @@
 			},
 			"Device.WiFi.CCAMeasurementDiagnostic.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp"
 				],
@@ -45532,7 +45413,6 @@
 			},
 			"Device.WiFi.RemoteMeasurementDiagnostic.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp"
 				],
@@ -45645,7 +45525,6 @@
 			},
 			"Device.WiFi.NeighboringWiFiDiagnostic.": {
 				"type": "object",
-				"version": "2.7",
 				"protocols": [
 					"cwmp"
 				],
@@ -45681,7 +45560,6 @@
 				},
 				"Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp"
 					],
@@ -45958,7 +45836,6 @@
 			},
 			"Device.WiFi.SSID.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -46193,7 +46070,6 @@
 				},
 				"Device.WiFi.SSID.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -46524,7 +46400,6 @@
 			},
 			"Device.WiFi.AccessPoint.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -46613,6 +46488,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -46685,6 +46561,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -46766,7 +46643,6 @@
 				},
 				"Device.WiFi.AccessPoint.{i}.Security.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -47051,7 +46927,6 @@
 				},
 				"Device.WiFi.AccessPoint.{i}.WPS.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -47188,7 +47063,6 @@
 				},
 				"Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -47456,7 +47330,6 @@
 					},
 					"Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -47578,7 +47451,6 @@
 				},
 				"Device.WiFi.AccessPoint.{i}.AC.{i}.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -47626,6 +47498,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -47643,6 +47516,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -47661,6 +47535,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -47679,6 +47554,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -47731,7 +47607,6 @@
 					},
 					"Device.WiFi.AccessPoint.{i}.AC.{i}.Stats.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -47855,7 +47730,6 @@
 				},
 				"Device.WiFi.AccessPoint.{i}.Accounting.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -47978,7 +47852,6 @@
 			},
 			"Device.WiFi.EndPoint.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -48081,7 +47954,6 @@
 				},
 				"Device.WiFi.EndPoint.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -48165,7 +48037,6 @@
 				},
 				"Device.WiFi.EndPoint.{i}.Security.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -48204,7 +48075,6 @@
 				},
 				"Device.WiFi.EndPoint.{i}.Profile.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -48310,7 +48180,6 @@
 					},
 					"Device.WiFi.EndPoint.{i}.Profile.{i}.Security.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -48415,7 +48284,6 @@
 				},
 				"Device.WiFi.EndPoint.{i}.WPS.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -48526,7 +48394,6 @@
 				},
 				"Device.WiFi.EndPoint.{i}.AC.{i}.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -48574,6 +48441,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -48591,6 +48459,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -48609,6 +48478,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -48627,6 +48497,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -48679,7 +48550,6 @@
 					},
 					"Device.WiFi.EndPoint.{i}.AC.{i}.Stats.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -48805,7 +48675,6 @@
 		},
 		"Device.ZigBee.": {
 			"type": "object",
-			"version": "2.7",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -48837,7 +48706,6 @@
 			},
 			"Device.ZigBee.Interface.{i}.": {
 				"type": "object",
-				"version": "2.7",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -49008,7 +48876,6 @@
 				},
 				"Device.ZigBee.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -49184,7 +49051,6 @@
 				},
 				"Device.ZigBee.Interface.{i}.AssociatedDevice.{i}.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -49267,7 +49133,6 @@
 			},
 			"Device.ZigBee.ZDO.{i}.": {
 				"type": "object",
-				"version": "2.7",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -49370,7 +49235,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.NodeDescriptor.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -49562,7 +49426,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.PowerDescriptor.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -49640,7 +49503,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.UserDescriptor.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -49678,7 +49540,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.ComplexDescriptor.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -49793,7 +49654,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.Security.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -49862,7 +49722,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.Network.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -49883,7 +49742,6 @@
 					},
 					"Device.ZigBee.ZDO.{i}.Network.Neighbor.{i}.": {
 						"type": "object",
-						"version": "2.7",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -49970,7 +49828,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.NodeManager.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -49991,7 +49848,6 @@
 					},
 					"Device.ZigBee.ZDO.{i}.NodeManager.RoutingTable.{i}.": {
 						"type": "object",
-						"version": "2.7",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -50096,7 +49952,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.Binding.{i}.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -50260,7 +50115,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.Group.{i}.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -50340,7 +50194,6 @@
 				},
 				"Device.ZigBee.ZDO.{i}.ApplicationEndpoint.{i}.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -50397,7 +50250,6 @@
 					},
 					"Device.ZigBee.ZDO.{i}.ApplicationEndpoint.{i}.SimpleDescriptor.": {
 						"type": "object",
-						"version": "2.7",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -50494,7 +50346,6 @@
 			},
 			"Device.ZigBee.Discovery.": {
 				"type": "object",
-				"version": "2.7",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -50515,7 +50366,6 @@
 				},
 				"Device.ZigBee.Discovery.AreaNetwork.{i}.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -50638,7 +50488,6 @@
 		},
 		"Device.Bridging.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -50747,7 +50596,6 @@
 			},
 			"Device.Bridging.Bridge.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -50889,7 +50737,6 @@
 				},
 				"Device.Bridging.Bridge.{i}.STP.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -51020,7 +50867,6 @@
 				},
 				"Device.Bridging.Bridge.{i}.Port.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -51358,7 +51204,6 @@
 					},
 					"Device.Bridging.Bridge.{i}.Port.{i}.Stats.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -51534,7 +51379,6 @@
 					},
 					"Device.Bridging.Bridge.{i}.Port.{i}.PriorityCodePoint.": {
 						"type": "object",
-						"version": "2.7",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -51640,7 +51484,6 @@
 				},
 				"Device.Bridging.Bridge.{i}.VLAN.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -51716,7 +51559,6 @@
 				},
 				"Device.Bridging.Bridge.{i}.VLANPort.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -51804,7 +51646,6 @@
 			},
 			"Device.Bridging.Filter.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -52474,7 +52315,6 @@
 			},
 			"Device.Bridging.ProviderBridge.{i}.": {
 				"type": "object",
-				"version": "2.7",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -52584,7 +52424,6 @@
 		},
 		"Device.PPP.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -52625,7 +52464,6 @@
 			},
 			"Device.PPP.Interface.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -53027,7 +52865,6 @@
 				},
 				"Device.PPP.Interface.{i}.PPPoE.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -53086,7 +52923,6 @@
 				},
 				"Device.PPP.Interface.{i}.IPCP.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -53190,7 +53026,6 @@
 				},
 				"Device.PPP.Interface.{i}.IPv6CP.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -53223,7 +53058,6 @@
 				},
 				"Device.PPP.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -53399,7 +53233,7 @@
 				},
 				"Device.PPP.Interface.{i}.PPPoA.": {
 					"type": "object",
-					"version": "2.2",
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -53412,7 +53246,6 @@
 		},
 		"Device.IP.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -53531,7 +53364,6 @@
 			},
 			"Device.IP.Interface.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -53807,7 +53639,6 @@
 				},
 				"Device.IP.Interface.{i}.IPv4Address.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -53928,7 +53759,6 @@
 				},
 				"Device.IP.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -54104,7 +53934,6 @@
 				},
 				"Device.IP.Interface.{i}.TWAMPReflector.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -54225,7 +54054,6 @@
 				},
 				"Device.IP.Interface.{i}.IPv6Address.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -54386,7 +54214,6 @@
 				},
 				"Device.IP.Interface.{i}.IPv6Prefix.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -54585,7 +54412,6 @@
 			},
 			"Device.IP.ActivePort.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -54683,7 +54509,6 @@
 			},
 			"Device.IP.Diagnostics.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -56396,6 +56221,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -56432,6 +56258,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -56458,6 +56285,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -56822,6 +56650,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -57561,7 +57390,6 @@
 				},
 				"Device.IP.Diagnostics.IPPing.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -57797,7 +57625,6 @@
 				},
 				"Device.IP.Diagnostics.TraceRoute.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -57984,7 +57811,6 @@
 					},
 					"Device.IP.Diagnostics.TraceRoute.RouteHops.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp"
 						],
@@ -58047,7 +57873,6 @@
 				},
 				"Device.IP.Diagnostics.DownloadDiagnostics.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -58423,7 +58248,6 @@
 					},
 					"Device.IP.Diagnostics.DownloadDiagnostics.PerConnectionResult.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp"
 						],
@@ -58513,7 +58337,6 @@
 					},
 					"Device.IP.Diagnostics.DownloadDiagnostics.IncrementalResult.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp"
 						],
@@ -58574,7 +58397,6 @@
 				},
 				"Device.IP.Diagnostics.UploadDiagnostics.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -58961,7 +58783,6 @@
 					},
 					"Device.IP.Diagnostics.UploadDiagnostics.PerConnectionResult.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp"
 						],
@@ -59051,7 +58872,6 @@
 					},
 					"Device.IP.Diagnostics.UploadDiagnostics.IncrementalResult.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp"
 						],
@@ -59112,7 +58932,6 @@
 				},
 				"Device.IP.Diagnostics.UDPEchoConfig.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -59265,7 +59084,6 @@
 				},
 				"Device.IP.Diagnostics.UDPEchoDiagnostics.": {
 					"type": "object",
-					"version": "2.9",
 					"protocols": [
 						"cwmp"
 					],
@@ -59537,7 +59355,6 @@
 					},
 					"Device.IP.Diagnostics.UDPEchoDiagnostics.IndividualPacketResult.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp"
 						],
@@ -59630,7 +59447,6 @@
 				},
 				"Device.IP.Diagnostics.IPLayerCapacityMetrics.": {
 					"type": "object",
-					"version": "2.14",
 					"protocols": [
 						"cwmp"
 					],
@@ -59766,6 +59582,7 @@
 						"type": "string",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -59801,6 +59618,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -59827,6 +59645,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -60191,6 +60010,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -60736,7 +60556,6 @@
 					},
 					"Device.IP.Diagnostics.IPLayerCapacityMetrics.ModalResult.{i}.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp"
 						],
@@ -60866,7 +60685,6 @@
 					},
 					"Device.IP.Diagnostics.IPLayerCapacityMetrics.IncrementalResult.{i}.": {
 						"type": "object",
-						"version": "2.14",
 						"protocols": [
 							"cwmp"
 						],
@@ -60967,7 +60785,6 @@
 				},
 				"Device.IP.Diagnostics.ServerSelectionDiagnostics.": {
 					"type": "object",
-					"version": "2.9",
 					"protocols": [
 						"cwmp"
 					],
@@ -61150,7 +60967,6 @@
 		},
 		"Device.LLDP.": {
 			"type": "object",
-			"version": "2.8",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -61160,7 +60976,6 @@
 			"array": false,
 			"Device.LLDP.Discovery.": {
 				"type": "object",
-				"version": "2.8",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -61181,7 +60996,6 @@
 				},
 				"Device.LLDP.Discovery.Device.{i}.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -61269,7 +61083,6 @@
 					},
 					"Device.LLDP.Discovery.Device.{i}.Port.{i}.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -61385,7 +61198,6 @@
 						},
 						"Device.LLDP.Discovery.Device.{i}.Port.{i}.LinkInformation.": {
 							"type": "object",
-							"version": "2.8",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -61433,7 +61245,6 @@
 					},
 					"Device.LLDP.Discovery.Device.{i}.DeviceInformation.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -61520,7 +61331,6 @@
 						},
 						"Device.LLDP.Discovery.Device.{i}.DeviceInformation.VendorSpecific.{i}.": {
 							"type": "object",
-							"version": "2.8",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -61591,7 +61401,6 @@
 		},
 		"Device.IPsec.": {
 			"type": "object",
-			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -61860,7 +61669,6 @@
 			},
 			"Device.IPsec.Stats.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -62003,7 +61811,6 @@
 			},
 			"Device.IPsec.Filter.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -62349,7 +62156,6 @@
 			},
 			"Device.IPsec.Profile.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -62698,7 +62504,6 @@
 				},
 				"Device.IPsec.Profile.{i}.SentCPAttr.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -62774,7 +62579,6 @@
 			},
 			"Device.IPsec.Tunnel.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -62840,7 +62644,6 @@
 				},
 				"Device.IPsec.Tunnel.{i}.Stats.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -62907,7 +62710,6 @@
 			},
 			"Device.IPsec.IKEv2SA.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -63123,7 +62925,6 @@
 				},
 				"Device.IPsec.IKEv2SA.{i}.Stats.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -63222,7 +63023,6 @@
 				},
 				"Device.IPsec.IKEv2SA.{i}.ReceivedCPAttr.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -63266,7 +63066,6 @@
 				},
 				"Device.IPsec.IKEv2SA.{i}.ChildSA.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -63347,7 +63146,6 @@
 					},
 					"Device.IPsec.IKEv2SA.{i}.ChildSA.{i}.Stats.": {
 						"type": "object",
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -63471,7 +63269,6 @@
 		},
 		"Device.GRE.": {
 			"type": "object",
-			"version": "2.8",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -63503,7 +63300,6 @@
 			},
 			"Device.GRE.Tunnel.{i}.": {
 				"type": "object",
-				"version": "2.8",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -63675,7 +63471,6 @@
 				},
 				"Device.GRE.Tunnel.{i}.Stats.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -63774,7 +63569,6 @@
 				},
 				"Device.GRE.Tunnel.{i}.Interface.{i}.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -63942,7 +63736,6 @@
 					},
 					"Device.GRE.Tunnel.{i}.Interface.{i}.Stats.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -64043,7 +63836,6 @@
 			},
 			"Device.GRE.Filter.{i}.": {
 				"type": "object",
-				"version": "2.8",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -64194,7 +63986,6 @@
 		},
 		"Device.L2TPv3.": {
 			"type": "object",
-			"version": "2.12",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -64226,7 +64017,6 @@
 			},
 			"Device.L2TPv3.Tunnel.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -64414,7 +64204,6 @@
 				},
 				"Device.L2TPv3.Tunnel.{i}.UDP.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -64471,7 +64260,6 @@
 				},
 				"Device.L2TPv3.Tunnel.{i}.Stats.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -64570,7 +64358,6 @@
 				},
 				"Device.L2TPv3.Tunnel.{i}.Interface.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -64723,7 +64510,6 @@
 					},
 					"Device.L2TPv3.Tunnel.{i}.Interface.{i}.Stats.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -64824,7 +64610,6 @@
 			},
 			"Device.L2TPv3.Filter.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -64975,7 +64760,6 @@
 		},
 		"Device.VXLAN.": {
 			"type": "object",
-			"version": "2.12",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -65007,7 +64791,6 @@
 			},
 			"Device.VXLAN.Tunnel.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -65213,7 +64996,6 @@
 				},
 				"Device.VXLAN.Tunnel.{i}.Stats.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -65312,7 +65094,6 @@
 				},
 				"Device.VXLAN.Tunnel.{i}.Interface.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -65437,7 +65218,6 @@
 					},
 					"Device.VXLAN.Tunnel.{i}.Interface.{i}.Stats.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -65538,7 +65318,6 @@
 			},
 			"Device.VXLAN.Filter.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -65689,7 +65468,6 @@
 		},
 		"Device.MAP.": {
 			"type": "object",
-			"version": "2.8",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -65721,7 +65499,6 @@
 			},
 			"Device.MAP.Domain.{i}.": {
 				"type": "object",
-				"version": "2.8",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -65849,6 +65626,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -65868,6 +65646,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -65887,6 +65666,7 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -65905,6 +65685,7 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -65926,7 +65707,6 @@
 				},
 				"Device.MAP.Domain.{i}.Rule.{i}.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -66136,7 +65916,6 @@
 				},
 				"Device.MAP.Domain.{i}.Interface.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -66236,7 +66015,6 @@
 					},
 					"Device.MAP.Domain.{i}.Interface.Stats.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -66415,7 +66193,6 @@
 		},
 		"Device.CaptivePortal.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -66481,7 +66258,6 @@
 		},
 		"Device.Routing.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -66502,7 +66278,6 @@
 			},
 			"Device.Routing.Router.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -66582,7 +66357,6 @@
 				},
 				"Device.Routing.Router.{i}.IPv4Forwarding.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -66808,7 +66582,6 @@
 				},
 				"Device.Routing.Router.{i}.IPv6Forwarding.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -66996,7 +66769,6 @@
 			},
 			"Device.Routing.RIP.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -67044,7 +66816,6 @@
 				},
 				"Device.Routing.RIP.InterfaceSetting.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -67144,7 +66915,6 @@
 			},
 			"Device.Routing.RouteInformation.": {
 				"type": "object",
-				"version": "2.2",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -67176,7 +66946,6 @@
 				},
 				"Device.Routing.RouteInformation.InterfaceSetting.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -67343,7 +67112,6 @@
 					},
 					"Device.Routing.RouteInformation.InterfaceSetting.{i}.Option.{i}.": {
 						"type": "object",
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -67410,7 +67178,6 @@
 			},
 			"Device.Routing.Babel.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -67631,7 +67398,6 @@
 				},
 				"Device.Routing.Babel.Constants.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -67670,7 +67436,6 @@
 				},
 				"Device.Routing.Babel.InterfaceSetting.{i}.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -67925,7 +67690,6 @@
 					},
 					"Device.Routing.Babel.InterfaceSetting.{i}.Stats.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -68002,7 +67766,6 @@
 					},
 					"Device.Routing.Babel.InterfaceSetting.{i}.Neighbor.{i}.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -68171,7 +67934,6 @@
 				},
 				"Device.Routing.Babel.Route.{i}.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -68312,7 +68074,6 @@
 				},
 				"Device.Routing.Babel.MACKeySet.{i}.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -68363,7 +68124,6 @@
 					},
 					"Device.Routing.Babel.MACKeySet.{i}.MACKey.{i}.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -68528,7 +68288,6 @@
 				},
 				"Device.Routing.Babel.DTLSCertSet.{i}.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -68579,7 +68338,6 @@
 					},
 					"Device.Routing.Babel.DTLSCertSet.{i}.DTLSCert.{i}.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -68650,7 +68408,6 @@
 		},
 		"Device.NeighborDiscovery.": {
 			"type": "object",
-			"version": "2.2",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -68682,7 +68439,6 @@
 			},
 			"Device.NeighborDiscovery.InterfaceSetting.{i}.": {
 				"type": "object",
-				"version": "2.2",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -68837,7 +68593,6 @@
 		},
 		"Device.RouterAdvertisement.": {
 			"type": "object",
-			"version": "2.2",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -68869,7 +68624,6 @@
 			},
 			"Device.RouterAdvertisement.InterfaceSetting.{i}.": {
 				"type": "object",
-				"version": "2.2",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -69244,7 +68998,6 @@
 				},
 				"Device.RouterAdvertisement.InterfaceSetting.{i}.Option.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -69323,7 +69076,6 @@
 		},
 		"Device.IPv6rd.": {
 			"type": "object",
-			"version": "2.2",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -69355,7 +69107,6 @@
 			},
 			"Device.IPv6rd.InterfaceSetting.{i}.": {
 				"type": "object",
-				"version": "2.2",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -69526,7 +69277,6 @@
 		},
 		"Device.DSLite.": {
 			"type": "object",
-			"version": "2.2",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -69558,7 +69308,6 @@
 			},
 			"Device.DSLite.InterfaceSetting.{i}.": {
 				"type": "object",
-				"version": "2.2",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -69732,7 +69481,6 @@
 		},
 		"Device.QoS.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -70023,7 +69771,6 @@
 			},
 			"Device.QoS.Classification.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -71311,7 +71058,6 @@
 			},
 			"Device.QoS.App.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -71492,7 +71238,6 @@
 			},
 			"Device.QoS.Flow.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -71708,7 +71453,6 @@
 			},
 			"Device.QoS.Policer.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -72012,7 +71756,6 @@
 			},
 			"Device.QoS.Queue.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -72328,7 +72071,6 @@
 			},
 			"Device.QoS.QueueStats.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -72500,7 +72242,6 @@
 			},
 			"Device.QoS.Shaper.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -72618,7 +72359,6 @@
 			},
 			"Device.QoS.Scheduler.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -72775,7 +72515,6 @@
 		},
 		"Device.LANConfigSecurity.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -72802,7 +72541,6 @@
 		},
 		"Device.Hosts.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -72834,7 +72572,6 @@
 			},
 			"Device.Hosts.Host.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -72849,6 +72586,7 @@
 					"type": "string",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -72897,6 +72635,7 @@
 					"type": "string",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -72930,6 +72669,7 @@
 					"type": "int",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73016,6 +72756,7 @@
 					"type": "string",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73032,6 +72773,7 @@
 					"type": "hexBinary",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73048,6 +72790,7 @@
 					"type": "hexBinary",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73122,7 +72865,6 @@
 				},
 				"Device.Hosts.Host.{i}.IPv4Address.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73156,7 +72898,6 @@
 				},
 				"Device.Hosts.Host.{i}.IPv6Address.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73181,7 +72922,6 @@
 				},
 				"Device.Hosts.Host.{i}.WANStats.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73270,7 +73010,6 @@
 			},
 			"Device.Hosts.AccessControl.{i}.": {
 				"type": "object",
-				"version": "2.14",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -73404,7 +73143,6 @@
 				},
 				"Device.Hosts.AccessControl.{i}.Schedule.{i}.": {
 					"type": "object",
-					"version": "2.14",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73507,7 +73245,6 @@
 		},
 		"Device.DNS.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -73547,7 +73284,6 @@
 			},
 			"Device.DNS.Zone.{i}.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -73647,7 +73383,6 @@
 				},
 				"Device.DNS.Zone.{i}.Host.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73751,7 +73486,6 @@
 			},
 			"Device.DNS.Client.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -73799,7 +73533,6 @@
 				},
 				"Device.DNS.Client.Server.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -73912,7 +73645,6 @@
 			},
 			"Device.DNS.Relay.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -73971,7 +73703,6 @@
 				},
 				"Device.DNS.Relay.Config.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -74080,7 +73811,6 @@
 				},
 				"Device.DNS.Relay.Forwarding.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -74193,7 +73923,6 @@
 			},
 			"Device.DNS.Diagnostics.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -74309,7 +74038,6 @@
 				},
 				"Device.DNS.Diagnostics.NSLookupDiagnostics.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp"
 					],
@@ -74421,7 +74149,6 @@
 					},
 					"Device.DNS.Diagnostics.NSLookupDiagnostics.Result.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp"
 						],
@@ -74526,7 +74253,6 @@
 			},
 			"Device.DNS.SD.": {
 				"type": "object",
-				"version": "2.6",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -74571,6 +74297,7 @@
 					"type": "string",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -74582,7 +74309,6 @@
 				},
 				"Device.DNS.SD.Advertise.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -74747,7 +74473,6 @@
 					},
 					"Device.DNS.SD.Advertise.{i}.TextRecord.{i}.": {
 						"type": "object",
-						"version": "2.17",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -74791,7 +74516,6 @@
 				},
 				"Device.DNS.SD.Service.{i}.": {
 					"type": "object",
-					"version": "2.6",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -75006,7 +74730,6 @@
 					},
 					"Device.DNS.SD.Service.{i}.TextRecord.{i}.": {
 						"type": "object",
-						"version": "2.6",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -75052,7 +74775,6 @@
 		},
 		"Device.NAT.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -75117,7 +74839,6 @@
 			},
 			"Device.NAT.InterfaceSetting.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -75250,7 +74971,6 @@
 			},
 			"Device.NAT.PortMapping.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -75481,7 +75201,6 @@
 			},
 			"Device.NAT.PortTrigger.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -75675,7 +75394,6 @@
 				},
 				"Device.NAT.PortTrigger.{i}.Rule.{i}.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -75758,7 +75476,6 @@
 		},
 		"Device.PCP.": {
 			"type": "object",
-			"version": "2.8",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -75845,7 +75562,6 @@
 			},
 			"Device.PCP.Client.{i}.": {
 				"type": "object",
-				"version": "2.8",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -75996,7 +75712,6 @@
 				},
 				"Device.PCP.Client.{i}.PCPProxy.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -76051,7 +75766,6 @@
 				},
 				"Device.PCP.Client.{i}.UPnPIWF.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -76089,7 +75803,6 @@
 				},
 				"Device.PCP.Client.{i}.Server.{i}.": {
 					"type": "object",
-					"version": "2.8",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -76342,7 +76055,6 @@
 					},
 					"Device.PCP.Client.{i}.Server.{i}.InboundMapping.{i}.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -76630,7 +76342,6 @@
 						},
 						"Device.PCP.Client.{i}.Server.{i}.InboundMapping.{i}.Filter.{i}.": {
 							"type": "object",
-							"version": "2.8",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -76730,7 +76441,6 @@
 					},
 					"Device.PCP.Client.{i}.Server.{i}.OutboundMapping.{i}.": {
 						"type": "object",
-						"version": "2.8",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -77010,7 +76720,6 @@
 		},
 		"Device.DHCPv4.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -77031,7 +76740,6 @@
 			},
 			"Device.DHCPv4.Client.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -77318,7 +77026,6 @@
 				},
 				"Device.DHCPv4.Client.{i}.SentOption.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -77395,7 +77102,6 @@
 				},
 				"Device.DHCPv4.Client.{i}.ReqOption.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -77489,7 +77195,6 @@
 			},
 			"Device.DHCPv4.Server.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -77521,7 +77226,6 @@
 				},
 				"Device.DHCPv4.Server.Pool.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -77985,7 +77689,6 @@
 					},
 					"Device.DHCPv4.Server.Pool.{i}.StaticAddress.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -78068,7 +77771,6 @@
 					},
 					"Device.DHCPv4.Server.Pool.{i}.Option.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -78145,7 +77847,6 @@
 					},
 					"Device.DHCPv4.Server.Pool.{i}.Client.{i}.": {
 						"type": "object",
-						"version": "2.2",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -78228,7 +77929,6 @@
 						},
 						"Device.DHCPv4.Server.Pool.{i}.Client.{i}.IPv4Address.{i}.": {
 							"type": "object",
-							"version": "2.2",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -78273,7 +77973,6 @@
 						},
 						"Device.DHCPv4.Server.Pool.{i}.Client.{i}.Option.{i}.": {
 							"type": "object",
-							"version": "2.2",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -78321,7 +78020,6 @@
 			},
 			"Device.DHCPv4.Relay.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -78369,7 +78067,6 @@
 				},
 				"Device.DHCPv4.Relay.Forwarding.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -78649,7 +78346,6 @@
 		},
 		"Device.DHCPv6.": {
 			"type": "object",
-			"version": "2.2",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -78670,7 +78366,6 @@
 			},
 			"Device.DHCPv6.Client.{i}.": {
 				"type": "object",
-				"version": "2.2",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -78909,7 +78604,6 @@
 				},
 				"Device.DHCPv6.Client.{i}.Server.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -78961,7 +78655,6 @@
 				},
 				"Device.DHCPv6.Client.{i}.SentOption.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -79038,7 +78731,6 @@
 				},
 				"Device.DHCPv6.Client.{i}.ReceivedOption.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -79095,7 +78787,6 @@
 			},
 			"Device.DHCPv6.Server.": {
 				"type": "object",
-				"version": "2.2",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -79127,7 +78818,6 @@
 				},
 				"Device.DHCPv6.Server.Pool.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -79461,7 +79151,6 @@
 					},
 					"Device.DHCPv6.Server.Pool.{i}.Client.{i}.": {
 						"type": "object",
-						"version": "2.2",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -79546,7 +79235,6 @@
 						},
 						"Device.DHCPv6.Server.Pool.{i}.Client.{i}.IPv6Address.{i}.": {
 							"type": "object",
-							"version": "2.2",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -79593,7 +79281,6 @@
 						},
 						"Device.DHCPv6.Server.Pool.{i}.Client.{i}.IPv6Prefix.{i}.": {
 							"type": "object",
-							"version": "2.2",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -79640,7 +79327,6 @@
 						},
 						"Device.DHCPv6.Server.Pool.{i}.Client.{i}.Option.{i}.": {
 							"type": "object",
-							"version": "2.2",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -79686,7 +79372,6 @@
 					},
 					"Device.DHCPv6.Server.Pool.{i}.Option.{i}.": {
 						"type": "object",
-						"version": "2.2",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -79782,7 +79467,6 @@
 		},
 		"Device.IEEE8021x.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -79803,7 +79487,6 @@
 			},
 			"Device.IEEE8021x.Supplicant.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -80061,7 +79744,6 @@
 				},
 				"Device.IEEE8021x.Supplicant.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -80223,7 +79905,6 @@
 				},
 				"Device.IEEE8021x.Supplicant.{i}.EAPMD5.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -80261,7 +79942,6 @@
 				},
 				"Device.IEEE8021x.Supplicant.{i}.EAPTLS.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -80296,7 +79976,6 @@
 		},
 		"Device.Users.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -80399,7 +80078,6 @@
 			},
 			"Device.Users.User.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -80455,6 +80133,7 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -80565,7 +80244,6 @@
 			},
 			"Device.Users.CheckCredentialsDiagnostics.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp"
 				],
@@ -80612,7 +80290,6 @@
 			},
 			"Device.Users.Group.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -80709,7 +80386,6 @@
 			},
 			"Device.Users.SupportedShell.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -80768,7 +80444,6 @@
 			},
 			"Device.Users.Role.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -80852,7 +80527,6 @@
 		},
 		"Device.SmartCardReaders.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -80873,7 +80547,6 @@
 			},
 			"Device.SmartCardReaders.SmartCardReader.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -80996,7 +80669,6 @@
 				},
 				"Device.SmartCardReaders.SmartCardReader.{i}.SmartCard.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -81091,7 +80763,6 @@
 		},
 		"Device.UPnP.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -81101,7 +80772,6 @@
 			"array": false,
 			"Device.UPnP.Device.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -81221,7 +80891,6 @@
 				},
 				"Device.UPnP.Device.Capabilities.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -81365,7 +81034,6 @@
 			},
 			"Device.UPnP.Discovery.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -81408,7 +81076,6 @@
 				},
 				"Device.UPnP.Discovery.RootDevice.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -81541,7 +81208,6 @@
 				},
 				"Device.UPnP.Discovery.Device.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -81677,7 +81343,6 @@
 				},
 				"Device.UPnP.Discovery.Service.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -81811,7 +81476,6 @@
 			},
 			"Device.UPnP.Description.": {
 				"type": "object",
-				"version": "2.6",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -81854,7 +81518,6 @@
 				},
 				"Device.UPnP.Description.DeviceDescription.{i}.": {
 					"type": "object",
-					"version": "2.6",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -81919,7 +81582,6 @@
 				},
 				"Device.UPnP.Description.DeviceInstance.{i}.": {
 					"type": "object",
-					"version": "2.6",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -82180,7 +81842,6 @@
 				},
 				"Device.UPnP.Description.ServiceInstance.{i}.": {
 					"type": "object",
-					"version": "2.6",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -82294,7 +81955,6 @@
 		},
 		"Device.DLNA.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -82304,7 +81964,6 @@
 			"array": false,
 			"Device.DLNA.Capabilities.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -82428,7 +82087,6 @@
 		},
 		"Device.SelfTestDiagnostics.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp"
 			],
@@ -82470,7 +82128,6 @@
 		},
 		"Device.Firewall.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -82650,7 +82307,6 @@
 			},
 			"Device.Firewall.Level.{i}.": {
 				"type": "object",
-				"version": "2.2",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -82794,7 +82450,6 @@
 			},
 			"Device.Firewall.Policy.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -82961,7 +82616,6 @@
 			},
 			"Device.Firewall.Chain.{i}.": {
 				"type": "object",
-				"version": "2.2",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -83050,7 +82704,6 @@
 				},
 				"Device.Firewall.Chain.{i}.Rule.{i}.": {
 					"type": "object",
-					"version": "2.2",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -83601,7 +83254,6 @@
 			},
 			"Device.Firewall.Pinhole.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -83862,7 +83514,6 @@
 			},
 			"Device.Firewall.DMZ.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -84037,7 +83688,6 @@
 			},
 			"Device.Firewall.Service.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -84227,7 +83877,6 @@
 			},
 			"Device.Firewall.InterfaceSetting.{i}.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -84359,7 +84008,6 @@
 			},
 			"Device.Firewall.ConnectionTracking.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -84369,7 +84017,6 @@
 				"array": false,
 				"Device.Firewall.ConnectionTracking.SIP.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -84457,7 +84104,6 @@
 				},
 				"Device.Firewall.ConnectionTracking.H323.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -84512,7 +84158,6 @@
 				},
 				"Device.Firewall.ConnectionTracking.FTP.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -84567,7 +84212,6 @@
 				},
 				"Device.Firewall.ConnectionTracking.PPTP.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -84589,7 +84233,6 @@
 				},
 				"Device.Firewall.ConnectionTracking.TFTP.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -84633,7 +84276,6 @@
 				},
 				"Device.Firewall.ConnectionTracking.IRC.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -84698,7 +84340,6 @@
 		},
 		"Device.PeriodicStatistics.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -84742,7 +84383,6 @@
 			},
 			"Device.PeriodicStatistics.SampleSet.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -84966,7 +84606,6 @@
 				},
 				"Device.PeriodicStatistics.SampleSet.{i}.Parameter.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -85142,7 +84781,6 @@
 		},
 		"Device.FaultMgmt.": {
 			"type": "object",
-			"version": "2.4",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -85218,7 +84856,6 @@
 			},
 			"Device.FaultMgmt.SupportedAlarm.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -85321,7 +84958,6 @@
 			},
 			"Device.FaultMgmt.CurrentAlarm.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -85490,7 +85126,6 @@
 			},
 			"Device.FaultMgmt.HistoryEvent.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -85663,7 +85298,6 @@
 			},
 			"Device.FaultMgmt.ExpeditedEvent.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -85835,7 +85469,6 @@
 			},
 			"Device.FaultMgmt.QueuedEvent.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -86008,7 +85641,6 @@
 		},
 		"Device.Security.": {
 			"type": "object",
-			"version": "2.4",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -86029,7 +85661,6 @@
 			},
 			"Device.Security.Certificate.{i}.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -86167,7 +85798,6 @@
 		},
 		"Device.FAP.": {
 			"type": "object",
-			"version": "2.4",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -86177,7 +85807,6 @@
 			"array": false,
 			"Device.FAP.GPS.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -86375,7 +86004,6 @@
 				},
 				"Device.FAP.GPS.ContinuousGPSStatus.": {
 					"type": "object",
-					"version": "2.4",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -86589,7 +86217,6 @@
 				},
 				"Device.FAP.GPS.AGPSServerConfig.": {
 					"type": "object",
-					"version": "2.4",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -86721,7 +86348,6 @@
 			},
 			"Device.FAP.PerfMgmt.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -86742,7 +86368,6 @@
 				},
 				"Device.FAP.PerfMgmt.Config.{i}.": {
 					"type": "object",
-					"version": "2.4",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -86858,7 +86483,6 @@
 			},
 			"Device.FAP.ApplicationPlatform.": {
 				"type": "object",
-				"version": "2.4",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -86934,7 +86558,6 @@
 				},
 				"Device.FAP.ApplicationPlatform.Capabilities.": {
 					"type": "object",
-					"version": "2.4",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -87118,7 +86741,6 @@
 				},
 				"Device.FAP.ApplicationPlatform.Control.": {
 					"type": "object",
-					"version": "2.4",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -87160,7 +86782,6 @@
 					},
 					"Device.FAP.ApplicationPlatform.Control.FemtoAwareness.": {
 						"type": "object",
-						"version": "2.4",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -87274,7 +86895,6 @@
 					},
 					"Device.FAP.ApplicationPlatform.Control.SMS.": {
 						"type": "object",
-						"version": "2.4",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -87379,7 +86999,6 @@
 					},
 					"Device.FAP.ApplicationPlatform.Control.MMS.": {
 						"type": "object",
-						"version": "2.4",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -87484,7 +87103,6 @@
 					},
 					"Device.FAP.ApplicationPlatform.Control.TerminalLocation.": {
 						"type": "object",
-						"version": "2.4",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -87605,7 +87223,6 @@
 				},
 				"Device.FAP.ApplicationPlatform.Monitoring.": {
 					"type": "object",
-					"version": "2.4",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -87660,7 +87277,6 @@
 					},
 					"Device.FAP.ApplicationPlatform.Monitoring.FemtoAwareness.": {
 						"type": "object",
-						"version": "2.4",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -87754,7 +87370,6 @@
 					},
 					"Device.FAP.ApplicationPlatform.Monitoring.SMS.": {
 						"type": "object",
-						"version": "2.4",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -87848,7 +87463,6 @@
 					},
 					"Device.FAP.ApplicationPlatform.Monitoring.MMS.": {
 						"type": "object",
-						"version": "2.4",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -87942,7 +87556,6 @@
 					},
 					"Device.FAP.ApplicationPlatform.Monitoring.TerminalLocation.": {
 						"type": "object",
-						"version": "2.4",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -88039,7 +87652,6 @@
 		},
 		"Device.BulkData.": {
 			"type": "object",
-			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -88180,7 +87792,6 @@
 			},
 			"Device.BulkData.Profile.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -88466,7 +88077,6 @@
 				},
 				"Device.BulkData.Profile.{i}.Parameter.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -88521,7 +88131,6 @@
 				},
 				"Device.BulkData.Profile.{i}.CSVEncoding.": {
 					"type": "object",
-					"version": "2.10",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -88600,7 +88209,6 @@
 				},
 				"Device.BulkData.Profile.{i}.JSONEncoding.": {
 					"type": "object",
-					"version": "2.10",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -88644,7 +88252,6 @@
 				},
 				"Device.BulkData.Profile.{i}.HTTP.": {
 					"type": "object",
-					"version": "2.10",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -88839,7 +88446,6 @@
 					},
 					"Device.BulkData.Profile.{i}.HTTP.RequestURIParameter.{i}.": {
 						"type": "object",
-						"version": "2.10",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -88883,7 +88489,6 @@
 				},
 				"Device.BulkData.Profile.{i}.MQTT.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -88952,7 +88557,6 @@
 		},
 		"Device.SoftwareModules.": {
 			"type": "object",
-			"version": "2.1",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -89273,7 +88877,6 @@
 			},
 			"Device.SoftwareModules.ExecEnvClass.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -89522,7 +89125,6 @@
 				},
 				"Device.SoftwareModules.ExecEnvClass.{i}.Capability.{i}.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -89588,7 +89190,6 @@
 			},
 			"Device.SoftwareModules.ExecEnv.{i}.": {
 				"type": "object",
-				"version": "2.1",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -90280,7 +89881,6 @@
 				},
 				"Device.SoftwareModules.ExecEnv.{i}.ApplicationData.{i}.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -90422,7 +90022,6 @@
 			},
 			"Device.SoftwareModules.DeploymentUnit.{i}.": {
 				"type": "object",
-				"version": "2.1",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -90831,7 +90430,6 @@
 			},
 			"Device.SoftwareModules.ExecutionUnit.{i}.": {
 				"type": "object",
-				"version": "2.1",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -91296,7 +90894,6 @@
 				},
 				"Device.SoftwareModules.ExecutionUnit.{i}.AutoRestart.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -91410,7 +91007,6 @@
 				},
 				"Device.SoftwareModules.ExecutionUnit.{i}.NetworkConfig.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -91447,7 +91043,6 @@
 				},
 				"Device.SoftwareModules.ExecutionUnit.{i}.HostObject.{i}.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -91526,7 +91121,6 @@
 				},
 				"Device.SoftwareModules.ExecutionUnit.{i}.EnvVariable.{i}.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -91589,7 +91183,6 @@
 				},
 				"Device.SoftwareModules.ExecutionUnit.{i}.Extensions.": {
 					"type": "object",
-					"version": "2.1",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -91602,7 +91195,6 @@
 		},
 		"Device.XMPP.": {
 			"type": "object",
-			"version": "2.7",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -91642,7 +91234,6 @@
 			},
 			"Device.XMPP.Connection.{i}.": {
 				"type": "object",
-				"version": "2.7",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -91925,7 +91516,6 @@
 				},
 				"Device.XMPP.Connection.{i}.Server.{i}.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -92037,7 +91627,6 @@
 				},
 				"Device.XMPP.Connection.{i}.Stats.": {
 					"type": "object",
-					"version": "2.7",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -92098,7 +91687,6 @@
 		},
 		"Device.IEEE1905.": {
 			"type": "object",
-			"version": "2.9",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -92123,7 +91711,6 @@
 			},
 			"Device.IEEE1905.AL.": {
 				"type": "object",
-				"version": "2.9",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -92232,7 +91819,6 @@
 				},
 				"Device.IEEE1905.AL.Interface.{i}.": {
 					"type": "object",
-					"version": "2.9",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -92452,7 +92038,6 @@
 					},
 					"Device.IEEE1905.AL.Interface.{i}.VendorProperties.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -92499,7 +92084,6 @@
 					},
 					"Device.IEEE1905.AL.Interface.{i}.Link.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -92628,7 +92212,6 @@
 						},
 						"Device.IEEE1905.AL.Interface.{i}.Link.{i}.Metric.": {
 							"type": "object",
-							"version": "2.9",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -92756,7 +92339,6 @@
 				},
 				"Device.IEEE1905.AL.ForwardingTable.": {
 					"type": "object",
-					"version": "2.9",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -92788,7 +92370,6 @@
 					},
 					"Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -92963,7 +92544,6 @@
 				},
 				"Device.IEEE1905.AL.NetworkTopology.": {
 					"type": "object",
-					"version": "2.9",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -93054,7 +92634,6 @@
 					},
 					"Device.IEEE1905.AL.NetworkTopology.ChangeLog.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -93166,7 +92745,6 @@
 					},
 					"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.": {
 						"type": "object",
-						"version": "2.9",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -93391,7 +92969,6 @@
 						},
 						"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IPv4Address.{i}.": {
 							"type": "object",
-							"version": "2.9",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -93479,7 +93056,6 @@
 						},
 						"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IPv6Address.{i}.": {
 							"type": "object",
-							"version": "2.9",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -93554,7 +93130,6 @@
 						},
 						"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.VendorProperties.{i}.": {
 							"type": "object",
-							"version": "2.9",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -93619,7 +93194,6 @@
 						},
 						"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.Interface.{i}.": {
 							"type": "object",
-							"version": "2.9",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -93834,7 +93408,6 @@
 						},
 						"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.NonIEEE1905Neighbor.{i}.": {
 							"type": "object",
-							"version": "2.9",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -93885,7 +93458,6 @@
 						},
 						"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.L2Neighbor.{i}.": {
 							"type": "object",
-							"version": "2.9",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -93959,7 +93531,6 @@
 						},
 						"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IEEE1905Neighbor.{i}.": {
 							"type": "object",
-							"version": "2.9",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -94020,7 +93591,6 @@
 							},
 							"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.IEEE1905Neighbor.{i}.Metric.{i}.": {
 								"type": "object",
-								"version": "2.9",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -94170,7 +93740,6 @@
 						},
 						"Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.BridgingTuple.{i}.": {
 							"type": "object",
-							"version": "2.9",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -94201,7 +93770,6 @@
 				},
 				"Device.IEEE1905.AL.Security.": {
 					"type": "object",
-					"version": "2.9",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -94242,7 +93810,6 @@
 				},
 				"Device.IEEE1905.AL.NetworkingRegistrar.": {
 					"type": "object",
-					"version": "2.9",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -94324,7 +93891,6 @@
 		},
 		"Device.MQTT.": {
 			"type": "object",
-			"version": "2.10",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -94356,7 +93922,6 @@
 			},
 			"Device.MQTT.Capabilities.": {
 				"type": "object",
-				"version": "2.10",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -94437,7 +94002,6 @@
 			},
 			"Device.MQTT.Client.{i}.": {
 				"type": "object",
-				"version": "2.10",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -94542,6 +94106,7 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -95046,7 +94611,6 @@
 				},
 				"Device.MQTT.Client.{i}.Subscription.{i}.": {
 					"type": "object",
-					"version": "2.10",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -95139,7 +94703,6 @@
 				},
 				"Device.MQTT.Client.{i}.UserProperty.{i}.": {
 					"type": "object",
-					"version": "2.13",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -95239,7 +94802,6 @@
 				},
 				"Device.MQTT.Client.{i}.Stats.": {
 					"type": "object",
-					"version": "2.10",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -95372,7 +94934,6 @@
 			},
 			"Device.MQTT.Broker.{i}.": {
 				"type": "object",
-				"version": "2.10",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -95523,7 +95084,6 @@
 				},
 				"Device.MQTT.Broker.{i}.Bridge.{i}.": {
 					"type": "object",
-					"version": "2.10",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -95816,7 +95376,6 @@
 					},
 					"Device.MQTT.Broker.{i}.Bridge.{i}.Server.{i}.": {
 						"type": "object",
-						"version": "2.10",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -95928,7 +95487,6 @@
 					},
 					"Device.MQTT.Broker.{i}.Bridge.{i}.Subscription.{i}.": {
 						"type": "object",
-						"version": "2.10",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -96069,7 +95627,6 @@
 				},
 				"Device.MQTT.Broker.{i}.Stats.": {
 					"type": "object",
-					"version": "2.10",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -96192,7 +95749,6 @@
 		},
 		"Device.DynamicDNS.": {
 			"type": "object",
-			"version": "2.10",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -96238,7 +95794,6 @@
 			},
 			"Device.DynamicDNS.Client.{i}.": {
 				"type": "object",
-				"version": "2.10",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -96394,7 +95949,6 @@
 				},
 				"Device.DynamicDNS.Client.{i}.Hostname.{i}.": {
 					"type": "object",
-					"version": "2.10",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -96465,7 +96019,6 @@
 			},
 			"Device.DynamicDNS.Server.{i}.": {
 				"type": "object",
-				"version": "2.10",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -96636,7 +96189,6 @@
 		},
 		"Device.LEDs.": {
 			"type": "object",
-			"version": "2.11",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -96657,7 +96209,6 @@
 			},
 			"Device.LEDs.LED.{i}.": {
 				"type": "object",
-				"version": "2.11",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -96794,7 +96345,6 @@
 				},
 				"Device.LEDs.LED.{i}.CycleElement.{i}.": {
 					"type": "object",
-					"version": "2.11",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -96893,7 +96443,6 @@
 				},
 				"Device.LEDs.LED.{i}.CurrentCycleElement.": {
 					"type": "object",
-					"version": "2.11",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -96946,7 +96495,6 @@
 		},
 		"Device.BASAPM.": {
 			"type": "object",
-			"version": "2.12",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -96967,7 +96515,6 @@
 			},
 			"Device.BASAPM.MeasurementEndpoint.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -97077,7 +96624,6 @@
 				},
 				"Device.BASAPM.MeasurementEndpoint.{i}.ISPDevice.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -97120,7 +96666,6 @@
 				},
 				"Device.BASAPM.MeasurementEndpoint.{i}.CustomerDevice.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -97165,7 +96710,6 @@
 		},
 		"Device.LMAP.": {
 			"type": "object",
-			"version": "2.12",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -97208,7 +96752,6 @@
 			},
 			"Device.LMAP.MeasurementAgent.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -97460,7 +97003,6 @@
 				},
 				"Device.LMAP.MeasurementAgent.{i}.TaskCapability.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -97516,7 +97058,6 @@
 					},
 					"Device.LMAP.MeasurementAgent.{i}.TaskCapability.{i}.Registry.{i}.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -97560,7 +97101,6 @@
 				},
 				"Device.LMAP.MeasurementAgent.{i}.Controller.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -97627,7 +97167,6 @@
 				},
 				"Device.LMAP.MeasurementAgent.{i}.Schedule.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -97813,7 +97352,6 @@
 					},
 					"Device.LMAP.MeasurementAgent.{i}.Schedule.{i}.Stats.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -97868,7 +97406,6 @@
 					},
 					"Device.LMAP.MeasurementAgent.{i}.Schedule.{i}.Action.{i}.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -98086,7 +97623,6 @@
 						},
 						"Device.LMAP.MeasurementAgent.{i}.Schedule.{i}.Action.{i}.Stats.": {
 							"type": "object",
-							"version": "2.12",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -98141,7 +97677,6 @@
 						},
 						"Device.LMAP.MeasurementAgent.{i}.Schedule.{i}.Action.{i}.Option.{i}.": {
 							"type": "object",
-							"version": "2.12",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -98223,7 +97758,6 @@
 				},
 				"Device.LMAP.MeasurementAgent.{i}.Task.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -98315,7 +97849,6 @@
 					},
 					"Device.LMAP.MeasurementAgent.{i}.Task.{i}.Registry.{i}.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -98386,7 +97919,6 @@
 					},
 					"Device.LMAP.MeasurementAgent.{i}.Task.{i}.Option.{i}.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -98467,7 +97999,6 @@
 				},
 				"Device.LMAP.MeasurementAgent.{i}.CommunicationChannel.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -98580,7 +98111,6 @@
 				},
 				"Device.LMAP.MeasurementAgent.{i}.Instruction.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -98681,7 +98211,6 @@
 					},
 					"Device.LMAP.MeasurementAgent.{i}.Instruction.{i}.MeasurementSuppression.{i}.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -98804,7 +98333,6 @@
 			},
 			"Device.LMAP.Report.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -98883,7 +98411,6 @@
 				},
 				"Device.LMAP.Report.{i}.Result.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -99050,7 +98577,6 @@
 					},
 					"Device.LMAP.Report.{i}.Result.{i}.Option.{i}.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -99097,7 +98623,6 @@
 					},
 					"Device.LMAP.Report.{i}.Result.{i}.Conflict.{i}.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -99161,7 +98686,6 @@
 					},
 					"Device.LMAP.Report.{i}.Result.{i}.ReportTable.{i}.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -99206,7 +98730,6 @@
 						},
 						"Device.LMAP.Report.{i}.Result.{i}.ReportTable.{i}.ResultRow.{i}.": {
 							"type": "object",
-							"version": "2.12",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -99230,7 +98753,6 @@
 						},
 						"Device.LMAP.Report.{i}.Result.{i}.ReportTable.{i}.Registry.{i}.": {
 							"type": "object",
-							"version": "2.12",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -99276,7 +98798,6 @@
 			},
 			"Device.LMAP.Event.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -99378,7 +98899,6 @@
 				},
 				"Device.LMAP.Event.{i}.PeriodicTimer.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -99423,7 +98943,6 @@
 				},
 				"Device.LMAP.Event.{i}.CalendarTimer.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -99551,7 +99070,6 @@
 				},
 				"Device.LMAP.Event.{i}.OneOff.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -99575,7 +99093,6 @@
 		},
 		"Device.WWC.": {
 			"type": "object",
-			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -99676,7 +99193,6 @@
 			},
 			"Device.WWC.AccessNetwork.{i}.": {
 				"type": "object",
-				"version": "2.14",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -99799,7 +99315,6 @@
 				},
 				"Device.WWC.AccessNetwork.{i}.GUTI.": {
 					"type": "object",
-					"version": "2.14",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -99844,7 +99359,6 @@
 			},
 			"Device.WWC.URSP.{i}.": {
 				"type": "object",
-				"version": "2.14",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -99902,7 +99416,6 @@
 				},
 				"Device.WWC.URSP.{i}.TrafficDescriptor.{i}.": {
 					"type": "object",
-					"version": "2.14",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -99969,7 +99482,6 @@
 					},
 					"Device.WWC.URSP.{i}.TrafficDescriptor.{i}.RouteSelectionDescriptor.{i}.": {
 						"type": "object",
-						"version": "2.14",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -100081,7 +99593,6 @@
 						},
 						"Device.WWC.URSP.{i}.TrafficDescriptor.{i}.RouteSelectionDescriptor.{i}.NetworkSlice.": {
 							"type": "object",
-							"version": "2.14",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -100124,7 +99635,6 @@
 		},
 		"Device.PDU.": {
 			"type": "object",
-			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -100145,7 +99655,6 @@
 			},
 			"Device.PDU.Session.{i}.": {
 				"type": "object",
-				"version": "2.14",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -100386,7 +99895,6 @@
 				},
 				"Device.PDU.Session.{i}.PCO.": {
 					"type": "object",
-					"version": "2.14",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -100464,7 +99972,6 @@
 				},
 				"Device.PDU.Session.{i}.NetworkSlice.": {
 					"type": "object",
-					"version": "2.14",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -100503,7 +100010,6 @@
 				},
 				"Device.PDU.Session.{i}.QoSRule.{i}.": {
 					"type": "object",
-					"version": "2.14",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -100617,7 +100123,6 @@
 					},
 					"Device.PDU.Session.{i}.QoSRule.{i}.Filter.{i}.": {
 						"type": "object",
-						"version": "2.14",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -100691,7 +100196,6 @@
 				},
 				"Device.PDU.Session.{i}.QoSFlow.{i}.": {
 					"type": "object",
-					"version": "2.14",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -100829,7 +100333,6 @@
 		},
 		"Device.FWE.": {
 			"type": "object",
-			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -100850,7 +100353,6 @@
 			},
 			"Device.FWE.Link.{i}.": {
 				"type": "object",
-				"version": "2.14",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -100942,7 +100444,6 @@
 				},
 				"Device.FWE.Link.{i}.Stats.": {
 					"type": "object",
-					"version": "2.14",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -101122,7 +100623,6 @@
 		},
 		"Device.Logical.": {
 			"type": "object",
-			"version": "2.16",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -101143,7 +100643,6 @@
 			},
 			"Device.Logical.Interface.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -101247,7 +100746,6 @@
 				},
 				"Device.Logical.Interface.{i}.Stats.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -101425,7 +100923,6 @@
 		},
 		"Device.XPON.": {
 			"type": "object",
-			"version": "2.16",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -101446,7 +100943,6 @@
 			},
 			"Device.XPON.ONU.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -101551,7 +101047,6 @@
 				},
 				"Device.XPON.ONU.{i}.SoftwareImage.{i}.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -101631,7 +101126,6 @@
 				},
 				"Device.XPON.ONU.{i}.EthernetUNI.{i}.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -101780,7 +101274,6 @@
 					},
 					"Device.XPON.ONU.{i}.EthernetUNI.{i}.Stats.": {
 						"type": "object",
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -101957,7 +101450,6 @@
 				},
 				"Device.XPON.ONU.{i}.ANI.{i}.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -102074,7 +101566,6 @@
 					},
 					"Device.XPON.ONU.{i}.ANI.{i}.Stats.": {
 						"type": "object",
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -102250,7 +101741,6 @@
 					},
 					"Device.XPON.ONU.{i}.ANI.{i}.TC.": {
 						"type": "object",
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -102260,7 +101750,6 @@
 						"array": false,
 						"Device.XPON.ONU.{i}.ANI.{i}.TC.ONUActivation.": {
 							"type": "object",
-							"version": "2.16",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -102343,7 +101832,6 @@
 						},
 						"Device.XPON.ONU.{i}.ANI.{i}.TC.Authentication.": {
 							"type": "object",
-							"version": "2.17",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -102381,7 +101869,6 @@
 						},
 						"Device.XPON.ONU.{i}.ANI.{i}.TC.PM.": {
 							"type": "object",
-							"version": "2.16",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -102391,7 +101878,6 @@
 							"array": false,
 							"Device.XPON.ONU.{i}.ANI.{i}.TC.PM.PHY.": {
 								"type": "object",
-								"version": "2.16",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -102479,7 +101965,6 @@
 							},
 							"Device.XPON.ONU.{i}.ANI.{i}.TC.PM.GEM.": {
 								"type": "object",
-								"version": "2.16",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -102534,7 +102019,6 @@
 							},
 							"Device.XPON.ONU.{i}.ANI.{i}.TC.PM.PLOAM.": {
 								"type": "object",
-								"version": "2.16",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -102589,7 +102073,6 @@
 							},
 							"Device.XPON.ONU.{i}.ANI.{i}.TC.PM.OMCI.": {
 								"type": "object",
-								"version": "2.16",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -102634,7 +102117,6 @@
 						},
 						"Device.XPON.ONU.{i}.ANI.{i}.TC.GEM.": {
 							"type": "object",
-							"version": "2.16",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -102655,7 +102137,6 @@
 							},
 							"Device.XPON.ONU.{i}.ANI.{i}.TC.GEM.Port.{i}.": {
 								"type": "object",
-								"version": "2.16",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -102717,7 +102198,6 @@
 								},
 								"Device.XPON.ONU.{i}.ANI.{i}.TC.GEM.Port.{i}.PM.": {
 									"type": "object",
-									"version": "2.16",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -102752,7 +102232,6 @@
 						},
 						"Device.XPON.ONU.{i}.ANI.{i}.TC.PerformanceThresholds.": {
 							"type": "object",
-							"version": "2.16",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -102797,7 +102276,6 @@
 						},
 						"Device.XPON.ONU.{i}.ANI.{i}.TC.Alarms.": {
 							"type": "object",
-							"version": "2.16",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -102974,7 +102452,6 @@
 					},
 					"Device.XPON.ONU.{i}.ANI.{i}.Transceiver.{i}.": {
 						"type": "object",
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -103199,7 +102676,6 @@
 		},
 		"Device.SSH.": {
 			"type": "object",
-			"version": "2.16",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -103258,7 +102734,6 @@
 			},
 			"Device.SSH.Server.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -103522,7 +102997,6 @@
 				},
 				"Device.SSH.Server.{i}.Session.{i}.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -103603,7 +103077,6 @@
 			},
 			"Device.SSH.AuthorizedKey.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -103661,7 +103134,6 @@
 		},
 		"Device.UnixDomainSockets.": {
 			"type": "object",
-			"version": "2.16",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -103682,7 +103154,6 @@
 			},
 			"Device.UnixDomainSockets.UnixDomainSocket.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -103745,7 +103216,6 @@
 		},
 		"Device.USPServices.": {
 			"type": "object",
-			"version": "2.16",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -103766,7 +103236,6 @@
 			},
 			"Device.USPServices.USPService.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -103850,7 +103319,6 @@
 		},
 		"Device.Syslog.": {
 			"type": "object",
-			"version": "2.17",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -103931,7 +103399,6 @@
 			},
 			"Device.Syslog.Filter.{i}.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -104069,7 +103536,6 @@
 			},
 			"Device.Syslog.Source.{i}.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -104184,7 +103650,6 @@
 				},
 				"Device.Syslog.Source.{i}.Network.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -104258,7 +103723,6 @@
 			},
 			"Device.Syslog.Template.{i}.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -104311,7 +103775,6 @@
 			},
 			"Device.Syslog.Action.{i}.": {
 				"type": "object",
-				"version": "2.17",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -104422,7 +103885,6 @@
 				},
 				"Device.Syslog.Action.{i}.LogFile.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -104466,7 +103928,6 @@
 				},
 				"Device.Syslog.Action.{i}.LogRemote.": {
 					"type": "object",
-					"version": "2.17",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -104558,7 +104019,6 @@
 		},
 		"Device.GatewayInfo.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -104768,7 +104228,6 @@
 		},
 		"Device.PacketCaptureDiagnostics.": {
 			"type": "object",
-			"version": "2.13",
 			"protocols": [
 				"cwmp"
 			],
@@ -104924,7 +104383,6 @@
 			},
 			"Device.PacketCaptureDiagnostics.PacketCaptureResult.{i}.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"cwmp"
 				],
@@ -104975,7 +104433,6 @@
 		},
 		"Device.USPAgent.": {
 			"type": "object",
-			"version": "2.15",
 			"protocols": [
 				"cwmp"
 			],
@@ -105134,7 +104591,6 @@
 			},
 			"Device.USPAgent.MTP.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp"
 				],
@@ -105208,7 +104664,7 @@
 				},
 				"Device.USPAgent.MTP.{i}.CoAP.": {
 					"type": "object",
-					"version": "2.15",
+					"obsolete": true,
 					"protocols": [
 						"cwmp"
 					],
@@ -105219,6 +104675,7 @@
 						"type": "string",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -105231,6 +104688,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -105248,6 +104706,7 @@
 						"type": "string",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -105258,6 +104717,7 @@
 						"type": "boolean",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -105268,6 +104728,7 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -105278,7 +104739,6 @@
 				},
 				"Device.USPAgent.MTP.{i}.STOMP.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp"
 					],
@@ -105318,7 +104778,6 @@
 				},
 				"Device.USPAgent.MTP.{i}.WebSocket.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp"
 					],
@@ -105395,7 +104854,6 @@
 				},
 				"Device.USPAgent.MTP.{i}.MQTT.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp"
 					],
@@ -105461,7 +104919,6 @@
 				},
 				"Device.USPAgent.MTP.{i}.UDS.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp"
 					],
@@ -105482,7 +104939,6 @@
 			},
 			"Device.USPAgent.Controller.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp"
 				],
@@ -105678,7 +105134,6 @@
 				},
 				"Device.USPAgent.Controller.{i}.MTP.{i}.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp"
 					],
@@ -105742,7 +105197,7 @@
 					},
 					"Device.USPAgent.Controller.{i}.MTP.{i}.CoAP.": {
 						"type": "object",
-						"version": "2.15",
+						"obsolete": true,
 						"protocols": [
 							"cwmp"
 						],
@@ -105753,6 +105208,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"cwmp"
 							],
@@ -105768,6 +105224,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"cwmp"
 							],
@@ -105784,6 +105241,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"cwmp"
 							],
@@ -105794,6 +105252,7 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"cwmp"
 							],
@@ -105804,7 +105263,6 @@
 					},
 					"Device.USPAgent.Controller.{i}.MTP.{i}.STOMP.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp"
 						],
@@ -105844,7 +105302,6 @@
 					},
 					"Device.USPAgent.Controller.{i}.MTP.{i}.WebSocket.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp"
 						],
@@ -105896,6 +105353,7 @@
 							"type": "boolean",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"cwmp"
 							],
@@ -105987,7 +105445,6 @@
 					},
 					"Device.USPAgent.Controller.{i}.MTP.{i}.MQTT.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp"
 						],
@@ -105998,6 +105455,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"cwmp"
 							],
@@ -106064,7 +105522,6 @@
 					},
 					"Device.USPAgent.Controller.{i}.MTP.{i}.UDS.": {
 						"type": "object",
-						"version": "2.16",
 						"protocols": [
 							"cwmp"
 						],
@@ -106096,7 +105553,6 @@
 			},
 			"Device.USPAgent.Certificate.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp"
 				],
@@ -106166,7 +105622,6 @@
 			},
 			"Device.USPAgent.ControllerTrust.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp"
 				],
@@ -106263,7 +105718,6 @@
 				},
 				"Device.USPAgent.ControllerTrust.Role.{i}.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp"
 					],
@@ -106322,7 +105776,6 @@
 					},
 					"Device.USPAgent.ControllerTrust.Role.{i}.Permission.{i}.": {
 						"type": "object",
-						"version": "2.15",
 						"protocols": [
 							"cwmp"
 						],
@@ -106454,7 +105907,6 @@
 				},
 				"Device.USPAgent.ControllerTrust.Credential.{i}.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp"
 					],
@@ -106531,7 +105983,6 @@
 				},
 				"Device.USPAgent.ControllerTrust.Challenge.{i}.": {
 					"type": "object",
-					"version": "2.15",
 					"protocols": [
 						"cwmp"
 					],
@@ -106683,7 +106134,6 @@
 		},
 		"Device.ETSIM2M.": {
 			"type": "object",
-			"version": "2.6",
 			"protocols": [
 				"cwmp"
 			],
@@ -106702,7 +106152,6 @@
 			},
 			"Device.ETSIM2M.SCL.{i}.": {
 				"type": "object",
-				"version": "2.6",
 				"protocols": [
 					"cwmp"
 				],
@@ -106782,7 +106231,6 @@
 				},
 				"Device.ETSIM2M.SCL.{i}.Discovery.": {
 					"type": "object",
-					"version": "2.6",
 					"protocols": [
 						"cwmp"
 					],
@@ -106812,7 +106260,6 @@
 				},
 				"Device.ETSIM2M.SCL.{i}.Reregistration.": {
 					"type": "object",
-					"version": "2.6",
 					"protocols": [
 						"cwmp"
 					],
@@ -106877,7 +106324,6 @@
 					},
 					"Device.ETSIM2M.SCL.{i}.Reregistration.ActionStatus.": {
 						"type": "object",
-						"version": "2.6",
 						"protocols": [
 							"cwmp"
 						],
@@ -106919,7 +106365,6 @@
 				},
 				"Device.ETSIM2M.SCL.{i}.SAFPolicySet.{i}.": {
 					"type": "object",
-					"version": "2.6",
 					"protocols": [
 						"cwmp"
 					],
@@ -106979,7 +106424,6 @@
 					},
 					"Device.ETSIM2M.SCL.{i}.SAFPolicySet.{i}.ANPPolicy.{i}.": {
 						"type": "object",
-						"version": "2.6",
 						"protocols": [
 							"cwmp"
 						],
@@ -107048,7 +106492,6 @@
 						},
 						"Device.ETSIM2M.SCL.{i}.SAFPolicySet.{i}.ANPPolicy.{i}.BlockPeriod.{i}.": {
 							"type": "object",
-							"version": "2.6",
 							"protocols": [
 								"cwmp"
 							],
@@ -107111,7 +106554,6 @@
 						},
 						"Device.ETSIM2M.SCL.{i}.SAFPolicySet.{i}.ANPPolicy.{i}.RequestCategory.{i}.": {
 							"type": "object",
-							"version": "2.6",
 							"protocols": [
 								"cwmp"
 							],
@@ -107170,7 +106612,6 @@
 							},
 							"Device.ETSIM2M.SCL.{i}.SAFPolicySet.{i}.ANPPolicy.{i}.RequestCategory.{i}.Schedule.{i}.": {
 								"type": "object",
-								"version": "2.6",
 								"protocols": [
 									"cwmp"
 								],
@@ -107230,7 +106671,6 @@
 								},
 								"Device.ETSIM2M.SCL.{i}.SAFPolicySet.{i}.ANPPolicy.{i}.RequestCategory.{i}.Schedule.{i}.AbsTimeSpan.{i}.": {
 									"type": "object",
-									"version": "2.6",
 									"protocols": [
 										"cwmp"
 									],
@@ -107294,7 +106734,6 @@
 					},
 					"Device.ETSIM2M.SCL.{i}.SAFPolicySet.{i}.M2MSPPolicy.": {
 						"type": "object",
-						"version": "2.6",
 						"protocols": [
 							"cwmp"
 						],
@@ -107323,7 +106762,6 @@
 						},
 						"Device.ETSIM2M.SCL.{i}.SAFPolicySet.{i}.M2MSPPolicy.RequestCategory.{i}.": {
 							"type": "object",
-							"version": "2.6",
 							"protocols": [
 								"cwmp"
 							],
@@ -107428,7 +106866,6 @@
 				},
 				"Device.ETSIM2M.SCL.{i}.AreaNwkInstance.{i}.": {
 					"type": "object",
-					"version": "2.6",
 					"protocols": [
 						"cwmp"
 					],
@@ -107482,7 +106919,6 @@
 					},
 					"Device.ETSIM2M.SCL.{i}.AreaNwkInstance.{i}.Property.{i}.": {
 						"type": "object",
-						"version": "2.6",
 						"protocols": [
 							"cwmp"
 						],
@@ -107513,7 +106949,6 @@
 				},
 				"Device.ETSIM2M.SCL.{i}.AreaNwkDeviceInfoInstance.{i}.": {
 					"type": "object",
-					"version": "2.6",
 					"protocols": [
 						"cwmp"
 					],
@@ -107624,7 +107059,6 @@
 					},
 					"Device.ETSIM2M.SCL.{i}.AreaNwkDeviceInfoInstance.{i}.Property.{i}.": {
 						"type": "object",
-						"version": "2.6",
 						"protocols": [
 							"cwmp"
 						],
@@ -107657,7 +107091,6 @@
 		},
 		"Device.STOMP.": {
 			"type": "object",
-			"version": "2.15",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -107678,7 +107111,6 @@
 			},
 			"Device.STOMP.Connection.{i}.": {
 				"type": "object",
-				"version": "2.15",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -107931,6 +107363,7 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
+					"obsolete": true,
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -107954,7 +107387,6 @@
 		},
 		"Device.LocalAgent.": {
 			"type": "object",
-			"version": "2.12",
 			"protocols": [
 				"usp"
 			],
@@ -108369,7 +107801,6 @@
 			},
 			"Device.LocalAgent.MTP.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"usp"
 				],
@@ -108443,7 +107874,7 @@
 				},
 				"Device.LocalAgent.MTP.{i}.CoAP.": {
 					"type": "object",
-					"version": "2.12",
+					"obsolete": true,
 					"protocols": [
 						"usp"
 					],
@@ -108454,6 +107885,7 @@
 						"type": "string",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"usp"
 						],
@@ -108466,6 +107898,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"usp"
 						],
@@ -108483,6 +107916,7 @@
 						"type": "string",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"usp"
 						],
@@ -108493,6 +107927,7 @@
 						"type": "boolean",
 						"read": true,
 						"write": false,
+						"obsolete": true,
 						"protocols": [
 							"usp"
 						],
@@ -108503,6 +107938,7 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"usp"
 						],
@@ -108513,7 +107949,6 @@
 				},
 				"Device.LocalAgent.MTP.{i}.STOMP.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					],
@@ -108553,7 +107988,6 @@
 				},
 				"Device.LocalAgent.MTP.{i}.WebSocket.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					],
@@ -108630,7 +108064,6 @@
 				},
 				"Device.LocalAgent.MTP.{i}.MQTT.": {
 					"type": "object",
-					"version": "2.13",
 					"protocols": [
 						"usp"
 					],
@@ -108696,7 +108129,6 @@
 				},
 				"Device.LocalAgent.MTP.{i}.UDS.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"usp"
 					],
@@ -108717,7 +108149,6 @@
 			},
 			"Device.LocalAgent.Threshold.{i}.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				],
@@ -108850,7 +108281,6 @@
 			},
 			"Device.LocalAgent.Monitor.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"usp"
 				],
@@ -108933,7 +108363,6 @@
 			},
 			"Device.LocalAgent.Controller.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"usp"
 				],
@@ -109243,7 +108672,6 @@
 				},
 				"Device.LocalAgent.Controller.{i}.MTP.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					],
@@ -109307,7 +108735,7 @@
 					},
 					"Device.LocalAgent.Controller.{i}.MTP.{i}.CoAP.": {
 						"type": "object",
-						"version": "2.12",
+						"obsolete": true,
 						"protocols": [
 							"usp"
 						],
@@ -109318,6 +108746,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -109333,6 +108762,7 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -109349,6 +108779,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -109359,6 +108790,7 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -109369,7 +108801,6 @@
 					},
 					"Device.LocalAgent.Controller.{i}.MTP.{i}.STOMP.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"usp"
 						],
@@ -109409,7 +108840,6 @@
 					},
 					"Device.LocalAgent.Controller.{i}.MTP.{i}.WebSocket.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"usp"
 						],
@@ -109461,6 +108891,7 @@
 							"type": "boolean",
 							"read": true,
 							"write": false,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -109559,7 +108990,6 @@
 					},
 					"Device.LocalAgent.Controller.{i}.MTP.{i}.MQTT.": {
 						"type": "object",
-						"version": "2.13",
 						"protocols": [
 							"usp"
 						],
@@ -109570,6 +109000,7 @@
 							"type": "string",
 							"read": true,
 							"write": true,
+							"obsolete": true,
 							"protocols": [
 								"usp"
 							],
@@ -109636,7 +109067,6 @@
 					},
 					"Device.LocalAgent.Controller.{i}.MTP.{i}.UDS.": {
 						"type": "object",
-						"version": "2.16",
 						"protocols": [
 							"usp"
 						],
@@ -109667,7 +109097,6 @@
 				},
 				"Device.LocalAgent.Controller.{i}.TransferCompletePolicy.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					],
@@ -109692,7 +109121,6 @@
 				},
 				"Device.LocalAgent.Controller.{i}.BootParameter.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					],
@@ -109747,7 +109175,6 @@
 				},
 				"Device.LocalAgent.Controller.{i}.E2ESession.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					],
@@ -109758,6 +109185,7 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"usp"
 						],
@@ -109861,6 +109289,7 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
+						"obsolete": true,
 						"protocols": [
 							"usp"
 						],
@@ -109942,7 +109371,6 @@
 			},
 			"Device.LocalAgent.Certificate.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"usp"
 				],
@@ -110063,7 +109491,6 @@
 			},
 			"Device.LocalAgent.ControllerTrust.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"usp"
 				],
@@ -110269,7 +109696,6 @@
 				},
 				"Device.LocalAgent.ControllerTrust.Role.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					],
@@ -110328,7 +109754,6 @@
 					},
 					"Device.LocalAgent.ControllerTrust.Role.{i}.Permission.{i}.": {
 						"type": "object",
-						"version": "2.12",
 						"protocols": [
 							"usp"
 						],
@@ -110460,7 +109885,6 @@
 				},
 				"Device.LocalAgent.ControllerTrust.Credential.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					],
@@ -110537,7 +109961,6 @@
 				},
 				"Device.LocalAgent.ControllerTrust.Challenge.{i}.": {
 					"type": "object",
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					],
@@ -110688,7 +110111,6 @@
 			},
 			"Device.LocalAgent.Subscription.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"usp"
 				],
@@ -110876,7 +110298,6 @@
 			},
 			"Device.LocalAgent.Request.{i}.": {
 				"type": "object",
-				"version": "2.12",
 				"protocols": [
 					"usp"
 				],
@@ -110963,7 +110384,6 @@
 		},
 		"Device.Standby.": {
 			"type": "object",
-			"version": "2.12",
 			"protocols": [
 				"usp"
 			],
@@ -110993,7 +110413,6 @@
 		},
 		"Device.CollectionDevice.{i}.": {
 			"type": "object",
-			"version": "2.16",
 			"protocols": [
 				"usp"
 			],
@@ -111165,7 +110584,6 @@
 		},
 		"Device.ProxiedDevice.{i}.": {
 			"type": "object",
-			"version": "2.12",
 			"protocols": [
 				"usp"
 			],
@@ -111287,7 +110705,6 @@
 			},
 			"Device.ProxiedDevice.{i}.Node.{i}.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				],
@@ -111341,7 +110758,6 @@
 		},
 		"Device.CWMPManagementServer.": {
 			"type": "object",
-			"version": "2.15",
 			"protocols": [
 				"usp"
 			],
@@ -111362,7 +110778,6 @@
 		},
 		"Device.IoTCapability.{i}.": {
 			"type": "object",
-			"version": "2.13",
 			"protocols": [
 				"usp"
 			],
@@ -111424,7 +110839,6 @@
 			},
 			"Device.IoTCapability.{i}.BinaryControl.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				],
@@ -111480,7 +110894,6 @@
 			},
 			"Device.IoTCapability.{i}.LevelControl.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				],
@@ -111579,7 +110992,6 @@
 			},
 			"Device.IoTCapability.{i}.EnumControl.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				],
@@ -111655,7 +111067,6 @@
 			},
 			"Device.IoTCapability.{i}.BinarySensor.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				],
@@ -111756,7 +111167,6 @@
 			},
 			"Device.IoTCapability.{i}.LevelSensor.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				],
@@ -111861,7 +111271,6 @@
 			},
 			"Device.IoTCapability.{i}.MultiLevelSensor.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				],
@@ -111950,7 +111359,6 @@
 			},
 			"Device.IoTCapability.{i}.EnumSensor.": {
 				"type": "object",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				],
@@ -112023,7 +111431,6 @@
 		},
 		"Device.Node.{i}.": {
 			"type": "object",
-			"version": "2.13",
 			"protocols": [
 				"usp"
 			],

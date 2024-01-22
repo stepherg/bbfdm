@@ -24,8 +24,8 @@ def is_dm_supported(supported_dm_list, dmobject):
     return "No"
 
 
-def add_data_to_list_dm(dm_list, obj, supported):
-    dm_list.append(obj + "," + supported)
+def add_data_to_list_dm(dm_list, obj, supported, obsoleted):
+    dm_list.append(obj + "," + supported + "," + obsoleted)
 
 def parse_standard_object(list_read, list_write, dmobject, value, proto):
     hasobj = bbf.obj_has_child(value)
@@ -33,7 +33,8 @@ def parse_standard_object(list_read, list_write, dmobject, value, proto):
 
     if bbf.is_proto_exist(value, proto) is True:
         supported = is_dm_supported(list_read, dmobject)
-        add_data_to_list_dm(list_write, dmobject, supported)
+        obsolete = bbf.get_option_value(value, "obsolete", False)
+        add_data_to_list_dm(list_write, dmobject, supported, "Yes" if obsolete else "No")
     
         if hasparam:
             if isinstance(value, dict):
@@ -46,7 +47,8 @@ def parse_standard_object(list_read, list_write, dmobject, value, proto):
                                 if bbf.is_proto_exist(v, proto) is False:
                                     continue
                                 supported = is_dm_supported(list_read, dmobject + k)
-                                add_data_to_list_dm(list_write, dmobject + k, supported)
+                                obsolete = bbf.get_option_value(v, "obsolete", False)
+                                add_data_to_list_dm(list_write, dmobject + k, supported, "Yes" if obsolete else "No")
                                 break
     
         if hasobj:
@@ -61,7 +63,7 @@ def parse_standard_object(list_read, list_write, dmobject, value, proto):
 def parse_vendor_object(list_read, list_write):
     for entry in list_read:
         param = entry.get("param")
-        add_data_to_list_dm(list_write, param, "Yes")
+        add_data_to_list_dm(list_write, param, "Yes", "No")
     
 
 def load_json_data(dm_name):
@@ -102,6 +104,8 @@ def generate_excel_sheet(sheet, title, data, style_mapping):
     style_title = style_mapping["title"]
     style_default = style_mapping["default"]
     style_suffix = style_mapping["suffix"]
+    style_obsolete_name = style_mapping["obsolete_name"]
+    style_obsolete = style_mapping["obsolete"]
 
     sheet.write(0, 0, title, style_title)
     sheet.write(0, 1, 'Supported', style_title)
@@ -114,8 +118,11 @@ def generate_excel_sheet(sheet, title, data, style_mapping):
             if param[0].endswith(suffix_candidate):
                 suffix = suffix_style
                 break
-                
-        style_name, style = suffix or (None, style_default)
+
+        if param[2] == "Yes":
+            style_name, style = style_obsolete_name, style_obsolete
+        else:
+            style_name, style = suffix or (None, style_default)
 
         if style_name is not None:
             sheet.write(i + 1, 0, param[0], style_name)
@@ -139,15 +146,20 @@ def generate_excel_file(output_file):
     xlwt.add_palette_colour("custom_colour_yellow", 0x10)
     xlwt.add_palette_colour("custom_colour_green", 0x20)
     xlwt.add_palette_colour("custom_colour_grey", 0x30)
+    xlwt.add_palette_colour("custom_colour_obsolete", 0x08)
     
     wb.set_colour_RGB(0x10, 255, 255, 153)
     wb.set_colour_RGB(0x20, 102, 205, 170)
     wb.set_colour_RGB(0x30, 153, 153, 153)
+    wb.set_colour_RGB(0x08, 221, 221, 221)
 
     style_mapping = {
         "title": xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_grey;' +
                              'font: bold 1, color black;' + 'alignment: horizontal center;'),
         "default": xlwt.easyxf('alignment: horizontal center;'),
+        "obsolete_name": xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_obsolete'),
+        "obsolete": xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_obsolete;' +
+                             'alignment: horizontal center;'),
         "suffix": {
             ".": (xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_yellow'),
                   xlwt.easyxf('pattern: pattern solid, fore_colour custom_colour_yellow;' +
