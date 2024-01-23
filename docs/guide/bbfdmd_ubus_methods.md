@@ -1250,7 +1250,7 @@ API to abort an on-going transaction, on calling this api, staged changes in uci
 ```console
 root@iopsys:~# ubus call bbfdm transaction '{"cmd":"abort", "optional":{"transaction_id":1695754826}}'
 {
-        "reverted_configs": [
+        "updated_services": [
                 "mapcontroller",
                 "wireless"
         ],
