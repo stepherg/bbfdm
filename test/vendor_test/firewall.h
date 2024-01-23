@@ -14,7 +14,6 @@
 
 #include "libbbfdm-api/dmcommon.h"
 
-extern DMLEAF tTEST_FirewallRuleParams[];
 extern DMOBJ tTEST_FirewallChainRuleObj[];
 extern DMLEAF tTEST_FirewallChainRuleParams[];
 extern DMLEAF tTEST_FirewallChainRuleTimeSpanParams[];

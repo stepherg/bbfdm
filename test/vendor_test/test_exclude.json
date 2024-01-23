@@ -1,0 +1,26 @@
+{
+  "Device.DeviceInfo.ProcessStatus.": {
+    "type": "object",
+    "protocols": [
+      "none"
+    ],
+    "access": false,
+    "array": false
+  },
+  "Device.X_IOPSYS_EU_IGMP.": {
+    "type": "object",
+    "protocols": [
+      "none"
+    ],
+    "access": false,
+    "array": false
+  },
+  "Device.X_IOPSYS_EU_MLD.": {
+    "type": "object",
+    "protocols": [
+      "none"
+    ],
+    "access": false,
+    "array": false
+  }  
+}

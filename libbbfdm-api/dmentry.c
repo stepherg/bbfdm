@@ -42,15 +42,10 @@ static struct dm_fault DM_FAULT_ARRAY[] = {
 	{ USP_FAULT_INVALID_PATH, "Path is not present in the data model schema"},
 };
 
-void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj,
-		DM_MAP_VENDOR *tVendorExtension[],
-		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude)
+void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 {
 	INIT_LIST_HEAD(&ctx->list_parameter);
 	ctx->dm_entryobj = tEntryObj;
-	ctx->dm_vendor_extension[0] = tVendorExtension ? tVendorExtension[0] : NULL;
-	ctx->dm_vendor_extension[1] = tVendorExtension ? tVendorExtension[1] : NULL;
-	ctx->dm_vendor_extension_exclude = tVendorExtensionExclude;
 	dm_uci_init();
 }
 
@@ -63,15 +58,10 @@ void bbf_ctx_clean(struct dmctx *ctx)
 	dmcleanmem();
 }
 
-void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj,
-		DM_MAP_VENDOR *tVendorExtension[],
-		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude)
+void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj)
 {
 	INIT_LIST_HEAD(&ctx->list_parameter);
 	ctx->dm_entryobj = tEntryObj;
-	ctx->dm_vendor_extension[0] = tVendorExtension ? tVendorExtension[0] : NULL;
-	ctx->dm_vendor_extension[1] = tVendorExtension ? tVendorExtension[1] : NULL;
-	ctx->dm_vendor_extension_exclude = tVendorExtensionExclude;
 }
 
 void bbf_ctx_clean_sub(struct dmctx *ctx)
@@ -252,9 +242,9 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 	return bbf_fault_map(ctx, fault);
 }
 
-void bbf_global_init(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, const char *plugin_path)
+void bbf_global_init(DMOBJ *dm_entryobj, const char *plugin_path)
 {
-	load_plugins(dm_entryobj, dm_VendorExtension,dm_VendorExtensionExclude, plugin_path);
+	load_plugins(dm_entryobj, plugin_path);
 }
 
 void bbf_global_clean(DMOBJ *dm_entryobj)
@@ -338,7 +328,7 @@ int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, 
 	if (!param || !linker || *linker == 0)
 		return 0;
 
-	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude);
+	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
 
 	dmctx.iswildcard = 1;
 	dmctx.inparam_isparam = 1;
@@ -364,7 +354,7 @@ int adm_entry_get_reference_value(struct dmctx *ctx, char *param, char **value)
 
 	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
 
-	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude);
+	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
 
 	dmctx.in_param = linker;
 
@@ -384,7 +374,7 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 	if (!param || !linker || *linker == 0)
 		return 0;
 
-	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude);
+	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
 
 	dmctx.in_param = param;
 	dmctx.linker = linker;
@@ -407,7 +397,7 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value) // 
 
 	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
 
-	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude);
+	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
 
 	dmctx.in_param = linker;
 
@@ -428,7 +418,7 @@ bool adm_entry_object_exists(struct dmctx *ctx, char *param)
 
 	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
 
-	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj, ctx->dm_vendor_extension, ctx->dm_vendor_extension_exclude);
+	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
 
 	dmctx.in_param = linker;
 

@@ -18,12 +18,11 @@
 				"cwmp",
 				"usp"
 			],
+			"flags": [
+				"Secure"
+			],
 			"mapping": [
 				{
-					"rpc": "get"
-				},
-				{
-					"rpc": "set",
 					"type": "uci",
 					"uci": {
 						"file": "users",
@@ -138,12 +137,11 @@
 					"cwmp",
 					"usp"
 				],
+				"flags": [
+					"Secure"
+				],
 				"mapping": [
 					{
-						"rpc": "get"
-					},
-					{
-						"rpc": "set",
 						"type": "uci", 
 						"uci": {
 							"file": "owsd", 

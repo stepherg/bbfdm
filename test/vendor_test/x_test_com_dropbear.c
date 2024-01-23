@@ -78,16 +78,6 @@ int delete_dropbear_instance(char *refparam, struct dmctx *ctx, void *data, char
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
-static int get_x_test_com_dropbear_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "dropbearalias", instance, value);
-}
-
-static int set_x_test_com_dropbear_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "dropbearalias", instance, value);
-}
-
 static int get_x_test_com_dropbear_password_auth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *res = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "PasswordAuth", "1");
@@ -182,29 +172,6 @@ static int set_x_test_com_dropbear_root_login(char *refparam, struct dmctx *ctx,
 	return 0;
 }
 
-static int get_x_test_com_dropbear_verbose(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "verbose", "0");
-	return 0;
-}
-
-static int set_x_test_com_dropbear_verbose(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	bool b;
-
-	switch (action) {
-		case VALUECHECK:
-			if (bbfdm_validate_boolean(ctx, value))
-				return FAULT_9007;
-			return 0;
-		case VALUESET:
-			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "verbose", b ? "1" : "0");
-			return 0;
-	}
-	return 0;
-}
-
 static int get_x_test_com_dropbear_gateway_ports(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "GatewayPorts", "0");
@@ -228,134 +195,16 @@ static int set_x_test_com_dropbear_gateway_ports(char *refparam, struct dmctx *c
 	return 0;
 }
 
-static int get_x_test_com_dropbear_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "Interface", value);
-	return 0;
-}
-
-static int set_x_test_com_dropbear_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "Interface", value);
-			return 0;
-	}
-	return 0;
-}
-
-static int get_x_test_com_dropbear_rsakeyfile(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "rsakeyfile", value);
-	return 0;
-}
-
-static int set_x_test_com_dropbear_rsakeyfile(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "rsakeyfile", value);
-			return 0;
-	}
-	return 0;
-}
-
-static int get_x_test_com_dropbear_dsskeyfile(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dsskeyfile", value);
-	return 0;
-}
-
-static int set_x_test_com_dropbear_dsskeyfile(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dsskeyfile", value);
-			return 0;
-	}
-	return 0;
-}
-
-static int get_x_test_com_dropbear_ssh_keepalive(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "SSHKeepAlive", "300");
-	return 0;
-}
-
-static int set_x_test_com_dropbear_ssh_keepalive(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "SSHKeepAlive", (DM_STRCMP(value, "300") == 0) ? "" : value);
-
-			return 0;
-	}
-	return 0;
-}
-
-static int get_x_test_com_dropbear_idle_timeout(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "IdleTimeout", "300");
-	return 0;
-}
-
-static int set_x_test_com_dropbear_idle_timeout(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	switch (action) {
-		case VALUECHECK:
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "IdleTimeout", (value[0] == '0') ? "" : value);
-			return 0;
-	}
-	return 0;
-}
-
-static int get_x_test_com_dropbear_banner_file(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "BannerFile", value);
-	return 0;
-}
-
-static int set_x_test_com_dropbear_banner_file(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-
-	switch (action) {
-		case VALUECHECK:
-			return 0;
-		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "BannerFile", value);
-			return 0;
-	}
-	return 0;
-}
-
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
 /*** Device.X_TEST_COM_Dropbear.{i}. ****/
 DMLEAF X_TEST_COM_DropbearParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"Alias", &DMWRITE, DMT_STRING, get_x_test_com_dropbear_alias, set_x_test_com_dropbear_alias, BBFDM_BOTH},
 {"PasswordAuth", &DMWRITE, DMT_BOOL, get_x_test_com_dropbear_password_auth, set_x_test_com_dropbear_password_auth, BBFDM_BOTH},
 {"RootPasswordAuth", &DMWRITE, DMT_BOOL, get_x_test_com_dropbear_root_password_auth, set_x_test_com_dropbear_root_password_auth, BBFDM_BOTH},
 {"Port", &DMWRITE, DMT_UNINT, get_x_test_com_dropbear_port, set_x_test_com_dropbear_port, BBFDM_BOTH},
 {"RootLogin", &DMWRITE, DMT_BOOL, get_x_test_com_dropbear_root_login, set_x_test_com_dropbear_root_login, BBFDM_BOTH},
 {"GatewayPorts", &DMWRITE, DMT_BOOL, get_x_test_com_dropbear_gateway_ports, set_x_test_com_dropbear_gateway_ports, BBFDM_BOTH},
-{"Interface", &DMWRITE, DMT_STRING, get_x_test_com_dropbear_interface, set_x_test_com_dropbear_interface, BBFDM_BOTH},
-{"RSAKeyFile", &DMWRITE, DMT_STRING, get_x_test_com_dropbear_rsakeyfile, set_x_test_com_dropbear_rsakeyfile, BBFDM_BOTH},
-{"DSSKeyFile", &DMWRITE, DMT_STRING, get_x_test_com_dropbear_dsskeyfile, set_x_test_com_dropbear_dsskeyfile, BBFDM_BOTH},
-{"SSHKeepAlive", &DMWRITE, DMT_UNINT, get_x_test_com_dropbear_ssh_keepalive, set_x_test_com_dropbear_ssh_keepalive, BBFDM_BOTH},
-{"IdleTimeout", &DMWRITE, DMT_UNINT, get_x_test_com_dropbear_idle_timeout, set_x_test_com_dropbear_idle_timeout, BBFDM_BOTH},
-{"Verbose", &DMWRITE, DMT_BOOL, get_x_test_com_dropbear_verbose, set_x_test_com_dropbear_verbose, BBFDM_BOTH},
-{"BannerFile", &DMWRITE, DMT_STRING, get_x_test_com_dropbear_banner_file, set_x_test_com_dropbear_banner_file, BBFDM_BOTH},
 {0}
 };

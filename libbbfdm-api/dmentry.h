@@ -15,21 +15,17 @@
 #ifndef __DMENTRY_H__
 #define __DMENTRY_H__
 
-void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj,
-		DM_MAP_VENDOR *tVendorExtension[],
-		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude);
+void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj);
 void bbf_ctx_clean(struct dmctx *ctx);
 
-void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj,
-		DM_MAP_VENDOR *tVendorExtension[],
-		DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude);
+void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj);
 void bbf_ctx_clean_sub(struct dmctx *ctx);
 
 int bbf_fault_map(struct dmctx *ctx, int fault);
 
 int bbf_entry_method(struct dmctx *ctx, int cmd);
 
-void bbf_global_init(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, const char *plugin_path);
+void bbf_global_init(DMOBJ *dm_entryobj, const char *plugin_path);
 void bbf_global_clean(DMOBJ *dm_entryobj);
 
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);

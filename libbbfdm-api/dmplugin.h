@@ -12,15 +12,15 @@
 #define __DMPLUGIN_H__
 
 DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path);
-void disable_entry_obj(DMOBJ *entryobj, char *obj_path);
 
-void dm_exclude_obj(DMOBJ *entryobj, DMNODE *parent_node, char *obj_path);
+void disable_entry_obj(DMOBJ *entryobj, char *obj_path, const char *parent_obj, const char *plugin_path);
+void disable_entry_leaf(DMOBJ *entryobj, char *leaf_path, const char *parent_obj, const char *plugin_path);
 
 int get_entry_idx(DMOBJ *entryobj);
 int get_obj_idx(DMOBJ **entryobj);
 int get_leaf_idx(DMLEAF **entryleaf);
 
-int load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, const char *plugin_path);
+void load_plugins(DMOBJ *dm_entryobj, const char *plugin_path);
 void free_plugins(DMOBJ *dm_entryobj);
 
 #endif //__DMPLUGIN_H__

@@ -43,8 +43,6 @@
 #define GLOB_EXPR "[=><]+"
 
 extern DMOBJ *DEAMON_DM_ROOT_OBJ;
-extern DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2];
-extern DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE;
 
 bool is_str_eq(const char *s1, const char *s2);
 bool is_node_instance(char *path);

@@ -17,7 +17,7 @@
 
 extern DM_MAP_OBJ tDynamicObj[];
 
-extern DMOBJ tEntryRoot[];
 extern DMOBJ tDeviceObj[];
 extern DMLEAF tDeviceParams[];
+
 #endif

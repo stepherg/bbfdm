@@ -7,15 +7,13 @@
 #include <libbbfdm-api/dmapi.h>
 #include <libbbfdm-api/dmentry.h>
 
-#include <libbbfdm/device.h>
-#include <libbbfdm/vendor.h>
+#include "../../libbbfdm/dmtree/tr181/device.h"
 
-static DMOBJ *TR181_ROOT_TREE = tEntryRoot;
-static DM_MAP_VENDOR *TR181_VENDOR_EXTENSION[2] = {
-		tVendorExtension,
-		tVendorExtensionOverwrite
+static DMOBJ TR181_ROOT_TREE[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceObj, tDeviceParams, NULL, BBFDM_BOTH},
+{0}
 };
-static DM_MAP_VENDOR_EXCLUDE *TR181_VENDOR_EXTENSION_EXCLUDE = tVendorExtensionExclude;
 
 static int setup(void **state)
 {
@@ -23,7 +21,7 @@ static int setup(void **state)
 	if (!ctx)
 		return -1;
 
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE);
 
 	*state = ctx;
 
@@ -43,7 +41,7 @@ static int teardown_commit(void **state)
 
 static int group_init(void **state)
 {
-	bbf_global_init(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, "/etc/bbfdm/plugins");
+	bbf_global_init(TR181_ROOT_TREE, "/etc/bbfdm/plugins");
 	return 0;
 }
 
@@ -71,7 +69,7 @@ static void validate_parameter(struct dmctx *ctx, const char *name, const char *
 	}
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init_sub(ctx, TR181_ROOT_TREE);
 }
 
 static void test_api_bbfdm_get_set_standard_parameter(void **state)
@@ -176,11 +174,21 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 
 	// get value ==> expected "0" error
 	ctx->in_param = "Device.UCI_TEST_V1.Password";
+	ctx->dm_type = BBFDM_CWMP;
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
 	validate_parameter(ctx, "Device.UCI_TEST_V1.Password", "", "xsd:string");
+
+	// get value ==> expected "0" error
+	ctx->in_param = "Device.UCI_TEST_V1.Password";
+	ctx->dm_type = BBFDM_USP;
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.Password", "iopsys_test", "xsd:string");
 
 	// validate uci config
 	fault = dmuci_get_option_value_string("users", "user", "password_required", &value);
@@ -189,6 +197,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 
 	// get value ==> expected "0" error
 	ctx->in_param = "Device.UCI_TEST_V1.OWSDNumberOfEntries";
+	ctx->dm_type = BBFDM_BOTH;
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
@@ -267,11 +276,21 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 
 	// get value ==> expected "0" error
 	ctx->in_param = "Device.UCI_TEST_V1.OWSD.3.Password";
+	ctx->dm_type = BBFDM_CWMP;
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
 	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.3.Password", "", "xsd:string");
+
+	// get value ==> expected "0" error
+	ctx->in_param = "Device.UCI_TEST_V1.OWSD.3.Password";
+	ctx->dm_type = BBFDM_USP;
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
+	assert_int_equal(fault, 0);
+
+	// validate parameter : name, type, value
+	validate_parameter(ctx, "Device.UCI_TEST_V1.OWSD.3.Password", "owsd_pwd", "xsd:string");
 
 	// validate uci config
 	fault = dmuci_get_option_value_string("owsd", "@owsd_listen[2]", "password", &value);
@@ -280,6 +299,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 
 	// get value ==> expected "0" error
 	ctx->in_param = "Device.UBUS_TEST_V1.Uptime";
+	ctx->dm_type = BBFDM_BOTH;
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
@@ -483,7 +503,6 @@ static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
 	validate_parameter(ctx, "Device.WiFi.Radio.[iopsys_test].Channel", "116", "xsd:unsignedInt");
 }
 
-#if 0
 static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -494,19 +513,26 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Enable", "64t", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Enable";
+	ctx->in_value = "64t";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Enable", "truee", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Enable";
+	ctx->in_value = "truee";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Enable", "true", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Enable";
+	ctx->in_value = "true";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Enable", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Enable";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
@@ -517,41 +543,54 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Mapping without range: Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries", "64t", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries";
+	ctx->in_value = "64t";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries", "15600", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries";
+	ctx->in_value = "15600";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Nbr_Retries", "15600", "xsd:unsignedInt");
 
 	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", "1050", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Port";
+	ctx->in_value = "1050";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Mapping with range: set value in the first range [0-1000] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", "1000", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Port";
+	ctx->in_value = "1000";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Port";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Port", "1000", "xsd:unsignedInt");
 
 	// Mapping with range: set value in the second range [15000-65535] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", "20546", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Port";
+	ctx->in_value = "20546";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Port", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Port";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
@@ -562,56 +601,74 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Mapping with range (only min): Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Min_value", "-300", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Min_value";
+	ctx->in_value = "-300";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Min_value", "-273", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Min_value";
+	ctx->in_value = "-273";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Min_value", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Min_value";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Min_value", "-273", "xsd:int");
 
 	// Mapping with range (only max): Set Wrong Value out of range ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Max_value", "280", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Max_value";
+	ctx->in_value = "280";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Mapping with range: set value in the first range [0-1000] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Max_value", "274", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Max_value";
+	ctx->in_value = "274";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Max_value", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Max_value";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Max_value", "274", "xsd:int");
 
 	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", "-3", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Value";
+	ctx->in_value = "-3";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Mapping with range: set value in the first range [-10:-5] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", "-7", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Value";
+	ctx->in_value = "-7";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Value";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
-	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.value", "-7", "xsd:int");
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Value", "-7", "xsd:int");
 
 	// Mapping with range: set value in the second range [-1:10] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", "1", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Value";
+	ctx->in_value = "1";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Value", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Value";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
@@ -622,41 +679,54 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Mapping without range: Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes", "64t", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes";
+	ctx->in_value = "64t";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes", "15600", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes";
+	ctx->in_value = "15600";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Nbr_bytes", "15600", "xsd:unsignedLong");
 
 	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", "499", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_packets";
+	ctx->in_value = "499";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Mapping with range: set value in the first range [0-100] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", "99", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_packets";
+	ctx->in_value = "99";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_packets";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", "99", "xsd:unsignedLong");
 
 	// Mapping with range: set value in the second range [500-3010] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", "1024", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_packets";
+	ctx->in_value = "1024";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Nbr_packets", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Nbr_packets";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
@@ -667,45 +737,60 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Mapping without range: Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.MaxTxPower", "-300t", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.MaxTxPower";
+	ctx->in_value = "-300t";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.MaxTxPower", "-273", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.MaxTxPower";
+	ctx->in_value = "-273";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.MaxTxPower", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.MaxTxPower";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.MaxTxPower", "-273", "xsd:long");
 
 	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "-91", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit";
+	ctx->in_value = "-91";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Mapping with range: set value in the first range [-90:36] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "274", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit";
+	ctx->in_value = "274";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "274", "xsd:long");
 
 	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "37", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit";
+	ctx->in_value = "37";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Mapping with range: set value in the first range [70:360] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", "70", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit";
+	ctx->in_value = "70";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerLimit";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
@@ -716,19 +801,26 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.AssociationTime", "2030-01-01T11:22:33.2Z", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.AssociationTime";
+	ctx->in_value = "2030-01-01T11:22:33.2Z";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.AssociationTime", "2022-01-01T12:20:22.2222Z", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.AssociationTime";
+	ctx->in_value = "2022-01-01T12:20:22.2222Z";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.AssociationTime", "2022-01-01T12:20:22Z", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.AssociationTime";
+	ctx->in_value = "2022-01-01T12:20:22Z";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.AssociationTime", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.AssociationTime";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
@@ -739,56 +831,74 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Mapping without range: Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.ButtonColor", "64t", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.ButtonColor";
+	ctx->in_value = "64t";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.ButtonColor", "64ab78cef12", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.ButtonColor";
+	ctx->in_value = "64ab78cef12";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.ButtonColor", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.ButtonColor";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.ButtonColor", "64ab78cef12", "xsd:hexBinary");
 
 	// Mapping with range: Set Wrong Value out of range ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", "am123", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TextColor";
+	ctx->in_value = "am123";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Mapping with range: set value in the first range [3-3] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", "123abc", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TextColor";
+	ctx->in_value = "123abc";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TextColor";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.TextColor", "123abc", "xsd:hexBinary");
 
 	// Mapping with range: set value in the second range [5-5] ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", "12345abcde", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TextColor";
+	ctx->in_value = "12345abcde";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TextColor", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TextColor";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.TextColor", "12345abcde", "xsd:hexBinary");
 
 	// Mapping without range: Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.BackgroundColor", "12345abce", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.BackgroundColor";
+	ctx->in_value = "12345abce";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.BackgroundColor", "45a1bd", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.BackgroundColor";
+	ctx->in_value = "45a1bd";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.BackgroundColor", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.BackgroundColor";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
@@ -799,56 +909,74 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Interface", "64", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Interface";
+	ctx->in_value = "64";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Interface", "wan", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Interface";
+	ctx->in_value = "wan";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Interface", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Interface";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Interface", "wan", "xsd:string");
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.IPAddr", "192.168.1.789", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.IPAddr";
+	ctx->in_value = "192.168.1.789";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.IPAddr", "192.168.117.45", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.IPAddr";
+	ctx->in_value = "192.168.117.45";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.IPAddr", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.IPAddr";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.IPAddr", "192.168.117.45", "xsd:string");
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Protocol", "OMA-D", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Protocol";
+	ctx->in_value = "OMA-D";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Protocol", "OMA-DM", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Protocol";
+	ctx->in_value = "OMA-DM";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Protocol", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Protocol";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.Protocol", "OMA-DM", "xsd:string");
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Description", "bbf validate test", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Description";
+	ctx->in_value = "bbf validate test";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.Description", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Description";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
@@ -859,41 +987,57 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", "te,be,re,yu", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.FailureReasons";
+	ctx->in_value = "te,be,re,yu";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", "ExcessiveDelay,InsufficientBuffers", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.FailureReasons";
+	ctx->in_value = "ExcessiveDelay,InsufficientBuffers";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", "LowRate,Other", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.FailureReasons";
+	ctx->in_value = "LowRate,Other";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.FailureReasons";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.FailureReasons", "LowRate,Other", "xsd:string");
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", "200MHz,10MHz", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths";
+	ctx->in_value = "200MHz,10MHz";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", "ExcessiveDelay,InsufficientBuffers", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths";
+	ctx->in_value = "ExcessiveDelay,InsufficientBuffers";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", "40MHz,80+80MHz", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths";
+	ctx->in_value = "40MHz,80+80MHz";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths";
+	ctx->in_value = "";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
+	ctx->in_param = "";
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.SupportedOperatingChannelBandwidths", "40MHz,80+80MHz", "xsd:string");
 
 	/*
@@ -901,19 +1045,26 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported", "-5,-3,99,120", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported";
+	ctx->in_value = "-5,-3,99,120";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported", "-1,9,990", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported";
+	ctx->in_value = "-1,9,990";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported", "-1,9,100", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported";
+	ctx->in_value = "-1,9,100";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.TransmitPowerSupported";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
@@ -924,25 +1075,32 @@ static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 	 */
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", "8,1,2,3", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration";
+	ctx->in_value = "8,1,2,3";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// Set Wrong Value ==> expected "9007" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", "1,2,3,4,5,6,7,8", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration";
+	ctx->in_value = "1,2,3,4,5,6,7,8";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9007);
 
 	// set value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", "0,1,2,3,4,5,6,7", NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration";
+	ctx->in_value = "0,1,2,3,4,5,6,7";
+	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", NULL, NULL);
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration";
+	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter after setting to true: name, type, value
 	validate_parameter(ctx, "Device.X_IOPSYS_EU_TEST.1.PriorityRegeneration", "0,1,2,3,4,5,6,7", "xsd:string");
 }
-#endif
+
 static void test_api_bbfdm_add_del_standard_object(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -1617,9 +1775,8 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_v1_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_library_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter_alias, setup, teardown_commit),
-#if 0
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_input_value_validation_json_parameter, setup, teardown_commit),
-#endif
+
 		// Add/Delete Object method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_standard_object, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_json_object, setup, teardown_commit),

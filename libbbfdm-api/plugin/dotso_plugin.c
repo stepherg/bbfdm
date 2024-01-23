@@ -42,6 +42,18 @@ static void free_all_list_open_library(struct list_head *library_list)
 	}
 }
 
+static void dotso_plugin_disable_requested_entries(DMOBJ *entryobj, DMOBJ *requested_obj, DMLEAF *requested_leaf, const char *parent_obj, const char *plugin_path)
+{
+	if (!entryobj)
+		return;
+
+	for (; (requested_obj && requested_obj->obj); requested_obj++)
+		disable_entry_obj(entryobj, requested_obj->obj, parent_obj, plugin_path);
+
+	for (; (requested_leaf && requested_leaf->parameter); requested_leaf++)
+		disable_entry_leaf(entryobj, requested_leaf->parameter, parent_obj, plugin_path);
+}
+
 int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 {
 #ifndef BBF_SCHEMA_FULL_TREE
@@ -50,7 +62,7 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 	void *handle = dlopen(plugin_path, RTLD_LAZY);
 #endif
 	if (!handle) {
-		TRACE("Plugin failed [%s]\n", dlerror());
+		BBF_DEBUG("Plugin failed [%s]\n", dlerror());
 		return 0;
 	}
 
@@ -60,7 +72,7 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 	if (dynamic_obj == NULL) {
 		dlclose(handle);
-		TRACE("Plugin %s missing init symbol ...", plugin_path);
+		BBF_DEBUG("Plugin %s missing init symbol ...", plugin_path);
 		return 0;
 	}
 
@@ -70,16 +82,14 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 		if (!dm_entryobj)
 			continue;
 
-		if (dynamic_obj[i].root_obj) {
+		dotso_plugin_disable_requested_entries(dm_entryobj, dynamic_obj[i].root_obj, dynamic_obj[i].root_leaf, dynamic_obj[i].path, plugin_path);
 
-			// Disable object if it already exists in the main tree
-			disable_entry_obj(dm_entryobj, dynamic_obj[i].root_obj->obj);
+		if (dynamic_obj[i].root_obj) {
 
 			if (dm_entryobj->nextdynamicobj == NULL) {
 				dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
 				dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
 				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-				dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
 			}
 
 			if (dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj == NULL) {
@@ -100,7 +110,6 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 				dm_entryobj->dynamicleaf = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_leaf));
 				dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
 				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-				dm_entryobj->dynamicleaf[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
 			}
 
 			if (dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf == NULL) {

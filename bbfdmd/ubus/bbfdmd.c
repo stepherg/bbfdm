@@ -1650,13 +1650,13 @@ int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 	if (strcasecmp(tmp, "JSON") == 0) {
 		err = load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path, &DEAMON_DM_ROOT_OBJ);
 	} else if (strcasecmp(tmp, "DotSo") == 0) {
-		err = load_dotso_plugin(&deamon_lib_handle, file_path, &DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, &DEAMON_DM_VENDOR_EXTENSION_EXCLUDE);
+		err = load_dotso_plugin(&deamon_lib_handle, file_path, &DEAMON_DM_ROOT_OBJ);
 	} else {
 		ERR("Input type %s not supported", tmp);
 	}
 
 	if (!err) {
-		bbf_global_init(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, daemon_ctx->config.in_plugin_dir);
+		bbf_global_init(DEAMON_DM_ROOT_OBJ, daemon_ctx->config.in_plugin_dir);
 	} else {
 		ERR("Failed loading %s", file_path);
 	}

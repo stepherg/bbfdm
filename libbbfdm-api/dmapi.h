@@ -32,6 +32,7 @@ extern struct dm_permession_s DMASYNC;
 
 extern char *DMT_TYPE[];
 
+extern unsigned char gLogLevel;
 extern bool is_micro_service;
 
 #ifndef BBF_MAX_OBJECT_INSTANCES
@@ -157,15 +158,6 @@ typedef struct dm_map_obj {
 	struct dm_leaf_s *root_leaf;
 } DM_MAP_OBJ;
 
-typedef struct dm_map_vendor {
-	char *vendor;
-	struct dm_map_obj *vendor_obj;
-} DM_MAP_VENDOR;
-
-typedef struct dm_map_vendor_exclude {
-	char *vendor;
-	char **vendor_obj;
-} DM_MAP_VENDOR_EXCLUDE;
 
 struct dm_reference {
 	char *path;
@@ -181,8 +173,6 @@ struct dmctx {
 	int (*checkleaf)(DMOBJECT_ARGS);
 	struct list_head list_parameter;
 	DMOBJ *dm_entryobj;
-	DM_MAP_VENDOR *dm_vendor_extension[2];
-	DM_MAP_VENDOR_EXCLUDE *dm_vendor_extension_exclude;
 	bool nextlevel;
 	bool iswildcard;
 	int faultcode;
@@ -389,7 +379,6 @@ enum bbfdm_type_enum {
 enum {
 	INDX_JSON_MOUNT,
 	INDX_LIBRARY_MOUNT,
-	INDX_VENDOR_MOUNT,
 	INDX_SERVICE_MOUNT,
 	__INDX_DYNAMIC_MAX
 };

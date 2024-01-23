@@ -18,8 +18,10 @@
 #include "dmbbf.h"
 
 #define MAX_DM_PATH (1024)
+#define DEFAULT_LOG_LEVEL (2)
 
-static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance);
+unsigned char gLogLevel = DEFAULT_LOG_LEVEL;
+bool is_micro_service = false;
 
 char *DMT_TYPE[] = {
 	[DMT_STRING] = "xsd:string",
@@ -40,7 +42,7 @@ struct dm_permession_s DMWRITE = {"1", NULL};
 struct dm_permession_s DMSYNC = {"sync", NULL};
 struct dm_permession_s DMASYNC = {"async", NULL};
 
-bool is_micro_service = false;
+static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance);
 
 static bool is_instance_number_alias(char **str)
 {
@@ -430,7 +432,7 @@ static void dm_browse_service(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *e
 
 	if (dmctx->checkobj) {
 		*err = dmctx->checkobj(dmctx, &node, NULL, NULL, NULL, NULL, data, instance);
-		if (*err)
+		if (*err && !dmctx->inparam_isparam && DM_STRSTR(dmctx->in_param, parent_obj) != dmctx->in_param)
 			return;
 	}
 
@@ -2272,12 +2274,12 @@ static int mparam_set_value(DMPARAM_ARGS)
 
 			res = string_to_bool(dmctx->in_value, &val);
 			if (res == 0 && dmuci_string_to_boolean(value) == val) {
-				TRACE("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
+				BBF_DEBUG("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
 				return 0;
 			}
 		} else {
 			if (DM_STRCMP(value, dmctx->in_value) == 0) {
-				TRACE("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
+				BBF_DEBUG("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
 				return 0;
 			}
 		}

@@ -12,10 +12,6 @@
 #include "common.h"
 #include "get_helper.h"
 
-#define DEFAULT_LOG_LEVEL (2)
-
-static unsigned char gLogLevel = DEFAULT_LOG_LEVEL;
-
 // Logging utilities
 void set_debug_level(unsigned char level)
 {

@@ -1,77 +1,81 @@
 # BBFDM Vendor
 
-`bbfdm` library can be used to **Extend** the Data Model with new objects/parameters, to **Overwrite** existing objects/parameters with new ones and **Exclude** some objects/parameters from Data Model tree.
+The `bbfdm` library offers functionality for vendors to define their vendor extensions. This allows them to **extend** the core Data Model by introducing new objects/parameters/operates/events, **overwrite** and **exclude** existing ones.
 
-## How to add new vendor
+## How to Add a New Vendor
 
-### 1. Create a vendor folder
+### 1. Create a Vendor Folder
 
-Create a new folder under **'dmtree/vendor/'** which contains all files related to the vendor
+To add a new vendor, simply create a new folder under **'dmtree/vendor/'** which contains all files related to the vendor. Ensure that the folder name matches the vendor name specified in **BBF_VENDOR_LIST** macro.
 
-### 2. Fill Extend, Overwrite and Exclude tables with objects/parameters
+### 2. Populate the `tDynamicObj` Table
 
-Create the first vendor C file which contains new **Extend**, **Overwrite** and **Exclude** tables of objects/parameters.
-
-#### Extend and Overwrite table
-
-The Extend and Overwrite tables contain entries of **DM_MAP_OBJ** structure.
-
-The **DM_MAP_OBJ** structure contains three arguments:
+For extending, overwriting, and excluding objects/parameters/operates/events from the core tree, it's mandatory to have a `tDynamicObj` table. This table should be defined using **DM_MAP_OBJ** structure, which has three arguments:
 
 |     Argument     |                                     Description                                                               |
 | ---------------- | ------------------------------------------------------------------------------------------------------------- |
-| `parentobj`      | A string of the parent object name. Example “Device.IP.Diagnostics.”, “Device.DeviceInfo”, “Device.WiFi.Radio.” |
-| `nextobject`     | Pointer to a **DMOBJ** array which contains a list of the child objects |
-| `parameter`      | Pointer to a **DMLEAF** array which contains a list of the child parameters |
+| `parentobj`      | A string representing the parent object name from which to extend/exclude/overwrite the required items. Example: "Device.IP.Diagnostics.", "Device.WiFi.Radio." |
+| `nextobject`     | Pointer to a **DMOBJ** array containing a list of child objects to extend/exclude/overwrite |
+| `parameter`      | Pointer to a **DMLEAF** array containing a list of child parameters to extend/exclude/overwrite |
 
-#### Exclude table
 
-Each entry in the exclude table is a string which could be a path of object or parameter that need to be excluded from the tree
+- The `parentobj` must be a string path of an **object** available in the core tree. If it doesn't exist, it will be skipped during parsing of the `tDynamicObj` table.
 
-The following [link](../../libbbfdm/dmtree/vendor/test/tr181/vendor.c) contains example of Extend, Overwrite and Exclude table.
+- To extend the Data Model tree, fill the `nextobject` and `parameter` arguments with the required objects/parameters/operates/events not supported by the core tree.
 
-### 3. Adding vendor and standard objects/Parameters
+- To overwrite existing objects/parameters/operates/events in the core tree, fill the `nextobject` and `parameter` arguments with the same items defined in the core tree, along with new **add/del/get/set/browse** APIs needed by the vendor.
 
-Implement the new vendor/standard objects and parameters as defined above in the first section.
+- To exclude existing objects/parameters/operates/events in the core tree, fill the `nextobject` and `parameter` arguments with the same items defined in the core tree, and setting **bbfdm_type** to **BBFDM_NONE**.
 
-Example: [Custom Vendor Object Dropbear](../../libbbfdm/dmtree/vendor/test/tr181/x_test_com_dropbear.c)
+### 3. Enable vendor
 
-### 4. link vendor tables to the main tree
+To enable the new vendor:
 
-To register the new vendor tables, you need to link them in the main three tables:
+- Add the vendor to the list in **BBF_VENDOR_LIST** macro.
 
-- **tVendorExtension**
+- Define the vendor prefix using **BBF_VENDOR_PREFIX** macro.
 
-- **tVendorExtensionOverwrite**
-
-- **tVendorExtensionExclude**
-
-These tables are defined in the file **'dmtree/vendor/vendor.c'**.
-
-Example: [Link vendor tables to the main tree](../../libbbfdm/dmtree/vendor/vendor.c)
-
-### 5. Enable vendor
-
-To enable the new vendor
-
-- Define **BBF_VENDOR_EXTENSION** macro
-
-- Add the new vendor in the list **BBF_VENDOR_LIST** macro
-
-- Define the vendor prefix using **BBF_VENDOR_PREFIX** macro
-
-Example of Config Options:
+Example Configuration Options:
 
 ```bash
-BBF_VENDOR_EXTENSION=y
-BBF_VENDOR_LIST="iopsys,test"
-BBF_VENDOR_PREFIX="X_TEST_COM_"
+BBF_VENDOR_LIST="iopsys,xxxx"
+BBF_VENDOR_PREFIX="X_IOPSYS_EU_"
 ```
 
-> Note1: The `libbbfdm` vendor list can support multi-vendor with comma seperated.
+## Example how to Extend, Overwrite and Exclude the Data Model tree
 
-> Note2: If multi vendors are supported and there is a object/parameter that is implmented by multi customers in different way, the implemented object/parameter of the first vendor name in the **BBF_VENDOR_LIST** will be considered.
+In the [test/vendor_test/](../../test/vendor_test) directory, you'll find an example implementation for **test** vendor. This implementation demonstrates how to extend, overwrite, and exclude objects/parameters/operates/events from the core tree.
 
-> Note3: Overwrite and Exclude are only considered in `dmtree/vendor/<vendor>/`
+### 1. Extend Data Model
 
-- The directory **'dmtree/vendor/test/'** contains an example of **test** vendor implementation
+- using DotSo Plugin:
+	- Add support for [Device.Firewall.Chain.{i}.Rule.{i}.X_TEST_COM_TimeSpan.](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/firewall.c#L172) object
+	- Add support for [Device.Firewall.Chain.{i}.Rule.{i}.X_TEST_COM_ICMPType](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/firewall.c#L178) parameter
+
+- using JSON Plugin:
+	- Add support for [Device.PD2.{i}.](../../test/vendor_test/test_extend.json) object
+
+### 2. Overwrite Data Model
+
+- using DotSo Plugin:
+	- Overwrite [Device.X_IOPSYS_EU_Dropbear.{i}.](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/device.c#L18) object in the core tree
+	- Overwrite [Device.DeviceInfo.Manufacturer](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/deviceinfo.c#L29) parameter in the core tree
+
+- using JSON Plugin:
+	- Overwrite [Device.DeviceInfo.Processor.](../../test/vendor_test/test_overwrite.json) object in the core tree
+
+### 3. Exclude Data Model
+
+- using DotSo Plugin:
+	- Exclude [Device.USB.](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/device.c#L17) object from the core tree
+	- Exclude [Device.Ethernet.RMONStats.{i}.Packets1024to1518Bytes](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/extension.c#L37) parameter from the core tree
+
+- using JSON Plugin:
+	- Exclude [Device.X_IOPSYS_EU_IGMP.](../../test/vendor_test/test_exclude.json) object from the core tree
+
+
+> Note1: The `libbbfdm` vendor list can support multiple vendors, separated by commas.
+
+> Note2: If multi vendors are supported and there is an objects/parameters/operates/events implemented differently by different vendors, the implementation of the **last vendor name** in **BBF_VENDOR_LIST** will be considered.
+
+> Note3: In the JSON plugin, there is no way to extend, overwrite and exclude parameters/operates/events that have an existing object in the core tree.

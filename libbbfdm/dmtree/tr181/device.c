@@ -88,12 +88,6 @@ DM_MAP_OBJ tDynamicObj[] = {
 {0}
 };
 
-DMOBJ tEntryRoot[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceObj, tDeviceParams, NULL, BBFDM_BOTH},
-{0}
-};
-
 /* *** Device. *** */
 DMOBJ tDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/

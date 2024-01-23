@@ -14,10 +14,6 @@
 #include "plugin/json_plugin.h"
 #include "plugin/dotso_plugin.h"
 
-#ifdef BBF_VENDOR_EXTENSION
-#include "plugin/vendor_plugin.h"
-#endif
-
 extern struct list_head global_memhead;
 
 struct service
@@ -35,13 +31,12 @@ static bool add_service_to_main_tree(DMOBJ *main_dm, char *srv_name, char *srv_p
 		return false;
 
 	// Disable service object if it already exists in the main tree
-	disable_entry_obj(dm_entryobj, srv_obj);
+	disable_entry_obj(dm_entryobj, srv_obj, srv_parent_dm, srv_name);
 
 	if (dm_entryobj->nextdynamicobj == NULL) {
 		dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
 		dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
 		dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-		dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
 		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
 	}
 
@@ -326,15 +321,18 @@ DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path)
 	DMOBJ *obj = NULL;
 
 	char *in_obj = replace_str(obj_path, ".{i}.", ".");
+	if (in_obj == NULL)
+		return NULL;
+
 	dm_check_dynamic_obj(&node, entryobj, in_obj, &obj);
 	FREE(in_obj);
 
 	return obj;
 }
 
-void disable_entry_obj(DMOBJ *entryobj, char *obj_path)
+void disable_entry_obj(DMOBJ *entryobj, char *obj_path, const char *parent_obj, const char *plugin_path)
 {
-	if (!entryobj || DM_STRLEN(obj_path) == 0)
+	if (!entryobj || !plugin_path || DM_STRLEN(obj_path) == 0)
 		return;
 
 	DMOBJ *nextobj = entryobj->nextobj;
@@ -342,35 +340,65 @@ void disable_entry_obj(DMOBJ *entryobj, char *obj_path)
 	for (; (nextobj && nextobj->obj); nextobj++) {
 
 		if (DM_STRCMP(nextobj->obj, obj_path) == 0) {
+			BBF_INFO("## Excluding [%s%s.] from the core tree and the same object will be exposed again using (%s) ##", parent_obj, obj_path, plugin_path);
 			nextobj->bbfdm_type = BBFDM_NONE;
 			return;
 		}
 	}
+
+	if (entryobj->nextdynamicobj) {
+		for (int i = 0; i < 2; i++) {
+			struct dm_dynamic_obj *next_dyn_array = entryobj->nextdynamicobj + i;
+			if (next_dyn_array->nextobj) {
+				for (int j = 0; next_dyn_array->nextobj[j]; j++) {
+					DMOBJ *jentryobj = next_dyn_array->nextobj[j];
+					for (; (jentryobj && jentryobj->obj); jentryobj++) {
+
+						if (DM_STRCMP(jentryobj->obj, obj_path) == 0) {
+							TRACE("## Excluding [%s%s.] from the core tree and the same object will be exposed again using (%s) ##", parent_obj, obj_path, plugin_path);
+							jentryobj->bbfdm_type = BBFDM_NONE;
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
-void dm_exclude_obj(DMOBJ *entryobj, DMNODE *parent_node, char *obj_path)
+void disable_entry_leaf(DMOBJ *entryobj, char *leaf_path, const char *parent_obj, const char *plugin_path)
 {
-	char *parent_obj = parent_node->current_object;
+	if (!entryobj || !plugin_path || DM_STRLEN(leaf_path) == 0)
+		return;
 
-	for (; (entryobj && entryobj->obj); entryobj++) {
-		DMNODE node = {0};
-		node.obj = entryobj;
-		node.parent = parent_node;
-		node.instance_level = parent_node->instance_level;
-		node.matched = parent_node->matched;
+	DMLEAF *leaf = entryobj->leaf;
 
-		dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
-		if (DM_STRCMP(node.current_object, obj_path) == 0) {
-			entryobj->bbfdm_type = BBFDM_NONE;
+	for (; (leaf && leaf->parameter); leaf++) {
+
+		if (DM_STRCMP(leaf->parameter, leaf_path) == 0) {
+			BBF_INFO("## Excluding [%s%s] from the core tree and the same parameter will be exposed again using (%s) ##", parent_obj, leaf_path, plugin_path);
+			leaf->bbfdm_type = BBFDM_NONE;
 			return;
 		}
+	}
 
-		int err = plugin_obj_match(obj_path, &node);
-		if (err)
-			continue;
+	if (entryobj->dynamicleaf) {
+		for (int i = 0; i < 2; i++) {
+			struct dm_dynamic_leaf *next_dyn_array = entryobj->dynamicleaf + i;
+			if (next_dyn_array->nextleaf) {
+				for (int j = 0; next_dyn_array->nextleaf[j]; j++) {
+					DMLEAF *jleaf = next_dyn_array->nextleaf[j];
+					for (; (jleaf && jleaf->parameter); jleaf++) {
 
-		if (entryobj->nextobj)
-			dm_exclude_obj(entryobj->nextobj, &node, obj_path);
+						if (DM_STRCMP(jleaf->parameter, leaf_path) == 0) {
+							TRACE("## Excluding [%s%s] from the core tree and the same parameter will be exposed again using (%s) ##", parent_obj, leaf_path, plugin_path);
+							jleaf->bbfdm_type = BBFDM_NONE;
+							return;
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -404,22 +432,15 @@ int get_leaf_idx(DMLEAF **entryleaf)
 	return idx;
 }
 
-int load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, const char *plugin_path)
+void load_plugins(DMOBJ *dm_entryobj, const char *plugin_path)
 {
 	int max_num_files = 256;
 
-#ifdef BBF_VENDOR_EXTENSION
-	// Load objects and parameters exposed via vendor extension plugin
-	free_specific_dynamic_node(dm_entryobj, INDX_VENDOR_MOUNT);
-	load_vendor_dynamic_arrays(dm_entryobj, dm_VendorExtension, dm_VendorExtensionExclude);
-#endif /* BBF_VENDOR_EXTENSION */
-
 	if (DM_STRLEN(plugin_path) == 0)
-		return 0;
+		return;
 
-	if (!folder_exists(plugin_path)) {
-		return 0;
-	}
+	if (!folder_exists(plugin_path))
+		return;
 
 	free_json_plugins();
 	free_specific_dynamic_node(dm_entryobj, INDX_JSON_MOUNT);
@@ -439,8 +460,6 @@ int load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP
 
 		dmfree(files[i]);
 	}
-
-	return 0;
 }
 
 void free_plugins(DMOBJ *dm_entryobj)

@@ -14,6 +14,7 @@
 
 DMOBJ tTEST_DeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{BBF_VENDOR_PREFIX"Dropbear", &DMWRITE, add_dropbear_instance, delete_dropbear_instance, "file:/etc/config/dropbear", browse_dropbear_instance, NULL, NULL, NULL, X_TEST_COM_DropbearParams, NULL, BBFDM_BOTH},
+{"USB", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_NONE},
+{"X_IOPSYS_EU_Dropbear", &DMWRITE, add_dropbear_instance, delete_dropbear_instance, "file:/etc/config/dropbear", browse_dropbear_instance, NULL, NULL, NULL, X_TEST_COM_DropbearParams, NULL, BBFDM_BOTH},
 {0}
 };

@@ -3,6 +3,7 @@
 
 #include "libbbfdm-api/dmcommon.h"
 
+extern DMOBJ tTEST_DeviceInfoObj[];
 extern DMLEAF tTEST_DeviceInfoParams[];
 
 #endif //__TEST_DEVICEINFO_H

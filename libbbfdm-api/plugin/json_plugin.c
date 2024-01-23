@@ -111,11 +111,23 @@ static void free_loaded_json_files(struct list_head *json_list)
 	}
 }
 
-void find_prefix_obj(char *full_obj, char *prefix_obj, size_t len)
+void json_plugin_find_prefix_obj(const char *full_obj, char *prefix_obj, size_t len)
 {
 	int last_occurent = 0, occur = 0;
 
+	if (!full_obj || !prefix_obj || len == 0)
+		return;
+
+	*prefix_obj = 0;
+
 	char *full_object = replace_str(full_obj, ".{i}.", ".");
+	if (full_object == NULL)
+		return;
+
+	unsigned int full_object_dot_num = count_occurrences(full_object, '.');
+	if (full_object_dot_num < 2)
+		return;
+
 	for (int i = 0; full_object[i] != 0; i++) {
 
 		if (full_object[i] == '.') {
@@ -129,11 +141,23 @@ void find_prefix_obj(char *full_obj, char *prefix_obj, size_t len)
 	FREE(full_object);
 }
 
-static void find_current_obj(char *full_obj, char *curr_obj, size_t len)
+static void json_plugin_find_current_obj(const char *full_obj, char *curr_obj, size_t len)
 {
 	int last_occurent = 0, occur = 0;
 
+	if (!full_obj || !curr_obj || len == 0)
+		return;
+
+	*curr_obj = 0;
+
 	char *full_object = replace_str(full_obj, ".{i}.", ".");
+	if (full_object == NULL)
+		return;
+
+	unsigned int full_object_dot_num = count_occurrences(full_object, '.');
+	if (full_object_dot_num < 2)
+		return;
+
 	for (int i = 0; full_object[i] != 0; i++) {
 
 		if (full_object[i] == '.') {
@@ -216,6 +240,42 @@ static int get_number_of_instances(char *refparam)
 	}
 
 	return nbr_inst;
+}
+
+static int get_bbfdm_type(struct json_object *protocols)
+{
+	if (!protocols || json_object_get_type(protocols) != json_type_array)
+		return BBFDM_NONE;
+
+	size_t n_proto = json_object_array_length(protocols);
+	if (n_proto == 0)
+		return BBFDM_NONE;
+
+	if (n_proto == 1) {
+		struct json_object *proto = json_object_array_get_idx(protocols, 0);
+		const char *proto_str = json_object_get_string(proto);
+
+		if (strcmp(proto_str, "cwmp") == 0)
+			return BBFDM_CWMP;
+		else if (strcmp(proto_str, "usp") == 0)
+			return BBFDM_USP;
+		else
+			return BBFDM_NONE;
+	} else if (n_proto == 2) {
+		struct json_object *proto1 = json_object_array_get_idx(protocols, 0);
+		struct json_object *proto2 = json_object_array_get_idx(protocols, 1);
+
+		const char *proto_str1 = json_object_get_string(proto1);
+		const char *proto_str2 = json_object_get_string(proto2);
+
+		if ((strcmp(proto_str1, "cwmp") == 0 && strcmp(proto_str2, "usp") == 0) ||
+				(strcmp(proto_str1, "usp") == 0 && strcmp(proto_str2, "cwmp") == 0))
+			return BBFDM_BOTH;
+		else
+			return BBFDM_NONE;
+	} else {
+		return BBFDM_NONE;
+	}
 }
 
 static void replace_indexes(struct dmctx *ctx, char *old_key, char *new_key, size_t key_len)
@@ -1541,7 +1601,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
 	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL, *flags = NULL;
 	char full_param[512] = {0};
-	size_t n_proto, n_flags;
+	size_t n_flags;
 	// cppcheck-suppress nullPointerRedundantCheck
 	char **in_p = NULL, **out_p = NULL, **ev_arg = NULL, **tmp = NULL;
 
@@ -1549,6 +1609,9 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 		return;
 
 	char *param_ext = replace_str(param, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
+	if (!param_ext)
+		return;
+
 	//PARAM
 	pleaf[i].parameter = dm_dynamic_strdup(&json_memhead, param_ext);
 
@@ -1658,19 +1721,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 
 	//bbfdm_type
 	json_object_object_get_ex(jobj, "protocols", &protocols);
-	n_proto = protocols ? json_object_array_length(protocols) : 0;
-	if (n_proto == 2)
-		pleaf[i].bbfdm_type = BBFDM_BOTH;
-	else if (n_proto == 1) {
-		struct json_object *proto = protocols ? json_object_array_get_idx(protocols, 0) : NULL;
-		if (proto && strcmp(json_object_get_string(proto), "cwmp") == 0)
-			pleaf[i].bbfdm_type = BBFDM_CWMP;
-		else if (proto && strcmp(json_object_get_string(proto), "usp") == 0)
-			pleaf[i].bbfdm_type = BBFDM_USP;
-		else
-			pleaf[i].bbfdm_type = BBFDM_BOTH;
-	} else
-		pleaf[i].bbfdm_type = BBFDM_BOTH;
+	pleaf[i].bbfdm_type = get_bbfdm_type(protocols);
 
 	//dm_falgs
 	json_object_object_get_ex(jobj, "flags", &flags);
@@ -1720,12 +1771,21 @@ void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json
 	char curr_obj[128] = {0};
 
 	count_obj_param_under_jsonobj(jobj, &obj_number, &param_number);
+
 	char *obj_path = replace_str(object, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
+	if (!obj_path)
+		return;
+
 	char *full_obj = replace_str(obj_path, ".{i}.", ".");
-	find_current_obj(full_obj, curr_obj, sizeof(curr_obj));
+	if (!full_obj) {
+		FREE(obj_path);
+		return;
+	}
+
+	json_plugin_find_current_obj(full_obj, curr_obj, sizeof(curr_obj));
 	FREE(obj_path);
 
-	if (!pobj)
+	if (!pobj || strlen(curr_obj) == 0)
 		return;
 
 	//OBJ
@@ -1753,21 +1813,10 @@ void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json
 	pobj[index].checkdep = NULL;
 
 	json_object_object_foreach(jobj, key, json_obj) {
+
 		//bbfdm_type
 		if (strcmp(key, "protocols") == 0) {
-			size_t n_proto = json_obj ? json_object_array_length(json_obj) : 0;
-			if (n_proto == 2)
-				pobj[index].bbfdm_type = BBFDM_BOTH;
-			else if (n_proto == 1) {
-				struct json_object *proto = json_obj ? json_object_array_get_idx(json_obj, 0) : NULL;
-				if (proto && strcmp(json_object_get_string(proto), "cwmp") == 0)
-					pobj[index].bbfdm_type = BBFDM_CWMP;
-				else if (proto && strcmp(json_object_get_string(proto), "usp") == 0)
-					pobj[index].bbfdm_type = BBFDM_USP;
-				else
-					pobj[index].bbfdm_type = BBFDM_BOTH;
-			} else
-				pobj[index].bbfdm_type = BBFDM_BOTH;
+			pobj[index].bbfdm_type = get_bbfdm_type(json_obj);
 		}
 
 		//linker
@@ -1823,40 +1872,58 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 	json_object *json = json_object_from_file(plugin_path);
 	if (!json) {
-		TRACE("Plugin failed [%s]\n", plugin_path);
+		BBF_DEBUG("Plugin failed [%s]\n", plugin_path);
 		return 0;
 	}
 
 	json_object_object_foreach(json, key, jobj) {
-		if (!key)
-			break;
 
 		if (strcmp(key, "json_plugin_version") == 0) {
 			json_plugin_version = json_object_get_int(jobj);
 			continue;
 		}
 
-		char obj_prefix[MAX_DM_LENGTH] = {0};
-		char obj_name[64] = {0};
-
 		char *obj_path = replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
-		find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
-		find_current_obj(obj_path, obj_name, sizeof(obj_name));
+		if (obj_path == NULL) {
+			BBF_DEBUG("ERROR: Can't get the node object");
+			continue;
+		}
 
-		DMOBJ *dm_entryobj = find_entry_obj(entryobj, obj_prefix);
-		if (!dm_entryobj) {
+		if (strncmp(obj_path, "Device.", strlen("Device.")) != 0 || obj_path[strlen(obj_path) - 1] != '.') {
+			BBF_DEBUG("ERROR: Object (%s) not valid", obj_path);
 			FREE(obj_path);
 			continue;
 		}
 
-		// Disable object if it already exists in the main tree
-		disable_entry_obj(dm_entryobj, obj_name);
+		char obj_prefix[MAX_DM_LENGTH] = {0};
+		json_plugin_find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
+		if (strlen(obj_prefix) == 0) {
+			BBF_DEBUG("ERROR: Obj prefix is empty for (%s) Object", obj_path);
+			FREE(obj_path);
+			continue;
+		}
+
+		char curr_obj[128] = {0};
+		json_plugin_find_current_obj(obj_path, curr_obj, sizeof(curr_obj));
+		if (strlen(curr_obj) == 0) {
+			BBF_DEBUG("ERROR: Can't get the current object from (%s) parent object", obj_path);
+			FREE(obj_path);
+			continue;
+		}
+
+		DMOBJ *dm_entryobj = find_entry_obj(entryobj, obj_prefix);
+		if (!dm_entryobj) {
+			BBF_DEBUG("ERROR: entry obj doesn't exist for (%s) Object", obj_prefix);
+			FREE(obj_path);
+			continue;
+		}
+
+		disable_entry_obj(dm_entryobj, curr_obj, obj_prefix, plugin_path);
 
 		if (dm_entryobj->nextdynamicobj == NULL) {
 			dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
 			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
 			dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-			dm_entryobj->nextdynamicobj[INDX_VENDOR_MOUNT].idx_type = INDX_VENDOR_MOUNT;
 			dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
 		}
 
@@ -1876,6 +1943,7 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 		FREE(obj_path);
 	}
+
 	save_loaded_json_files(&loaded_json_files, json);
 	return 0;
 }

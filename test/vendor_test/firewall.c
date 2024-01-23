@@ -167,22 +167,17 @@ static int test__get_firewall_expriydate(char *refparam, struct dmctx *ctx, void
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
 /* *** Device.Firewall.Chain.{i}.Rule.{i}. *** */
-DMLEAF tTEST_FirewallRuleParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"ExpiryDate", &DMWRITE, DMT_TIME, test__get_firewall_expriydate, NULL, BBFDM_BOTH},
-{0}
-};
-
 DMOBJ tTEST_FirewallChainRuleObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{BBF_VENDOR_PREFIX"TimeSpan", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tTEST_FirewallChainRuleTimeSpanParams, NULL, BBFDM_BOTH},
+{"X_TEST_COM_TimeSpan", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tTEST_FirewallChainRuleTimeSpanParams, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tTEST_FirewallChainRuleParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{BBF_VENDOR_PREFIX"ICMPType", &DMWRITE, DMT_STRING, get_rule_icmp_type, set_rule_icmp_type, BBFDM_BOTH},
-{BBF_VENDOR_PREFIX"SourceMACAddress", &DMWRITE, DMT_STRING, get_rule_source_mac, set_rule_source_mac, BBFDM_BOTH},
+{"X_TEST_COM_ICMPType", &DMWRITE, DMT_STRING, get_rule_icmp_type, set_rule_icmp_type, BBFDM_BOTH},
+{"X_TEST_COM_SourceMACAddress", &DMWRITE, DMT_STRING, get_rule_source_mac, set_rule_source_mac, BBFDM_BOTH},
+{"ExpiryDate", &DMWRITE, DMT_TIME, test__get_firewall_expriydate, NULL, BBFDM_BOTH},
 {0}
 };
 

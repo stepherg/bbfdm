@@ -67,7 +67,7 @@ return
 This method is used to initialize the dmctx structure object to read the data model.
 
 ``` 
-void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude);
+void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj);
 inputs
 	struct dmctx *ctx
 		pointer to struct dmctx strunture to be initialized.
@@ -81,7 +81,7 @@ return
 This method is an extension of bbf_ctx_init method. only difference it only intializes dmctx structure object and does not intializes other resources used in reading data model
 
 ``` 
-void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj, DM_MAP_VENDOR *tVendorExtension[], DM_MAP_VENDOR_EXCLUDE *tVendorExtensionExclude)
+void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj)
 inputs
 	struct dmctx *ctx
 		pointer to struct dmctx strunture to be initialized.

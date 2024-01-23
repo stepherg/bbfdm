@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.0)
+
+PROJECT(libbbfdm_iopsys_ext)
+
+ADD_DEFINITIONS(-Wall -Werror -D_GNU_SOURCE)
+ADD_DEFINITIONS(-DBBF_VENDOR_PREFIX="${BBF_VENDOR_PREFIX}")
+
+FILE(GLOB BBF_IOPSYS_VENDOR_EXTENSION_SOURCES ../../../dmlayer.c *.c)
+
+ADD_LIBRARY(bbfdm_iopsys_ext SHARED ${BBF_IOPSYS_VENDOR_EXTENSION_SOURCES})
+
+INSTALL(TARGETS bbfdm_iopsys_ext
+	LIBRARY DESTINATION etc/bbfdm/plugins)

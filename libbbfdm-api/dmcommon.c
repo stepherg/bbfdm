@@ -750,7 +750,7 @@ struct uci_section *is_dmmap_section_exist_eq(char* package, char* section, char
 	return NULL;
 }
 
-unsigned int count_occurrences(char *str, char c)
+unsigned int count_occurrences(const char *str, char c)
 {
 	int count = 0;
 
@@ -2062,21 +2062,31 @@ char *replace_char(char *str, char find, char replace)
 
 char *replace_str(const char *str, const char *substr, const char *replacement)
 {
-	int replacement_len = DM_STRLEN(replacement);
-	int substr_len = DM_STRLEN(substr);
-	int i, cnt = 0;
+	if (!str || !substr || !replacement)
+		return NULL;
 
-	for (i = 0; str[i] != '\0'; i++) {
+	int str_len = strlen(str);
+	int substr_len = strlen(substr);
+	int replacement_len = strlen(replacement);
+	int cnt = 0;
+
+	if (str_len == 0)
+		return strdup("");
+
+	if (substr_len == 0)
+		return strdup(str);
+
+	for (int i = 0; str[i] != '\0'; i++) {
 		if (DM_STRSTR(&str[i], substr) == &str[i]) {
 			cnt++;
 			i += substr_len - 1;
 		}
 	}
 
-	size_t new_str_len = i + cnt * (replacement_len - substr_len) + 1;
+	size_t new_str_len = str_len + cnt * (replacement_len - substr_len) + 1;
 	char *value = (char *)malloc(new_str_len * sizeof(char));
 
-	i = 0;
+	int i = 0;
 	while (*str) {
 		if (strstr(str, substr) == str) {
 			i += snprintf(&value[i], new_str_len - i, "%s", replacement);

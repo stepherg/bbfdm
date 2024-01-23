@@ -185,7 +185,7 @@ enum option_type_enum {
 #define sysfs_foreach_file_sorted(path,max_num_files) \
 	struct dirent *ent = NULL; \
 	DIR *dir = NULL; \
-	if ((dir = opendir(path)) == NULL) return 0; \
+	if ((dir = opendir(path)) == NULL) return; \
 	int num_files = 0; \
 	char *files[max_num_files]; \
 	while ((ent = readdir(dir)) != NULL && num_files < max_num_files) \
@@ -251,7 +251,7 @@ int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *obje
 int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
 int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *reference, char *objects[]);
 char *check_create_dmmap_package(const char *dmmap_package);
-unsigned int count_occurrences(char *str, char c);
+unsigned int count_occurrences(const char *str, char c);
 bool isdigit_str(const char *str);
 bool ishex_str(const char *str);
 bool special_char(char c);

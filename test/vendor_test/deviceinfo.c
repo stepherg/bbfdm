@@ -18,6 +18,12 @@ static int test__get_device_manufacturer(char *refparam, struct dmctx *ctx, void
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
 /* *** Device.DeviceInfo. *** */
+DMOBJ tTEST_DeviceInfoObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"VendorConfigFile", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_NONE},
+{0}
+};
+
 DMLEAF tTEST_DeviceInfoParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Manufacturer", &DMREAD, DMT_STRING, test__get_device_manufacturer, NULL, BBFDM_BOTH},

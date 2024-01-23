@@ -21,8 +21,6 @@ extern struct list_head json_memhead;
 #define UNUSED  __attribute__((unused))
 
 static DMOBJ *CLI_DM_ROOT_OBJ = NULL;
-static DM_MAP_VENDOR *CLI_DM_VENDOR_EXTENSION[2] = {0};
-static DM_MAP_VENDOR_EXCLUDE *CLI_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
 
 static void *cli_lib_handle = NULL;
 
@@ -516,16 +514,12 @@ static int cli_exec_command(cli_data_t *cli_data, int argc, char *argv[])
 	if (strcasecmp(cli_data->in_type, "DotSO") == 0 || strcasecmp(cli_data->in_type, "JSON") == 0) {
 
 		if (strcasecmp(cli_data->in_type, "DotSO") == 0) {
-			if (load_dotso_plugin(&cli_lib_handle, cli_data->in_name,
-					&CLI_DM_ROOT_OBJ,
-					CLI_DM_VENDOR_EXTENSION,
-					&CLI_DM_VENDOR_EXTENSION_EXCLUDE) != 0) {
+			if (load_dotso_plugin(&cli_lib_handle, cli_data->in_name, &CLI_DM_ROOT_OBJ) != 0) {
 				err = EXIT_FAILURE;
 				goto end;
 			}
 		} else {
-			if (load_json_plugin(&loaded_json_files, &json_list, &json_memhead, cli_data->in_name,
-					&CLI_DM_ROOT_OBJ) != 0) {
+			if (load_json_plugin(&loaded_json_files, &json_list, &json_memhead, cli_data->in_name, &CLI_DM_ROOT_OBJ) != 0) {
 				err = EXIT_FAILURE;
 				goto end;
 			}
@@ -536,9 +530,9 @@ static int cli_exec_command(cli_data_t *cli_data, int argc, char *argv[])
 			goto end;
 		}
 
-		bbf_global_init(CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE, cli_data->in_plugin_dir);
+		bbf_global_init(CLI_DM_ROOT_OBJ, cli_data->in_plugin_dir);
 
-		bbf_ctx_init(&cli_data->bbf_ctx, CLI_DM_ROOT_OBJ, CLI_DM_VENDOR_EXTENSION, CLI_DM_VENDOR_EXTENSION_EXCLUDE);
+		bbf_ctx_init(&cli_data->bbf_ctx, CLI_DM_ROOT_OBJ);
 
 		cli_data->bbf_ctx.dm_type = cli_data->proto;
 		cli_data->bbf_ctx.instance_mode = cli_data->instance_mode;

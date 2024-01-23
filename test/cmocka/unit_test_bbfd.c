@@ -7,15 +7,13 @@
 #include <libbbfdm-api/dmapi.h>
 #include <libbbfdm-api/dmentry.h>
 
-#include <libbbfdm/device.h>
-#include <libbbfdm/vendor.h>
+#include "../../libbbfdm/dmtree/tr181/device.h"
 
-static DMOBJ *TR181_ROOT_TREE = tEntryRoot;
-static DM_MAP_VENDOR *TR181_VENDOR_EXTENSION[2] = {
-		tVendorExtension,
-		tVendorExtensionOverwrite
+static DMOBJ TR181_ROOT_TREE[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceObj, tDeviceParams, NULL, BBFDM_BOTH},
+{0}
 };
-static DM_MAP_VENDOR_EXCLUDE *TR181_VENDOR_EXTENSION_EXCLUDE = tVendorExtensionExclude;
 
 static int setup(void **state)
 {
@@ -23,7 +21,7 @@ static int setup(void **state)
 	if (!ctx)
 		return -1;
 
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE);
 
 	*state = ctx;
 
@@ -54,7 +52,7 @@ static int teardown_revert(void **state)
 
 static int group_init(void **state)
 {
-	bbf_global_init(TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE, "/etc/bbfdm/plugins");
+	bbf_global_init(TR181_ROOT_TREE, "/etc/bbfdm/plugins");
 	return 0;
 }
 
@@ -592,7 +590,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE);
 
 	/*
 	 * Test of JSON Parameter Path
@@ -605,7 +603,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE);
 }
 
 static void test_api_bbfdm_json_add_object(void **state)
@@ -653,7 +651,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE);
 
 	ctx->in_param = "Device.WiFi.SSID.1.Enable";
 

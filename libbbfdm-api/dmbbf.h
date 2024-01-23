@@ -64,22 +64,28 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
 
 #ifndef TRACE
 #define TRACE(MESSAGE, ...) do { \
-	syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__,__LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
+	syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
 } while(0)
 #endif
 
-#define ENABLE_BBF_DEBUG 0
-
-#if ENABLE_BBF_DEBUG
-#define BBF_DEBUG(fmt, ...) do { \
-	FILE *fp = fopen("/tmp/bbfdm.log", "a"); \
-	if (fp) { \
-		fprintf(fp, "%s@%s:%d: " fmt, __func__, __FILE__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-		fclose(fp); \
-	} \
+// Macros for different log levels
+#define BBF_ERR(MESSAGE, ...) do { \
+    if (gLogLevel >= 1) { \
+        syslog(LOG_ERR, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
+    } \
 } while(0)
-#else
-#define BBF_DEBUG(fmt, ...)
-#endif
+
+#define BBF_INFO(MESSAGE, ...) do { \
+    if (gLogLevel >= 3) { \
+        syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
+    } \
+} while(0)
+
+#define BBF_DEBUG(MESSAGE, ...) do { \
+    if (gLogLevel >= 4) { \
+        syslog(LOG_DEBUG, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
+    } \
+} while(0)
+
 
 #endif //__DMBBF_H__

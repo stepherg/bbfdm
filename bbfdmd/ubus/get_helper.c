@@ -21,8 +21,6 @@
 extern struct list_head head_registered_service;
 
 DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
-DM_MAP_VENDOR *DEAMON_DM_VENDOR_EXTENSION[2] = {0};
-DM_MAP_VENDOR_EXCLUDE *DEAMON_DM_VENDOR_EXTENSION_EXCLUDE = NULL;
 
 static struct {
 	int trans_id;
@@ -74,7 +72,7 @@ void bb_add_string(struct blob_buf *bb, const char *name, const char *value)
 
 void bbf_init(struct dmctx *dm_ctx)
 {
-	bbf_ctx_init(dm_ctx, DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init(dm_ctx, DEAMON_DM_ROOT_OBJ);
 }
 
 void bbf_cleanup(struct dmctx *dm_ctx)
@@ -84,7 +82,7 @@ void bbf_cleanup(struct dmctx *dm_ctx)
 
 void bbf_sub_init(struct dmctx *dm_ctx)
 {
-	bbf_ctx_init_sub(dm_ctx, DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init_sub(dm_ctx, DEAMON_DM_ROOT_OBJ);
 }
 
 void bbf_sub_cleanup(struct dmctx *dm_ctx)
