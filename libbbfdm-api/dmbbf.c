@@ -432,7 +432,7 @@ static void dm_browse_service(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *e
 
 	if (dmctx->checkobj) {
 		*err = dmctx->checkobj(dmctx, &node, NULL, NULL, NULL, NULL, data, instance);
-		if (*err && !dmctx->inparam_isparam && DM_STRSTR(dmctx->in_param, parent_obj) != dmctx->in_param)
+		if (*err)
 			return;
 	}
 

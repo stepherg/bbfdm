@@ -107,10 +107,16 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 
 		char obj_prefix[1024] = {0};
 		json_plugin_find_prefix_obj(node_obj, obj_prefix, sizeof(obj_prefix));
-		if (strlen(obj_prefix) == 0) {
+
+		int obj_prefix_len = strlen(obj_prefix);
+		if (obj_prefix_len == 0) {
 			ERR("ERROR: Obj prefix is empty for (%s) Object\n", node_obj);
 			return -1;
 		}
+
+		// Remove '.' from object prefix
+		if (obj_prefix[obj_prefix_len - 1] == '.')
+			obj_prefix[obj_prefix_len - 1] = 0;
 
 		DMOBJ *dm_entryobj = (DMOBJ *)dm_dynamic_calloc(json_memhead, 2, sizeof(DMOBJ));
 		if (dm_entryobj == NULL) {
