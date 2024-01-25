@@ -11,7 +11,6 @@
 
 #include <sys/stat.h>
 
-#include "dmcommon.h"
 #include "selftest.h"
 
 #define DIAG_BIN "/usr/sbin/self-diagnostics"
@@ -85,7 +84,7 @@ int operate_Device_SelfTest(char *refparam, struct dmctx *ctx, void *data, char 
 	add_list_parameter(ctx, dmstrdup("Results"), result, DMT_TYPE[DMT_STRING], NULL);
 
 	if (ctx->dm_type != BBFDM_USP) {
-		set_diagnostics_option("selftest", "DiagnosticState", "Complete");
+		diagnostics_set_option("selftest", "DiagnosticState", "Complete");
 		dmuci_commit_package_bbfdm(DMMAP_DIAGNOSTIGS);
 	}
 
@@ -94,7 +93,7 @@ int operate_Device_SelfTest(char *refparam, struct dmctx *ctx, void *data, char 
 err:
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup("Error_Internal"), DMT_TYPE[DMT_STRING], NULL);
 	if (ctx->dm_type != BBFDM_USP) {
-		set_diagnostics_option("selftest", "DiagnosticState", "Error");
+		diagnostics_set_option("selftest", "DiagnosticState", "Error");
 		dmuci_commit_package_bbfdm(DMMAP_DIAGNOSTIGS);
 	}
 
@@ -106,7 +105,7 @@ err:
 **************************************************************/
 static int get_SelfTest_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("selftest", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("selftest", "DiagnosticState", "None");
 	return 0;
 }
 
@@ -119,7 +118,7 @@ static int set_SelfTest_DiagnosticsState(char *refparam, struct dmctx *ctx, void
 			break;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("selftest", "DiagnosticState", value);
+				diagnostics_set_option("selftest", "DiagnosticState", value);
 	}
 	return 0;
 }

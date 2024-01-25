@@ -13,7 +13,7 @@
 #ifndef __ETHERNET_H
 #define __ETHERNET_H
 
-#include "dmcommon.h"
+#include "libbbfdm-api/dmcommon.h"
 
 extern DMOBJ tEthernetObj[];
 extern DMLEAF tEthernetParams[];

@@ -9,7 +9,7 @@
  *
  */
 
-#include "dmcommon.h"
+#include "dmlayer.h"
 #include "bridging.h"
 
 struct bridge_port_args

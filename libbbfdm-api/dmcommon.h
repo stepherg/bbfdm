@@ -67,41 +67,41 @@
 #include "dmjson.h"
 #include "dmentry.h"
 
-extern char *Encapsulation[];
-extern char *LinkType[];
-extern char *BridgeStandard[];
-extern char *BridgeType[];
-extern char *VendorClassIDMode[];
+extern char *Encapsulation[]; // To be removed later!!!!!!!!!!!!
+extern char *LinkType[]; // To be removed later!!!!!!!!!!!!
+extern char *BridgeStandard[]; // To be removed later!!!!!!!!!!!!
+extern char *BridgeType[]; // To be removed later!!!!!!!!!!!!
+extern char *VendorClassIDMode[]; // To be removed later!!!!!!!!!!!!
 extern char *DiagnosticsState[];
-extern char *SupportedProtocols[];
-extern char *InstanceMode[];
-extern char *NATProtocol[];
-extern char *Config[];
-extern char *Target[];
-extern char *ServerConnectAlgorithm[];
-extern char *KeepAlivePolicy[];
-extern char *DeliveryHeaderProtocol[];
-extern char *KeyIdentifierGenerationPolicy[];
-extern char *PreambleType[];
-extern char *MFPConfig[];
-extern char *DuplexMode[];
-extern char *RequestedState[];
-extern char *BulkDataProtocols[];
-extern char *EncodingTypes[];
-extern char *CSVReportFormat[];
-extern char *RowTimestamp[];
-extern char *JSONReportFormat[];
-extern char *StaticType[];
-extern char *ProtocolVersion[];
-extern char *ServerSelectionProtocol[];
-extern char *DHCPType[];
-extern char *DropAlgorithm[];
-extern char *SchedulerAlgorithm[];
-extern char *ProfileEnable[];
-extern char *PIN[];
-extern char *DestinationAddress[];
-extern char *RegulatoryDomain[];
-extern char *ConformingAction[];
+extern char *SupportedProtocols[]; // To be removed later!!!!!!!!!!!!
+extern char *InstanceMode[]; // To be removed later!!!!!!!!!!!!
+extern char *NATProtocol[]; // To be removed later!!!!!!!!!!!!
+extern char *Config[]; // To be removed later!!!!!!!!!!!!
+extern char *Target[]; // To be removed later!!!!!!!!!!!!
+extern char *ServerConnectAlgorithm[]; // To be removed later!!!!!!!!!!!!
+extern char *KeepAlivePolicy[]; // To be removed later!!!!!!!!!!!!
+extern char *DeliveryHeaderProtocol[]; // To be removed later!!!!!!!!!!!!
+extern char *KeyIdentifierGenerationPolicy[]; // To be removed later!!!!!!!!!!!!
+extern char *PreambleType[]; // To be removed later!!!!!!!!!!!!
+extern char *MFPConfig[]; // To be removed later!!!!!!!!!!!!
+extern char *DuplexMode[]; // To be removed later!!!!!!!!!!!!
+extern char *RequestedState[]; // To be removed later!!!!!!!!!!!!
+extern char *BulkDataProtocols[]; // To be removed later!!!!!!!!!!!!
+extern char *EncodingTypes[]; // To be removed later!!!!!!!!!!!!
+extern char *CSVReportFormat[]; // To be removed later!!!!!!!!!!!!
+extern char *RowTimestamp[]; // To be removed later!!!!!!!!!!!!
+extern char *JSONReportFormat[]; // To be removed later!!!!!!!!!!!!
+extern char *StaticType[]; // To be removed later!!!!!!!!!!!!
+extern char *ProtocolVersion[]; // To be removed later!!!!!!!!!!!!
+extern char *ServerSelectionProtocol[]; // To be removed later!!!!!!!!!!!!
+extern char *DHCPType[]; // To be removed later!!!!!!!!!!!!
+extern char *DropAlgorithm[]; // To be removed later!!!!!!!!!!!!
+extern char *SchedulerAlgorithm[]; // To be removed later!!!!!!!!!!!!
+extern char *ProfileEnable[]; // To be removed later!!!!!!!!!!!!
+extern char *PIN[]; // To be removed later!!!!!!!!!!!!
+extern char *DestinationAddress[]; // To be removed later!!!!!!!!!!!!
+extern char *RegulatoryDomain[]; // To be removed later!!!!!!!!!!!!
+extern char *ConformingAction[]; // To be removed later!!!!!!!!!!!!
 extern char *IPv4Address[];
 extern char *IPv6Address[];
 extern char *IPAddress[];
@@ -109,19 +109,19 @@ extern char *MACAddress[];
 extern char *IPPrefix[];
 extern char *IPv4Prefix[];
 extern char *IPv6Prefix[];
-extern char *SupportedOperatingChannelBandwidth[];
-extern char *SupportedStandards[];
-extern char *SupportedFrequencyBands[];
-extern char *Provider_Bridge_Type[];
-extern char *AdvPreferredRouterFlag[];
-extern char *PowerState[];
-extern char *FW_Mode[];
-extern char *AKMsAllowed[];
-extern char *CellularDataPreference[];
-extern char *IPLayerCapacityRole[];
-extern char *UDPPayloadContent[];
-extern char *IPLayerCapacityTestType[];
-extern char *RateAdjAlgorithm[];
+extern char *SupportedOperatingChannelBandwidth[]; // To be removed later!!!!!!!!!!!!
+extern char *SupportedStandards[]; // To be removed later!!!!!!!!!!!!
+extern char *SupportedFrequencyBands[]; // To be removed later!!!!!!!!!!!!
+extern char *Provider_Bridge_Type[]; // To be removed later!!!!!!!!!!!!
+extern char *AdvPreferredRouterFlag[]; // To be removed later!!!!!!!!!!!!
+extern char *PowerState[]; // To be removed later!!!!!!!!!!!!
+extern char *FW_Mode[]; // To be removed later!!!!!!!!!!!!
+extern char *AKMsAllowed[]; // To be removed later!!!!!!!!!!!!
+extern char *CellularDataPreference[]; // To be removed later!!!!!!!!!!!!
+extern char *IPLayerCapacityRole[]; // To be removed later!!!!!!!!!!!!
+extern char *UDPPayloadContent[]; // To be removed later!!!!!!!!!!!!
+extern char *IPLayerCapacityTestType[]; // To be removed later!!!!!!!!!!!!
+extern char *RateAdjAlgorithm[]; // To be removed later!!!!!!!!!!!!
 
 #define CRONTABS_ROOT "/etc/crontabs/root"
 #define ACTIVATE_HANDLER_FILE "/usr/share/bbfdm/bbf_activate_handler.sh"
@@ -136,6 +136,11 @@ extern char *RateAdjAlgorithm[];
 #define SYSTEM_CERT_PATH "/etc/ssl/certs"
 #define BOARD_JSON_FILE "/etc/board.json"
 #define DMMAP "dmmap"
+#define DMMAP_DIAGNOSTIGS "dmmap_diagnostics"
+#define HTTP_URI "http"
+#define FTP_URI "ftp"
+#define FILE_URI "file://"
+#define FILE_LOCALHOST_URI "file://localhost"
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
 
 #define DM_ASSERT(X, Y) \
@@ -327,6 +332,15 @@ char *ifaddrs_get_global_ipv6(char *interface_name);
 bool validate_blob_message(struct blob_attr *src, struct blob_attr *dst);
 void strip_lead_trail_whitespace(char *str);
 int dm_buf_to_file(char *buf, const char *filename);
+
+char *diagnostics_get_option(char *sec_name, char *option);
+char *diagnostics_get_option_fallback_def(char *sec_name, char *option, char *default_value);
+void diagnostics_set_option(char *sec_name, char *option, char *value);
+void diagnostics_reset_state(char *sec_name);
+char *diagnostics_get_interface_name(struct dmctx *ctx, char *value);
+
+long download_file(char *file_path, const char *url, const char *username, const char *password);
+long upload_file(const char *file_path, const char *url, const char *username, const char *password);
 
 /* Deprecated functions */
 __attribute__ ((deprecated("Use bbfdm_validate_string"))) int dm_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);

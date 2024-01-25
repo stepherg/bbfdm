@@ -10,6 +10,7 @@
  *
  */
 
+#include "dmlayer.h"
 #include "ethernet.h"
 
 struct eth_port_args
@@ -610,9 +611,11 @@ static int get_EthernetInterface_DuplexMode(char *refparam, struct dmctx *ctx, v
 
 static int set_EthernetInterface_DuplexMode(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Duplex_Mode[] = {"Half", "Full", "Auto", NULL};
+
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, DuplexMode, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Duplex_Mode, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

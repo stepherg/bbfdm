@@ -9,10 +9,15 @@
  *
  */
 
-#include "dmcommon.h"
 #include "iplayercap.h"
 
 #define IPLAYER_CAP_DIAGNOSTIC_PATH "/usr/share/bbfdm/iplayercap"
+
+static char *Protocol_Version[] = {"Any", "IPv4", "IPv6", NULL};
+static char *IPLayerCapacity_Role[] = {"Receiver", "Sender", NULL};
+static char *UDP_Payload_Content[] = {"zeroes", "random", NULL};
+static char *IPLayerCapacity_TestType[] = {"Search", "Fixed", NULL};
+static char *RateAdj_Algorithm[] = {"B", "C", NULL};
 
 /*
  * *** Device.IP.Diagnostics.IPLayerCapacityMetrics. ***
@@ -46,7 +51,7 @@ static int browseIPLayerCapacityIncrementalResultInst(struct dmctx *dmctx, DMNOD
 
 static int get_IPDiagnosticsIPLayerCapacity_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("iplayercapacity", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "DiagnosticState", "None");
 	return 0;
 }
 
@@ -59,7 +64,7 @@ static int set_IPDiagnosticsIPLayerCapacity_DiagnosticsState(char *refparam, str
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("iplayercapacity", "DiagnosticState", value);
+				diagnostics_set_option("iplayercapacity", "DiagnosticState", value);
 			return 0;
 	}
 	return 0;
@@ -97,7 +102,7 @@ int get_IPDiagnosticsIPLayerCapacity_SupportedMetrics(char *refparam, struct dmc
 
 static int get_IPDiagnosticsIPLayerCapacity_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = get_diagnostics_option("iplayercapacity", "interface");
+	char *linker = diagnostics_get_option("iplayercapacity", "interface");
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
@@ -119,8 +124,8 @@ static int set_IPDiagnosticsIPLayerCapacity_Interface(char *refparam, struct dmc
 
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "interface", reference.value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -128,7 +133,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Interface(char *refparam, struct dmc
 
 static int get_IPDiagnosticsIPLayerCapacity_Role(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "Role");
+	*value = diagnostics_get_option("iplayercapacity", "Role");
 	return 0;
 }
 
@@ -136,13 +141,13 @@ static int set_IPDiagnosticsIPLayerCapacity_Role(char *refparam, struct dmctx *c
 {
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, IPLayerCapacityRole, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, IPLayerCapacity_Role, NULL))
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "Role", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "Role", value);
 			return 0;
 	}
 	return 0;
@@ -150,7 +155,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Role(char *refparam, struct dmctx *c
 
 static int get_IPDiagnosticsIPLayerCapacity_Host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "Host");
+	*value = diagnostics_get_option("iplayercapacity", "Host");
 	return 0;
 }
 
@@ -162,8 +167,8 @@ static int set_IPDiagnosticsIPLayerCapacity_Host(char *refparam, struct dmctx *c
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "Host", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "Host", value);
 			return 0;
 	}
 	return 0;
@@ -171,7 +176,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Host(char *refparam, struct dmctx *c
 
 static int get_IPDiagnosticsIPLayerCapacity_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "Port");
+	*value = diagnostics_get_option("iplayercapacity", "Port");
 	return 0;
 }
 
@@ -183,8 +188,8 @@ static int set_IPDiagnosticsIPLayerCapacity_Port(char *refparam, struct dmctx *c
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "Port", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "Port", value);
 			return 0;
 	}
 	return 0;
@@ -192,7 +197,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Port(char *refparam, struct dmctx *c
 
 static int get_IPDiagnosticsIPLayerCapacity_JumboFramesPermitted(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "JumboFramesPermitted");
+	*value = diagnostics_get_option("iplayercapacity", "JumboFramesPermitted");
 	return 0;
 }
 
@@ -206,9 +211,9 @@ static int set_IPDiagnosticsIPLayerCapacity_JumboFramesPermitted(char *refparam,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
+			diagnostics_reset_state("iplayercapacity");
 			string_to_bool(value, &b);
-			set_diagnostics_option("iplayercapacity", "JumboFramesPermitted", b ? "1" : "0");
+			diagnostics_set_option("iplayercapacity", "JumboFramesPermitted", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -216,7 +221,7 @@ static int set_IPDiagnosticsIPLayerCapacity_JumboFramesPermitted(char *refparam,
 
 static int get_IPDiagnosticsIPLayerCapacity_DSCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "DSCP");
+	*value = diagnostics_get_option("iplayercapacity", "DSCP");
 	return 0;
 }
 
@@ -228,8 +233,8 @@ static int set_IPDiagnosticsIPLayerCapacity_DSCP(char *refparam, struct dmctx *c
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "DSCP", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "DSCP", value);
 			return 0;
 	}
 	return 0;
@@ -237,7 +242,7 @@ static int set_IPDiagnosticsIPLayerCapacity_DSCP(char *refparam, struct dmctx *c
 
 static int get_IPDiagnosticsIPLayerCapacity_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "ProtocolVersion");
+	*value = diagnostics_get_option("iplayercapacity", "ProtocolVersion");
 	return 0;
 }
 
@@ -245,12 +250,12 @@ static int set_IPDiagnosticsIPLayerCapacity_ProtocolVersion(char *refparam, stru
 {
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Protocol_Version, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "ProtocolVersion", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "ProtocolVersion", value);
 			return 0;
 	}
 	return 0;
@@ -258,7 +263,7 @@ static int set_IPDiagnosticsIPLayerCapacity_ProtocolVersion(char *refparam, stru
 
 static int get_IPDiagnosticsIPLayerCapacity_UDPPayloadContent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "UDPPayloadContent");
+	*value = diagnostics_get_option("iplayercapacity", "UDPPayloadContent");
 	return 0;
 }
 
@@ -266,12 +271,12 @@ static int set_IPDiagnosticsIPLayerCapacity_UDPPayloadContent(char *refparam, st
 {
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, UDPPayloadContent, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, UDP_Payload_Content, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "UDPPayloadContent", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "UDPPayloadContent", value);
 			return 0;
 	}
 	return 0;
@@ -279,7 +284,7 @@ static int set_IPDiagnosticsIPLayerCapacity_UDPPayloadContent(char *refparam, st
 
 static int get_IPDiagnosticsIPLayerCapacity_TestType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "TestType");
+	*value = diagnostics_get_option("iplayercapacity", "TestType");
 	return 0;
 }
 
@@ -287,12 +292,12 @@ static int set_IPDiagnosticsIPLayerCapacity_TestType(char *refparam, struct dmct
 {
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, IPLayerCapacityTestType, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, IPLayerCapacity_TestType, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "TestType", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "TestType", value);
 			return 0;
 	}
 	return 0;
@@ -300,7 +305,7 @@ static int set_IPDiagnosticsIPLayerCapacity_TestType(char *refparam, struct dmct
 
 static int get_IPDiagnosticsIPLayerCapacity_IPDVEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "IPDVEnable");
+	*value = diagnostics_get_option("iplayercapacity", "IPDVEnable");
 	return 0;
 }
 
@@ -314,9 +319,9 @@ static int set_IPDiagnosticsIPLayerCapacity_IPDVEnable(char *refparam, struct dm
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
+			diagnostics_reset_state("iplayercapacity");
 			string_to_bool(value, &b);
-			set_diagnostics_option("iplayercapacity", "IPDVEnable", b ? "1" : "0");
+			diagnostics_set_option("iplayercapacity", "IPDVEnable", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -324,7 +329,7 @@ static int set_IPDiagnosticsIPLayerCapacity_IPDVEnable(char *refparam, struct dm
 
 static int get_IPDiagnosticsIPLayerCapacity_StartSendingRateIndex(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "StartSendingRateIndex");
+	*value = diagnostics_get_option("iplayercapacity", "StartSendingRateIndex");
 	return 0;
 }
 
@@ -337,8 +342,8 @@ static int set_IPDiagnosticsIPLayerCapacity_StartSendingRateIndex(char *refparam
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "StartSendingRateIndex", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "StartSendingRateIndex", value);
 			return 0;
 	}
 	return 0;
@@ -346,7 +351,7 @@ static int set_IPDiagnosticsIPLayerCapacity_StartSendingRateIndex(char *refparam
 
 static int get_IPDiagnosticsIPLayerCapacity_NumberFirstModeTestSubIntervals(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "NumberFirstModeTestSubIntervals");
+	*value = diagnostics_get_option("iplayercapacity", "NumberFirstModeTestSubIntervals");
 	return 0;
 }
 
@@ -358,8 +363,8 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberFirstModeTestSubIntervals(char
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "NumberFirstModeTestSubIntervals", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "NumberFirstModeTestSubIntervals", value);
 			return 0;
 	}
 	return 0;
@@ -367,7 +372,7 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberFirstModeTestSubIntervals(char
 
 static int get_IPDiagnosticsIPLayerCapacity_NumberTestSubIntervals(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "NumberTestSubIntervals");
+	*value = diagnostics_get_option("iplayercapacity", "NumberTestSubIntervals");
 	return 0;
 }
 
@@ -383,8 +388,8 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberTestSubIntervals(char *refpara
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "NumberTestSubIntervals", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "NumberTestSubIntervals", value);
 			return 0;
 	}
 	return 0;
@@ -392,7 +397,7 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberTestSubIntervals(char *refpara
 
 static int get_IPDiagnosticsIPLayerCapacity_TestSubInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "TestSubInterval");
+	*value = diagnostics_get_option("iplayercapacity", "TestSubInterval");
 	return 0;
 }
 
@@ -405,8 +410,8 @@ static int set_IPDiagnosticsIPLayerCapacity_TestSubInterval(char *refparam, stru
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "TestSubInterval", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "TestSubInterval", value);
 			return 0;
 	}
 	return 0;
@@ -414,7 +419,7 @@ static int set_IPDiagnosticsIPLayerCapacity_TestSubInterval(char *refparam, stru
 
 static int get_IPDiagnosticsIPLayerCapacity_StatusFeedbackInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "StatusFeedbackInterval");
+	*value = diagnostics_get_option("iplayercapacity", "StatusFeedbackInterval");
 	return 0;
 }
 
@@ -426,8 +431,8 @@ static int set_IPDiagnosticsIPLayerCapacity_StatusFeedbackInterval(char *refpara
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "StatusFeedbackInterval", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "StatusFeedbackInterval", value);
 			return 0;
 	}
 	return 0;
@@ -435,7 +440,7 @@ static int set_IPDiagnosticsIPLayerCapacity_StatusFeedbackInterval(char *refpara
 
 static int get_IPDiagnosticsIPLayerCapacity_SeqErrThresh(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "SeqErrThresh");
+	*value = diagnostics_get_option("iplayercapacity", "SeqErrThresh");
 	return 0;
 }
 
@@ -447,8 +452,8 @@ static int set_IPDiagnosticsIPLayerCapacity_SeqErrThresh(char *refparam, struct 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "SeqErrThresh", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "SeqErrThresh", value);
 			return 0;
 	}
 	return 0;
@@ -456,7 +461,7 @@ static int set_IPDiagnosticsIPLayerCapacity_SeqErrThresh(char *refparam, struct 
 
 static int get_IPDiagnosticsIPLayerCapacity_ReordDupIgnoreEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "ReordDupIgnoreEnable");
+	*value = diagnostics_get_option("iplayercapacity", "ReordDupIgnoreEnable");
 	return 0;
 }
 
@@ -470,9 +475,9 @@ static int set_IPDiagnosticsIPLayerCapacity_ReordDupIgnoreEnable(char *refparam,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
+			diagnostics_reset_state("iplayercapacity");
 			string_to_bool(value, &b);
-			set_diagnostics_option("iplayercapacity", "ReordDupIgnoreEnable", b ? "1" : "0");
+			diagnostics_set_option("iplayercapacity", "ReordDupIgnoreEnable", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -480,7 +485,7 @@ static int set_IPDiagnosticsIPLayerCapacity_ReordDupIgnoreEnable(char *refparam,
 
 static int get_IPDiagnosticsIPLayerCapacity_LowerThresh(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "LowerThresh");
+	*value = diagnostics_get_option("iplayercapacity", "LowerThresh");
 	return 0;
 }
 
@@ -492,8 +497,8 @@ static int set_IPDiagnosticsIPLayerCapacity_LowerThresh(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "LowerThresh", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "LowerThresh", value);
 			return 0;
 	}
 	return 0;
@@ -501,7 +506,7 @@ static int set_IPDiagnosticsIPLayerCapacity_LowerThresh(char *refparam, struct d
 
 static int get_IPDiagnosticsIPLayerCapacity_UpperThresh(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "UpperThresh");
+	*value = diagnostics_get_option("iplayercapacity", "UpperThresh");
 	return 0;
 }
 
@@ -513,8 +518,8 @@ static int set_IPDiagnosticsIPLayerCapacity_UpperThresh(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "UpperThresh", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "UpperThresh", value);
 			return 0;
 	}
 	return 0;
@@ -522,7 +527,7 @@ static int set_IPDiagnosticsIPLayerCapacity_UpperThresh(char *refparam, struct d
 
 static int get_IPDiagnosticsIPLayerCapacity_HighSpeedDelta(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "HighSpeedDelta");
+	*value = diagnostics_get_option("iplayercapacity", "HighSpeedDelta");
 	return 0;
 }
 
@@ -534,8 +539,8 @@ static int set_IPDiagnosticsIPLayerCapacity_HighSpeedDelta(char *refparam, struc
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "HighSpeedDelta", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "HighSpeedDelta", value);
 			return 0;
 	}
 	return 0;
@@ -543,7 +548,7 @@ static int set_IPDiagnosticsIPLayerCapacity_HighSpeedDelta(char *refparam, struc
 
 static int get_IPDiagnosticsIPLayerCapacity_RateAdjAlgorithm(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "RateAdjAlgorithm");
+	*value = diagnostics_get_option("iplayercapacity", "RateAdjAlgorithm");
 	return 0;
 }
 
@@ -551,12 +556,12 @@ static int set_IPDiagnosticsIPLayerCapacity_RateAdjAlgorithm(char *refparam, str
 {
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, RateAdjAlgorithm, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, RateAdj_Algorithm, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "RateAdjAlgorithm", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "RateAdjAlgorithm", value);
 			return 0;
 	}
 	return 0;
@@ -570,8 +575,8 @@ static int set_IPDiagnosticsIPLayerCapacity_SlowAdjThresh(char *refparam, struct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("iplayercapacity");
-			set_diagnostics_option("iplayercapacity", "SlowAdjThresh", value);
+			diagnostics_reset_state("iplayercapacity");
+			diagnostics_set_option("iplayercapacity", "SlowAdjThresh", value);
 			return 0;
 	}
 	return 0;
@@ -579,169 +584,169 @@ static int set_IPDiagnosticsIPLayerCapacity_SlowAdjThresh(char *refparam, struct
 
 static int get_IPDiagnosticsIPLayerCapacity_SlowAdjThresh(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "SlowAdjThresh");
+	*value = diagnostics_get_option("iplayercapacity", "SlowAdjThresh");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("iplayercapacity", "BOMTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "BOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("iplayercapacity", "EOMTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "EOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_TmaxUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "TmaxUsed");
+	*value = diagnostics_get_option("iplayercapacity", "TmaxUsed");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_TestInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "TestInterval");
+	*value = diagnostics_get_option("iplayercapacity", "TestInterval");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_MaxIPLayerCapacity(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "MaxIPLayerCapacity");
+	*value = diagnostics_get_option("iplayercapacity", "MaxIPLayerCapacity");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_TimeOfMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("iplayercapacity", "TimeOfMax", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "TimeOfMax", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_MaxETHCapacityNoFCS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "MaxETHCapacityNoFCS");
+	*value = diagnostics_get_option("iplayercapacity", "MaxETHCapacityNoFCS");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_MaxETHCapacityWithFCS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "MaxETHCapacityWithFCS");
+	*value = diagnostics_get_option("iplayercapacity", "MaxETHCapacityWithFCS");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_MaxETHCapacityWithFCSVLAN(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "MaxETHCapacityWithFCSVLAN");
+	*value = diagnostics_get_option("iplayercapacity", "MaxETHCapacityWithFCSVLAN");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_LossRatioAtMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "LossRatioAtMax");
+	*value = diagnostics_get_option("iplayercapacity", "LossRatioAtMax");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_RTTRangeAtMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "RTTRangeAtMax");
+	*value = diagnostics_get_option("iplayercapacity", "RTTRangeAtMax");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_PDVRangeAtMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "PDVRangeAtMax");
+	*value = diagnostics_get_option("iplayercapacity", "PDVRangeAtMax");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_MinOnewayDelayAtMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "MinOnewayDelayAtMax");
+	*value = diagnostics_get_option("iplayercapacity", "MinOnewayDelayAtMax");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_ReorderedRatioAtMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "ReorderedRatioAtMax");
+	*value = diagnostics_get_option("iplayercapacity", "ReorderedRatioAtMax");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_ReplicatedRatioAtMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "ReplicatedRatioAtMax");
+	*value = diagnostics_get_option("iplayercapacity", "ReplicatedRatioAtMax");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_InterfaceEthMbpsAtMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "InterfaceEthMbpsAtMax");
+	*value = diagnostics_get_option("iplayercapacity", "InterfaceEthMbpsAtMax");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_IPLayerCapacitySummary(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "IPLayerCapacitySummary");
+	*value = diagnostics_get_option("iplayercapacity", "IPLayerCapacitySummary");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_LossRatioSummary(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "LossRatioSummary");
+	*value = diagnostics_get_option("iplayercapacity", "LossRatioSummary");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_RTTRangeSummary(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "RTTRangeSummary");
+	*value = diagnostics_get_option("iplayercapacity", "RTTRangeSummary");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_PDVRangeSummary(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "PDVRangeSummary");
+	*value = diagnostics_get_option("iplayercapacity", "PDVRangeSummary");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_MinOnewayDelaySummary(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "MinOnewayDelaySummary");
+	*value = diagnostics_get_option("iplayercapacity", "MinOnewayDelaySummary");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_MinRTTSummary(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "MinRTTSummary");
+	*value = diagnostics_get_option("iplayercapacity", "MinRTTSummary");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_ReorderedRatioSummary(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "ReorderedRatioSummary");
+	*value = diagnostics_get_option("iplayercapacity", "ReorderedRatioSummary");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_ReplicatedRatioSummary(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "ReplicatedRatioSummary");
+	*value = diagnostics_get_option("iplayercapacity", "ReplicatedRatioSummary");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_InterfaceEthMbpsSummary(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "InterfaceEthMbpsSummary");
+	*value = diagnostics_get_option("iplayercapacity", "InterfaceEthMbpsSummary");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_TmaxRTTUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "TmaxRTTUsed");
+	*value = diagnostics_get_option("iplayercapacity", "TmaxRTTUsed");
 	return 0;
 }
 
 static int get_IPDiagnosticsIPLayerCapacity_TimestampResolutionUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("iplayercapacity", "TimestampResolutionUsed");
+	*value = diagnostics_get_option("iplayercapacity", "TimestampResolutionUsed");
 	return 0;
 }
 
@@ -985,9 +990,9 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 	}
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
-	char *interface = get_diagnostics_interface_option(ctx, ip_interface);
+	char *interface = diagnostics_get_interface_name(ctx, ip_interface);
 	char *role = dmjson_get_value((json_object *)value, 1, "Role");
-	if (role[0] != '\0' && bbfdm_validate_string(ctx, role, -1, -1, IPLayerCapacityRole, NULL))
+	if (role[0] != '\0' && bbfdm_validate_string(ctx, role, -1, -1, IPLayerCapacity_Role, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *port = dmjson_get_value((json_object *)value, 1, "Port");
@@ -1003,15 +1008,15 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *ip_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
-	if (ip_proto[0] != '\0' && bbfdm_validate_string(ctx, ip_proto, -1, -1, ProtocolVersion, NULL))
+	if (ip_proto[0] != '\0' && bbfdm_validate_string(ctx, ip_proto, -1, -1, Protocol_Version, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *content = dmjson_get_value((json_object *)value, 1, "UDPPayloadContent");
-	if (content[0] != '\0' && bbfdm_validate_string(ctx, content, -1, -1, UDPPayloadContent, NULL))
+	if (content[0] != '\0' && bbfdm_validate_string(ctx, content, -1, -1, UDP_Payload_Content, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *test_type = dmjson_get_value((json_object *)value, 1, "TestType");
-	if (test_type[0] != '\0' && bbfdm_validate_string(ctx, test_type, -1, -1, IPLayerCapacityTestType, NULL))
+	if (test_type[0] != '\0' && bbfdm_validate_string(ctx, test_type, -1, -1, IPLayerCapacity_TestType, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *ipdv = dmjson_get_value((json_object *)value, 1, "IPDVEnable");
@@ -1063,7 +1068,7 @@ int operate_IPDiagnostics_IPLayerCapacity(char *refparam, struct dmctx *ctx, voi
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	char *rate_adj = dmjson_get_value((json_object *)value, 1, "RateAdjAlgorithm");
-	if (rate_adj[0] != '\0' && bbfdm_validate_string(ctx, rate_adj, -1, -1, RateAdjAlgorithm, NULL))
+	if (rate_adj[0] != '\0' && bbfdm_validate_string(ctx, rate_adj, -1, -1, RateAdj_Algorithm, NULL))
 		return USP_FAULT_INVALID_ARGUMENT;
 
 	snprintf(input, sizeof(input), "'{\"host\": \"%s\",\"interface\":\"%s\",\"role\":\"%s\",\"port\":\"%s\",\"jumbo_frames\":\"%s\",\"proto_ver\":\"%s\",\"udp_content\":\"%s\",\"test_type\":\"%s\",\"ipdv_enable\":\"%s\",\"DSCP\":\"%s\",\"rate_index\":\"%s\",\"mode_subintervals\":\"%s\",\"test_subinterval\":\"%s\",\"feedback_interval\":\"%s\",\"seq_err_thresh\":\"%s\",\"dup_ignore\":\"%s\",\"lower_thresh\":\"%s\",\"upper_thresh\":\"%s\",\"high_speed_delta\":\"%s\",\"algorithm\":\"%s\",\"slow_adj_thresh\":\"%s\",\"num_interval\":\"%s\",\"proto\":\"%s\"}'",

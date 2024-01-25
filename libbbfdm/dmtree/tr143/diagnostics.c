@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmcommon.h"
 #include "diagnostics.h"
 #ifdef BBF_TR471
 #include "iplayercap.h"
@@ -40,7 +39,7 @@ static int get_diag_enable_true(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("ipping", "DiagnosticState", "None");
 	return 0;
 }
 
@@ -53,7 +52,7 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("ipping", "DiagnosticState", value);
+				diagnostics_set_option("ipping", "DiagnosticState", value);
 			return 0;
 	}
 	return 0;
@@ -61,7 +60,7 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 
 static int get_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = get_diagnostics_option("ipping", "interface");
+	char *linker = diagnostics_get_option("ipping", "interface");
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
@@ -83,8 +82,8 @@ static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("ipping");
-			set_diagnostics_option("ipping", "interface", reference.value);
+			diagnostics_reset_state("ipping");
+			diagnostics_set_option("ipping", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -92,20 +91,22 @@ static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_ip_ping_protocolversion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "ProtocolVersion", "Any");
+	*value = diagnostics_get_option_fallback_def("ipping", "ProtocolVersion", "Any");
 	return 0;
 }
 
 static int set_ip_ping_protocolversion(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *ProtocolVersion[] = {"Any", "IPv4", "IPv6", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("ipping");
-			set_diagnostics_option("ipping", "ProtocolVersion", value);
+			diagnostics_reset_state("ipping");
+			diagnostics_set_option("ipping", "ProtocolVersion", value);
 			return 0;
 	}
 	return 0;
@@ -113,7 +114,7 @@ static int set_ip_ping_protocolversion(char *refparam, struct dmctx *ctx, void *
 
 static int get_ip_ping_host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("ipping", "Host");
+	*value = diagnostics_get_option("ipping", "Host");
 	return 0;
 }
 
@@ -125,8 +126,8 @@ static int set_ip_ping_host(char *refparam, struct dmctx *ctx, void *data, char 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("ipping");
-			set_diagnostics_option("ipping", "Host", value);
+			diagnostics_reset_state("ipping");
+			diagnostics_set_option("ipping", "Host", value);
 			return 0;
 	}
 	return 0;
@@ -134,7 +135,7 @@ static int set_ip_ping_host(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int get_ip_ping_repetition_number(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "NumberOfRepetitions", "3");
+	*value = diagnostics_get_option_fallback_def("ipping", "NumberOfRepetitions", "3");
 	return 0;
 }
 
@@ -146,8 +147,8 @@ static int set_ip_ping_repetition_number(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("ipping");
-			set_diagnostics_option("ipping", "NumberOfRepetitions", value);
+			diagnostics_reset_state("ipping");
+			diagnostics_set_option("ipping", "NumberOfRepetitions", value);
 			return 0;
 	}
 	return 0;
@@ -155,7 +156,7 @@ static int set_ip_ping_repetition_number(char *refparam, struct dmctx *ctx, void
 
 static int get_ip_ping_timeout(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "Timeout", "1000");
+	*value = diagnostics_get_option_fallback_def("ipping", "Timeout", "1000");
 	return 0;
 }
 
@@ -167,8 +168,8 @@ static int set_ip_ping_timeout(char *refparam, struct dmctx *ctx, void *data, ch
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("ipping");
-			set_diagnostics_option("ipping", "Timeout", value);
+			diagnostics_reset_state("ipping");
+			diagnostics_set_option("ipping", "Timeout", value);
 			return 0;
 	}
 	return 0;
@@ -176,7 +177,7 @@ static int set_ip_ping_timeout(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_ip_ping_block_size(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "DataBlockSize", "64");
+	*value = diagnostics_get_option_fallback_def("ipping", "DataBlockSize", "64");
 	return 0;
 }
 
@@ -188,8 +189,8 @@ static int set_ip_ping_block_size(char *refparam, struct dmctx *ctx, void *data,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("ipping");
-			set_diagnostics_option("ipping", "DataBlockSize", value);
+			diagnostics_reset_state("ipping");
+			diagnostics_set_option("ipping", "DataBlockSize", value);
 			return 0;
 	}
 	return 0;
@@ -197,7 +198,7 @@ static int set_ip_ping_block_size(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_ip_ping_DSCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "DSCP", "0");
+	*value = diagnostics_get_option_fallback_def("ipping", "DSCP", "0");
 	return 0;
 }
 
@@ -209,8 +210,8 @@ static int set_ip_ping_DSCP(char *refparam, struct dmctx *ctx, void *data, char 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("ipping");
-			set_diagnostics_option("ipping", "DSCP", value);
+			diagnostics_reset_state("ipping");
+			diagnostics_set_option("ipping", "DSCP", value);
 			return 0;
 	}
 	return 0;
@@ -218,55 +219,55 @@ static int set_ip_ping_DSCP(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int get_IPDiagnosticsIPPing_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("ipping", "IPAddressUsed");
+	*value = diagnostics_get_option("ipping", "IPAddressUsed");
 	return 0;
 }
 
 static int get_ip_ping_success_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "SuccessCount", "0");
+	*value = diagnostics_get_option_fallback_def("ipping", "SuccessCount", "0");
 	return 0;
 }
 
 static int get_ip_ping_failure_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "FailureCount", "0");
+	*value = diagnostics_get_option_fallback_def("ipping", "FailureCount", "0");
 	return 0;
 }
 
 static int get_ip_ping_average_response_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "AverageResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("ipping", "AverageResponseTime", "0");
 	return 0;
 }
 
 static int get_ip_ping_min_response_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "MinimumResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("ipping", "MinimumResponseTime", "0");
 	return 0;
 }
 
 static int get_ip_ping_max_response_time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "MaximumResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("ipping", "MaximumResponseTime", "0");
 	return 0;
 }
 
 static int get_ip_ping_AverageResponseTimeDetailed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "AverageResponseTimeDetailed", "0");
+	*value = diagnostics_get_option_fallback_def("ipping", "AverageResponseTimeDetailed", "0");
 	return 0;
 }
 
 static int get_ip_ping_MinimumResponseTimeDetailed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "MinimumResponseTimeDetailed", "0");
+	*value = diagnostics_get_option_fallback_def("ipping", "MinimumResponseTimeDetailed", "0");
 	return 0;
 }
 
 static int get_ip_ping_MaximumResponseTimeDetailed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "MaximumResponseTimeDetailed", "0");
+	*value = diagnostics_get_option_fallback_def("ipping", "MaximumResponseTimeDetailed", "0");
 	return 0;
 }
 
@@ -276,7 +277,7 @@ static int get_ip_ping_MaximumResponseTimeDetailed(char *refparam, struct dmctx 
 
 static int get_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("traceroute", "DiagnosticState", "None");
 	return 0;
 }
 
@@ -289,7 +290,7 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("traceroute", "DiagnosticState", value);
+				diagnostics_set_option("traceroute", "DiagnosticState", value);
 			return 0;
 	}
 	return 0;
@@ -297,7 +298,7 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 
 static int get_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = get_diagnostics_option("traceroute", "interface");
+	char *linker = diagnostics_get_option("traceroute", "interface");
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
@@ -319,8 +320,8 @@ static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("traceroute");
-			set_diagnostics_option("traceroute", "interface", reference.value);
+			diagnostics_reset_state("traceroute");
+			diagnostics_set_option("traceroute", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -328,20 +329,22 @@ static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 
 static int get_IPDiagnosticsTraceRoute_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "ProtocolVersion", "Any");
+	*value = diagnostics_get_option_fallback_def("traceroute", "ProtocolVersion", "Any");
 	return 0;
 }
 
 static int set_IPDiagnosticsTraceRoute_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *ProtocolVersion[] = {"Any", "IPv4", "IPv6", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("traceroute");
-			set_diagnostics_option("traceroute", "ProtocolVersion", value);
+			diagnostics_reset_state("traceroute");
+			diagnostics_set_option("traceroute", "ProtocolVersion", value);
 			return 0;
 	}
 	return 0;
@@ -349,7 +352,7 @@ static int set_IPDiagnosticsTraceRoute_ProtocolVersion(char *refparam, struct dm
 
 static int get_IPDiagnosticsTraceRoute_Host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("traceroute", "Host");
+	*value = diagnostics_get_option("traceroute", "Host");
 	return 0;
 }
 
@@ -361,8 +364,8 @@ static int set_IPDiagnosticsTraceRoute_Host(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("traceroute");
-			set_diagnostics_option("traceroute", "Host", value);
+			diagnostics_reset_state("traceroute");
+			diagnostics_set_option("traceroute", "Host", value);
 			return 0;
 	}
 	return 0;
@@ -370,7 +373,7 @@ static int set_IPDiagnosticsTraceRoute_Host(char *refparam, struct dmctx *ctx, v
 
 static int get_IPDiagnosticsTraceRoute_NumberOfTries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "NumberOfTries", "3");
+	*value = diagnostics_get_option_fallback_def("traceroute", "NumberOfTries", "3");
 	return 0;
 }
 
@@ -382,8 +385,8 @@ static int set_IPDiagnosticsTraceRoute_NumberOfTries(char *refparam, struct dmct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("traceroute");
-			set_diagnostics_option("traceroute", "NumberOfTries", value);
+			diagnostics_reset_state("traceroute");
+			diagnostics_set_option("traceroute", "NumberOfTries", value);
 			return 0;
 	}
 	return 0;
@@ -391,7 +394,7 @@ static int set_IPDiagnosticsTraceRoute_NumberOfTries(char *refparam, struct dmct
 
 static int get_IPDiagnosticsTraceRoute_Timeout(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "Timeout", "5000");
+	*value = diagnostics_get_option_fallback_def("traceroute", "Timeout", "5000");
 	return 0;
 }
 
@@ -403,8 +406,8 @@ static int set_IPDiagnosticsTraceRoute_Timeout(char *refparam, struct dmctx *ctx
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("traceroute");
-			set_diagnostics_option("traceroute", "Timeout", value);
+			diagnostics_reset_state("traceroute");
+			diagnostics_set_option("traceroute", "Timeout", value);
 			return 0;
 	}
 	return 0;
@@ -412,7 +415,7 @@ static int set_IPDiagnosticsTraceRoute_Timeout(char *refparam, struct dmctx *ctx
 
 static int get_IPDiagnosticsTraceRoute_DataBlockSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "DataBlockSize", "38");
+	*value = diagnostics_get_option_fallback_def("traceroute", "DataBlockSize", "38");
 	return 0;
 }
 
@@ -424,8 +427,8 @@ static int set_IPDiagnosticsTraceRoute_DataBlockSize(char *refparam, struct dmct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("traceroute");
-			set_diagnostics_option("traceroute", "DataBlockSize", value);
+			diagnostics_reset_state("traceroute");
+			diagnostics_set_option("traceroute", "DataBlockSize", value);
 			return 0;
 	}
 	return 0;
@@ -433,7 +436,7 @@ static int set_IPDiagnosticsTraceRoute_DataBlockSize(char *refparam, struct dmct
 
 static int get_IPDiagnosticsTraceRoute_DSCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "DSCP", "0");
+	*value = diagnostics_get_option_fallback_def("traceroute", "DSCP", "0");
 	return 0;
 }
 
@@ -445,8 +448,8 @@ static int set_IPDiagnosticsTraceRoute_DSCP(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("traceroute");
-			set_diagnostics_option("traceroute", "DSCP", value);
+			diagnostics_reset_state("traceroute");
+			diagnostics_set_option("traceroute", "DSCP", value);
 			return 0;
 	}
 	return 0;
@@ -454,7 +457,7 @@ static int set_IPDiagnosticsTraceRoute_DSCP(char *refparam, struct dmctx *ctx, v
 
 static int get_IPDiagnosticsTraceRoute_MaxHopCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "MaxHops", "30");
+	*value = diagnostics_get_option_fallback_def("traceroute", "MaxHops", "30");
 	return 0;
 }
 
@@ -466,8 +469,8 @@ static int set_IPDiagnosticsTraceRoute_MaxHopCount(char *refparam, struct dmctx 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("traceroute");
-			set_diagnostics_option("traceroute", "MaxHops", value);
+			diagnostics_reset_state("traceroute");
+			diagnostics_set_option("traceroute", "MaxHops", value);
 			return 0;
 	}
 	return 0;
@@ -475,19 +478,19 @@ static int set_IPDiagnosticsTraceRoute_MaxHopCount(char *refparam, struct dmctx 
 
 static int get_IPDiagnosticsTraceRoute_ResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "ResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("traceroute", "ResponseTime", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsTraceRoute_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("traceroute", "IPAddressUsed");
+	*value = diagnostics_get_option("traceroute", "IPAddressUsed");
 	return 0;
 }
 
 static int get_IPDiagnosticsTraceRoute_RouteHopsNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "NumberOfHops", "0");
+	*value = diagnostics_get_option_fallback_def("traceroute", "NumberOfHops", "0");
 	return 0;
 }
 
@@ -521,7 +524,7 @@ static int get_IPDiagnosticsTraceRouteRouteHops_RTTimes(char *refparam, struct d
 
 static int get_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("download", "DiagnosticState", "None");
 	return 0;
 }
 
@@ -534,7 +537,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("download", "DiagnosticState", value);
+				diagnostics_set_option("download", "DiagnosticState", value);
 			return 0;
 	}
 	return 0;
@@ -542,7 +545,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 
 static int get_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = get_diagnostics_option("download", "interface");
+	char *linker = diagnostics_get_option("download", "interface");
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
@@ -564,8 +567,8 @@ static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct
 
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("download");
-			set_diagnostics_option("download", "interface", reference.value);
+			diagnostics_reset_state("download");
+			diagnostics_set_option("download", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -573,7 +576,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct
 
 static int get_IPDiagnosticsDownloadDiagnostics_DownloadURL(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("download", "url");
+	*value = diagnostics_get_option("download", "url");
 	return 0;
 }
 
@@ -585,8 +588,8 @@ static int set_IPDiagnosticsDownloadDiagnostics_DownloadURL(char *refparam, stru
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("download");
-			set_diagnostics_option("download", "url", value);
+			diagnostics_reset_state("download");
+			diagnostics_set_option("download", "url", value);
 			return 0;
 	}
 	return 0;
@@ -606,7 +609,7 @@ static int get_IPDiagnosticsDownloadDiagnostics_DownloadDiagnosticMaxConnections
 
 static int get_IPDiagnosticsDownloadDiagnostics_DSCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "DSCP", "0");
+	*value = diagnostics_get_option_fallback_def("download", "DSCP", "0");
 	return 0;
 }
 
@@ -618,8 +621,8 @@ static int set_IPDiagnosticsDownloadDiagnostics_DSCP(char *refparam, struct dmct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("download");
-			set_diagnostics_option("download", "DSCP", value);
+			diagnostics_reset_state("download");
+			diagnostics_set_option("download", "DSCP", value);
 			return 0;
 	}
 	return 0;
@@ -627,7 +630,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DSCP(char *refparam, struct dmct
 
 static int get_IPDiagnosticsDownloadDiagnostics_EthernetPriority(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "ethernetpriority", "0");
+	*value = diagnostics_get_option_fallback_def("download", "ethernetpriority", "0");
 	return 0;
 }
 
@@ -639,8 +642,8 @@ static int set_IPDiagnosticsDownloadDiagnostics_EthernetPriority(char *refparam,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("download");
-			set_diagnostics_option("download", "ethernetpriority", value);
+			diagnostics_reset_state("download");
+			diagnostics_set_option("download", "ethernetpriority", value);
 			return 0;
 	}
 	return 0;
@@ -648,20 +651,22 @@ static int set_IPDiagnosticsDownloadDiagnostics_EthernetPriority(char *refparam,
 
 static int get_IPDiagnosticsDownloadDiagnostics_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "ProtocolVersion", "Any");
+	*value = diagnostics_get_option_fallback_def("download", "ProtocolVersion", "Any");
 	return 0;
 }
 
 static int set_IPDiagnosticsDownloadDiagnostics_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *ProtocolVersion[] = {"Any", "IPv4", "IPv6", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("download");
-			set_diagnostics_option("download", "ProtocolVersion", value);
+			diagnostics_reset_state("download");
+			diagnostics_set_option("download", "ProtocolVersion", value);
 			return 0;
 	}
 	return 0;
@@ -669,7 +674,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_ProtocolVersion(char *refparam, 
 
 static int get_IPDiagnosticsDownloadDiagnostics_NumberOfConnections(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "NumberOfConnections", "1");
+	*value = diagnostics_get_option_fallback_def("download", "NumberOfConnections", "1");
 	return 0;
 }
 
@@ -681,8 +686,8 @@ static int set_IPDiagnosticsDownloadDiagnostics_NumberOfConnections(char *refpar
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("download");
-			set_diagnostics_option("download", "NumberOfConnections", value);
+			diagnostics_reset_state("download");
+			diagnostics_set_option("download", "NumberOfConnections", value);
 			return 0;
 	}
 	return 0;
@@ -690,86 +695,86 @@ static int set_IPDiagnosticsDownloadDiagnostics_NumberOfConnections(char *refpar
 
 static int get_IPDiagnosticsDownloadDiagnostics_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("download", "IPAddressUsed");
+	*value = diagnostics_get_option("download", "IPAddressUsed");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "ROMTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("download", "ROMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "BOMTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("download", "BOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "EOMTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("download", "EOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_TestBytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TestBytesReceived", "0");
+	*value = diagnostics_get_option_fallback_def("download", "TestBytesReceived", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_TotalBytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TotalBytesReceived", "0");
+	*value = diagnostics_get_option_fallback_def("download", "TotalBytesReceived", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_TotalBytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TotalBytesSent", "0");
+	*value = diagnostics_get_option_fallback_def("download", "TotalBytesSent", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_TestBytesReceivedUnderFullLoading(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TestBytesReceived", "0");
+	*value = diagnostics_get_option_fallback_def("download", "TestBytesReceived", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_TotalBytesReceivedUnderFullLoading(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TotalBytesReceived", "0");
+	*value = diagnostics_get_option_fallback_def("download", "TotalBytesReceived", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_TotalBytesSentUnderFullLoading(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TotalBytesSent", "0");
+	*value = diagnostics_get_option_fallback_def("download", "TotalBytesSent", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_PeriodOfFullLoading(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "PeriodOfFullLoading", "0");
+	*value = diagnostics_get_option_fallback_def("download", "PeriodOfFullLoading", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_TCPOpenRequestTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("download", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_TCPOpenResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("download", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsDownloadDiagnostics_PerConnectionResultNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	bool b;
-	char *tmp = get_diagnostics_option("download", "EnablePerConnection");
+	char *tmp = diagnostics_get_option("download", "EnablePerConnection");
 	string_to_bool(tmp, &b);
 	*value = (b) ? "1" : "0";
 	return 0;
@@ -777,7 +782,7 @@ static int get_IPDiagnosticsDownloadDiagnostics_PerConnectionResultNumberOfEntri
 
 static int get_IPDiagnosticsDownloadDiagnostics_EnablePerConnectionResults(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("download", "EnablePerConnection", "0");
+	*value = diagnostics_get_option_fallback_def("download", "EnablePerConnection", "0");
 	return 0;
 }
 
@@ -789,8 +794,8 @@ static int set_IPDiagnosticsDownloadDiagnostics_EnablePerConnectionResults(char 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("download");
-			set_diagnostics_option("download", "EnablePerConnection", value);
+			diagnostics_reset_state("download");
+			diagnostics_set_option("download", "EnablePerConnection", value);
 			return 0;
 	}
 	return 0;
@@ -850,7 +855,7 @@ static int get_IPDiagnosticsDownloadDiagnosticsPerConnectionResult_TCPOpenRespon
 
 static int get_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("upload", "DiagnosticState", "None");
 	return 0;
 }
 
@@ -863,7 +868,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("upload", "DiagnosticState", value);
+				diagnostics_set_option("upload", "DiagnosticState", value);
 			return 0;
 	}
 	return 0;
@@ -871,7 +876,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 
 static int get_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = get_diagnostics_option("upload", "interface");
+	char *linker = diagnostics_get_option("upload", "interface");
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
@@ -893,8 +898,8 @@ static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct d
 
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("upload");
-			set_diagnostics_option("upload", "interface", reference.value);
+			diagnostics_reset_state("upload");
+			diagnostics_set_option("upload", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -902,7 +907,7 @@ static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct d
 
 static int get_IPDiagnosticsUploadDiagnostics_UploadURL(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("upload", "url");
+	*value = diagnostics_get_option("upload", "url");
 	return 0;
 }
 
@@ -914,8 +919,8 @@ static int set_IPDiagnosticsUploadDiagnostics_UploadURL(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("upload");
-			set_diagnostics_option("upload", "url", value);
+			diagnostics_reset_state("upload");
+			diagnostics_set_option("upload", "url", value);
 			return 0;
 	}
 	return 0;
@@ -929,7 +934,7 @@ static int get_IPDiagnosticsUploadDiagnostics_UploadTransports(char *refparam, s
 
 static int get_IPDiagnosticsUploadDiagnostics_DSCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "DSCP", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "DSCP", "0");
 	return 0;
 }
 
@@ -941,8 +946,8 @@ static int set_IPDiagnosticsUploadDiagnostics_DSCP(char *refparam, struct dmctx 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("upload");
-			set_diagnostics_option("upload", "DSCP", value);
+			diagnostics_reset_state("upload");
+			diagnostics_set_option("upload", "DSCP", value);
 			return 0;
 	}
 	return 0;
@@ -950,7 +955,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DSCP(char *refparam, struct dmctx 
 
 static int get_IPDiagnosticsUploadDiagnostics_EthernetPriority(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "ethernetpriority", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "ethernetpriority", "0");
 	return 0;
 }
 
@@ -962,8 +967,8 @@ static int set_IPDiagnosticsUploadDiagnostics_EthernetPriority(char *refparam, s
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("upload");
-			set_diagnostics_option("upload", "ethernetpriority", value);
+			diagnostics_reset_state("upload");
+			diagnostics_set_option("upload", "ethernetpriority", value);
 			return 0;
 	}
 	return 0;
@@ -971,7 +976,7 @@ static int set_IPDiagnosticsUploadDiagnostics_EthernetPriority(char *refparam, s
 
 static int get_IPDiagnosticsUploadDiagnostics_TestFileLength(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TestFileLength", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "TestFileLength", "0");
 	return 0;
 }
 
@@ -983,8 +988,8 @@ static int set_IPDiagnosticsUploadDiagnostics_TestFileLength(char *refparam, str
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("upload");
-			set_diagnostics_option("upload", "TestFileLength", value);
+			diagnostics_reset_state("upload");
+			diagnostics_set_option("upload", "TestFileLength", value);
 			return 0;
 	}
 	return 0;
@@ -992,20 +997,22 @@ static int set_IPDiagnosticsUploadDiagnostics_TestFileLength(char *refparam, str
 
 static int get_IPDiagnosticsUploadDiagnostics_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "ProtocolVersion", "Any");
+	*value = diagnostics_get_option_fallback_def("upload", "ProtocolVersion", "Any");
 	return 0;
 }
 
 static int set_IPDiagnosticsUploadDiagnostics_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *ProtocolVersion[] = {"Any", "IPv4", "IPv6", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("upload");
-			set_diagnostics_option("upload", "ProtocolVersion", value);
+			diagnostics_reset_state("upload");
+			diagnostics_set_option("upload", "ProtocolVersion", value);
 			return 0;
 	}
 	return 0;
@@ -1013,7 +1020,7 @@ static int set_IPDiagnosticsUploadDiagnostics_ProtocolVersion(char *refparam, st
 
 static int get_IPDiagnosticsUploadDiagnostics_NumberOfConnections(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "NumberOfConnections", "1");
+	*value = diagnostics_get_option_fallback_def("upload", "NumberOfConnections", "1");
 	return 0;
 }
 
@@ -1025,8 +1032,8 @@ static int set_IPDiagnosticsUploadDiagnostics_NumberOfConnections(char *refparam
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("upload");
-			set_diagnostics_option("upload", "NumberOfConnections", value);
+			diagnostics_reset_state("upload");
+			diagnostics_set_option("upload", "NumberOfConnections", value);
 			return 0;
 	}
 	return 0;
@@ -1034,86 +1041,86 @@ static int set_IPDiagnosticsUploadDiagnostics_NumberOfConnections(char *refparam
 
 static int get_IPDiagnosticsUploadDiagnostics_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("upload", "IPAddressUsed");
+	*value = diagnostics_get_option("upload", "IPAddressUsed");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "ROMTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "ROMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "BOMTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "BOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "EOMTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "EOMTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_TestBytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TestBytesSent", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "TestBytesSent", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_TotalBytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TotalBytesReceived", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "TotalBytesReceived", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_TotalBytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TotalBytesSent", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "TotalBytesSent", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_TestBytesSentUnderFullLoading(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TestBytesSent", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "TestBytesSent", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_TotalBytesReceivedUnderFullLoading(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TotalBytesReceived", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "TotalBytesReceived", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_TotalBytesSentUnderFullLoading(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TotalBytesSent", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "TotalBytesSent", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_PeriodOfFullLoading(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload","PeriodOfFullLoading", "0");
+	*value = diagnostics_get_option_fallback_def("upload","PeriodOfFullLoading", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_TCPOpenRequestTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_TCPOpenResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnostics_PerConnectionResultNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	bool b;
-	char *tmp = get_diagnostics_option("upload", "EnablePerConnection");
+	char *tmp = diagnostics_get_option("upload", "EnablePerConnection");
 	string_to_bool(tmp, &b);
 	*value = (b) ? "1" : "0";
 	return 0;
@@ -1121,7 +1128,7 @@ static int get_IPDiagnosticsUploadDiagnostics_PerConnectionResultNumberOfEntries
 
 static int get_IPDiagnosticsUploadDiagnostics_EnablePerConnectionResults(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "EnablePerConnection", "0");
+	*value = diagnostics_get_option_fallback_def("upload", "EnablePerConnection", "0");
 	return 0;
 }
 
@@ -1133,8 +1140,8 @@ static int set_IPDiagnosticsUploadDiagnostics_EnablePerConnectionResults(char *r
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("upload");
-			set_diagnostics_option("upload", "EnablePerConnection", value);
+			diagnostics_reset_state("upload");
+			diagnostics_set_option("upload", "EnablePerConnection", value);
 			return 0;
 	}
 	return 0;
@@ -1142,19 +1149,19 @@ static int set_IPDiagnosticsUploadDiagnostics_EnablePerConnectionResults(char *r
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_ROMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "ROMtime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "ROMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_BOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "BOMtime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "BOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_EOMTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "EOMtime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "EOMtime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -1179,13 +1186,13 @@ static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TotalBytesSent(
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TCPOpenRequestTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "TCPOpenRequestTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
 static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TCPOpenResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("upload", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
+	*value = diagnostics_get_option_fallback_def("upload", "TCPOpenResponseTime", "0001-01-01T00:00:00.000000Z");
 	return 0;
 }
 
@@ -1195,7 +1202,7 @@ static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TCPOpenResponse
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "DiagnosticState", "None");
 	return 0;
 }
 
@@ -1208,7 +1215,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("udpechodiag", "DiagnosticState", value);
+				diagnostics_set_option("udpechodiag", "DiagnosticState", value);
 			return 0;
 	}
 	return 0;
@@ -1216,7 +1223,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = get_diagnostics_option("udpechodiag", "interface");
+	char *linker = diagnostics_get_option("udpechodiag", "interface");
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
@@ -1238,8 +1245,8 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_option("udpechodiag", "interface", reference.value);
+			diagnostics_reset_state("udpechodiag");
+			diagnostics_set_option("udpechodiag", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -1247,7 +1254,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("udpechodiag", "Host");
+	*value = diagnostics_get_option("udpechodiag", "Host");
 	return 0;
 }
 
@@ -1259,8 +1266,8 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_option("udpechodiag", "Host", value);
+			diagnostics_reset_state("udpechodiag");
+			diagnostics_set_option("udpechodiag", "Host", value);
 			return 0;
 	}
 	return 0;
@@ -1268,7 +1275,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "port", "7");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "port", "7");
 	return 0;
 }
 
@@ -1280,8 +1287,8 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Port(char *refparam, struct dmctx
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_option("udpechodiag", "port", value);
+			diagnostics_reset_state("udpechodiag");
+			diagnostics_set_option("udpechodiag", "port", value);
 			return 0;
 	}
 	return 0;
@@ -1289,7 +1296,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Port(char *refparam, struct dmctx
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_NumberOfRepetitions(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "NumberOfRepetitions", "1");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "NumberOfRepetitions", "1");
 	return 0;
 }
 
@@ -1301,8 +1308,8 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_NumberOfRepetitions(char *refpara
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_option("udpechodiag", "NumberOfRepetitions", value);
+			diagnostics_reset_state("udpechodiag");
+			diagnostics_set_option("udpechodiag", "NumberOfRepetitions", value);
 			return 0;
 	}
 	return 0;
@@ -1310,7 +1317,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_NumberOfRepetitions(char *refpara
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Timeout(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "Timeout", "5000");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "Timeout", "5000");
 	return 0;
 }
 
@@ -1322,8 +1329,8 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Timeout(char *refparam, struct dm
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_option("udpechodiag", "Timeout", value);
+			diagnostics_reset_state("udpechodiag");
+			diagnostics_set_option("udpechodiag", "Timeout", value);
 			return 0;
 	}
 	return 0;
@@ -1331,7 +1338,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Timeout(char *refparam, struct dm
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_DataBlockSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "DataBlockSize", "24");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "DataBlockSize", "24");
 	return 0;
 }
 
@@ -1343,8 +1350,8 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DataBlockSize(char *refparam, str
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_option("udpechodiag", "DataBlockSize", value);
+			diagnostics_reset_state("udpechodiag");
+			diagnostics_set_option("udpechodiag", "DataBlockSize", value);
 			return 0;
 	}
 	return 0;
@@ -1352,7 +1359,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DataBlockSize(char *refparam, str
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_DSCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "DSCP", "0");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "DSCP", "0");
 	return 0;
 }
 
@@ -1364,8 +1371,8 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DSCP(char *refparam, struct dmctx
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_option("udpechodiag", "DSCP", value);
+			diagnostics_reset_state("udpechodiag");
+			diagnostics_set_option("udpechodiag", "DSCP", value);
 			return 0;
 	}
 	return 0;
@@ -1373,7 +1380,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DSCP(char *refparam, struct dmctx
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_InterTransmissionTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "InterTransmissionTime", "1000");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "InterTransmissionTime", "1000");
 	return 0;
 }
 
@@ -1385,8 +1392,8 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_InterTransmissionTime(char *refpa
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_option("udpechodiag", "InterTransmissionTime", value);
+			diagnostics_reset_state("udpechodiag");
+			diagnostics_set_option("udpechodiag", "InterTransmissionTime", value);
 			return 0;
 	}
 	return 0;
@@ -1394,20 +1401,22 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_InterTransmissionTime(char *refpa
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "ProtocolVersion", "Any");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "ProtocolVersion", "Any");
 	return 0;
 }
 
 static int set_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *ProtocolVersion[] = {"Any", "IPv4", "IPv6", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("udpechodiag");
-			set_diagnostics_option("udpechodiag", "ProtocolVersion", value);
+			diagnostics_reset_state("udpechodiag");
+			diagnostics_set_option("udpechodiag", "ProtocolVersion", value);
 			return 0;
 	}
 	return 0;
@@ -1415,37 +1424,37 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion(char *refparam, s
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("udpechodiag", "IPAddressUsed");
+	*value = diagnostics_get_option("udpechodiag", "IPAddressUsed");
 	return 0;
 }
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_SuccessCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "SuccessCount", "0");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "SuccessCount", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_FailureCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "FailureCount", "0");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "FailureCount", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_AverageResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "AverageResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "AverageResponseTime", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_MinimumResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "MinimumResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "MinimumResponseTime", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_MaximumResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "MaximumResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("udpechodiag", "MaximumResponseTime", "0");
 	return 0;
 }
 
@@ -1455,7 +1464,7 @@ static int get_IPDiagnosticsUDPEchoDiagnostics_MaximumResponseTime(char *refpara
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("serverselection", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("serverselection", "DiagnosticState", "None");
 	return 0;
 }
 
@@ -1468,7 +1477,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("serverselection", "DiagnosticState", value);
+				diagnostics_set_option("serverselection", "DiagnosticState", value);
 			return 0;
 	}
 	return 0;
@@ -1476,7 +1485,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = get_diagnostics_option("serverselection", "interface");
+	char *linker = diagnostics_get_option("serverselection", "interface");
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
@@ -1498,8 +1507,8 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("serverselection");
-			set_diagnostics_option("serverselection", "interface", reference.value);
+			diagnostics_reset_state("serverselection");
+			diagnostics_set_option("serverselection", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -1507,20 +1516,22 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("serverselection", "ProtocolVersion", "Any");
+	*value = diagnostics_get_option_fallback_def("serverselection", "ProtocolVersion", "Any");
 	return 0;
 }
 
 static int set_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *ProtocolVersion[] = {"Any", "IPv4", "IPv6", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, ProtocolVersion, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("serverselection");
-			set_diagnostics_option("serverselection", "ProtocolVersion", value);
+			diagnostics_reset_state("serverselection");
+			diagnostics_set_option("serverselection", "ProtocolVersion", value);
 			return 0;
 	}
 	return 0;
@@ -1528,20 +1539,22 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion(char *ref
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("serverselection", "Protocol", "ICMP");
+	*value = diagnostics_get_option_fallback_def("serverselection", "Protocol", "ICMP");
 	return 0;
 }
 
 static int set_IPDiagnosticsServerSelectionDiagnostics_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *ServerSelectionProtocol[] = {"ICMP", "UDP Echo", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, ServerSelectionProtocol, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("serverselection");
-			set_diagnostics_option("serverselection", "Protocol", value);
+			diagnostics_reset_state("serverselection");
+			diagnostics_set_option("serverselection", "Protocol", value);
 			return 0;
 	}
 	return 0;
@@ -1549,7 +1562,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Protocol(char *refparam, 
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_HostList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("serverselection", "HostList");
+	*value = diagnostics_get_option("serverselection", "HostList");
 	return 0;
 }
 
@@ -1561,8 +1574,8 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_HostList(char *refparam, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("serverselection");
-			set_diagnostics_option("serverselection", "HostList", value);
+			diagnostics_reset_state("serverselection");
+			diagnostics_set_option("serverselection", "HostList", value);
 			return 0;
 	}
 	return 0;
@@ -1570,7 +1583,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_HostList(char *refparam, 
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_NumberOfRepetitions(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("serverselection", "NumberOfRepetitions", "3");
+	*value = diagnostics_get_option_fallback_def("serverselection", "NumberOfRepetitions", "3");
 	return 0;
 }
 
@@ -1582,8 +1595,8 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_NumberOfRepetitions(char 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("serverselection");
-			set_diagnostics_option("serverselection", "NumberOfRepetitions", value);
+			diagnostics_reset_state("serverselection");
+			diagnostics_set_option("serverselection", "NumberOfRepetitions", value);
 			return 0;
 	}
 	return 0;
@@ -1591,7 +1604,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_NumberOfRepetitions(char 
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_Timeout(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("serverselection", "Timeout", "1000");
+	*value = diagnostics_get_option_fallback_def("serverselection", "Timeout", "1000");
 	return 0;
 }
 
@@ -1603,8 +1616,8 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Timeout(char *refparam, s
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("serverselection");
-			set_diagnostics_option("serverselection", "Timeout", value);
+			diagnostics_reset_state("serverselection");
+			diagnostics_set_option("serverselection", "Timeout", value);
 			return 0;
 	}
 	return 0;
@@ -1612,31 +1625,31 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Timeout(char *refparam, s
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_FastestHost(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("serverselection", "FastestHost");
+	*value = diagnostics_get_option("serverselection", "FastestHost");
 	return 0;
 }
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_MinimumResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("serverselection", "MinimumResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("serverselection", "MinimumResponseTime", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_AverageResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("serverselection", "AverageResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("serverselection", "AverageResponseTime", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_MaximumResponseTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("serverselection", "MaximumResponseTime", "0");
+	*value = diagnostics_get_option_fallback_def("serverselection", "MaximumResponseTime", "0");
 	return 0;
 }
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_IPAddressUsed(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("serverselection", "IPAddressUsed");
+	*value = diagnostics_get_option("serverselection", "IPAddressUsed");
 	return 0;
 }
 
@@ -1728,7 +1741,7 @@ static int operate_IPDiagnostics_IPPing(char *refparam, struct dmctx *ctx, void 
 	}
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
-	char *ipping_interface = get_diagnostics_interface_option(ctx, ip_interface);
+	char *ipping_interface = diagnostics_get_interface_name(ctx, ip_interface);
 	char *ipping_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *ipping_nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
 	char *ipping_timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
@@ -1831,7 +1844,7 @@ static int operate_IPDiagnostics_TraceRoute(char *refparam, struct dmctx *ctx, v
 	}
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
-	char *interface = get_diagnostics_interface_option(ctx, ip_interface);
+	char *interface = diagnostics_get_interface_name(ctx, ip_interface);
 	char *ip_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *nboftries = dmjson_get_value((json_object *)value, 1, "NumberOfTries");
 	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
@@ -1967,7 +1980,7 @@ static int operate_IPDiagnostics_DownloadDiagnostics(char *refparam, struct dmct
 	}
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
-	char *download_interface = get_diagnostics_interface_option(ctx, ip_interface);
+	char *download_interface = diagnostics_get_interface_name(ctx, ip_interface);
 	char *download_dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
 	char *download_ethernet_priority = dmjson_get_value((json_object *)value, 1, "EthernetPriority");
 	char *download_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
@@ -2108,7 +2121,7 @@ static int operate_IPDiagnostics_UploadDiagnostics(char *refparam, struct dmctx 
 	}
 
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
-	char *upload_interface = get_diagnostics_interface_option(ctx, ip_interface);
+	char *upload_interface = diagnostics_get_interface_name(ctx, ip_interface);
 	char *upload_dscp = dmjson_get_value((json_object *)value, 1, "DSCP");
 	char *upload_ethernet_priority = dmjson_get_value((json_object *)value, 1, "EthernetPriority");
 	char *upload_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
@@ -2225,7 +2238,7 @@ static int operate_IPDiagnostics_UDPEchoDiagnostics(char *refparam, struct dmctx
 
 	char *udpecho_port = dmjson_get_value((json_object *)value, 1, "Port");
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
-	char *udpecho_interface = get_diagnostics_interface_option(ctx, ip_interface);
+	char *udpecho_interface = diagnostics_get_interface_name(ctx, ip_interface);
 	char *udpecho_proto = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *udpecho_nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
 	char *udpecho_timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
@@ -2317,7 +2330,7 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 	char *protocol_used = dmjson_get_value((json_object *)value, 1, "Protocol");
 	char *protocol_version = dmjson_get_value((json_object *)value, 1, "ProtocolVersion");
 	char *ip_interface = dmjson_get_value((json_object *)value, 1, "Interface");
-	char *interface = get_diagnostics_interface_option(ctx, ip_interface);
+	char *interface = diagnostics_get_interface_name(ctx, ip_interface);
 	char *nbofrepetition = dmjson_get_value((json_object *)value, 1, "NumberOfRepetitions");
 	char *timeout = dmjson_get_value((json_object *)value, 1, "Timeout");
 	char *proto = (ctx->dm_type == BBFDM_USP) ? "usp" : "both_proto";

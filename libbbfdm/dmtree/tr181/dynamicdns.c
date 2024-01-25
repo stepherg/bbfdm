@@ -958,9 +958,11 @@ static int get_DynamicDNSServer_Protocol(char *refparam, struct dmctx *ctx, void
 
 static int set_DynamicDNSServer_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Supported_Protocols[] = {"HTTP", "HTTPS", NULL};
+
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, SupportedProtocols, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Supported_Protocols, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

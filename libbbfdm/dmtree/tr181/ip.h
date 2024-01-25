@@ -13,7 +13,7 @@
 #ifndef __IP_H
 #define __IP_H
 
-#include "dmcommon.h"
+#include "libbbfdm-api/dmcommon.h"
 
 extern DMOBJ tIPObj[];
 extern DMLEAF tIPParams[];

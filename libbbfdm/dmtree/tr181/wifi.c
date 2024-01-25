@@ -23,6 +23,8 @@
 #define MAX_POWER_INDEX 64
 #define UBUS_OBJ_LEN 32
 
+static char *MFP_Config[] = {"Disabled", "Optional", "Required", NULL};
+
 struct radio_obj
 {
 	char obj_name[15];
@@ -1054,6 +1056,7 @@ static int get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, str
 
 static int set_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Supported_Operating_Channel_Bandwidth[] = {"20MHz", "40MHz", "80MHz", "160MHz", "320MHz", "80+80MHz", "Auto", NULL};
 	char *supported_bandwidths = NULL;
 	char *curr_htmode = NULL;
 	char htmode[32];
@@ -1061,7 +1064,7 @@ static int set_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, SupportedOperatingChannelBandwidth, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Supported_Operating_Channel_Bandwidth, NULL))
 				return FAULT_9007;
 
 			// Get the list of all supported operating channel bandwidths
@@ -1104,9 +1107,11 @@ static int get_WiFiRadio_PreambleType(char *refparam, struct dmctx *ctx, void *d
 
 static int set_WiFiRadio_PreambleType(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Preamble_Type[] = {"short", "long", "auto", NULL};
+
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, PreambleType, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Preamble_Type, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1271,9 +1276,11 @@ static int get_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, voi
 
 static int set_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Regulatory_Domain[] = {"^[A-Z][A-Z]$", "^[A-Z][A-Z][ OI]$", NULL};
+
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, 2, 3, NULL, RegulatoryDomain))
+			if (bbfdm_validate_string(ctx, value, 2, 3, NULL, Regulatory_Domain))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -2087,7 +2094,7 @@ static int set_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *c
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, MFPConfig, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, MFP_Config, NULL))
 				return FAULT_9007;
 
 			/*Here we also need to validate the encyption algo whether the MFP can be set*/
@@ -2635,7 +2642,7 @@ static int set_WiFiEndPointProfileSecurity_MFPConfig(char *refparam, struct dmct
 {
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, MFPConfig, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, MFP_Config, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -3328,11 +3335,12 @@ static int get_radio_frequency(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int set_radio_frequency(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Supported_Frequency_Bands[] = {"2.4GHz", "5GHz", "6GHz", NULL};
 	char *supported_frequency_bands = NULL;
 
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, SupportedFrequencyBands, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Supported_Frequency_Bands, NULL))
 				return FAULT_9007;
 
 			// Get the list of all supported frequency bands
@@ -3491,6 +3499,7 @@ static int get_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 
 static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Supported_Standards[] = {"a", "b", "g", "n", "ac", "ax", "be", NULL};
 	char *supported_standards = NULL;
 	char *bandwidth = NULL;
 	char *pch, *spch;
@@ -3498,7 +3507,7 @@ static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 
 	switch (action) {
 			case VALUECHECK:
-				if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, -1, SupportedStandards, NULL))
+				if (bbfdm_validate_string_list(ctx, value, -1, -1, -1, -1, -1, Supported_Standards, NULL))
 					return FAULT_9007;
 
 				// Get the list of all supported standards

@@ -10,7 +10,7 @@
  *
  */
 
-#include "ip.h"
+#include "dmlayer.h"
 #include "routing.h"
 
 struct route_args {

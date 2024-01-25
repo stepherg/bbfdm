@@ -620,9 +620,11 @@ static int get_IEEE1905ALInterface_PowerState(char *refparam, struct dmctx *ctx,
 
 static int set_IEEE1905ALInterface_PowerState(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Power_State[] = {"On", "Power_Save", "Off", "Unsupported", NULL};
+
 	switch (action) {
 	case VALUECHECK:
-		if (bbfdm_validate_string(ctx, value, -1, -1, PowerState, NULL))
+		if (bbfdm_validate_string(ctx, value, -1, -1, Power_State, NULL))
 		      return FAULT_9007;
 		break;
 	case VALUESET:

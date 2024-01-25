@@ -161,11 +161,12 @@ static int get_atm_destination_address(char *refparam, struct dmctx *ctx, void *
 
 static int set_atm_destination_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Destination_Address[] = {"^\\d+/\\d+$", NULL};
 	char *vpi = NULL, *vci = NULL, *spch;
 
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, DestinationAddress))
+			if (bbfdm_validate_string(ctx, value, -1, 256, NULL, Destination_Address))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -201,9 +202,11 @@ static int get_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, 
 
 static int set_atm_encapsulation(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *encapsulation[] = {"LLC", "VCMUX", NULL};
+
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, Encapsulation, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, encapsulation, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
@@ -234,9 +237,11 @@ static int get_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char
 
 static int set_atm_link_type(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Link_Type[] = {"EoA", "IPoA", "PPPoA", "CIP", "Unconfigured", NULL};
+
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, LinkType, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Link_Type, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

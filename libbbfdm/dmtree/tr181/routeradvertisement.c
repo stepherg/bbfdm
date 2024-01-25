@@ -488,9 +488,11 @@ static int get_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag(char *
 
 static int set_RouterAdvertisementInterfaceSetting_AdvPreferredRouterFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Adv_Preferred_RouterFlag[] = {"High", "Medium", "Low", NULL};
+
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, AdvPreferredRouterFlag, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Adv_Preferred_RouterFlag, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

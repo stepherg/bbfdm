@@ -10,9 +10,11 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include "dmcommon.h"
-#include "deviceinfo.h"
 #include "sys/statvfs.h"
+#include <openssl/sha.h>
+#include <openssl/evp.h>
+
+#include "deviceinfo.h"
 
 extern struct list_head global_memhead;
 
@@ -20,7 +22,9 @@ LIST_HEAD(process_list);
 static int process_count = 0;
 
 #define PROCPS_BUFSIZE 1024
+#define CONFIG_BACKUP "/tmp/bbf_config_backup"
 #define DEF_VENDOR_LOG_FILE "/tmp/.vend_log"
+#define MAX_TIME_WINDOW 5
 
 struct process_entry {
 	struct list_head list;
@@ -374,6 +378,400 @@ static int get_number_of_cpus(void)
 	dm_read_sysfs_file("/sys/devices/system/cpu/present", val, sizeof(val));
 	char *max = DM_STRCHR(val, '-');
 	return max ? DM_STRTOL(max+1)+1 : 0;
+}
+
+static bool get_response_code_status(const char *url, int response_code)
+{
+	if ((strncmp(url, HTTP_URI, strlen(HTTP_URI)) == 0 && response_code != 200) ||
+		(strncmp(url, FTP_URI, strlen(FTP_URI)) == 0 && response_code != 226) ||
+		(strncmp(url, FILE_URI, strlen(FILE_URI)) == 0 && response_code != 0) ||
+		(strncmp(url, HTTP_URI, strlen(HTTP_URI)) && strncmp(url, FTP_URI, strlen(FTP_URI)) && strncmp(url, FILE_URI, strlen(FILE_URI)))) {
+		return false;
+	}
+
+	return true;
+}
+
+static void send_transfer_complete_event(const char *command, const char *obj_path, const char *transfer_url,
+	char *fault_string, time_t start_t, time_t complete_t,const char *commandKey, const char *transfer_type)
+{
+	char start_time[32] = {0};
+	char complete_time[32] = {0};
+	unsigned fault_code = 0;
+
+	strftime(start_time, sizeof(start_time), "%Y-%m-%dT%H:%M:%SZ", gmtime(&start_t));
+	strftime(complete_time, sizeof(complete_time), "%Y-%m-%dT%H:%M:%SZ", gmtime(&complete_t));
+
+	if (DM_STRLEN(fault_string) != 0)
+		fault_code = USP_FAULT_GENERAL_FAILURE;
+
+	struct json_object *obj = json_object_new_object();
+
+	json_object_object_add(obj, "Command", json_object_new_string(command));
+	if(commandKey)
+		json_object_object_add(obj, "CommandKey", json_object_new_string(commandKey));
+	else
+		json_object_object_add(obj, "CommandKey", json_object_new_string(""));
+	json_object_object_add(obj, "Requestor", json_object_new_string(""));
+	json_object_object_add(obj, "TransferType", json_object_new_string(transfer_type));
+	json_object_object_add(obj, "Affected", json_object_new_string(obj_path));
+	json_object_object_add(obj, "TransferURL", json_object_new_string(transfer_url));
+	json_object_object_add(obj, "StartTime", json_object_new_string(start_time));
+	json_object_object_add(obj, "CompleteTime", json_object_new_string(complete_time));
+	json_object_object_add(obj, "FaultCode", json_object_new_uint64(fault_code));
+	json_object_object_add(obj, "FaultString", json_object_new_string(fault_string));
+
+	dmubus_call_set("bbfdm", "notify_event", UBUS_ARGS{{"name", "Device.LocalAgent.TransferComplete!", String}, {"input", json_object_to_json_string(obj), Table}}, 2);
+
+	json_object_put(obj);
+}
+
+const bool validate_file_system_size(const char *file_size)
+{
+	if (file_size && *file_size) {
+		unsigned long f_size = strtoul(file_size, NULL, 10);
+		unsigned long fs_available_size = file_system_size("/tmp", FS_SIZE_AVAILABLE);
+
+		if (fs_available_size < f_size)
+			return false;
+	}
+
+	return true;
+}
+
+
+const bool validate_hash_value(const char *algo, const char *file_path, const char *checksum)
+{
+	unsigned char buffer[1024 * 16] = {0};
+	char hash[BUFSIZ] = {0};
+	bool res = false;
+	unsigned int bytes = 0;
+	FILE *file;
+
+	EVP_MD_CTX *mdctx;
+	const EVP_MD *md;
+	unsigned char md_value[EVP_MAX_MD_SIZE];
+
+	file = fopen(file_path, "rb");
+	if (!file)
+		return false;
+
+	md = EVP_get_digestbyname(algo);
+	mdctx = EVP_MD_CTX_create();
+	EVP_DigestInit_ex(mdctx, md, NULL);
+
+	if (md == NULL)
+		goto end;
+
+	while ((bytes = fread (buffer, 1, sizeof(buffer), file))) {
+		EVP_DigestUpdate(mdctx, buffer, bytes);
+	}
+
+	bytes = 0;
+	EVP_DigestFinal_ex(mdctx, md_value, &bytes);
+
+	for (int i = 0; i < bytes; i++)
+		snprintf(&hash[i * 2], sizeof(hash) - (i * 2), "%02x", md_value[i]);
+
+	if (DM_STRCMP(hash, checksum) == 0)
+		res = true;
+
+end:
+	EVP_MD_CTX_destroy(mdctx);
+	EVP_cleanup();
+
+	fclose(file);
+	return res;
+}
+
+const bool validate_checksum_value(const char *file_path, const char *checksum_algorithm, const char *checksum)
+{
+	if (checksum && *checksum) {
+
+		if (strcmp(checksum_algorithm, "SHA-1") == 0)
+			return validate_hash_value("SHA1", file_path, checksum);
+		else if (strcmp(checksum_algorithm, "SHA-224") == 0)
+			return validate_hash_value("SHA224", file_path, checksum);
+		else if (strcmp(checksum_algorithm, "SHA-256") == 0)
+			return validate_hash_value("SHA256", file_path, checksum);
+		else if (strcmp(checksum_algorithm, "SHA-384") == 0)
+			return validate_hash_value("SHA384", file_path, checksum);
+		else if (strcmp(checksum_algorithm, "SHA-512") == 0)
+			return validate_hash_value("SHA512", file_path, checksum);
+		else
+			return false;
+	}
+
+	return true;
+}
+
+int bbf_config_backup(const char *url, const char *username, const char *password,
+		char *config_name, const char *command, const char *obj_path)
+{
+	int res = 0;
+	char fault_msg[128] = {0};
+	time_t complete_time = 0;
+	time_t start_time = time(NULL);
+
+	// Export config file to backup file
+	if (dmuci_export_package(config_name, CONFIG_BACKUP)) {
+		snprintf(fault_msg, sizeof(fault_msg), "Failed to export the configurations");
+		res = -1;
+		goto end;
+	}
+
+	// Upload the config file
+	long res_code = upload_file(CONFIG_BACKUP, url, username, password);
+	complete_time = time(NULL);
+
+	// Check if the upload operation was successful
+	if (!get_response_code_status(url, res_code)) {
+		res = -1;
+		snprintf(fault_msg, sizeof(fault_msg), "Upload operation is failed, fault code (%ld)", res_code);
+	}
+
+end:
+	// Send the transfer complete event
+	send_transfer_complete_event(command, obj_path, url, fault_msg, start_time, complete_time, NULL, "Upload");
+
+	// Remove temporary file
+	if (file_exists(CONFIG_BACKUP) && remove(CONFIG_BACKUP))
+		res = -1;
+
+	return res;
+}
+
+int bbf_upload_log(const char *url, const char *username, const char *password,
+                char *config_name, const char *command, const char *obj_path)
+{
+	int res = 0;
+	char fault_msg[128] = {0};
+
+	// Upload the config file
+	time_t start_time = time(NULL);
+	long res_code = upload_file(config_name, url, username, password);
+	time_t complete_time = time(NULL);
+
+	// Check if the upload operation was successful
+	if (!get_response_code_status(url, res_code)) {
+		snprintf(fault_msg, sizeof(fault_msg), "Upload operation is failed, fault code (%ld)", res_code);
+		res = -1;
+	}
+
+	// Send the transfer complete event
+	send_transfer_complete_event(command, obj_path, url, fault_msg, start_time, complete_time, NULL, "Upload");
+	return res;
+}
+int bbf_config_restore(const char *url, const char *username, const char *password,
+		const char *file_size, const char *checksum_algorithm, const char *checksum,
+		const char *command, const char *obj_path)
+{
+	char config_restore[256] = "/tmp/bbf_config_restore";
+	int res = 0;
+	char fault_msg[128] = {0};
+	time_t complete_time = 0;
+	time_t start_time = time(NULL);
+
+	// Check the file system size if there is sufficient space for downloading the config file
+	if (!validate_file_system_size(file_size)) {
+		snprintf(fault_msg, sizeof(fault_msg), "Available memory space is less than required for the operation");
+		res = -1;
+		goto end;
+	}
+
+	// Download the firmware image
+	long res_code = download_file(config_restore, url, username, password);
+	complete_time = time(NULL);
+
+	// Check if the download operation was successful
+	if (!get_response_code_status(url, res_code)) {
+		snprintf(fault_msg, sizeof(fault_msg), "Upload operation is failed, fault code (%ld)", res_code);
+		res = -1;
+		goto end;
+	}
+
+	// Validate the CheckSum value according to its algorithm
+	if (!validate_checksum_value(config_restore, checksum_algorithm, checksum)) {
+		snprintf(fault_msg, sizeof(fault_msg), "Checksum of the downloaded file is mismatched");
+		res = -1;
+		goto end;
+	}
+
+	// Apply config file
+	if (dmuci_import(NULL, config_restore)) {
+		snprintf(fault_msg, sizeof(fault_msg), "Failed to import the configurations");
+		res = -1;
+	}
+
+end:
+	// Send the transfer complete event
+	send_transfer_complete_event(command, obj_path, url, fault_msg, start_time, complete_time, NULL, "Download");
+
+	// Remove temporary file
+	if (file_exists(config_restore) && strncmp(url, FILE_URI, strlen(FILE_URI)) && remove(config_restore))
+		res = -1;
+
+	return res;
+}
+
+struct sysupgrade_ev_data {
+	const char *bank_id;
+	bool status;
+};
+
+static void dmubus_receive_sysupgrade(struct ubus_context *ctx, struct ubus_event_handler *ev,
+				const char *type, struct blob_attr *msg)
+{
+	struct dmubus_event_data *data;
+	struct blob_attr *msg_attr;
+
+	if (!msg || !ev)
+		return;
+
+	data = container_of(ev, struct dmubus_event_data, ev);
+	if (data == NULL)
+		return;
+
+	struct sysupgrade_ev_data *ev_data = (struct sysupgrade_ev_data *)data->ev_data;
+	if (ev_data == NULL)
+		return;
+
+	size_t msg_len = (size_t)blobmsg_data_len(msg);
+	__blob_for_each_attr(msg_attr, blobmsg_data(msg), msg_len) {
+		if (DM_STRCMP("bank_id", blobmsg_name(msg_attr)) == 0) {
+			char *attr_val = (char *)blobmsg_data(msg_attr);
+			if (DM_STRCMP(attr_val, ev_data->bank_id) != 0)
+				return;
+		}
+
+		if (DM_STRCMP("status", blobmsg_name(msg_attr)) == 0) {
+			char *attr_val = (char *)blobmsg_data(msg_attr);
+			if (DM_STRCMP(attr_val, "Downloading") == 0)
+				return;
+			else if (DM_STRCMP(attr_val, "Available") == 0)
+				ev_data->status = true;
+			else
+				ev_data->status = false;
+
+		}
+	}
+
+	uloop_end();
+	return;
+}
+
+static int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
+		const char *file_size, const char *checksum_algorithm, const char *checksum,
+		const char *bank_id, const char *command, const char *obj_path, const char *commandKey)
+{
+	char fw_image_path[256] = "/tmp/firmware-XXXXXX";
+	json_object *json_obj = NULL;
+	bool activate = false, valid = false;
+	int res = 0;
+	char fault_msg[128] = {0};
+	time_t complete_time = 0;
+	time_t start_time = time(NULL);
+
+	// Check the file system size if there is sufficient space for downloading the firmware image
+	if (!validate_file_system_size(file_size)) {
+		res = -1;
+		snprintf(fault_msg, sizeof(fault_msg), "Available memory space is lower than required for downloading");
+		goto end;
+	}
+
+	res = mkstemp(fw_image_path);
+	if (res == -1) {
+		snprintf(fault_msg, sizeof(fault_msg), "Operation failed due to some internal failure");
+		goto end;
+	} else {
+		close(res); // close the fd, as only filename required
+		res = 0;
+	}
+
+	// Download the firmware image
+	long res_code = download_file(fw_image_path, url, username, password);
+	complete_time = time(NULL);
+
+	// Check if the download operation was successful
+	if (!get_response_code_status(url, res_code)) {
+		snprintf(fault_msg, sizeof(fault_msg), "Download operation is failed, fault code (%ld)", res_code);
+		res = -1;
+		goto end;
+	}
+
+	// Validate the CheckSum value according to its algorithm
+	if (!validate_checksum_value(fw_image_path, checksum_algorithm, checksum)) {
+		res = -1;
+		snprintf(fault_msg, sizeof(fault_msg), "Checksum of the file is not matched with the specified value");
+		goto end;
+	}
+
+	string_to_bool((char *)auto_activate, &activate);
+	char *act = (activate) ? "1" : "0";
+
+	dmubus_call_blocking("system", "validate_firmware_image", UBUS_ARGS{{"path", fw_image_path, String}}, 1, &json_obj);
+	if (json_obj == NULL) {
+		res = -1;
+		snprintf(fault_msg, sizeof(fault_msg), "Failed in validation of the file");
+		goto end;
+	}
+
+	char *val = dmjson_get_value(json_obj, 1, "valid");
+	string_to_bool(val, &valid);
+	json_object_put(json_obj);
+	json_obj = NULL;
+	if (valid == false) {
+		snprintf(fault_msg, sizeof(fault_msg), "File is not a valid firmware image");
+		res = -1;
+		goto end;
+	}
+
+	// Apply Firmware Image
+	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", act, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
+	if (json_obj == NULL) {
+		res = 1;
+		snprintf(fault_msg, sizeof(fault_msg), "Internal error occurred when applying the firmware");
+		goto end;
+	}
+
+	struct sysupgrade_ev_data ev_data = {
+		.bank_id = bank_id,
+		.status = false,
+	};
+
+	dmubus_wait_for_event("sysupgrade", 120, &ev_data, dmubus_receive_sysupgrade, NULL);
+
+	if (ev_data.status == false) {
+		res = 1;
+		snprintf(fault_msg, sizeof(fault_msg), "Failed to apply the downloaded image file");
+		goto end;
+	}
+
+	// Reboot the device if auto activation is true
+	if (activate) {
+		// Send the transfer complete after image applied
+		send_transfer_complete_event(command, obj_path, url, fault_msg, start_time, complete_time, commandKey, "Download");
+
+		sleep(5); // added additional buffer for TransferComplete! event
+		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
+			res = -1;
+		sleep(10); // Wait for reboot to take action
+	}
+
+end:
+	// Send the transfer complete event
+	send_transfer_complete_event(command, obj_path, url, fault_msg, start_time, complete_time, commandKey, "Download");
+
+	// Remove temporary file if ubus upgrade failed and file exists
+	if (!json_obj && file_exists(fw_image_path) && strncmp(url, FILE_URI, strlen(FILE_URI))) {
+		remove(fw_image_path);
+		res = -1;
+	}
+
+	if (json_obj != NULL)
+		json_object_put(json_obj);
+
+	return res;
 }
 
 static int dmmap_synchronizeVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
@@ -1390,6 +1788,7 @@ static int get_operate_args_DeviceInfoFirmwareImage_Activate(char *refparam, str
 
 static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *FW_Mode[] = {"AnyTime", "Immediately", "WhenIdle", "ConfirmationNeeded", NULL};
 	char *start_time[MAX_TIME_WINDOW] = {0};
 	char *end_time[MAX_TIME_WINDOW] = {0};
 	char *mode[MAX_TIME_WINDOW] = {0};

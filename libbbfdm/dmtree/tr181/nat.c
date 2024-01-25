@@ -633,9 +633,11 @@ static int get_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void
 
 static int set_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *NAT_Protocol[] = {"TCP", "UDP", NULL};
+
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, NATProtocol, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, NAT_Protocol, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

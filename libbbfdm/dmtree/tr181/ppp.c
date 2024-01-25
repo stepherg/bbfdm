@@ -9,6 +9,7 @@
  *
  */
 
+#include "dmlayer.h"
 #include "ppp.h"
 
 struct ppp_args

@@ -12,7 +12,7 @@
 #ifndef __PPP_H
 #define __PPP_H
 
-#include "dmcommon.h"
+#include "libbbfdm-api/dmcommon.h"
 
 #define IPCP 0
 #define IPCPv6 1

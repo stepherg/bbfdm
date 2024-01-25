@@ -11,6 +11,8 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
+#include <curl/curl.h>
+
 #include "dmcommon.h"
 
 char *Encapsulation[] = {"LLC", "VCMUX", NULL};
@@ -2389,6 +2391,146 @@ bool validate_blob_message(struct blob_attr *src, struct blob_attr *dst)
 	}
 
 	return res;
+}
+
+char *diagnostics_get_option(char *sec_name, char *option)
+{
+	char *value = NULL;
+	dmuci_get_option_value_string_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, option, &value);
+	return value;
+}
+
+char *diagnostics_get_option_fallback_def(char *sec_name, char *option, char *default_value)
+{
+	char *value = diagnostics_get_option(sec_name, option);
+	return (*value != '\0') ? value : default_value;
+}
+
+void diagnostics_set_option(char *sec_name, char *option, char *value)
+{
+	check_create_dmmap_package(DMMAP_DIAGNOSTIGS);
+	struct uci_section *section = dmuci_walk_section_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
+	if (!section)
+		dmuci_set_value_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, "", sec_name);
+
+	dmuci_set_value_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, option, value);
+}
+
+void diagnostics_reset_state(char *sec_name)
+{
+	char *diag_state = diagnostics_get_option(sec_name, "DiagnosticState");
+	if (strcmp(diag_state, "Requested") != 0) {
+		diagnostics_set_option(sec_name, "DiagnosticState", "None");
+	}
+}
+
+char *diagnostics_get_interface_name(struct dmctx *ctx, char *value)
+{
+	char *linker = NULL;
+
+	if (!value || *value == 0)
+		return "";
+
+	if (strncmp(value, "Device.IP.Interface.", 20) != 0)
+		return "";
+
+	adm_entry_get_reference_value(ctx, value, &linker);
+	return linker ? linker : "";
+}
+
+long download_file(char *file_path, const char *url, const char *username, const char *password)
+{
+	long res_code = 0;
+
+	if (!file_path || !url)
+		return -1;
+
+	if (strncmp(url, FILE_URI, strlen(FILE_URI)) == 0) {
+
+		const char *curr_path = (!strncmp(url, FILE_LOCALHOST_URI, strlen(FILE_LOCALHOST_URI))) ? url + strlen(FILE_LOCALHOST_URI) : url + strlen(FILE_URI);
+
+		if (!file_exists(curr_path))
+			return -1;
+
+		DM_STRNCPY(file_path, curr_path, 256);
+	} else {
+
+		CURL *curl = curl_easy_init();
+		if (curl) {
+			curl_easy_setopt(curl, CURLOPT_URL, url);
+			if (username) curl_easy_setopt(curl, CURLOPT_USERNAME, username);
+			if (password) curl_easy_setopt(curl, CURLOPT_PASSWORD, password);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 600);
+
+			FILE *fp = fopen(file_path, "wb");
+			if (fp) {
+				curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+				curl_easy_perform(curl);
+				fclose(fp);
+			}
+
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &res_code);
+			curl_easy_cleanup(curl);
+		}
+	}
+
+	return res_code;
+}
+
+long upload_file(const char *file_path, const char *url, const char *username, const char *password)
+{
+	long res_code = 0;
+
+	if (!file_path || !url)
+		return -1;
+
+	if (strncmp(url, FILE_URI, strlen(FILE_URI)) == 0) {
+		char dst_path[2046] = {0};
+		char buff[BUFSIZ] = {0};
+		FILE *sfp, *dfp;
+		int n, count=0;
+
+		sfp = fopen(file_path, "rb");
+		if (sfp == NULL) {
+			return -1;
+		}
+
+		snprintf(dst_path, sizeof(dst_path), "%s", url + strlen(FILE_URI));
+		dfp = fopen(dst_path, "wb");
+		if (dfp == NULL) {
+			fclose(sfp);
+			return -1;
+		}
+
+		while ((n = fread(buff, 1, BUFSIZ, sfp)) != 0) {
+			fwrite(buff, 1, n, dfp);
+			count+=n;
+		}
+
+		fclose(sfp);
+		fclose(dfp);
+	} else {
+		CURL *curl = curl_easy_init();
+		if (curl) {
+			curl_easy_setopt(curl, CURLOPT_URL, url);
+			if (username) curl_easy_setopt(curl, CURLOPT_USERNAME, username);
+			if (password) curl_easy_setopt(curl, CURLOPT_PASSWORD, password);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 600);
+			curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+			FILE *fp = fopen(file_path, "rb");
+			if (fp) {
+				curl_easy_setopt(curl, CURLOPT_READDATA, fp);
+				curl_easy_perform(curl);
+				fclose(fp);
+			}
+
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &res_code);
+			curl_easy_cleanup(curl);
+		}
+	}
+
+	return res_code;
 }
 
 /**********************

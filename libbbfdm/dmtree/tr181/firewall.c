@@ -9,6 +9,7 @@
  *      Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  */
 
+#include "dmlayer.h"
 #include "firewall.h"
 
 struct rule_sec
@@ -1268,9 +1269,11 @@ static int set_firewall_enable(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int set_firewall_config(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *config[] = {"High", "Low", "Off", "Advanced", NULL};
+
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, Config, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, config, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
@@ -1531,6 +1534,8 @@ static int set_rule_description(char *refparam, struct dmctx *ctx, void *data, c
 
 static int set_rule_target(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Target[] = {"Drop", "Accept", "Reject", "Return", "TargetChain", NULL};
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, Target, NULL))

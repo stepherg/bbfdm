@@ -10,6 +10,7 @@
  *
  */
 
+#include "dmlayer.h"
 #include "ip.h"
 #if defined(BBF_TR143) || defined(BBF_TR471)
 #include "diagnostics.h"

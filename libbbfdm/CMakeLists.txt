@@ -12,7 +12,7 @@ OPTION(BBF_TR143 "build with tr143 datamodel" ON)
 OPTION(BBF_TR471 "build with tr471 datamodel" ON)
 OPTION(BBF_WIFI_DATAELEMENTS "build with wifi dataelements datamodel" ON)
 
-SET(BBF_DM_SOURCES dmcommon.c dmlayer.c)
+SET(BBF_DM_SOURCES dmlayer.c)
 
 IF(BBF_TR181)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}/dmtree/tr181")
@@ -41,7 +41,7 @@ ENDIF(BBF_TR471)
 
 ADD_LIBRARY(bbfdm SHARED ${BBF_DM_SOURCES} ${BBF_TR181_SOURCES} ${BBF_TR143_SOURCES} ${BBF_TR471_SOURCES})
 
-TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json curl m bbfdm-api ssl crypto)
+TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json bbfdm-api ssl crypto)
 
 INSTALL(TARGETS bbfdm
 		LIBRARY DESTINATION usr/lib)

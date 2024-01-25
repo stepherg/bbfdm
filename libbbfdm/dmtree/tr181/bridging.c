@@ -10,7 +10,7 @@
  *
  */
 
-#include "dmcommon.h"
+#include "dmlayer.h"
 #include "bridging.h"
 
 struct bridge_args
@@ -1546,9 +1546,11 @@ static int get_BridgingBridge_Standard(char *refparam, struct dmctx *ctx, void *
 
 static int set_BridgingBridge_Standard(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Bridge_Standard[] = {"802.1D-2004", "802.1Q-2005", "802.1Q-2011", NULL};
+
 	switch (action) {
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, BridgeStandard, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Bridge_Standard, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:

@@ -1619,9 +1619,11 @@ static int get_QoSQueue_SchedulerAlgorithm(char *refparam, struct dmctx *ctx, vo
 
 static int set_QoSQueue_SchedulerAlgorithm(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *Scheduler_Algorithm[] = {"WFQ", "WRR", "SP", NULL};
+
 	switch (action)	{
 		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, -1, SchedulerAlgorithm, NULL))
+			if (bbfdm_validate_string(ctx, value, -1, -1, Scheduler_Algorithm, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:

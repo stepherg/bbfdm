@@ -9,7 +9,6 @@
  *
  */
 
-#include "dmcommon.h"
 #include "packetcapture.h"
 
 #define PACKET_CAPTURE_DIAGNOSTIC_PATH "/usr/share/bbfdm/packetcapture"
@@ -73,7 +72,7 @@ int operate_Device_packetCapture(char *refparam, struct dmctx *ctx, void *data, 
 
 	char *intf = dmjson_get_value((json_object *)value, 1, "Interface");
 	if (intf[0] != '\0') {
-		intf = get_diagnostics_interface_option(ctx, intf);
+		intf = diagnostics_get_interface_name(ctx, intf);
 		if (DM_STRLEN(intf) == 0)
 			return USP_FAULT_INVALID_ARGUMENT;
 	}
@@ -157,7 +156,7 @@ int operate_Device_packetCapture(char *refparam, struct dmctx *ctx, void *data, 
 **************************************************************/
 static int get_PacketCapture_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("packetcapture", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("packetcapture", "DiagnosticState", "None");
 	return 0;
 }
 
@@ -170,14 +169,14 @@ static int set_PacketCapture_DiagnosticsState(char *refparam, struct dmctx *ctx,
 			break;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("packetcapture", "DiagnosticState", value);
+				diagnostics_set_option("packetcapture", "DiagnosticState", value);
 	}
 	return 0;
 }
 
 static int get_PacketCapture_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = get_diagnostics_option("packetcapture", "Interface");
+	char *linker = diagnostics_get_option("packetcapture", "Interface");
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
@@ -199,15 +198,15 @@ static int set_PacketCapture_Interface(char *refparam, struct dmctx *ctx, void *
 
 			break;
 		case VALUESET:
-			reset_diagnostic_state("packetcapture");
-			set_diagnostics_option("packetcapture", "Interface", reference.value);
+			diagnostics_reset_state("packetcapture");
+			diagnostics_set_option("packetcapture", "Interface", reference.value);
 	}
 	return 0;
 }
 
 static int get_PacketCapture_Format(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("packetcapture", "Format");
+	*value = diagnostics_get_option("packetcapture", "Format");
 	return 0;
 }
 
@@ -222,15 +221,15 @@ static int set_PacketCapture_Format(char *refparam, struct dmctx *ctx, void *dat
 
 			break;
 		case VALUESET:
-			reset_diagnostic_state("packetcapture");
-			set_diagnostics_option("packetcapture", "Format", value);
+			diagnostics_reset_state("packetcapture");
+			diagnostics_set_option("packetcapture", "Format", value);
 	}
 	return 0;
 }
 
 static int get_PacketCapture_Duration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("packetcapture", "Duration", "1");
+	*value = diagnostics_get_option_fallback_def("packetcapture", "Duration", "1");
 	return 0;
 }
 
@@ -242,15 +241,15 @@ static int set_PacketCapture_Duration(char *refparam, struct dmctx *ctx, void *d
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			reset_diagnostic_state("packetcapture");
-			set_diagnostics_option("packetcapture", "Duration", value);
+			diagnostics_reset_state("packetcapture");
+			diagnostics_set_option("packetcapture", "Duration", value);
 	}
 	return 0;
 }
 
 static int get_PacketCapture_PacketCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("packetcapture", "PacketCount", "0");
+	*value = diagnostics_get_option_fallback_def("packetcapture", "PacketCount", "0");
 	return 0;
 }
 
@@ -262,15 +261,15 @@ static int set_PacketCapture_PacketCount(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			reset_diagnostic_state("packetcapture");
-			set_diagnostics_option("packetcapture", "PacketCount", value);
+			diagnostics_reset_state("packetcapture");
+			diagnostics_set_option("packetcapture", "PacketCount", value);
 	}
 	return 0;
 }
 
 static int get_PacketCapture_FileTarget(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("packetcapture", "FileTarget");
+	*value = diagnostics_get_option("packetcapture", "FileTarget");
 	return 0;
 }
 
@@ -282,15 +281,15 @@ static int set_PacketCapture_FileTarget(char *refparam, struct dmctx *ctx, void 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			reset_diagnostic_state("packetcapture");
-			set_diagnostics_option("packetcapture", "FileTarget", value);
+			diagnostics_reset_state("packetcapture");
+			diagnostics_set_option("packetcapture", "FileTarget", value);
 	}
 	return 0;
 }
 
 static int get_PacketCapture_FilterExpression(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("packetcapture", "FilterExpression");
+	*value = diagnostics_get_option("packetcapture", "FilterExpression");
 	return 0;
 }
 
@@ -302,15 +301,15 @@ static int set_PacketCapture_FilterExpression(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			reset_diagnostic_state("packetcapture");
-			set_diagnostics_option("packetcapture", "FilterExpression", value);
+			diagnostics_reset_state("packetcapture");
+			diagnostics_set_option("packetcapture", "FilterExpression", value);
 	}
 	return 0;
 }
 
 static int get_PacketCapture_Username(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("packetcapture", "Username");
+	*value = diagnostics_get_option("packetcapture", "Username");
 	return 0;
 }
 
@@ -322,8 +321,8 @@ static int set_PacketCapture_Username(char *refparam, struct dmctx *ctx, void *d
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			reset_diagnostic_state("packetcapture");
-			set_diagnostics_option("packetcapture", "Username", value);
+			diagnostics_reset_state("packetcapture");
+			diagnostics_set_option("packetcapture", "Username", value);
 	}
 	return 0;
 }
@@ -342,8 +341,8 @@ static int set_PacketCapture_Password(char *refparam, struct dmctx *ctx, void *d
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			reset_diagnostic_state("packetcapture");
-			set_diagnostics_option("packetcapture", "Password", value);
+			diagnostics_reset_state("packetcapture");
+			diagnostics_set_option("packetcapture", "Password", value);
 	}
 	return 0;
 }

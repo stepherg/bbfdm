@@ -8,7 +8,6 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include "dmcommon.h"
 #include "dns.h"
 
 /* Returns dnsmasq section name belongs to LAN network */
@@ -421,44 +420,44 @@ static int get_forwarding_dns_server(char *refparam, struct dmctx *ctx, void *da
 
 static int get_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("nslookup", "DiagnosticState", "None");
+	*value = diagnostics_get_option_fallback_def("nslookup", "DiagnosticState", "None");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *linker = get_diagnostics_option("nslookup", "interface");
+	char *linker = diagnostics_get_option("nslookup", "interface");
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
 
 static int get_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("nslookup", "HostName");
+	*value = diagnostics_get_option("nslookup", "HostName");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option("nslookup", "DNSServer");
+	*value = diagnostics_get_option("nslookup", "DNSServer");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("nslookup", "Timeout", "5000");
+	*value = diagnostics_get_option_fallback_def("nslookup", "Timeout", "5000");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_number_of_repetitions(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("nslookup", "NumberOfRepetitions", "1");
+	*value = diagnostics_get_option_fallback_def("nslookup", "NumberOfRepetitions", "1");
 	return 0;
 }
 
 static int get_nslookupdiagnostics_success_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("nslookup", "SuccessCount", "0");
+	*value = diagnostics_get_option_fallback_def("nslookup", "SuccessCount", "0");
 	return 0;
 }
 
@@ -693,7 +692,7 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 			return 0;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Requested") == 0)
-				set_diagnostics_option("nslookup", "DiagnosticState", value);
+				diagnostics_set_option("nslookup", "DiagnosticState", value);
 			return 0;
 	}
 	return 0;
@@ -716,8 +715,8 @@ static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, 
 
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("nslookup");
-			set_diagnostics_option("nslookup", "interface", reference.value);
+			diagnostics_reset_state("nslookup");
+			diagnostics_set_option("nslookup", "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -731,8 +730,8 @@ static int set_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("nslookup");
-			set_diagnostics_option("nslookup", "HostName", value);
+			diagnostics_reset_state("nslookup");
+			diagnostics_set_option("nslookup", "HostName", value);
 			return 0;
 	}
 	return 0;
@@ -746,8 +745,8 @@ static int set_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("nslookup");
-			set_diagnostics_option("nslookup", "DNSServer", value);
+			diagnostics_reset_state("nslookup");
+			diagnostics_set_option("nslookup", "DNSServer", value);
 			return 0;
 	}
 	return 0;
@@ -761,8 +760,8 @@ static int set_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("nslookup");
-			set_diagnostics_option("nslookup", "Timeout", value);
+			diagnostics_reset_state("nslookup");
+			diagnostics_set_option("nslookup", "Timeout", value);
 			return 0;
 	}
 	return 0;
@@ -776,8 +775,8 @@ static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			reset_diagnostic_state("nslookup");
-			set_diagnostics_option("nslookup", "NumberOfRepetitions", value);
+			diagnostics_reset_state("nslookup");
+			diagnostics_set_option("nslookup", "NumberOfRepetitions", value);
 			return 0;
 	}
 	return 0;

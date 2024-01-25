@@ -19,7 +19,7 @@ FILE(GLOB BBF_API_SOURCES *.c plugin/*.c)
 
 ADD_LIBRARY(bbfdm-api SHARED ${BBF_API_SOURCES})
 
-TARGET_LINK_LIBRARIES(bbfdm-api uci ubus ubox json-c blobmsg_json dl)
+TARGET_LINK_LIBRARIES(bbfdm-api uci ubus ubox json-c blobmsg_json dl curl)
 
 INSTALL(TARGETS bbfdm-api
 		LIBRARY DESTINATION usr/lib)
