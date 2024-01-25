@@ -49,8 +49,8 @@ In the [test/vendor_test/](../../test/vendor_test) directory, you'll find an exa
 ### 1. Extend Data Model
 
 - using DotSo Plugin:
-	- Add support for [Device.Firewall.Chain.{i}.Rule.{i}.X_TEST_COM_TimeSpan.](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/firewall.c#L172) object
-	- Add support for [Device.Firewall.Chain.{i}.Rule.{i}.X_TEST_COM_ICMPType](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/firewall.c#L178) parameter
+	- Add support for [Device.Firewall.Chain.{i}.Rule.{i}.X_TEST_COM_TimeSpan.](../../test/vendor_test/firewall.c#L172) object
+	- Add support for [Device.Firewall.Chain.{i}.Rule.{i}.X_TEST_COM_ICMPType](../../test/vendor_test/firewall.c#L178) parameter
 
 - using JSON Plugin:
 	- Add support for [Device.PD2.{i}.](../../test/vendor_test/test_extend.json) object
@@ -58,8 +58,8 @@ In the [test/vendor_test/](../../test/vendor_test) directory, you'll find an exa
 ### 2. Overwrite Data Model
 
 - using DotSo Plugin:
-	- Overwrite [Device.X_IOPSYS_EU_Dropbear.{i}.](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/device.c#L18) object in the core tree
-	- Overwrite [Device.DeviceInfo.Manufacturer](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/deviceinfo.c#L29) parameter in the core tree
+	- Overwrite [Device.X_IOPSYS_EU_Dropbear.{i}.](../../test/vendor_test/device.c#L18) object in the core tree
+	- Overwrite [Device.DeviceInfo.Manufacturer](../../test/vendor_test/deviceinfo.c#L29) parameter in the core tree
 
 - using JSON Plugin:
 	- Overwrite [Device.DeviceInfo.Processor.](../../test/vendor_test/test_overwrite.json) object in the core tree
@@ -67,8 +67,8 @@ In the [test/vendor_test/](../../test/vendor_test) directory, you'll find an exa
 ### 3. Exclude Data Model
 
 - using DotSo Plugin:
-	- Exclude [Device.USB.](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/device.c#L17) object from the core tree
-	- Exclude [Device.Ethernet.RMONStats.{i}.Packets1024to1518Bytes](https://dev.iopsys.eu/bbf/bbfdm/-/blob/ticket_13148/test/vendor_test/extension.c#L37) parameter from the core tree
+	- Exclude [Device.USB.](../../test/vendor_test/device.c#L17) object from the core tree
+	- Exclude [Device.Ethernet.RMONStats.{i}.Packets1024to1518Bytes](../../test/vendor_test/extension.c#L37) parameter from the core tree
 
 - using JSON Plugin:
 	- Exclude [Device.X_IOPSYS_EU_IGMP.](../../test/vendor_test/test_exclude.json) object from the core tree
