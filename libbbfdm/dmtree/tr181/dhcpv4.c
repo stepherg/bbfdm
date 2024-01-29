@@ -12,7 +12,6 @@
  */
 
 #include "dhcpv4.h"
-#include "dns.h"
 
 #define DHCP_OPTION_VENDORID 60
 #define DHCP_OPTION_CLIENTID 61
@@ -65,6 +64,20 @@ struct dhcp_client_option_args {
 	char *option_tag;
 	char *value;
 };
+
+/* Returns dnsmasq section name belongs to LAN network */
+char *get_dnsmasq_section_name(void)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_sections("dhcp", "dnsmasq", s) {
+		char *sec = section_name(s);
+		if (DM_STRCMP(sec, "dns_client") != 0)
+			return sec;
+	}
+
+	return "";
+}
 
 /*************************************************************
 * INIT

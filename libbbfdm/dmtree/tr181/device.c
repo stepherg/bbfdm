@@ -25,7 +25,6 @@
 #include "ppp.h"
 #include "routing.h"
 #include "firewall.h"
-#include "dns.h"
 #include "dsl.h"
 #include "fast.h"
 #include "dhcpv6.h"
@@ -107,7 +106,6 @@ DMOBJ tDeviceObj[] = {
 {"PPP", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/ppp.sh,/etc/config/network", NULL, NULL, NULL, tPPPObj, tPPPParams, NULL, BBFDM_BOTH, NULL},
 {"Routing", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tRoutingObj, tRoutingParams, NULL, BBFDM_BOTH, NULL},
 {"Firewall", &DMREAD, NULL, NULL, "file:/etc/config/firewall", NULL, NULL, NULL, tFirewallObj, tFirewallParams, NULL, BBFDM_BOTH, NULL},
-{"DNS", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tDNSObj, tDNSParams, NULL, BBFDM_BOTH, NULL},
 {"IEEE1905", &DMREAD, NULL, NULL, "file:/etc/config/ieee1905", NULL, NULL, NULL, tIEEE1905Obj, tIEEE1905Params, NULL, BBFDM_BOTH, NULL},
 {"InterfaceStack", &DMREAD, NULL, NULL, "file:/etc/config/network", browseInterfaceStackInst, NULL, NULL, NULL, tInterfaceStackParams, NULL, BBFDM_BOTH, NULL},
 {"USB", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tUSBObj, tUSBParams, NULL, BBFDM_BOTH, NULL},

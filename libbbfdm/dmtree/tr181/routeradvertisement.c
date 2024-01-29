@@ -9,12 +9,25 @@
  */
 
 #include "dhcpv4.h"
-#include "dns.h"
 #include "routeradvertisement.h"
 
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
+/* Returns dnsmasq section name belonging to LAN network */
+char *get_dhcp_dnsmasq_section_name(void)
+{
+	struct uci_section *s = NULL;
+
+	uci_foreach_sections("dhcp", "dnsmasq", s) {
+		char *sec = section_name(s);
+		if (DM_STRCMP(sec, "dns_client") != 0)
+			return sec;
+	}
+
+	return "";
+}
+
 static int radv_get_option_value(struct uci_section *s, char *option_list, const char *option_value, char **value)
 {
 	struct uci_list *uci_list = NULL;
@@ -188,7 +201,7 @@ static int delObjRouterAdvertisementInterfaceSettingOption(char *refparam, struc
 /*#Device.RouterAdvertisement.Enable!UCI:dhcp/dnsmasq,@dnsmasq[0]/raserver*/
 static int get_RouterAdvertisement_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *sec = get_dnsmasq_section_name();
+	char *sec = get_dhcp_dnsmasq_section_name();
 
 	if (DM_STRLEN(sec) == 0)
 		return 0;
@@ -208,7 +221,7 @@ static int set_RouterAdvertisement_Enable(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			sec = get_dnsmasq_section_name();
+			sec = get_dhcp_dnsmasq_section_name();
 			if (DM_STRLEN(sec) == 0)
 				return 0;
 
