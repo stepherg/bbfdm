@@ -4,11 +4,13 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname "${0}")"
-. "${ROOT}"/bbf_api
+. "$(dirname "${0}")/../bbf_api"
 
-udpecho_error()
-{
+udpecho_list() {
+	echo '"udpecho" : { "host": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "inter_trans_time":"str", "proto": "str" }'
+}
+
+udpecho_error() {
 	json_init
 	json_add_string "Status" "$1"
 	json_add_string "IPAddressUsed" ""
@@ -139,7 +141,9 @@ udpecho_launch() {
 	}
 }
 
-if [ -n "$1" ]; then
+if [ "$1" = "list" ]; then
+	udpecho_list
+elif [ -n "$1" ]; then
 	udpecho_launch "$1"
 else
 	udpecho_error "Error_Internal" "1"

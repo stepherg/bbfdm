@@ -4,8 +4,11 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname "${0}")"
-. "${ROOT}"/bbf_api
+. "$(dirname "${0}")/../bbf_api"
+
+serverselection_list() {
+	echo '"serverselection" : { "hostlist": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "protocol_used": "str", "proto": "str" }'
+}
 
 serverselection_error() {
 	json_init
@@ -183,7 +186,9 @@ serverselection_launch() {
 	}
 }
 
-if [ -n "$1" ]; then
+if [ "$1" = "list" ]; then
+	serverselection_list
+elif [ -n "$1" ]; then
 	serverselection_launch "$1"
 else
 	serverselection_error "Error_Internal" "1"

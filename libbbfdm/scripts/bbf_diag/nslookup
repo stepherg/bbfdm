@@ -4,8 +4,7 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname "${0}")"
-. "${ROOT}"/bbf_api
+. "$(dirname "${0}")/../bbf_api"
 
 get_nslookup_log_file() {
 	IDX=1
@@ -17,6 +16,10 @@ get_nslookup_log_file() {
 	done
 
 	echo ${LOG_FILE}
+}
+
+nslookup_list() {
+	echo '"nslookup" : { "host": "str", "dns_serevr": "str", "iface": "str", "nbr_of_rep": "str", "timeout": "str", "proto": "str" }'
 }
 
 nslookup_error() {
@@ -166,8 +169,9 @@ nslookup_launch() {
 	}
 }
 
-
-if [ -n "$1" ]; then
+if [ "$1" = "list" ]; then
+	nslookup_list
+elif [ -n "$1" ]; then
 	nslookup_launch "$1"
 else
 	nslookup_error "Error_Internal"

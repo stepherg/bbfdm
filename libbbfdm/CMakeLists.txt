@@ -54,10 +54,20 @@ IF(BBF_TR143)
 	INSTALL(DIRECTORY DESTINATION usr/share/bbfdm)
 	INSTALL(DIRECTORY DESTINATION usr/libexec/rpcd)
 	FILE(GLOB scripts scripts/*)
-	INSTALL(FILES ${scripts}
-		PERMISSIONS OWNER_EXECUTE
-		DESTINATION usr/share/bbfdm
-	)
+
+	FOREACH(script ${scripts})
+		IF(IS_DIRECTORY ${script})
+			INSTALL(DIRECTORY ${script}
+				DESTINATION usr/share/bbfdm
+			)
+		ELSE()
+			INSTALL(FILES ${script}
+				PERMISSIONS OWNER_EXECUTE
+				DESTINATION usr/share/bbfdm
+			)
+		ENDIF()
+	ENDFOREACH()
+
 	INSTALL(FILES scripts/bbf.diag
 		PERMISSIONS OWNER_EXECUTE
 		DESTINATION usr/libexec/rpcd

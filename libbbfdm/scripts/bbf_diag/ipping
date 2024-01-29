@@ -5,8 +5,11 @@
 
 . /usr/share/libubox/jshn.sh
 
-ROOT="$(dirname "${0}")"
-. "${ROOT}"/bbf_api
+. "$(dirname "${0}")/../bbf_api"
+
+ipping_list() {
+	echo '"ipping" : { "host": "str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "proto": "str" }'
+}
 
 ipping_error() {
 	json_init
@@ -157,7 +160,9 @@ ipping_launch() {
 	}
 }
 
-if [ -n "$1" ]; then
+if [ "$1" = "list" ]; then
+	ipping_list
+elif [ -n "$1" ]; then
 	ipping_launch "$1"
 else
 	ipping_error "Error_Internal" "1"
