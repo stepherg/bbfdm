@@ -41,7 +41,7 @@ ENDIF(BBF_TR471)
 
 ADD_LIBRARY(bbfdm SHARED ${BBF_DM_SOURCES} ${BBF_TR181_SOURCES} ${BBF_TR143_SOURCES} ${BBF_TR471_SOURCES})
 
-TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json bbfdm-api ssl crypto)
+TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json m bbfdm-api ssl crypto)
 
 INSTALL(TARGETS bbfdm
 		LIBRARY DESTINATION usr/lib)
