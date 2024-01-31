@@ -1832,7 +1832,11 @@ static int mobj_get_name_in_param(DMOBJECT_ARGS)
 static int mparam_get_name_in_param(DMPARAM_ARGS)
 {
 	if (node->is_ubus_service) {
-		return get_ubus_name(dmctx, node);
+		int err = get_ubus_name(dmctx, node);
+		if (err)
+			return err;
+
+		dmctx->stop = true;
 	} else {
 		char *refparam;
 		char *perm = leaf->permission->val;
@@ -1864,8 +1868,9 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 
 		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
 		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
-		return 0;
 	}
+
+	return 0;
 }
 
 static int mobj_get_name_in_obj(DMOBJECT_ARGS)
