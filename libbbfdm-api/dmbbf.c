@@ -1495,7 +1495,7 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
 		if (DM_STRLEN(fault))
-			continue;
+			return DM_STRTOUL(fault);
 
 		dmctx->findparam = 1;
 
@@ -1509,6 +1509,9 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 
 			if ((path[len - 1] == '.' && path_dot_num > in_path_dot_num + 1) ||
 				(path[len - 1] != '.' && path_dot_num > in_path_dot_num))
+				continue;
+		} else {
+			if (i == 0 && (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0))
 				continue;
 		}
 
@@ -1817,7 +1820,9 @@ static int mobj_get_name_in_param(DMOBJECT_ARGS)
 static int mparam_get_name_in_param(DMPARAM_ARGS)
 {
 	if (node->is_ubus_service) {
-		return get_ubus_name(dmctx, node);
+		int err = get_ubus_name(dmctx, node);
+		dmctx->stop = true;
+		return err ? err : 0;
 	} else {
 		char *refparam;
 		char *perm = leaf->permission->val;
@@ -1927,6 +1932,7 @@ int dm_entry_get_name(struct dmctx *ctx)
 		ctx->method_obj = mobj_get_name;
 		ctx->method_param = mparam_get_name;
 		ctx->in_param = root->obj;
+		ctx->disable_mservice_browse = true;
 		node.matched = 1;
 		findparam_check = 1;
 	} else if (*(ctx->in_param + len - 1) == '.') {
