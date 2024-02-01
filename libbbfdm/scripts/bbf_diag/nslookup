@@ -3,8 +3,7 @@
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
 . /usr/share/libubox/jshn.sh
-
-. "$(dirname "${0}")/../bbf_api"
+. /usr/share/bbfdm/bbf_api
 
 get_nslookup_log_file() {
 	IDX=1
@@ -19,7 +18,14 @@ get_nslookup_log_file() {
 }
 
 nslookup_list() {
-	echo '"nslookup" : { "host": "str", "dns_serevr": "str", "iface": "str", "nbr_of_rep": "str", "timeout": "str", "proto": "str" }'
+	json_add_object "nslookup"
+	json_add_string "host" "str"
+	json_add_string "dns_serevr" "str"
+	json_add_string "iface" "str"
+	json_add_string "nbr_of_rep" "str"
+	json_add_string "timeout" "str"
+	json_add_string "proto" "str"
+	json_close_object
 }
 
 nslookup_error() {

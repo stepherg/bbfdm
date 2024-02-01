@@ -4,11 +4,19 @@
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
 . /usr/share/libubox/jshn.sh
-
-. "$(dirname "${0}")/../bbf_api"
+. /usr/share/bbfdm/bbf_api
 
 ipping_list() {
-	echo '"ipping" : { "host": "str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "proto": "str" }'
+	json_add_object "ipping"
+	json_add_string "host" "str"
+	json_add_string "iface" "str"
+	json_add_string "ip_proto" "str"
+	json_add_string "nbr_of_rep" "str"
+	json_add_string "timeout" "str"
+	json_add_string "data_size" "str"
+	json_add_string "dscp" "str"
+	json_add_string "proto" "str"
+	json_close_object
 }
 
 ipping_error() {

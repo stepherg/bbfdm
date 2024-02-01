@@ -1,33 +1,20 @@
 #!/bin/sh
 
 BBF_DIAG_SCRIPTS="/usr/share/bbfdm/bbf_diag"
+
 . /usr/share/libubox/jshn.sh
 
 case "$1" in
 	list)
-		# Open the JSON object
-		output_json="{"
-
-		first_iteration=true
+		json_init
 
 		for file in "${BBF_DIAG_SCRIPTS}"/*; do
 			[ -f "${file}" ] || continue
 
-			file_output=$(sh "${file}" "$1")
-
-			# Add a comma for all iterations after the first one
-			[ "$first_iteration" = true ] || output_json="${output_json},"
-			first_iteration=false
-
-			# Concatenate the output to the result
-			output_json="${output_json}${file_output}"
+			. "${file}" "${1}"
 		done
 
-		# Close the JSON object
-		output_json="${output_json}}"
-
-		# Return the concatenated JSON output
-		echo "$output_json"
+		json_dump
 	;;
 	call)
 		# Read the arguments

@@ -3,11 +3,19 @@
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
 . /usr/share/libubox/jshn.sh
-
-. "$(dirname "${0}")/../bbf_api"
+. /usr/share/bbfdm/bbf_api
 
 serverselection_list() {
-	echo '"serverselection" : { "hostlist": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "protocol_used": "str", "proto": "str" }'
+	json_add_object "serverselection"
+	json_add_string "hostlist" "str"
+	json_add_string "port" "str"
+	json_add_string "iface" "str"
+	json_add_string "ip_proto" "str"
+	json_add_string "nbr_of_rep" "str"
+	json_add_string "timeout" "str"
+	json_add_string "protocol_used" "str"
+	json_add_string "proto" "str"
+	json_close_object
 }
 
 serverselection_error() {
