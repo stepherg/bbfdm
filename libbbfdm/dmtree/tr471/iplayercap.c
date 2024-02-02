@@ -176,7 +176,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Host(char *refparam, struct dmctx *c
 
 static int get_IPDiagnosticsIPLayerCapacity_Port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = diagnostics_get_option("iplayercapacity", "Port");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "Port", "25000");
 	return 0;
 }
 
@@ -372,7 +372,7 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberFirstModeTestSubIntervals(char
 
 static int get_IPDiagnosticsIPLayerCapacity_NumberTestSubIntervals(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = diagnostics_get_option("iplayercapacity", "NumberTestSubIntervals");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "NumberTestSubIntervals", "10");
 	return 0;
 }
 
@@ -397,7 +397,7 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberTestSubIntervals(char *refpara
 
 static int get_IPDiagnosticsIPLayerCapacity_TestSubInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = diagnostics_get_option("iplayercapacity", "TestSubInterval");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "TestSubInterval", "1000");
 	return 0;
 }
 
@@ -419,7 +419,7 @@ static int set_IPDiagnosticsIPLayerCapacity_TestSubInterval(char *refparam, stru
 
 static int get_IPDiagnosticsIPLayerCapacity_StatusFeedbackInterval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = diagnostics_get_option("iplayercapacity", "StatusFeedbackInterval");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "StatusFeedbackInterval", "50");
 	return 0;
 }
 
@@ -485,7 +485,7 @@ static int set_IPDiagnosticsIPLayerCapacity_ReordDupIgnoreEnable(char *refparam,
 
 static int get_IPDiagnosticsIPLayerCapacity_LowerThresh(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = diagnostics_get_option("iplayercapacity", "LowerThresh");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "LowerThresh", "30");
 	return 0;
 }
 
@@ -506,7 +506,7 @@ static int set_IPDiagnosticsIPLayerCapacity_LowerThresh(char *refparam, struct d
 
 static int get_IPDiagnosticsIPLayerCapacity_UpperThresh(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = diagnostics_get_option("iplayercapacity", "UpperThresh");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "UpperThresh", "90");
 	return 0;
 }
 
@@ -527,7 +527,7 @@ static int set_IPDiagnosticsIPLayerCapacity_UpperThresh(char *refparam, struct d
 
 static int get_IPDiagnosticsIPLayerCapacity_HighSpeedDelta(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = diagnostics_get_option("iplayercapacity", "HighSpeedDelta");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "HighSpeedDelta", "10");
 	return 0;
 }
 
@@ -584,7 +584,7 @@ static int set_IPDiagnosticsIPLayerCapacity_SlowAdjThresh(char *refparam, struct
 
 static int get_IPDiagnosticsIPLayerCapacity_SlowAdjThresh(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = diagnostics_get_option("iplayercapacity", "SlowAdjThresh");
+	*value = diagnostics_get_option_fallback_def("iplayercapacity", "SlowAdjThresh", "3");
 	return 0;
 }
 
