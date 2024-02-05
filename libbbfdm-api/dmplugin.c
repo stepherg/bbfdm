@@ -320,12 +320,12 @@ DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path)
 	DMNODE node = {.current_object = ""};
 	DMOBJ *obj = NULL;
 
-	char *in_obj = replace_str(obj_path, ".{i}.", ".");
-	if (in_obj == NULL)
+	char in_obj[1024] = {0};
+	replace_str(obj_path, ".{i}.", ".", in_obj, sizeof(in_obj));
+	if (strlen(in_obj) == 0)
 		return NULL;
 
 	dm_check_dynamic_obj(&node, entryobj, in_obj, &obj);
-	FREE(in_obj);
 
 	return obj;
 }

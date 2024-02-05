@@ -88,14 +88,15 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 	save_loaded_json_files(json_plugin, json_obj);
 
 	json_object_object_foreach(json_obj, key, jobj) {
+		char node_obj[1024] = {0};
 
 		if (strcmp(key, "json_plugin_version") == 0) {
 			json_plugin_version = json_object_get_int(jobj);
 			continue;
 		}
 
-		char *node_obj = replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
-		if (node_obj == NULL) {
+		replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, node_obj, sizeof(node_obj));
+		if (strlen(node_obj) == 0) {
 			ERR("ERROR: Can't get the node object\n");
 			return -1;
 		}
@@ -133,7 +134,6 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 		dm_entryobj[0].bbfdm_type = BBFDM_BOTH;
 
 		parse_obj(node_obj, jobj, dm_entryobj[0].nextobj, 0, json_plugin_version, json_list);
-		FREE(node_obj);
 		break;
 	}
 

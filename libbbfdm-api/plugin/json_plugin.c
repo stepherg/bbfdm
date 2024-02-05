@@ -114,14 +114,15 @@ static void free_loaded_json_files(struct list_head *json_list)
 void json_plugin_find_prefix_obj(const char *full_obj, char *prefix_obj, size_t len)
 {
 	int last_occurent = 0, occur = 0;
+	char full_object[MAX_DM_LENGTH] = {0};
 
 	if (!full_obj || !prefix_obj || len == 0)
 		return;
 
 	*prefix_obj = 0;
 
-	char *full_object = replace_str(full_obj, ".{i}.", ".");
-	if (full_object == NULL)
+	replace_str(full_obj, ".{i}.", ".", full_object, sizeof(full_object));
+	if (strlen(full_object) == 0)
 		return;
 
 	unsigned int full_object_dot_num = count_occurrences(full_object, '.');
@@ -138,20 +139,20 @@ void json_plugin_find_prefix_obj(const char *full_obj, char *prefix_obj, size_t 
 
 	*(full_object + last_occurent + 1) = 0;
 	snprintf(prefix_obj, len, "%s", full_object);
-	FREE(full_object);
 }
 
 static void json_plugin_find_current_obj(const char *full_obj, char *curr_obj, size_t len)
 {
 	int last_occurent = 0, occur = 0;
+	char full_object[MAX_DM_LENGTH] = {0};
 
 	if (!full_obj || !curr_obj || len == 0)
 		return;
 
 	*curr_obj = 0;
 
-	char *full_object = replace_str(full_obj, ".{i}.", ".");
-	if (full_object == NULL)
+	replace_str(full_obj, ".{i}.", ".", full_object, sizeof(full_object));
+	if (strlen(full_object) == 0)
 		return;
 
 	unsigned int full_object_dot_num = count_occurrences(full_object, '.');
@@ -168,7 +169,6 @@ static void json_plugin_find_current_obj(const char *full_obj, char *curr_obj, s
 
 	full_object[occur] = 0;
 	snprintf(curr_obj, len, "%s", full_object + last_occurent + 1);
-	FREE(full_object);
 }
 
 static void generate_path_without_instance(char *full_obj, bool is_obj, char *obj_path, size_t len)
@@ -688,7 +688,7 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 
 	if (linker_jobj) {
 		char *link = json_object_get_string(linker_jobj);
-		linker = replace_str(link, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
+		linker = replace_str(link, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, NULL, 0);
 	}
 
 	if (file && type && opt_temp && strstr(refparam, "NumberOfEntries")) {
@@ -1600,7 +1600,8 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 {
 	/* PARAM, permission, type, getvalue, setvalue, bbfdm_type(6)*/
 	struct json_object *type = NULL, *protocols = NULL, *write = NULL, *async = NULL, *flags = NULL;
-	char full_param[512] = {0};
+	char full_param[1024] = {0};
+	char param_ext[256] = {0};
 	size_t n_flags;
 	// cppcheck-suppress nullPointerRedundantCheck
 	char **in_p = NULL, **out_p = NULL, **ev_arg = NULL, **tmp = NULL;
@@ -1608,8 +1609,8 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	if (!jobj || !pleaf)
 		return;
 
-	char *param_ext = replace_str(param, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
-	if (!param_ext)
+	replace_str(param, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, param_ext, sizeof(param_ext));
+	if (strlen(param_ext) == 0)
 		return;
 
 	//PARAM
@@ -1739,7 +1740,6 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	}
 
 	snprintf(full_param, sizeof(full_param), "%s%s", object, param_ext);
-	FREE(param_ext);
 	save_json_data(list, full_param, jobj, json_version, (const char**)in_p, (const char**)out_p, (const char**)ev_arg);
 }
 
@@ -1768,22 +1768,21 @@ void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json
 	DMOBJ *next_obj = NULL;
 	DMLEAF *next_leaf = NULL;
 	char **keys_p = NULL;
-	char curr_obj[128] = {0};
 
 	count_obj_param_under_jsonobj(jobj, &obj_number, &param_number);
 
-	char *obj_path = replace_str(object, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
-	if (!obj_path)
+	char obj_path[MAX_DM_LENGTH] = {0};
+	replace_str(object, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, obj_path, sizeof(obj_path));
+	if (strlen(obj_path) == 0)
 		return;
 
-	char *full_obj = replace_str(obj_path, ".{i}.", ".");
-	if (!full_obj) {
-		FREE(obj_path);
+	char full_obj[MAX_DM_LENGTH] = {0};
+	replace_str(obj_path, ".{i}.", ".", full_obj, sizeof(full_obj));
+	if (strlen(full_obj) == 0)
 		return;
-	}
 
-	json_plugin_find_current_obj(full_obj, curr_obj, sizeof(curr_obj));
-	FREE(obj_path);
+	char curr_obj[256] = {0};
+	json_plugin_find_current_obj(full_obj, curr_obj, sizeof(curr_obj));;
 
 	if (!pobj || strlen(curr_obj) == 0)
 		return;
@@ -1862,8 +1861,6 @@ void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json
 			i++;
 		}
 	}
-
-	FREE(full_obj);
 }
 
 int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
@@ -1877,21 +1874,21 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 	}
 
 	json_object_object_foreach(json, key, jobj) {
+		char obj_path[MAX_DM_LENGTH] = {0};
 
 		if (strcmp(key, "json_plugin_version") == 0) {
 			json_plugin_version = json_object_get_int(jobj);
 			continue;
 		}
 
-		char *obj_path = replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
-		if (obj_path == NULL) {
+		replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, obj_path, sizeof(obj_path));
+		if (strlen(obj_path) == 0) {
 			BBF_DEBUG("ERROR: Can't get the node object");
 			continue;
 		}
 
 		if (strncmp(obj_path, "Device.", strlen("Device.")) != 0 || obj_path[strlen(obj_path) - 1] != '.') {
 			BBF_DEBUG("ERROR: Object (%s) not valid", obj_path);
-			FREE(obj_path);
 			continue;
 		}
 
@@ -1899,7 +1896,6 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 		json_plugin_find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
 		if (strlen(obj_prefix) == 0) {
 			BBF_DEBUG("ERROR: Obj prefix is empty for (%s) Object", obj_path);
-			FREE(obj_path);
 			continue;
 		}
 
@@ -1907,14 +1903,12 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 		json_plugin_find_current_obj(obj_path, curr_obj, sizeof(curr_obj));
 		if (strlen(curr_obj) == 0) {
 			BBF_DEBUG("ERROR: Can't get the current object from (%s) parent object", obj_path);
-			FREE(obj_path);
 			continue;
 		}
 
 		DMOBJ *dm_entryobj = find_entry_obj(entryobj, obj_prefix);
 		if (!dm_entryobj) {
 			BBF_DEBUG("ERROR: entry obj doesn't exist for (%s) Object", obj_prefix);
-			FREE(obj_path);
 			continue;
 		}
 
@@ -1940,8 +1934,6 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 			memset(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
 			parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, json_plugin_version, &json_list);
 		}
-
-		FREE(obj_path);
 	}
 
 	save_loaded_json_files(&loaded_json_files, json);

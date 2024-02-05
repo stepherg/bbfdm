@@ -2062,44 +2062,93 @@ char *replace_char(char *str, char find, char replace)
 	return str;
 }
 
-char *replace_str(const char *str, const char *substr, const char *replacement)
+/**
+ * Replace all occurrences of a substring in a given string with another substring.
+ *
+ * @param input_str The input string where replacements will be performed.
+ * @param old_substr The substring to be replaced.
+ * @param new_substr The substring to replace `old_substr`.
+ * @param result_str The buffer to store the result. If NULL, memory will be allocated.
+ * @param buffer_len The length of the buffer. If `result_str` is not NULL, this should be the size of the buffer.
+ * @return A pointer to the result string. If `result_str` is provided, it will point to `result_str`, otherwise, it will be dynamically allocated.
+ */
+char *replace_str(const char *input_str, const char *old_substr, const char *new_substr, char *result_str, size_t buffer_len)
 {
-	if (!str || !substr || !replacement)
+	if (result_str && buffer_len > 0)
+		result_str[0] = 0;
+
+	if (!input_str || !old_substr || !new_substr || (result_str && buffer_len == 0))
 		return NULL;
 
-	int str_len = strlen(str);
-	int substr_len = strlen(substr);
-	int replacement_len = strlen(replacement);
-	int cnt = 0;
+	size_t input_str_len = strlen(input_str);
+	size_t old_substr_len = strlen(old_substr);
+	size_t new_substr_len = strlen(new_substr);
+	size_t occurrences = 0;
 
-	if (str_len == 0)
-		return strdup("");
-
-	if (substr_len == 0)
-		return strdup(str);
-
-	for (int i = 0; str[i] != '\0'; i++) {
-		if (DM_STRSTR(&str[i], substr) == &str[i]) {
-			cnt++;
-			i += substr_len - 1;
+	if (input_str_len == 0) {
+		// Handle case where the input string is empty
+		if (result_str && buffer_len > 0) {
+			return result_str;
+		} else {
+			return strdup("");
 		}
 	}
 
-	size_t new_str_len = str_len + cnt * (replacement_len - substr_len) + 1;
-	char *value = (char *)malloc(new_str_len * sizeof(char));
-
-	int i = 0;
-	while (*str) {
-		if (strstr(str, substr) == str) {
-			i += snprintf(&value[i], new_str_len - i, "%s", replacement);
-			str += substr_len;
+	if (old_substr_len == 0) {
+		// Handle case where the input substring is empty
+		if (result_str && buffer_len > 0) {
+			snprintf(result_str, buffer_len, "%s", input_str);
+			return result_str;
+		} else {
+			return strdup(input_str);
 		}
-		else
-			value[i++] = *str++;
 	}
-	value[i] = '\0';
 
-	return value;
+	// Count occurrences of old_substr in input_str
+	for (size_t i = 0; input_str[i] != '\0'; i++) {
+		if (strstr(&input_str[i], old_substr) == &input_str[i]) {
+			occurrences++;
+			i += old_substr_len;
+		}
+	}
+
+	size_t new_str_len = input_str_len + occurrences * (new_substr_len - old_substr_len) + 1;
+
+	if (result_str && buffer_len > 0 && new_str_len > buffer_len) {
+		// Buffer size is too small
+		return NULL;
+	}
+
+	// Allocate memory only if result_str is not provided
+	char *result = result_str ? result_str : (char *)malloc(new_str_len * sizeof(char));
+
+	if (!result) {
+		// Memory allocation failed
+		return NULL;
+	}
+
+	size_t i = 0;
+	while (*input_str) {
+		char *match = strstr(input_str, old_substr);
+		if (match == input_str) {
+			// Replace old_substr with new_substr
+			strncpy(&result[i], new_substr, new_substr_len);
+			i += new_substr_len;
+			input_str += old_substr_len;
+		} else if (match) {
+			// Copy characters from input_str to result until the match
+			size_t len = match - input_str;
+			strncpy(&result[i], input_str, len);
+			i += len;
+			input_str += len;
+		} else {
+			// No more occurrences, copy the remaining characters
+			result[i++] = *input_str++;
+		}
+	}
+	result[i] = '\0';
+
+	return result;
 }
 
 void strip_lead_trail_whitespace(char *str)

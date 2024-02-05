@@ -322,7 +322,7 @@ bool is_regular_file(const char *path);
 unsigned long file_system_size(const char *path, const enum fs_size_type_enum type);
 void remove_char(char *str, const char c);
 char *replace_char(char *str, char find, char replace);
-char *replace_str(const char *str, const char *substr, const char *replacement);
+char *replace_str(const char *input_str, const char *old_substr, const char *new_substr, char *result_str, size_t buffer_len);
 int dm_file_to_buf(const char *filename, void *buf, size_t buf_size);
 int dm_file_copy(char *src, char *dst);
 int check_browse_section(struct uci_section *s, void *data);
