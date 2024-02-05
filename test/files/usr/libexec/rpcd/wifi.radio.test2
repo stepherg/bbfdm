@@ -4,7 +4,7 @@
 
 case "$1" in
         list)
-                echo '{ "status" : {}, "stats": {}, "scanresults": {} }'
+                echo '{ "status" : {}, "stats": {}, "scanresults": {} , "channels": {}}'
         ;;
         call)
                 case "$2" in
@@ -17,6 +17,9 @@ case "$1" in
                         scanresults)
                                 cat /tmp/wifi.radio.test2.scanresults.data 2>/dev/null
                         ;;
+			channels)
+                                cat /tmp/wifi.radio.test2.channels.data 2>/dev/null
+			;;
                 esac
         ;;
 esac

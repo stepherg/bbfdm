@@ -1299,22 +1299,18 @@ static int set_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, voi
 /*#Device.WiFi.Radio.{i}.PossibleChannels!UBUS:wifi.radio.@Name/status//supp_channels[0].channels*/
 static int get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	json_object *res = NULL, *supp_channels = NULL, *arrobj = NULL;
-	char object[UBUS_OBJ_LEN], *cur_opclass = NULL;
-	int i = 0;
+	json_object *res = NULL;
+	char object[UBUS_OBJ_LEN], *bandwidth = NULL;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
-	cur_opclass = dmjson_get_value(res, 1, "opclass");
-	dmjson_foreach_obj_in_array(res, arrobj, supp_channels, i, 1, "supp_channels") {
-		char *opclass = dmjson_get_value(supp_channels, 1, "opclass");
-		if (DM_STRCMP(opclass, cur_opclass) != 0)
-			continue;
 
-		*value = dmjson_get_value_array_all(supp_channels, ",", 1, "channels");
-		break;
-	}
+	bandwidth = dmjson_get_value(res, 1, "bandwidth");
+	dmubus_call(object, "channels", UBUS_ARGS{{"bandwidth", bandwidth, String}}, 1, &res);
+	DM_ASSERT(res, *value = "");
+
+	*value = dmjson_get_value_array_all(res, ",", 1, "channels");
 	return 0;
 }
 
