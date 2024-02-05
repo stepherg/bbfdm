@@ -1881,20 +1881,15 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 		}
 
 		char obj_prefix[MAX_DM_LENGTH] = {0};
-		char obj_name[64] = {0};
 
 		char *obj_path = replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX);
 		find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
-		find_current_obj(obj_path, obj_name, sizeof(obj_name));
 
 		DMOBJ *dm_entryobj = find_entry_obj(entryobj, obj_prefix);
 		if (!dm_entryobj) {
 			FREE(obj_path);
 			continue;
 		}
-
-		// Disable object if it already exists in the main tree
-		disable_entry_obj(dm_entryobj, obj_name);
 
 		if (dm_entryobj->nextdynamicobj == NULL) {
 			dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));

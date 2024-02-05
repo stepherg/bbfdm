@@ -72,9 +72,6 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 		if (dynamic_obj[i].root_obj) {
 
-			// Disable object if it already exists in the main tree
-			disable_entry_obj(dm_entryobj, dynamic_obj[i].root_obj->obj);
-
 			if (dm_entryobj->nextdynamicobj == NULL) {
 				dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
 				dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
