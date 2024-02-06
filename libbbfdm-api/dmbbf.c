@@ -908,6 +908,36 @@ end:
 	return is_micro_service ? value : "";
 }
 
+static bool has_same_reference(char *curr_value, char *new_value)
+{
+	struct dm_reference reference = {0};
+	char key_name[256], key_value[256];
+	char param_value[2048] = {0};
+	regmatch_t pmatch[2];
+
+	snprintf(param_value, sizeof(param_value), "%s", new_value);
+
+	bbf_get_reference_args(param_value, &reference);
+
+	bool res = match(curr_value, "\\[(.*?)\\]", 2, pmatch);
+	if (!res)
+		return (DM_STRCMP(curr_value, reference.path) == 0);
+
+	int len = pmatch[0].rm_so;
+	if (len <= 0)
+		return false;
+
+	char *match_str = curr_value + pmatch[1].rm_so;
+	if (DM_STRLEN(match_str) == 0)
+		return false;
+
+	int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
+	if (n != 2)
+		return false;
+
+	return (DM_STRNCMP(curr_value, reference.path, len) == 0 && DM_STRCMP(key_value, reference.value) == 0);
+}
+
 static char *check_value_by_type(char *value, int type)
 {
 	int i = 0, len = DM_STRLEN(value);
@@ -2274,6 +2304,8 @@ static int mparam_set_value(DMPARAM_ARGS)
 
 		(leaf->getvalue)(refparam, dmctx, data, instance, &value);
 
+		snprintf(param_value, sizeof(param_value), "%s", dmctx->in_value);
+
 		if (leaf->type == DMT_BOOL) {
 			bool val = false;
 			int res = 0;
@@ -2283,17 +2315,19 @@ static int mparam_set_value(DMPARAM_ARGS)
 				BBF_DEBUG("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
 				return 0;
 			}
+		} else if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
+			if (DM_LSTRSTR(dmctx->in_value, "=>") == NULL)
+				get_reference_paramater_value(dmctx, dmctx->in_value, param_value, sizeof(param_value));
+
+			if (has_same_reference(value, param_value)) {
+				BBF_DEBUG("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
+				return 0;
+			}
 		} else {
 			if (DM_STRCMP(value, dmctx->in_value) == 0) {
 				BBF_DEBUG("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
 				return 0;
 			}
-		}
-
-		if ((leaf->dm_falgs & DM_FLAG_REFERENCE) && !DM_LSTRSTR(dmctx->in_value, "=>")) {
-			get_reference_paramater_value(dmctx, dmctx->in_value, param_value, sizeof(param_value));
-		} else {
-			snprintf(param_value, sizeof(param_value), "%s", dmctx->in_value);
 		}
 
 		char *param_val = dmstrdup(param_value);
