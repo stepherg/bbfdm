@@ -327,8 +327,12 @@ static void resolve_all_symbols(struct dmctx *ctx, void *data, char *instance, c
 
 			if (idx_pos != 0 && nbr_instances - idx_pos >= 0)
 				pos += snprintf(&new_key[pos], key_len - pos, "%s.", ctx->inst_buf[nbr_instances - idx_pos] ? ctx->inst_buf[nbr_instances - idx_pos] : "");
-		} else
+		} else if (strcmp(pch, "@Input") == 0) {
+			pos += snprintf(&new_key[pos], key_len - pos, "%s.", pchr ? dmjson_get_value((json_object *)value, 1, pchr) : "");
+			break;
+		} else {
 			pos += snprintf(&new_key[pos], key_len - pos, "%s.", pch);
+		}
 	}
 
 	if (pos && !has_dot)
@@ -981,7 +985,7 @@ static int ubus_set_operate(json_object *mapping_obj, int json_version, char *re
 	if (args) {
 		struct ubus_arg u_args[16] = {0};
 
-		int u_args_size = fill_ubus_arguments(ctx, data, instance, "", nbr_instances, json_version, args, u_args);
+		int u_args_size = fill_ubus_arguments(ctx, data, instance, value, nbr_instances, json_version, args, u_args);
 
 		if (u_args_size != 0) {
 			in_args = json_object_new_object();

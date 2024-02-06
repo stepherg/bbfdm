@@ -164,7 +164,9 @@ If we consider multi-instance objects, they are kind of special because we have 
 
 @Count     => Returns the count of instances
 
-@Value     => Replace with the value passed in set command, used for ubus set
+@Value     => Replace with the value passed in set command, only used for ubus **set**
+
+@Input.XXX => Replace with the value passed in Input 'XXX' option, only used for ubus **operate**
 
 ## How to have different mappings for get/set:
 ```json
