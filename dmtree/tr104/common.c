@@ -529,7 +529,15 @@ int init_call_log(void)
 				token += 1;
 				end = DM_LSTRSTR(token, ",");
 				CHECK_RESULT(end);
-				DM_STRNCPY(cdr.averageRoundTripDelay, token, end - token + 1);
+				DM_STRNCPY(cdr.localAverageRoundTripDelay, token, end - token + 1);
+
+				token = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(token);
+				token += 1;
+				end = DM_LSTRSTR(token, ",");
+				CHECK_RESULT(end);
+				DM_STRNCPY(cdr.remoteAverageRoundTripDelay, token, end - token + 1);
+
 
 				token = DM_LSTRSTR(token, ",");
 				CHECK_RESULT(token);

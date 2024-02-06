@@ -225,7 +225,14 @@ static int get_ServicesVoiceServiceCallLog_Src_MaxJitter(char *refparam, struct 
 static int get_ServicesVoiceServiceCallLog_Src_AverageRoundTripDelay(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct call_log_entry *entry = (struct call_log_entry *)data;
-	*value = (entry) ? dmstrdup(entry->averageRoundTripDelay) : "0";
+	*value = (entry) ? dmstrdup(entry->localAverageRoundTripDelay) : "0";
+	return 0;
+}
+
+static int get_ServicesVoiceServiceCallLog_Destination_AverageRoundTripDelay(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	struct call_log_entry *entry = (struct call_log_entry *)data;
+	*value = (entry) ? dmstrdup(entry->remoteAverageRoundTripDelay) : "0";
 	return 0;
 }
 
@@ -301,7 +308,7 @@ DMLEAF tServicesVoiceServiceCallLogSessionParams[] = {
 DMOBJ tServicesVoiceServiceCallLogSessionDestinationObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"DSP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationDSPObj, NULL, NULL, BBFDM_BOTH},
-{"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH},
+{"RTP", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tServicesVoiceServiceCallLogSessionDestinationRTPParams, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -360,4 +367,10 @@ DMLEAF tServicesVoiceServiceCallLogSessionSourceRTPParams[] = {
 {"AverageRoundTripDelay", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Src_AverageRoundTripDelay, NULL, BBFDM_BOTH},
 {"ReceivePacketLossRate", &DMREAD, DMT_UNINT, get_ServicesVoiceServiceCallLog_Src__ReceivePacketLossRate, NULL, BBFDM_BOTH},
 {0}
+};
+
+/* *** Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP. *** */
+DMLEAF tServicesVoiceServiceCallLogSessionDestinationRTPParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"AverageRoundTripDelay", &DMREAD, DMT_INT, get_ServicesVoiceServiceCallLog_Destination_AverageRoundTripDelay, NULL, BBFDM_BOTH},{0}
 };

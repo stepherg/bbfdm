@@ -62,7 +62,8 @@ struct call_log_entry {
 	char txpkts[20];
 	char jitter[20];
 	char maxJitter[20];
-	char averageRoundTripDelay[20];
+	char localAverageRoundTripDelay[20];
+	char remoteAverageRoundTripDelay[20];
 	char farEndInterarrivalJitter[20];
 	char averageFarEndInterarrivalJitter[20];
 	char receiveInterarrivalJitter[20];
