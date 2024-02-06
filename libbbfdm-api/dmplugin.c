@@ -49,7 +49,7 @@ static bool add_service_to_main_tree(DMOBJ *main_dm, char *srv_name, char *srv_p
 		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).obj = dm_dynamic_strdup(&global_memhead, srv_obj);
 		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).checkdep = dm_dynamic_strdup(&global_memhead, srv_name);
 	} else {
-		int idx = get_entry_idx(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0]);
+		int idx = get_entry_obj_idx(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0]);
 		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] = dm_dynamic_realloc(&global_memhead, dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
 		memset(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
 		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).obj = dm_dynamic_strdup(&global_memhead, srv_obj);
@@ -335,12 +335,17 @@ void disable_entry_obj(DMOBJ *entryobj, char *obj_path, const char *parent_obj, 
 	if (!entryobj || !plugin_path || DM_STRLEN(obj_path) == 0)
 		return;
 
+	char obj_name[256] = {0};
+	replace_str(obj_path, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, obj_name, sizeof(obj_name));
+	if (strlen(obj_name) == 0)
+		return;
+
 	DMOBJ *nextobj = entryobj->nextobj;
 
 	for (; (nextobj && nextobj->obj); nextobj++) {
 
-		if (DM_STRCMP(nextobj->obj, obj_path) == 0) {
-			BBF_INFO("## Excluding [%s%s.] from the core tree and the same object will be exposed again using (%s) ##", parent_obj, obj_path, plugin_path);
+		if (DM_STRCMP(nextobj->obj, obj_name) == 0) {
+			BBF_INFO("## Excluding [%s%s.] from the core tree and the same object will be exposed again using (%s) ##", parent_obj, obj_name, plugin_path);
 			nextobj->bbfdm_type = BBFDM_NONE;
 			return;
 		}
@@ -354,8 +359,8 @@ void disable_entry_obj(DMOBJ *entryobj, char *obj_path, const char *parent_obj, 
 					DMOBJ *jentryobj = next_dyn_array->nextobj[j];
 					for (; (jentryobj && jentryobj->obj); jentryobj++) {
 
-						if (DM_STRCMP(jentryobj->obj, obj_path) == 0) {
-							TRACE("## Excluding [%s%s.] from the core tree and the same object will be exposed again using (%s) ##", parent_obj, obj_path, plugin_path);
+						if (DM_STRCMP(jentryobj->obj, obj_name) == 0) {
+							BBF_INFO("## Excluding [%s%s.] from the core tree and the same object will be exposed again using (%s) ##", parent_obj, obj_name, plugin_path);
 							jentryobj->bbfdm_type = BBFDM_NONE;
 							return;
 						}
@@ -371,12 +376,17 @@ void disable_entry_leaf(DMOBJ *entryobj, char *leaf_path, const char *parent_obj
 	if (!entryobj || !plugin_path || DM_STRLEN(leaf_path) == 0)
 		return;
 
+	char leaf_name[256] = {0};
+	replace_str(leaf_path, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, leaf_name, sizeof(leaf_name));
+	if (strlen(leaf_name) == 0)
+		return;
+
 	DMLEAF *leaf = entryobj->leaf;
 
 	for (; (leaf && leaf->parameter); leaf++) {
 
-		if (DM_STRCMP(leaf->parameter, leaf_path) == 0) {
-			BBF_INFO("## Excluding [%s%s] from the core tree and the same parameter will be exposed again using (%s) ##", parent_obj, leaf_path, plugin_path);
+		if (DM_STRCMP(leaf->parameter, leaf_name) == 0) {
+			BBF_INFO("## Excluding [%s%s] from the core tree and the same parameter will be exposed again using (%s) ##", parent_obj, leaf_name, plugin_path);
 			leaf->bbfdm_type = BBFDM_NONE;
 			return;
 		}
@@ -390,8 +400,8 @@ void disable_entry_leaf(DMOBJ *entryobj, char *leaf_path, const char *parent_obj
 					DMLEAF *jleaf = next_dyn_array->nextleaf[j];
 					for (; (jleaf && jleaf->parameter); jleaf++) {
 
-						if (DM_STRCMP(jleaf->parameter, leaf_path) == 0) {
-							TRACE("## Excluding [%s%s] from the core tree and the same parameter will be exposed again using (%s) ##", parent_obj, leaf_path, plugin_path);
+						if (DM_STRCMP(jleaf->parameter, leaf_name) == 0) {
+							BBF_INFO("## Excluding [%s%s] from the core tree and the same parameter will be exposed again using (%s) ##", parent_obj, leaf_name, plugin_path);
 							jleaf->bbfdm_type = BBFDM_NONE;
 							return;
 						}
@@ -402,11 +412,21 @@ void disable_entry_leaf(DMOBJ *entryobj, char *leaf_path, const char *parent_obj
 	}
 }
 
-int get_entry_idx(DMOBJ *entryobj)
+int get_entry_obj_idx(DMOBJ *entryobj)
 {
 	int idx = 0;
 
 	for (; (entryobj && entryobj->obj); entryobj++)
+		idx++;
+
+	return idx;
+}
+
+int get_entry_leaf_idx(DMLEAF *entryleaf)
+{
+	int idx = 0;
+
+	for (; (entryleaf && entryleaf->parameter); entryleaf++)
 		idx++;
 
 	return idx;

@@ -16,7 +16,8 @@ DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path);
 void disable_entry_obj(DMOBJ *entryobj, char *obj_path, const char *parent_obj, const char *plugin_path);
 void disable_entry_leaf(DMOBJ *entryobj, char *leaf_path, const char *parent_obj, const char *plugin_path);
 
-int get_entry_idx(DMOBJ *entryobj);
+int get_entry_obj_idx(DMOBJ *entryobj);
+int get_entry_leaf_idx(DMLEAF *entryleaf);
 int get_obj_idx(DMOBJ **entryobj);
 int get_leaf_idx(DMLEAF **entryleaf);
 

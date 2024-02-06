@@ -1,4 +1,61 @@
 {
+  "Device.WiFi.": {
+    "type": "object",
+    "protocols": [
+      "cwmp",
+      "usp"
+    ],
+    "access": false,
+    "array": false,
+    "{BBF_VENDOR_PREFIX}TEST1": {
+  	  "type": "boolean",
+  	  "protocols": [
+  	    "cwmp",
+  	    "usp"
+  	  ],
+  	  "read": true,
+  	  "write": true,
+  	  "datatype": "boolean",
+  	  "mapping": [
+  	    {
+  	      "type": "uci",
+  	      "uci": {
+  	        "file": "wireless",
+  	        "section": {
+  	          "name": "config"
+  	        },
+  	        "option": {
+  	          "name": "test1_enable"
+  	        }
+  	      }
+  	    }
+  	  ]
+    },
+    "{BBF_VENDOR_PREFIX}TEST2": {
+  	  "type": "boolean",
+  	  "protocols": [
+  	    "cwmp",
+  	    "usp"
+  	  ],
+  	  "read": true,
+  	  "write": true,
+  	  "datatype": "boolean",
+  	  "mapping": [
+  	    {
+  	      "type": "uci",
+  	      "uci": {
+  	        "file": "wireless",
+  	        "section": {
+  	          "name": "config"
+  	        },
+  	        "option": {
+  	          "name": "test1_enable"
+  	        }
+  	      }
+  	    }
+  	  ]
+    }
+  },
   "Device.PD2.{i}.": {
     "type": "object",
     "version": "2.14",

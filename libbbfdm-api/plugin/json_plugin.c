@@ -1863,6 +1863,54 @@ void parse_obj(char *object, json_object *jobj, DMOBJ *pobj, int index, int json
 	}
 }
 
+static void create_parse_obj(DMOBJ *dm_entryobj, char *obj_path, json_object *jobj, int json_plugin_version)
+{
+	if (dm_entryobj->nextdynamicobj == NULL) {
+		dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
+		dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
+		dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
+		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
+	}
+
+	if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj == NULL) {
+		dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj = calloc(2, sizeof(struct dm_obj_s *));
+	}
+
+	if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] == NULL) {
+		dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_calloc(&json_memhead, 2, sizeof(struct dm_obj_s));
+		parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], 0, json_plugin_version, &json_list);
+	} else {
+		int idx = get_entry_obj_idx(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0]);
+		dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_realloc(&json_memhead, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
+		memset(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
+		parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, json_plugin_version, &json_list);
+	}
+}
+
+static void create_parse_param(DMOBJ *dm_entryobj, char *obj_path, char *param, json_object *jobj, int json_plugin_version)
+{
+	if (dm_entryobj->dynamicleaf == NULL) {
+		dm_entryobj->dynamicleaf = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
+		dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
+		dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
+		dm_entryobj->dynamicleaf[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
+	}
+
+	if (dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf == NULL) {
+		dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf = calloc(2, sizeof(struct dm_leaf_s *));
+	}
+
+	if (dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf[0] == NULL) {
+		dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf[0] = dm_dynamic_calloc(&json_memhead, 2, sizeof(struct dm_leaf_s));
+		parse_param(obj_path, param, jobj, dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf[0], 0, json_plugin_version, &json_list);
+	} else {
+		int idx = get_entry_leaf_idx(dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf[0]);
+		dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf[0] = dm_dynamic_realloc(&json_memhead, dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf[0], (idx + 2) * sizeof(struct dm_leaf_s));
+		memset(dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf[0] + (idx + 1), 0, sizeof(struct dm_leaf_s));
+		parse_param(obj_path, param, jobj, dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf[0], idx, json_plugin_version, &json_list);
+	}
+}
+
 int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 {
 	int json_plugin_version = JSON_VERSION_0;
@@ -1892,47 +1940,40 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 			continue;
 		}
 
-		char obj_prefix[MAX_DM_LENGTH] = {0};
-		json_plugin_find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
-		if (strlen(obj_prefix) == 0) {
-			BBF_DEBUG("ERROR: Obj prefix is empty for (%s) Object", obj_path);
-			continue;
-		}
+		DMOBJ *dm_entryobj = find_entry_obj(entryobj, obj_path);
+		if (dm_entryobj) { // The object is already in the core tree, should check the next level
 
-		char curr_obj[128] = {0};
-		json_plugin_find_current_obj(obj_path, curr_obj, sizeof(curr_obj));
-		if (strlen(curr_obj) == 0) {
-			BBF_DEBUG("ERROR: Can't get the current object from (%s) parent object", obj_path);
-			continue;
-		}
+			json_object_object_foreach(jobj, opt, json_obj) {
 
-		DMOBJ *dm_entryobj = find_entry_obj(entryobj, obj_prefix);
-		if (!dm_entryobj) {
-			BBF_DEBUG("ERROR: entry obj doesn't exist for (%s) Object", obj_prefix);
-			continue;
-		}
+				if (json_object_get_type(json_obj) == json_type_object && is_obj(opt, json_obj)) {
+					char curr_obj[128] = {0};
 
-		disable_entry_obj(dm_entryobj, curr_obj, obj_prefix, plugin_path);
+					json_plugin_find_current_obj(opt, curr_obj, sizeof(curr_obj));
 
-		if (dm_entryobj->nextdynamicobj == NULL) {
-			dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
-			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
-			dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-			dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
-		}
+					disable_entry_obj(dm_entryobj, curr_obj, obj_path, plugin_path);
+					create_parse_obj(dm_entryobj, opt, json_obj, json_plugin_version);
+				}
 
-		if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj == NULL) {
-			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj = calloc(2, sizeof(struct dm_obj_s *));
-		}
+				if (json_object_get_type(json_obj) == json_type_object && !is_obj(opt, json_obj) && strcmp(opt, "mapping") != 0) {
+					disable_entry_leaf(dm_entryobj, opt, obj_path, plugin_path);
+					create_parse_param(dm_entryobj, obj_path, opt, json_obj, json_plugin_version);
+				}
+			}
+		} else { // It's a new object
+			char obj_prefix[MAX_DM_LENGTH] = {0};
+			json_plugin_find_prefix_obj(obj_path, obj_prefix, MAX_DM_LENGTH);
+			if (strlen(obj_prefix) == 0) {
+				BBF_DEBUG("ERROR: Obj prefix is empty for (%s) Object", obj_path);
+				continue;
+			}
 
-		if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] == NULL) {
-			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_calloc(&json_memhead, 2, sizeof(struct dm_obj_s));
-			parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], 0, json_plugin_version, &json_list);
-		} else {
-			int idx = get_entry_idx(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0]);
-			dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] = dm_dynamic_realloc(&json_memhead, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
-			memset(dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
-			parse_obj(obj_path, jobj, dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj[0], idx, json_plugin_version, &json_list);
+			dm_entryobj = find_entry_obj(entryobj, obj_prefix);
+			if (!dm_entryobj) {
+				BBF_DEBUG("ERROR: entry obj doesn't exist for (%s) Object", obj_prefix);
+				continue;
+			}
+
+			create_parse_obj(dm_entryobj, obj_path, jobj, json_plugin_version);
 		}
 	}
 

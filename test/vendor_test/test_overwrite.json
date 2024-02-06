@@ -1,5 +1,5 @@
 {
-  "Device.DeviceInfo.Processor.": {
+  "Device.DeviceInfo.": {
     "type": "object",
     "protocols": [
       "cwmp",
@@ -7,15 +7,34 @@
     ],
     "access": false,
     "array": false,
-    "Architecture": {
-      "type": "string",
+    "Device.DeviceInfo.Processor.": {
+      "type": "object",
       "protocols": [
         "cwmp",
         "usp"
       ],
+      "access": false,
+      "array": false,
+      "Architecture": {
+        "type": "string",
+        "protocols": [
+          "cwmp",
+          "usp"
+        ],
+        "read": true,
+        "write": false,
+        "default": "x86_64"
+      }
+    },
+    "ProcessorNumberOfEntries": {
+      "type": "unsignedInt",
       "read": true,
       "write": false,
-      "default": "x86_64"
+      "protocols": [
+        "cwmp",
+        "usp"
+      ],
+      "default": "1"
     }
   }
 }
