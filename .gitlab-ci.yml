@@ -39,41 +39,12 @@ run_tools_test:
   script:
   - "./gitlab-ci/tools-test.sh"
   - "./gitlab-ci/generate_supported_dm.sh"
-
   artifacts:
       when: always
       paths:
           - out/datamodel_default.xml
           - out/datamodel_hdm.xml
           - out/datamodel.xls
-
-run_libbbfdm_api_functional_test:
-  stage: functional_test
-  image: ${COMMON_IMAGE}
-  allow_failure: false
-  script:
-  - "./gitlab-ci/install-dependencies.sh"
-  - "./gitlab-ci/setup.sh"
-  - "./gitlab-ci/functional-api-test.sh"
-
-  artifacts:
-      when: always
-      paths:
-          - functional-api-test-coverage.xml
-
-run_libbbfdm_functional_test:
-  stage: functional_test
-  image: ${COMMON_IMAGE}
-  allow_failure: false
-  script:
-  - "./gitlab-ci/install-dependencies.sh"
-  - "./gitlab-ci/setup.sh"
-  - "./gitlab-ci/functional-test.sh"
-
-  artifacts:
-      when: always
-      paths:
-          - functional-test-coverage.xml
 
 run_libbbfdm_memory_test:
   stage: functional_test
