@@ -39,6 +39,8 @@ run_tools_test:
   script:
     - "./gitlab-ci/tools-test.sh"
     - "./gitlab-ci/generate_supported_dm.sh"
+  only:
+    - merge_requests
   artifacts:
     when: always
     paths:
