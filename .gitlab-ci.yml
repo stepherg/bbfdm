@@ -11,22 +11,22 @@ include:
   - project: 'docs/portal2/pipeline-template'
     file: 'MkDocs.gitlab-ci.yml'
     rules:
-       - if: $CI_COMMIT_BRANCH == "devel"
+      - if: $CI_COMMIT_BRANCH == "devel"
 
 stages:
-    - static_code_analysis
-    - unit_test
-    - functional_test
-    - deploy
+  - static_code_analysis
+  - unit_test
+  - functional_test
+  - deploy
 
 run_unit_test:
   stage: unit_test
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
-  - "./gitlab-ci/install-dependencies.sh"
-  - "./gitlab-ci/setup.sh"
-  - "./gitlab-ci/unit-test.sh"
+    - "./gitlab-ci/install-dependencies.sh"
+    - "./gitlab-ci/setup.sh"
+    - "./gitlab-ci/unit-test.sh"
   artifacts:
     when: always
     paths:
@@ -37,43 +37,43 @@ run_tools_test:
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
-  - "./gitlab-ci/tools-test.sh"
-  - "./gitlab-ci/generate_supported_dm.sh"
+    - "./gitlab-ci/tools-test.sh"
+    - "./gitlab-ci/generate_supported_dm.sh"
   artifacts:
-      when: always
-      paths:
-          - out/datamodel_default.xml
-          - out/datamodel_hdm.xml
-          - out/datamodel.xls
+    when: always
+    paths:
+      - out/datamodel_default.xml
+      - out/datamodel_hdm.xml
+      - out/datamodel.xls
 
 run_libbbfdm_memory_test:
   stage: functional_test
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
-  - "./gitlab-ci/install-dependencies.sh"
-  - "./gitlab-ci/setup.sh"
-  - "./gitlab-ci/memory-test.sh"
+    - "./gitlab-ci/install-dependencies.sh"
+    - "./gitlab-ci/setup.sh"
+    - "./gitlab-ci/memory-test.sh"
   artifacts:
-      when: always
-      paths:
-          - output-report-device-get.txt
-          - memory-*.xml
+    when: always
+    paths:
+      - output-report-device-get.txt
+      - memory-*.xml
 
 run_bbfd_functional_test:
-    stage: functional_test
-    image: ${COMMON_IMAGE}
-    allow_failure: false
-    script:
+  stage: functional_test
+  image: ${COMMON_IMAGE}
+  allow_failure: false
+  script:
     - "./gitlab-ci/install-dependencies.sh"
     - "./gitlab-ci/setup.sh"
     - "./gitlab-ci/bbfdmd-functional-test.sh"
-    artifacts:
-        when: always
-        reports:
-            junit: ./report/*.xml
-        paths:
-            - funl-result.log
-            - funl-test-coverage.xml
-            - report/
-            - memory-*.xml
+  artifacts:
+    when: always
+    reports:
+      junit: ./report/*.xml
+    paths:
+      - funl-result.log
+      - funl-test-coverage.xml
+      - report/
+      - memory-*.xml
