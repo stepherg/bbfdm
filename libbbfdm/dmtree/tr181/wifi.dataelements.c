@@ -651,22 +651,22 @@ static int get_WiFiDataElementsNetwork_option(char *method_name, const char *opt
 	return 0;
 }
 
-/*#Device.WiFi.DataElements.Network.ID!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.ID*/
+/*#Device.WiFi.DataElements.Network.ID!UBUS:wifi.dataelements.collector/dump2//data[0].wfa-dataelements:Network.ID*/
 static int get_WiFiDataElementsNetwork_ID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_WiFiDataElementsNetwork_option("dump", "ID", false, value);
+	return get_WiFiDataElementsNetwork_option("dump2", "ID", false, value);
 }
 
-/*#Device.WiFi.DataElements.Network.TimeStamp!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.TimeStamp*/
+/*#Device.WiFi.DataElements.Network.TimeStamp!UBUS:wifi.dataelements.collector/dump2//data[0].wfa-dataelements:Network.TimeStamp*/
 static int get_WiFiDataElementsNetwork_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_WiFiDataElementsNetwork_option("dump", "TimeStamp", false, value);
+	return get_WiFiDataElementsNetwork_option("dump2", "TimeStamp", false, value);
 }
 
-/*#Device.WiFi.DataElements.Network.ControllerID!UBUS:wifi.dataelements.collector/dump//data[0].wfa-dataelements:Network.ControllerID*/
+/*#Device.WiFi.DataElements.Network.ControllerID!UBUS:wifi.dataelements.collector/dump2//data[0].wfa-dataelements:Network.ControllerID*/
 static int get_WiFiDataElementsNetwork_ControllerID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_WiFiDataElementsNetwork_option("dump", "ControllerID", false, value);
+	return get_WiFiDataElementsNetwork_option("dump2", "ControllerID", false, value);
 }
 
 static int get_WiFiDataElementsNetwork_DeviceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
