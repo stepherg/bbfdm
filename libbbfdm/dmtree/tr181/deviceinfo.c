@@ -662,7 +662,7 @@ static void dmubus_receive_sysupgrade(struct ubus_context *ctx, struct ubus_even
 
 static int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
-		const char *bank_id, const char *command, const char *obj_path, const char *commandKey)
+		const char *bank_id, const char *command, const char *obj_path, const char *commandKey, char *keep)
 {
 	char fw_image_path[256] = "/tmp/firmware-XXXXXX";
 	json_object *json_obj = NULL;
@@ -726,8 +726,11 @@ static int bbf_fw_image_download(const char *url, const char *auto_activate, con
 		goto end;
 	}
 
+	// default state is to preserve the config over firmware upgrades
+	char *keep_config = DM_STRLEN((char *)keep) ? keep : "1";
+
 	// Apply Firmware Image
-	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", act, Boolean}, {"bank", bank_id, Integer}}, 3, &json_obj);
+	dmubus_call_blocking("fwbank", "upgrade", UBUS_ARGS{{"path", fw_image_path, String}, {"auto_activate", act, Boolean}, {"bank", bank_id, Integer}, {"keep_settings", keep_config, Boolean}}, 4, &json_obj);
 	if (json_obj == NULL) {
 		res = 1;
 		snprintf(fault_msg, sizeof(fault_msg), "Internal error occurred when applying the firmware");
@@ -1720,6 +1723,7 @@ static operation_args firmware_image_download_args = {
 		"CheckSumAlgorithm",
 		"CheckSum",
 		"CommandKey",
+		BBF_VENDOR_PREFIX"KeepConfig",
 		NULL
 	}
 };
@@ -1755,11 +1759,11 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 	char *checksum_algorithm = dmjson_get_value((json_object *)value, 1, "CheckSumAlgorithm");
 	char *checksum = dmjson_get_value((json_object *)value, 1, "CheckSum");
 	char *commandKey = dmjson_get_value((json_object *)value, 1, "CommandKey");
-
+	char *keep_config = dmjson_get_value((json_object *)value, 1, BBF_VENDOR_PREFIX"KeepConfig");
 
 	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
 
-	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path, commandKey);
+	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path, commandKey, keep_config);
 
 	if (res == 1) {
 		bbfdm_set_fault_message(ctx, "Firmware validation failed");
