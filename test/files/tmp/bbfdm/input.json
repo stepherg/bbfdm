@@ -1,6 +1,7 @@
 {
 	"daemon": {
 		"config": {
+		    "loglevel": 2
 		},
 		"input": {
 			"type": "DotSo",

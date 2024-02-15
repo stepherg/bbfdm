@@ -1,0 +1,23 @@
+{
+    "events": [
+        {
+            "description": "Validate ubus bbfdm <notify_event> method",
+            "service": "bbfdm",
+            "method": "notify_event",
+            "input": {
+                "name": "Device.LocalAgent.TransferComplete!",
+                "input": {
+                    "param1": "val1",
+                    "param2": "val2"
+                }
+            },
+            "output": {
+                "name": "Device.LocalAgent.TransferComplete!",
+                "input": {
+                    "param1": "val1",
+                    "param2": "val2"
+                }
+            }
+        }
+    ]
+}

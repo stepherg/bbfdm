@@ -1,0 +1,70 @@
+{
+    "events": [
+        {
+            "description": "Validate <bbfdm.event> event using internal event defined in the core Data Model: Device.WiFi.DataElements.AssociationEvent.Associated!",
+            "event_name": "wifi.dataelements.Associated",
+            "inputs": {
+                "eventTime": "2020-10-24T01:09:34+01:00",
+                "wfa-dataelements:AssociationEvent": {
+                    "AssocData": {
+                        "BSSID": "00:22:07:6b:17:52",
+                        "MACAddress": "54:b8:02:80:25:e8",
+                        "StatusCode": 12,
+                        "HTCapabilities": "AA==\n",
+                        "VHTCapabilities": "AAAAAAAA\n",
+                        "HECapabilities": "AA==\n"
+                    }
+                }
+            },
+            "output": {
+                "name": "Device.WiFi.DataElements.AssociationEvent.Associated!",
+                "input": {
+                    "TimeStamp": "2020-10-24T01:09:34+01:00",
+                    "BSSID": "00:22:07:6b:17:52",
+                    "MACAddress": "54:b8:02:80:25:e8",
+                    "StatusCode": "12",
+                    "HTCapabilities": "AA==\n",
+                    "VHTCapabilities": "AAAAAAAA\n",
+                    "HECapabilities": "AA==\n"
+                }
+            }
+        },
+        {
+            "description": "Validate <bbfdm.event> event using internal event defined in the core Data Model: Device.WiFi.DataElements.DisassociationEvent.Disassociated!",
+            "event_name": "wifi.dataelements.Disassociated",
+            "inputs": {
+                "eventTime": "2020-10-24T01:10:20+01:00",
+                "wfa-dataelements:DisassociationEvent": {
+                    "DisassocData": {
+                        "BSSID": "00:22:07:6b:17:51",
+                        "MACAddress": "d2:a2:d1:17:27:f7",
+                        "ReasonCode": 12,
+                        "BytesSent": 181625,
+                        "BytesReceived": 11497,
+                        "PacketsSent": 1951,
+                        "PacketsReceived": 105,
+                        "ErrorsSent": 107,
+                        "ErrorsReceived": 78,
+                        "RetransCount": 9999
+                    }
+                }
+            },
+            "output": {
+                "name": "Device.WiFi.DataElements.DisassociationEvent.Disassociated!",
+                "input": {
+                    "TimeStamp": "2020-10-24T01:10:20+01:00",
+                    "BSSID": "00:22:07:6b:17:51",
+                    "MACAddress": "d2:a2:d1:17:27:f7",
+                    "ReasonCode": "12",
+                    "BytesSent": "181625",
+                    "BytesReceived": "11497",
+                    "PacketsSent": "1951",
+                    "PacketsReceived": "105",
+                    "ErrorsSent": "107",
+                    "ErrorsReceived": "78",
+                    "RetransCount": "9999"
+                }
+            }
+        }
+    ]
+}

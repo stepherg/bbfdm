@@ -12,7 +12,7 @@ child = pexpect.spawn('ubus monitor')
 os.rename("/etc/config/dropbear", "/etc/config/dropbear_1")
 
 try:
-    ret = child.expect('notify', timeout=65)
+    ret = child.expect('notify', timeout=40)
 except:
     print("FAIL: Schema updater notification")
 
@@ -26,6 +26,18 @@ if ret == 0:
 os.rename("/etc/config/dropbear_1", "/etc/config/dropbear")
 
 if ret == 0:
+    try:
+        ret = child.expect('notify', timeout=40)
+    except:
+        print("FAIL: Schema updater notification")
+        
+if ret == 0:
+    try:
+        ret = child.expect('bbfdm.AddObj')
+    except:
+        print("FAIL: Schema updater notification")
+
+if ret == 0:        
     print("PASS: Schema updater notification")
 
 exit(ret)
