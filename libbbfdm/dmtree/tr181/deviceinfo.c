@@ -1322,6 +1322,7 @@ static operation_args firmware_image_download_args = {
 		"CheckSumAlgorithm",
 		"CheckSum",
 		"CommandKey",
+		BBF_VENDOR_PREFIX"KeepConfig",
 		NULL
 	}
 };
@@ -1357,11 +1358,11 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 	char *checksum_algorithm = dmjson_get_value((json_object *)value, 1, "CheckSumAlgorithm");
 	char *checksum = dmjson_get_value((json_object *)value, 1, "CheckSum");
 	char *commandKey = dmjson_get_value((json_object *)value, 1, "CommandKey");
-
+	char *keep_config = dmjson_get_value((json_object *)value, 1, BBF_VENDOR_PREFIX"KeepConfig");
 
 	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
 
-	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path, commandKey);
+	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path, commandKey, keep_config);
 
 	if (res == 1) {
 		bbfdm_set_fault_message(ctx, "Firmware validation failed");

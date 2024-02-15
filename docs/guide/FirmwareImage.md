@@ -108,3 +108,34 @@ If the exit code from the idle script is zero then firmware image can be activat
 * This document is only target for Firmware management using USP.
 
 * TimeWindow.{i}.Mode = 'ConfirmationNeeded' is not supported.
+
+
+## Vendor extension option to keep config while firmware download
+
+It deployments for some customers, its required to do a factory reset after doing a firmware upgrade to start the CPE from clean state and then provision it from ACS/Controller.
+
+As per standard datamodel, it's at-least 2 step time consuming process:
+- Download the Firmware using 'Device.DeviceInfo.FirmwareImage.{i}.Download()' operate command with AutoActivate=1
+- Wait for the 'Device.Boot!' event
+- Factory reset the CPE using 'Device.FactoryReset()'
+- Wait for the Boot event and then start provisioning.
+
+We added an addition vendor specific input option which can be used by USP controller to factoryReset the CPE along with Firmware Upgrade, with this customer can save the cost of one additional reboot, which result into faster provisioning of the CPE.
+
+Below are the current input options defined for Download operate command
+```bash
+Device.DeviceInfo.FirmwareImage.{i}.Download()
+Device.DeviceInfo.FirmwareImage.{i}.Download() input:AutoActivate
+Device.DeviceInfo.FirmwareImage.{i}.Download() input:CheckSum
+Device.DeviceInfo.FirmwareImage.{i}.Download() input:CheckSumAlgorithm
+Device.DeviceInfo.FirmwareImage.{i}.Download() input:CommandKey
+Device.DeviceInfo.FirmwareImage.{i}.Download() input:FileSize
+Device.DeviceInfo.FirmwareImage.{i}.Download() input:Password
+Device.DeviceInfo.FirmwareImage.{i}.Download() input:URL
+Device.DeviceInfo.FirmwareImage.{i}.Download() input:Username
+Device.DeviceInfo.FirmwareImage.{i}.Download() input:X_IOPSYS_EU_KeepConfig
+```
+
+Customer can use X_IOPSYS_EU_KeepConfig=0, to do factory reset(not copy the current config to next firmware) while doing the download.
+
+> Note: Default value of X_IOPSYS_EU_KeepConfig is 1, so in case this option not used, it keeps the config(as the default behavior of the CPE).

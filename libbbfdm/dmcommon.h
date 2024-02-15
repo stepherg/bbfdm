@@ -55,7 +55,7 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 		const char *command, const char *obj_path);
 int bbf_fw_image_download(const char *url, const char *auto_activate, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
-		const char *bank_id, const char *command, const char *obj_path, const char *commandKey);
+		const char *bank_id, const char *command, const char *obj_path, const char *commandKey, char *keep);
 
 bool ip___is_ip_interface_instance_exists(const char *sec_name, const char *device);
 void ip___update_child_interfaces(char *device, char *option_name, char *option_value);
