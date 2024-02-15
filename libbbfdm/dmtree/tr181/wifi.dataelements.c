@@ -3237,12 +3237,12 @@ static int get_event_args_WiFiDataElementsAssociationEvent_Associated(char *refp
 static int event_WiFiDataElementsAssociationEvent_Associated(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *event_time = dmjson_get_value((json_object *)value, 1, "eventTime");
-	char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "BSSID");
-	char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "MACAddress");
-	char *status_code = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "StatusCode");
-	char *ht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "HTCapabilities");
-	char *vht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "VHTCapabilities");
-	char *he_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "HECapabilities");
+	char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "BSSID");
+	char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "MACAddress");
+	char *status_code = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "StatusCode");
+	char *ht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "HTCapabilities");
+	char *vht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "VHTCapabilities");
+	char *he_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "HECapabilities");
 
 	add_list_parameter(ctx, dmstrdup("TimeStamp"), dmstrdup(event_time), DMT_TYPE[DMT_STRING], NULL);
 	add_list_parameter(ctx, dmstrdup("BSSID"), dmstrdup(bssid), DMT_TYPE[DMT_STRING], NULL);
