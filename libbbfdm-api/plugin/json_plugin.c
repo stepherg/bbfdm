@@ -897,6 +897,8 @@ end:
 static char *get_value_from_mapping(json_object *param_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance)
 {
 	struct json_object *mapping_arr = NULL, *mapping = NULL, *def_value = NULL;
+	char *def_val = NULL;
+	char *val = NULL;
 
 	if (!param_obj)
 		return "";
@@ -904,8 +906,7 @@ static char *get_value_from_mapping(json_object *param_obj, int json_version, ch
 	// Check if default value option exists
 	json_object_object_get_ex(param_obj, "default", &def_value);
 	if (def_value) {
-		char *val = json_object_get_string(def_value);
-		return val ? dm_dynamic_strdup(&json_memhead, val) : "";
+		def_val = json_object_get_string(def_value);
 	}
 
 	json_object_object_get_ex(param_obj, "mapping", &mapping_arr);
@@ -921,21 +922,28 @@ static char *get_value_from_mapping(json_object *param_obj, int json_version, ch
 			if (rpc && json_version == JSON_VERSION_1 && strcmp(json_object_get_string(rpc), "get") != 0)
 				continue;
 
-			if (type && strcmp(json_object_get_string(type), "uci") == 0)
-				return uci_get_value(mapping, json_version, refparam, ctx, data, instance);
-			else if (type && strcmp(json_object_get_string(type), "ubus") == 0)
-				return ubus_get_value(mapping, json_version, refparam, ctx, data, instance);
-			else if (type && strcmp(json_object_get_string(type), "uci_sec") == 0 && json_version == JSON_VERSION_1)
-				return uci_v1_get_value(mapping, refparam, ctx, data, instance);
-			else if (type && strcmp(json_object_get_string(type), "json") == 0 && json_version == JSON_VERSION_1)
-				return ubus_v1_get_value(mapping, refparam, ctx, data, instance);
-			else
-				return "";
+			if (type && strcmp(json_object_get_string(type), "uci") == 0) {
+				val = uci_get_value(mapping, json_version, refparam, ctx, data, instance);
+				break;
+			} else if (type && strcmp(json_object_get_string(type), "ubus") == 0) {
+				val = ubus_get_value(mapping, json_version, refparam, ctx, data, instance);
+				break;
+			} else if (type && strcmp(json_object_get_string(type), "uci_sec") == 0 && json_version == JSON_VERSION_1) {
+				val = uci_v1_get_value(mapping, refparam, ctx, data, instance);
+				break;
+			} else if (type && strcmp(json_object_get_string(type), "json") == 0 && json_version == JSON_VERSION_1) {
+				val = ubus_v1_get_value(mapping, refparam, ctx, data, instance);
+				break;
+			} else
+				break;
 		}
 
 	}
 
-	return "";
+	if (DM_STRLEN(val) != 0)
+		return val;
+
+	return def_val ? dm_dynamic_strdup(&json_memhead, def_val) : "";
 }
 
 static int getvalue_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
