@@ -82,16 +82,8 @@ extern DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6CapabilitiesParams[]
 extern DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTATIDQueueSizesParams[];
 extern DMLEAF tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams[];
 extern DMLEAF tWiFiDataElementsNetworkDeviceRadioMultiAPRadioParams[];
-extern DMOBJ tWiFiDataElementsAssociationEventObj[];
 extern DMLEAF tWiFiDataElementsAssociationEventParams[];
-extern DMOBJ tWiFiDataElementsAssociationEventAssociationEventDataObj[];
-extern DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataParams[];
-extern DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataWiFi6CapabilitiesParams[];
-extern DMOBJ tWiFiDataElementsDisassociationEventObj[];
 extern DMLEAF tWiFiDataElementsDisassociationEventParams[];
-extern DMLEAF tWiFiDataElementsDisassociationEventDisassociationEventDataParams[];
-extern DMOBJ tWiFiDataElementsFailedConnectionEventObj[];
 extern DMLEAF tWiFiDataElementsFailedConnectionEventParams[];
-extern DMLEAF tWiFiDataElementsFailedConnectionEventFailedConnectionEventDataParams[];
 
 #endif //__WIFI_DATAELEMENTS_H

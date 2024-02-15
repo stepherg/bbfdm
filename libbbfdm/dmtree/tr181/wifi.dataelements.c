@@ -588,50 +588,6 @@ static int browseWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulCurrentOperat
 }
 */
 
-static int browseWiFiDataElementsAssociationEventAssociationEventDataInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	struct wifi_event_args curr_wifi_event_args = {0};
-	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *assoc_ev = NULL, *assoc_obj = NULL;
-	char *inst = NULL;
-	int id = 0, i = 0;
-
-	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{0}, 0, &res);
-	dmjson_foreach_obj_in_array_reverse(res, notify_arr, notify_obj, i, 1, "notification") {
-		curr_wifi_event_args.event_time = dmjson_get_value(notify_obj, 1, "eventTime");
-		if (json_object_object_get_ex(notify_obj, "wfa-dataelements:AssociationEvent", &assoc_ev)) {
-			if (json_object_object_get_ex(assoc_ev, "AssocData", &assoc_obj)) {
-				curr_wifi_event_args.event_obj = assoc_obj;
-				inst = handle_instance_without_section(dmctx, parent_node, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_event_args, inst) == DM_STOP)
-					break;
-			}
-		}
-	}
-	return 0;
-}
-
-static int browseWiFiDataElementsDisassociationEventDisassociationEventDataInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	struct wifi_event_args curr_wifi_event_args = {0};
-	json_object *res = NULL, *notify_arr = NULL, *notify_obj = NULL, *disassoc_ev = NULL, *disassoc_obj = NULL;
-	char *inst = NULL;
-	int id = 0, i = 0;
-
-	dmubus_call("wifi.dataelements.collector", "event", UBUS_ARGS{0}, 0, &res);
-	dmjson_foreach_obj_in_array_reverse(res, notify_arr, notify_obj, i, 1, "notification") {
-		curr_wifi_event_args.event_time = dmjson_get_value(notify_obj, 1, "eventTime");
-		if (json_object_object_get_ex(notify_obj, "wfa-dataelements:DisassociationEvent", &disassoc_ev)) {
-			if (json_object_object_get_ex(disassoc_ev, "DisassocData", &disassoc_obj)) {
-				curr_wifi_event_args.event_obj = disassoc_obj;
-				inst = handle_instance_without_section(dmctx, parent_node, ++id);
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_event_args, inst) == DM_STOP)
-					break;
-			}
-		}
-	}
-	return 0;
-}
-
 /**************************************************************************
 * SET AND GET ALIAS
 ***************************************************************************/
@@ -2820,262 +2776,6 @@ static int get_WiFiDataElementsNetworkDeviceIEEE1905Security_EncryptionAlgorithm
 	return 0;
 }
 
-static int get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	int cnt = get_number_of_entries(ctx, data, instance, browseWiFiDataElementsAssociationEventAssociationEventDataInst);
-	dmasprintf(value, "%d", cnt);
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventData_BSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "BSSID");
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "MACAddress");
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "StatusCode");
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "HTCapabilities");
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "VHTCapabilities");
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "HECapabilities");
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = ((struct wifi_event_args *)data)->event_time;
-	return 0;
-}
-
-/*
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE160(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE8080(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MCSNSS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformee(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUBeamformer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_Beamformee80orLess(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_BeamformeeAbove80(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULMUMIMO(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULOFDMA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_RTS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MURTS(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MultiBSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUEDCA(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTRequestor(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTResponder(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SpatialReuse(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-
-static int get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_AnticipatedChannelUsage(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	//TODO
-	return 0;
-}
-*/
-
-static int get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	int cnt = get_number_of_entries(ctx, data, instance, browseWiFiDataElementsDisassociationEventDisassociationEventDataInst);
-	dmasprintf(value, "%d", cnt);
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_BSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "BSSID");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "MACAddress");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_ReasonCode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "ReasonCode");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "BytesSent");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "BytesReceived");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "PacketsSent");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "PacketsReceived");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "ErrorsSent");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "ErrorsReceived");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_RetransCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmjson_get_value(((struct wifi_event_args *)data)->event_obj, 1, "RetransCount");
-	return 0;
-}
-
-static int get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = ((struct wifi_event_args *)data)->event_time;
-	return 0;
-}
-
 /*************************************************************
  * OPERATE COMMANDS
  *************************************************************/
@@ -3618,9 +3318,9 @@ static int event_WiFiDataElementsDisassociationEvent_Disassociated(char *refpara
 DMOBJ tWiFiDataElementsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Network", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkObj, tWiFiDataElementsNetworkParams, NULL, BBFDM_BOTH},
-{"AssociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventObj, tWiFiDataElementsAssociationEventParams, NULL, BBFDM_BOTH, NULL},
-{"DisassociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventObj, tWiFiDataElementsDisassociationEventParams, NULL, BBFDM_BOTH, NULL},
-//{"FailedConnectionEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsFailedConnectionEventObj, tWiFiDataElementsFailedConnectionEventParams, NULL, BBFDM_BOTH, NULL},
+{"AssociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventParams, NULL, BBFDM_BOTH, NULL},
+{"DisassociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventParams, NULL, BBFDM_BOTH, NULL},
+//{"FailedConnectionEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsFailedConnectionEventParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -4432,117 +4132,22 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioUnassociatedSTAParams[] = {
 //};
 
 /* *** Device.WiFi.DataElements.AssociationEvent. *** */
-DMOBJ tWiFiDataElementsAssociationEventObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"AssociationEventData", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsAssociationEventAssociationEventDataInst, NULL, NULL, tWiFiDataElementsAssociationEventAssociationEventDataObj, tWiFiDataElementsAssociationEventAssociationEventDataParams, NULL, BBFDM_BOTH, NULL},
-{0}
-};
-
 DMLEAF tWiFiDataElementsAssociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"AssociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
 {"Associated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsAssociationEvent_Associated, event_WiFiDataElementsAssociationEvent_Associated, BBFDM_USP},
 {0}
 };
 
-/* *** Device.WiFi.DataElements.AssociationEvent.AssociationEventData.{i}. *** */
-DMOBJ tWiFiDataElementsAssociationEventAssociationEventDataObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-//{"WiFi6Capabilities", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventAssociationEventDataWiFi6CapabilitiesParams, NULL, BBFDM_BOTH, NULL},
-{0}
-};
-
-DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_BSSID, NULL, BBFDM_BOTH},
-{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_MACAddress, NULL, BBFDM_BOTH},
-{"StatusCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventData_StatusCode, NULL, BBFDM_BOTH},
-{"HTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_HTCapabilities, NULL, BBFDM_BOTH},
-{"VHTCapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_VHTCapabilities, NULL, BBFDM_BOTH},
-{"HECapabilities", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventData_HECapabilities, NULL, BBFDM_BOTH},
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsAssociationEventAssociationEventData_TimeStamp, NULL, BBFDM_BOTH},
-{0}
-};
-
-/* *** Device.WiFi.DataElements.AssociationEvent.AssociationEventData.{i}.WiFi6Capabilities. *** */
-//DMLEAF tWiFiDataElementsAssociationEventAssociationEventDataWiFi6CapabilitiesParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"HE160", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE160, NULL, BBFDM_BOTH},
-//{"HE8080", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_HE8080, NULL, BBFDM_BOTH},
-//{"MCSNSS", &DMREAD, DMT_BASE64, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MCSNSS, NULL, BBFDM_BOTH},
-//{"SUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformer, NULL, BBFDM_BOTH},
-//{"SUBeamformee", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SUBeamformee, NULL, BBFDM_BOTH},
-//{"MUBeamformer", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUBeamformer, NULL, BBFDM_BOTH},
-//{"Beamformee80orLess", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_Beamformee80orLess, NULL, BBFDM_BOTH},
-//{"BeamformeeAbove80", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_BeamformeeAbove80, NULL, BBFDM_BOTH},
-//{"ULMUMIMO", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULMUMIMO, NULL, BBFDM_BOTH},
-//{"ULOFDMA", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_ULOFDMA, NULL, BBFDM_BOTH},
-//{"MaxDLMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLMUMIMO, NULL, BBFDM_BOTH},
-//{"MaxULMUMIMO", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULMUMIMO, NULL, BBFDM_BOTH},
-//{"MaxDLOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxDLOFDMA, NULL, BBFDM_BOTH},
-//{"MaxULOFDMA", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MaxULOFDMA, NULL, BBFDM_BOTH},
-//{"RTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_RTS, NULL, BBFDM_BOTH},
-//{"MURTS", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MURTS, NULL, BBFDM_BOTH},
-//{"MultiBSSID", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MultiBSSID, NULL, BBFDM_BOTH},
-//{"MUEDCA", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_MUEDCA, NULL, BBFDM_BOTH},
-//{"TWTRequestor", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTRequestor, NULL, BBFDM_BOTH},
-//{"TWTResponder", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_TWTResponder, NULL, BBFDM_BOTH},
-//{"SpatialReuse", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_SpatialReuse, NULL, BBFDM_BOTH},
-//{"AnticipatedChannelUsage", &DMREAD, DMT_BOOL, get_WiFiDataElementsAssociationEventAssociationEventDataWiFi6Capabilities_AnticipatedChannelUsage, NULL, BBFDM_BOTH},
-//{0}
-//};
-
 /* *** Device.WiFi.DataElements.DisassociationEvent. *** */
-DMOBJ tWiFiDataElementsDisassociationEventObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"DisassociationEventData", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsDisassociationEventDisassociationEventDataInst, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventDisassociationEventDataParams, NULL, BBFDM_BOTH, NULL},
-{0}
-};
-
 DMLEAF tWiFiDataElementsDisassociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"DisassociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
 {"Disassociated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsDisassociationEvent_Disassociated, event_WiFiDataElementsDisassociationEvent_Disassociated, BBFDM_USP},
 {0}
 };
 
-/* *** Device.WiFi.DataElements.DisassociationEvent.DisassociationEventData.{i}. *** */
-DMLEAF tWiFiDataElementsDisassociationEventDisassociationEventDataParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"BSSID", &DMREAD, DMT_STRING, get_WiFiDataElementsDisassociationEventDisassociationEventData_BSSID, NULL, BBFDM_BOTH},
-{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsDisassociationEventDisassociationEventData_MACAddress, NULL, BBFDM_BOTH},
-{"ReasonCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_ReasonCode, NULL, BBFDM_BOTH},
-{"BytesSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesSent, NULL, BBFDM_BOTH},
-{"BytesReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_BytesReceived, NULL, BBFDM_BOTH},
-{"PacketsSent", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsSent, NULL, BBFDM_BOTH},
-{"PacketsReceived", &DMREAD, DMT_UNLONG, get_WiFiDataElementsDisassociationEventDisassociationEventData_PacketsReceived, NULL, BBFDM_BOTH},
-{"ErrorsSent", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsSent, NULL, BBFDM_BOTH},
-{"ErrorsReceived", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_ErrorsReceived, NULL, BBFDM_BOTH},
-{"RetransCount", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEventDisassociationEventData_RetransCount, NULL, BBFDM_BOTH},
-{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsDisassociationEventDisassociationEventData_TimeStamp, NULL, BBFDM_BOTH},
-{0}
-};
-
 /* *** Device.WiFi.DataElements.FailedConnectionEvent. *** */
-//DMOBJ tWiFiDataElementsFailedConnectionEventObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-//{"FailedConnectionEventData", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsFailedConnectionEventFailedConnectionEventDataInst, NULL, NULL, NULL, tWiFiDataElementsFailedConnectionEventFailedConnectionEventDataParams, NULL, BBFDM_BOTH, NULL},
-//{0}
-//};
-
 //DMLEAF tWiFiDataElementsFailedConnectionEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"FailedConnectionEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsFailedConnectionEvent_FailedConnectionEventDataNumberOfEntries, NULL, BBFDM_BOTH},
 //{"FailedConnection!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsFailedConnectionEvent_FailedConnection, NULL, BBFDM_USP},
-//{0}
-//};
-
-/* *** Device.WiFi.DataElements.FailedConnectionEvent.FailedConnectionEventData.{i}. *** */
-//DMLEAF tWiFiDataElementsFailedConnectionEventFailedConnectionEventDataParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_MACAddress, NULL, BBFDM_BOTH},
-//{"StatusCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_StatusCode, NULL, BBFDM_BOTH},
-//{"ReasonCode", &DMREAD, DMT_UNINT, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_ReasonCode, NULL, BBFDM_BOTH},
-//{"TimeStamp", &DMREAD, DMT_STRING, get_WiFiDataElementsFailedConnectionEventFailedConnectionEventData_TimeStamp, NULL, BBFDM_BOTH},
 //{0}
 //};

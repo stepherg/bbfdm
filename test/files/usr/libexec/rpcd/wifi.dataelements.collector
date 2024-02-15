@@ -4,7 +4,7 @@
 
 case "$1" in
         list)
-                echo '{ "status": {}, "event": {}, "dump2": {} }'
+                echo '{ "status": {}, "dump2": {} }'
         ;;
         call)
                 case "$2" in
@@ -12,9 +12,6 @@ case "$1" in
                                 json_init
                                 json_add_string status available
                                 json_dump
-                        ;;
-                        event)
-                                cat /tmp/wifi.dataelements.collector.event.data 2>/dev/null
                         ;;
                          dump2)
                                 cat /tmp/wifi.dataelements.collector.dump2.data 2>/dev/null
