@@ -1,0 +1,30 @@
+{
+    "events": [
+        {
+            "description": "Validate <bbfdm.AddObj> & <bbfdm.DelObj> event using internal object defined in the core Data Model: Device.DeviceInfo.FirmwareImage.",
+            "config_path": "/tmp/fwbank.data",
+            "objects_to_look": [
+                "Device.DeviceInfo.FirmwareImage.1",
+                "Device.DeviceInfo.FirmwareImage.2"
+            ]
+        },
+        {
+            "description": "Validate <bbfdm.AddObj> & <bbfdm.DelObj> event using external object JSON Plugin: Device.X_IOPSYS_EU_Dropbear.",
+            "config_path": "/etc/config/dropbear",
+            "objects_to_look": [
+                "Device.X_IOPSYS_EU_Dropbear.1",
+                "Device.SSH.Server.1"
+            ]
+        },
+        {
+            "description": "Validate <bbfdm.AddObj> & <bbfdm.DelObj> event using external object JSON Plugin: Device.X_IOPSYS_EU_IGMP.",
+            "config_path": "/etc/config/mcast",
+            "objects_to_look": [
+                "Device.X_IOPSYS_EU_IGMP.Proxy.1",
+                "Device.X_IOPSYS_EU_IGMP.Proxy.1.Interface.1",
+                "Device.X_IOPSYS_EU_IGMP.Proxy.1.Interface.2",
+                "Device.X_IOPSYS_EU_IGMP.Proxy.1.Filter.1"
+            ]
+        }
+    ]
+}
