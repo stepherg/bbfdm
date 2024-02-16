@@ -24,6 +24,9 @@ exec_cmd ubus wait_for bbfdm
 # Test 'bbfdm.AddObj' & 'bbfdm.DelObj' event
 ./test/python-test-cases/python/validate_add_del_event.py test/python-test-cases/json/add_del_event.json
 
+# Test ubus bbfdm 'get' method
+./test/python-test-cases/python/validate_ubus_get_method.py test/python-test-cases/json/ubus_get_method.json
+
 supervisorctl stop all
 supervisorctl status
 

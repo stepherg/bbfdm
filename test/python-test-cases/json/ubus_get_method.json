@@ -1,0 +1,33 @@
+{
+    "object": "bbfdm",
+    "test-cases": [
+        {
+            "description": "Test-Case-1: Get Parameter with correct path",
+            "input": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "optional": {"format": "raw", "proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.DeviceInfo.Manufacturer",
+                        "data": "iopsys",
+                        "type": "xsd:string"
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Test-Case-2: Get Parameter with wrong path",
+            "input": {
+                "path": "Device.DeviceInfo.Manufacture",
+                "optional": {"format": "raw", "proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {}
+        }
+    ]
+}
+
+
