@@ -120,6 +120,7 @@ struct dhcp_options_type DHCP_OPTIONS_ARRAY[] = {
 {"", 52, OPTION_INT, 1},                                /* DHCP_OVERLOAD           */
 {"", 53, OPTION_INT, 1},                                /* DHCP_MESSSAGE_TYPE      */
 {"serverid", 54, OPTION_IP, 4},                         /* DHCP_SERVER_ID          */
+{"", 55, OPTION_INT|OPTION_LIST, 1},                	/* DHCP_PARAM_LIST         */
 {"message", 56, OPTION_STRING, 0},                      /* DHCP_ERR_MESSAGE        */
 {"", 57, OPTION_INT, 2},                                /* DHCP_MAX_MESSAGE_SIZE   */
 {"", 58, OPTION_INT, 4},                                /* DHCP_RENEWAL_TIME       */
