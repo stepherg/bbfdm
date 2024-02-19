@@ -27,6 +27,9 @@ exec_cmd ubus wait_for bbfdm
 # Test ubus bbfdm 'get' method
 ./test/python-test-cases/python/validate_ubus_get_method.py test/python-test-cases/json/ubus_get_method.json
 
+# Test ubus bbfdm 'instances' method
+./test/python-test-cases/python/validate_ubus_schema_method.py test/python-test-cases/json/ubus_schema_method.json
+
 supervisorctl stop all
 supervisorctl status
 

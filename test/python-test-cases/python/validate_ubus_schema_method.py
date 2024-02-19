@@ -22,7 +22,7 @@ def run_test(args):
 
     print("Running: " + args.description)
 
-    out = ubus.call(args.service, "get", args.input)
+    out = ubus.call(args.service, "schema", args.input)
     
     if isinstance(out, list) and out:
         out = out[0]
@@ -32,17 +32,18 @@ def run_test(args):
         
     res_len = len(out["results"])
     fault = out["results"][0]["fault"] if res_len and "fault" in out["results"][0] else 0
-        
+
     if fault != args.expected_error:
         print("FAIL: " + args.description)
         return
         
     if args.expected_error == 0 and res_len == 0:
         print("FAIL: " + args.description)
-        return
+        return    
     
     # Check if output matches expected output
     if args.output != {}:
+        print(out)
         if out == args.output:
             print("PASS: " + args.description)
         else:
@@ -62,7 +63,7 @@ if __name__ == "__main__":
         with open(test_arguments_file, 'r') as f:
             test_arguments_data = json.load(f)
             service_name = test_arguments_data.get("object", "bbfdm")
-            args_list = [TestArguments(**test_case, service=service_name) for test_case in test_arguments_data["get"]]
+            args_list = [TestArguments(**test_case, service=service_name) for test_case in test_arguments_data["schema"]]
     except FileNotFoundError:
         print("File not found:", test_arguments_file)
         sys.exit(1)
