@@ -848,59 +848,77 @@ static int browseDHCPv4ServerPoolClientOptionInst(struct dmctx *dmctx, DMNODE *p
 	char line[2048], macaddr[24]={0}, vcid[128]={0}, clid[128]={0}, ucid[128]={0}, hostname[128]={0}, paramlist[256]={0};
 	char *inst = NULL;
 	int id = 0;
+	char *p = NULL;
 
 	while (fgets(line, sizeof(line), f) != NULL) {
 		remove_new_line(line);
-
-		sscanf(line, "%23s vcid=%127s clid=%127s ucid=%127s hostname=%127s paramlist=%255s",
-				macaddr, vcid, clid, ucid, hostname, paramlist);
+		sscanf(line, "%23s ", macaddr);
 
 		if (DM_STRNCMP(macaddr, (char *)args->lease->hwaddr, 24) == 0) {
+			p = DM_STRSTR(line, "vcid=");
+			if (p) {
+				sscanf(p, "vcid=%127s ", vcid);
+				if (DM_LSTRCMP(vcid, "-") != 0) {
+					init_client_options_args(&curr_client_options_args, "60", dmstrdup(vcid));
 
-			if (DM_LSTRCMP(vcid, "-") != 0) {
-				init_client_options_args(&curr_client_options_args, "60", dmstrdup(vcid));
+					inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
-				inst = handle_instance_without_section(dmctx, parent_node, ++id);
-
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
-					break;
+					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+						break;
+				}
 			}
 
-			if (DM_LSTRCMP(clid, "-") != 0) {
-				init_client_options_args(&curr_client_options_args, "61", dmstrdup(clid));
+			p = DM_STRSTR(line, "clid=");
+			if (p) {
+				sscanf(p, "clid=%127s ", clid);
+				if (DM_LSTRCMP(clid, "-") != 0) {
+					init_client_options_args(&curr_client_options_args, "61", dmstrdup(clid));
 
-				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+					inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
-					break;
+					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+						break;
+				}
 			}
 
 
-			if (DM_LSTRCMP(ucid, "-") != 0) {
-				init_client_options_args(&curr_client_options_args, "77", dmstrdup(ucid));
+			p = DM_STRSTR(line, "ucid=");
+			if (p) {
+				sscanf(p, "ucid=%127s ", ucid);
+				if (DM_LSTRCMP(ucid, "-") != 0) {
+					init_client_options_args(&curr_client_options_args, "77", dmstrdup(ucid));
 
-				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+					inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
-					break;
+					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+						break;
+				}
 			}
 
-			if (DM_LSTRCMP(hostname, "-") != 0) {
-				init_client_options_args(&curr_client_options_args, "12", dmstrdup(hostname));
+			p = DM_STRSTR(line, "hostname=");
+			if (p) {
+				sscanf(p, "hostname=%127s ", hostname);
+				if (DM_LSTRCMP(hostname, "-") != 0) {
+					init_client_options_args(&curr_client_options_args, "12", dmstrdup(hostname));
 
-				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+					inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
-					break;
+					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+						break;
+				}
 			}
 
-			if (DM_LSTRCMP(paramlist, "-") != 0) {
-				init_client_options_args(&curr_client_options_args, "55", dmstrdup(paramlist));
+			p = DM_STRSTR(line, "paramlist=");
+			if (p) {
+				sscanf(p, "paramlist=%255s ", paramlist);
+				if (DM_LSTRCMP(paramlist, "-") != 0) {
+					init_client_options_args(&curr_client_options_args, "55", dmstrdup(paramlist));
 
-				inst = handle_instance_without_section(dmctx, parent_node, ++id);
+					inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
-				if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
-					break;
+					if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_client_options_args, inst) == DM_STOP)
+						break;
+				}
 			}
 
 			break;
