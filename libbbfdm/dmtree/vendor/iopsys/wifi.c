@@ -11,17 +11,11 @@
 
 #include "wifi.h"
 
-struct wifi_acp_args
-{
-	struct dmmap_dup *sections;
-	char *ifname;
-};
-
 static int get_multi_ap_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *multi_ap = NULL;
 
-	dmuci_get_value_by_section_string((((struct wifi_acp_args *)data)->sections)->config_section, "multi_ap", &multi_ap);
+	dmuci_get_value_by_section_string((struct uci_section *)data, "multi_ap", &multi_ap);
 
 	if (DM_STRCMP(multi_ap, "1") == 0)
 		*value = "Backhaul";
