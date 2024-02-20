@@ -26,7 +26,8 @@ struct dhcp_lease {
 };
 
 struct dhcp_iface_args {
-	char *name;
+	char *parent_iface_name;
+	char *iface_name;
 	unsigned net_start;
 	unsigned net_end;
 	unsigned bits;
@@ -280,20 +281,20 @@ static void dhcp_leases_load(struct list_head *head)
 	fclose(f);
 }
 
-static int interface_get_ipv4(char *interface, uint32_t *addr, unsigned *bits)
+static char *find_ipv4_interface_up(char *parent_interface)
 {
 	struct uci_section *s = NULL;
 
-	if (DM_STRLEN(interface) == 0)
-		return -1;
+	if (DM_STRLEN(parent_interface) == 0)
+		return "";
 
-	char *device = get_device(interface);
+	char *device = get_device(parent_interface);
 	if (DM_STRLEN(device) == 0) {
-		dmuci_get_option_value_string("network", interface, "device", &device);
+		dmuci_get_option_value_string("network", parent_interface, "device", &device);
 	}
 
 	if (DM_STRLEN(device) == 0)
-		return -1;
+		return parent_interface;
 
 	uci_foreach_option_eq("network", "interface", "device", device, s) {
 		json_object *res = NULL;
@@ -329,14 +330,55 @@ static int interface_get_ipv4(char *interface, uint32_t *addr, unsigned *bits)
 		if (DM_STRLEN(addr_str) == 0 || addr_cidr == -1)
 			continue;
 
-		if (inet_pton(AF_INET, addr_str, addr) != 1)
-			continue;
-
-		*bits = addr_cidr;
-		return 0;
+		return dmstrdup(section_name(s));
 	}
 
-	return -1;
+	return parent_interface;
+}
+
+static int interface_get_ipv4(char *interface, uint32_t *addr, unsigned *bits)
+{
+	json_object *res = NULL;
+	char *addr_str = NULL;
+	int addr_cidr = -1;
+
+	if (DM_STRLEN(interface) == 0)
+		return -1;
+
+	dmubus_call("network.interface", "status", UBUS_ARGS {{"interface", interface, String}}, 1, &res);
+	if (res) {
+		json_object *jobj;
+
+		jobj = dmjson_select_obj_in_array_idx(res, 0, 1, "ipv4-address");
+		if (jobj) {
+			json_object_object_foreach(jobj, key, val) {
+				if (!DM_LSTRCMP(key, "address"))
+					addr_str = (char *)json_object_get_string(val);
+				else if (!DM_LSTRCMP(key, "mask"))
+					addr_cidr = json_object_get_int(val);
+			}
+		}
+	}
+
+	if (DM_STRLEN(addr_str) == 0) {
+		dmuci_get_option_value_string("network", interface, "ipaddr", &addr_str);
+	}
+
+	if (addr_cidr == -1) {
+		char *mask_str = NULL;
+
+		dmuci_get_option_value_string("network", interface, "netmask", &mask_str);
+		if (DM_STRLEN(mask_str)) addr_cidr = netmask2cidr(mask_str);
+	}
+
+	if (DM_STRLEN(addr_str) == 0 || addr_cidr == -1)
+		return -1;
+
+	if (inet_pton(AF_INET, addr_str, addr) != 1)
+		return -1;
+
+	*bits = addr_cidr;
+	return 0;
 }
 
 static void dhcp_leases_assign_to_interface(struct dhcp_args *dhcp, struct list_head *src)
@@ -378,7 +420,8 @@ static int fill_dhcp_iface_args(struct dhcp_args *dhcp_args)
 
 	memset(&dhcp_args->iface_args, 0, sizeof(struct dhcp_iface_args));
 
-	dmuci_get_value_by_section_string((dhcp_args->sections)->config_section, "interface", &dhcp_args->iface_args.name);
+	dmuci_get_value_by_section_string((dhcp_args->sections)->dmmap_section, "interface", &dhcp_args->iface_args.parent_iface_name);
+	dmuci_get_value_by_section_string((dhcp_args->sections)->config_section, "interface", &dhcp_args->iface_args.iface_name);
 
 	dmuci_get_value_by_section_string((dhcp_args->sections)->dmmap_section, "SubnetMask", &mask);
 	if (DM_STRLEN(mask) == 0) {
@@ -389,7 +432,7 @@ static int fill_dhcp_iface_args(struct dhcp_args *dhcp_args)
 		char *start = dmuci_get_value_by_section_fallback_def((dhcp_args->sections)->config_section, "start", "0");
 		char *limit = dmuci_get_value_by_section_fallback_def((dhcp_args->sections)->config_section, "limit", "0");
 
-		if (interface_get_ipv4(dhcp_args->iface_args.name, &iface_addr, &iface_cidr))
+		if (interface_get_ipv4(dhcp_args->iface_args.iface_name, &iface_addr, &iface_cidr))
 			return -1;
 
 		dhcp_args->iface_args.bits = ~((1 << (32 - iface_cidr)) - 1);
@@ -1553,10 +1596,10 @@ static int get_DHCPv4ServerPool_Status(char *refparam, struct dmctx *ctx, void *
 
 		*value = "Error_Misconfigured";
 
-		if (DM_STRLEN(((struct dhcp_args *)data)->iface_args.name) == 0)
+		if (DM_STRLEN(((struct dhcp_args *)data)->iface_args.iface_name) == 0)
 			return 0;
 
-		if (interface_get_ipv4(((struct dhcp_args *)data)->iface_args.name, &iface_addr, &iface_cidr))
+		if (interface_get_ipv4(((struct dhcp_args *)data)->iface_args.iface_name, &iface_addr, &iface_cidr))
 			return 0;
 
 		iface_bits = ~((1 << (32 - iface_cidr)) - 1);
@@ -1607,7 +1650,7 @@ static int set_DHCPv4ServerPool_Order(char *refparam, struct dmctx *ctx, void *d
 
 static int get_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", ((struct dhcp_args *)data)->iface_args.name, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", ((struct dhcp_args *)data)->iface_args.parent_iface_name, value);
 	return 0;
 }
 
@@ -1615,6 +1658,7 @@ static int set_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 {
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
+	char *iface_name = NULL;
 
 	bbf_get_reference_args(value, &reference);
 
@@ -1628,7 +1672,9 @@ static int set_DHCPv4ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "interface", reference.value);
+			iface_name = find_ipv4_interface_up(reference.value);
+			dmuci_set_value_by_section((((struct dhcp_args *)data)->sections)->config_section, "interface", iface_name);
+			dmuci_set_value_by_section((((struct dhcp_args *)data)->sections)->dmmap_section, "interface", reference.value);
 			return 0;
 	}
 	return 0;
@@ -1910,7 +1956,7 @@ static int get_DHCPv4ServerPool_DNSServers(char *refparam, struct dmctx *ctx, vo
 	if (!get_DHCPv4ServerPool_Option_Value((((struct dhcp_args *)data)->sections)->config_section, "6", value))
 		return 0;
 
-	dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->iface_args.name, "ipaddr", value);
+	dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->iface_args.iface_name, "ipaddr", value);
 	return 0;
 }
 
@@ -1953,7 +1999,7 @@ static int get_DHCPv4ServerPool_IPRouters(char *refparam, struct dmctx *ctx, voi
 	if (!get_DHCPv4ServerPool_Option_Value((((struct dhcp_args *)data)->sections)->config_section, "3", value))
 		return 0;
 
-	dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->iface_args.name, "ipaddr", value);
+	dmuci_get_option_value_string("network", ((struct dhcp_args *)data)->iface_args.iface_name, "ipaddr", value);
 	return 0;
 }
 
