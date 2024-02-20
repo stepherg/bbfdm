@@ -37,6 +37,7 @@ run_tools_test:
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
+  - "./gitlab-ci/setup.sh"
   - "./gitlab-ci/tools-test.sh"
   - "./gitlab-ci/generate_supported_dm.sh"
 
