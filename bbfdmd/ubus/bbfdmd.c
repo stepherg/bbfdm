@@ -1432,7 +1432,7 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 
 	opt_val = dmjson_get_value(deamon_obj, 2, "output", "object");
 	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->out_object, opt_val, sizeof(config->out_object));
+		replace_str(opt_val, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, config->out_object, sizeof(config->out_object));
 	}
 
 	opt_val = dmjson_get_value(deamon_obj, 2, "output", "root_obj");
