@@ -448,6 +448,12 @@ static char *get_datamodel_media_type(const char *media, const char *band)
 		return "IEEE 802.11ax 5.0";
 	else if (!DM_LSTRCMP(media, "IEEE 802_11AX") && !DM_LSTRCMP(band, "6"))
 		return "IEEE 802.11ax 6.0";
+	else if (!DM_LSTRCMP(media, "IEEE 802_11BE") && !DM_LSTRCMP(band, "2"))
+		return "IEEE 802.11be 2.4";
+	else if (!DM_LSTRCMP(media, "IEEE 802_11BE") && !DM_LSTRCMP(band, "5"))
+		return "IEEE 802.11be 5.0";
+	else if (!DM_LSTRCMP(media, "IEEE 802_11BE") && !DM_LSTRCMP(band, "6"))
+		return "IEEE 802.11be 6.0";
 	else if (!DM_LSTRCMP(media, "IEEE 802_11AD") && !DM_LSTRCMP(band, "60"))
 		return "IEEE 802.11ad";
 	else if (!DM_LSTRCMP(media, "IEEE 802_11AF"))
