@@ -10,7 +10,6 @@ It is often the case, that the supported mapping might not handle all the scenar
 	"json_plugin_version": 1,
 	"Device.": {
 		"type": "object",
-		"version": "2.0",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -21,7 +20,6 @@ It is often the case, that the supported mapping might not handle all the scenar
 			"type": "string",
 			"read": true,
 			"write": false,
-			"version": "2.4",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -29,7 +27,6 @@ It is often the case, that the supported mapping might not handle all the scenar
 		},
 		"Boot!": {
 			"type": "event",
-			"version": "2.12",
 			"protocols": [
 				"usp"
 			],
@@ -37,7 +34,6 @@ It is often the case, that the supported mapping might not handle all the scenar
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.12",
 				"protocols": [
 					"usp"
 				],
@@ -52,7 +48,6 @@ It is often the case, that the supported mapping might not handle all the scenar
 		"SelfTestDiagnostics()": {
 			"type": "command",
 			"async": true,
-			"version": "2.12",
 			"protocols": [
 				"usp"
 			],
@@ -61,7 +56,6 @@ It is often the case, that the supported mapping might not handle all the scenar
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.12",
 					"protocols": [
 						"usp"
 					]
@@ -81,7 +75,6 @@ The json object `dependency` is used to define the same. Below is an example of 
 	"json_plugin_version": 1,
 	"Device.CWMPManagementServer.": {
 		"type": "object",
-		"version": "2.15",
 		"protocols": [
 			"usp"
 		],
@@ -90,7 +83,6 @@ The json object `dependency` is used to define the same. Below is an example of 
 		"dependency": "file:/etc/config/cwmp",
 		"EnableCWMP": {
 			"type": "boolean",
-			"version": "2.15",
 			"read": true,
 			"write": true,
 			"protocols": [

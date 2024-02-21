@@ -143,7 +143,6 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 ```bash
 "WhitelistURL": {
 	"type": "string",
-	"version": "2.14",
 	"read": true,
 	"write": true,
 	"protocols": [
@@ -361,7 +360,6 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 		"access": false,
 		"Push!": {
 			"type": "event",
-			"version": "2.13",
 			"protocols": [
 				"usp"
 			],
@@ -369,7 +367,6 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				]
@@ -378,7 +375,6 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 		"Status()": {
 			"type": "command",
 			"async": true,
-			"version": "2.12",
 			"protocols": [
 				"usp"
 			],

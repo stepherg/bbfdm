@@ -1,7 +1,6 @@
 {
 	"Device.": {
 		"type": "object",
-		"version": "2.5",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -11,7 +10,6 @@
 		"array": false,
 		"Device.Services.": {
 			"type": "object",
-			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -21,7 +19,6 @@
 			"array": false,
 			"Device.Services.VoiceService.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -31,7 +28,6 @@
 				"array": true,
 				"Device.Services.VoiceService.{i}.CallLog.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -43,7 +39,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -55,7 +50,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -65,7 +59,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.": {
 						"type": "object",
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -75,7 +68,6 @@
 						"array": true,
 						"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.": {
 							"type": "object",
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -85,7 +77,6 @@
 							"array": false,
 							"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP.": {
 								"type": "object",
-								"version": "2.5",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -97,7 +88,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -109,7 +99,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -121,7 +110,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -133,7 +121,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -145,7 +132,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -157,7 +143,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -169,7 +154,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -181,7 +165,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -193,7 +176,6 @@
 						},
 						"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.": {
 							"type": "object",
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -203,7 +185,6 @@
 							"array": false,
 							"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.RTP.": {
 								"type": "object",
-								"version": "2.5",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -215,7 +196,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -227,7 +207,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -239,7 +218,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -251,7 +229,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -263,7 +240,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -275,7 +251,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -287,7 +262,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -299,7 +273,6 @@
 									"type": "unsignedInt",
 									"read": true,
 									"write": false,
-									"version": "2.5",
 									"protocols": [
 										"cwmp",
 										"usp"
@@ -313,7 +286,6 @@
 				},
 				"Device.Services.VoiceService.{i}.CallControl.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -323,7 +295,6 @@
 					"array": false,
 					"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.": {
 						"type": "object",
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -335,7 +306,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -347,7 +317,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -364,7 +333,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -381,7 +349,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -393,7 +360,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -410,7 +376,6 @@
 				},
 				"Device.Services.VoiceService.{i}.DECT.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -420,7 +385,6 @@
 					"array": false,
 					"Device.Services.VoiceService.{i}.DECT.Portable.{i}.": {
 						"type": "object",
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -432,7 +396,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -446,7 +409,6 @@
 		},
 		"Device.Bridging.": {
 			"type": "object",
-			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -456,7 +418,6 @@
 			"array": false,
 			"Device.Bridging.Bridge.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -466,7 +427,6 @@
 				"array": true,
 				"Device.Bridging.Bridge.{i}.Port.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -478,7 +438,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -503,7 +462,6 @@
 		},
 		"Device.DeviceInfo.": {
 			"type": "object",
-			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -515,7 +473,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -535,7 +492,6 @@
 		},
 		"Device.Ethernet.": {
 			"type": "object",
-			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -545,7 +501,6 @@
 			"array": false,
 			"Device.Ethernet.{BBF_VENDOR_PREFIX}MACVLAN.{i}.": {
 				"type": "object",
-				"version": "2.16",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -557,7 +512,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -570,7 +524,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -592,7 +545,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -609,7 +561,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -626,7 +577,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -641,7 +591,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -660,7 +609,6 @@
 				},
 				"Device.Ethernet.{BBF_VENDOR_PREFIX}MACVLAN.{i}.Stats.": {
 					"type": "object",
-					"version": "2.16",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -672,7 +620,6 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -684,7 +631,6 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -696,7 +642,6 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -708,7 +653,6 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -720,7 +664,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -732,7 +675,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -744,7 +686,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -756,7 +697,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -768,7 +708,6 @@
 						"type": "unsignedLong",
 						"read": true,
 						"write": false,
-						"version": "2.16",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -781,7 +720,6 @@
 		},
 		"Device.Time.": {
 			"type": "object",
-			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -793,7 +731,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -805,7 +742,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -816,7 +752,6 @@
 		},
 		"Device.{BBF_VENDOR_PREFIX}IGMP.": {
 			"type": "object",
-			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -828,7 +763,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -840,7 +774,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -850,7 +783,6 @@
 			},
 			"Device.{BBF_VENDOR_PREFIX}IGMP.Snooping.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -862,7 +794,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -874,7 +805,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -890,7 +820,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -907,7 +836,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -919,7 +847,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -931,7 +858,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -948,7 +874,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -965,7 +890,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -977,7 +901,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -989,7 +912,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -999,7 +921,6 @@
 				},
 				"Device.{BBF_VENDOR_PREFIX}IGMP.Snooping.{i}.ClientGroup.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1011,7 +932,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1023,7 +943,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1033,7 +952,6 @@
 					},
 					"Device.{BBF_VENDOR_PREFIX}IGMP.Snooping.{i}.ClientGroup.{i}.AssociatedDevice.{i}.": {
 						"type": "object",
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1045,7 +963,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -1057,7 +974,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -1069,7 +985,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -1081,7 +996,6 @@
 				},
 				"Device.{BBF_VENDOR_PREFIX}IGMP.Snooping.{i}.Filter.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1093,7 +1007,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1105,7 +1018,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1122,7 +1034,6 @@
 			},
 			"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1134,7 +1045,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1146,7 +1056,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1162,7 +1071,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1179,7 +1087,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1191,7 +1098,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1208,7 +1114,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1225,7 +1130,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1242,7 +1146,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1254,7 +1157,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1266,7 +1168,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1278,7 +1179,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1288,7 +1188,6 @@
 				},
 				"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.ClientGroup.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1300,7 +1199,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1312,7 +1210,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1322,7 +1219,6 @@
 					},
 					"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.ClientGroup.{i}.AssociatedDevice.{i}.": {
 						"type": "object",
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1334,7 +1230,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -1346,7 +1241,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -1358,7 +1252,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.5",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -1370,7 +1263,6 @@
 				},
 				"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.Filter.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1382,7 +1274,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1394,7 +1285,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1405,7 +1295,6 @@
 				},
 				"Device.{BBF_VENDOR_PREFIX}IGMP.Proxy.{i}.Interface.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1417,7 +1306,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1434,7 +1322,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1446,7 +1333,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1464,7 +1350,6 @@
 		},
 		"Device.{BBF_VENDOR_PREFIX}MLD.": {
 			"type": "object",
-			"version": "2.5",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -1476,7 +1361,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1488,7 +1372,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1498,7 +1381,6 @@
 			},
 			"Device.{BBF_VENDOR_PREFIX}MLD.Snooping.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1510,7 +1392,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1522,7 +1403,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1538,7 +1418,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1555,7 +1434,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1567,7 +1445,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1579,7 +1456,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1596,7 +1472,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1613,7 +1488,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1625,7 +1499,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1635,7 +1508,6 @@
 				},
 				"Device.{BBF_VENDOR_PREFIX}MLD.Snooping.{i}.Filter.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1647,7 +1519,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1659,7 +1530,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1676,7 +1546,6 @@
 			},
 			"Device.{BBF_VENDOR_PREFIX}MLD.Proxy.{i}.": {
 				"type": "object",
-				"version": "2.5",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1688,7 +1557,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1700,7 +1568,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1716,7 +1583,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1733,7 +1599,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1745,7 +1610,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1762,7 +1626,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1779,7 +1642,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1796,7 +1658,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1808,7 +1669,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1820,7 +1680,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1830,7 +1689,6 @@
 				},
 				"Device.{BBF_VENDOR_PREFIX}MLD.Proxy.{i}.Interface.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1842,7 +1700,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1859,7 +1716,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1871,7 +1727,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1887,7 +1742,6 @@
 				},
 				"Device.{BBF_VENDOR_PREFIX}MLD.Proxy.{i}.Filter.{i}.": {
 					"type": "object",
-					"version": "2.5",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1899,7 +1753,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -1911,7 +1764,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.5",
 						"protocols": [
 							"cwmp",
 							"usp"

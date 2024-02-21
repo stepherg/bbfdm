@@ -1,7 +1,6 @@
 {
 	"Device.Services.VoiceService.{i}.": {
 		"type": "object",
-		"version": "2.0",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -16,7 +15,6 @@
 			"type": "string",
 			"read": true,
 			"write": true,
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -33,7 +31,6 @@
 			"type": "unsignedInt",
 			"read": true,
 			"write": false,
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -45,7 +42,6 @@
 			"type": "unsignedInt",
 			"read": true,
 			"write": false,
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -57,7 +53,6 @@
 			"type": "unsignedInt",
 			"read": true,
 			"write": false,
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -69,7 +64,6 @@
 			"type": "unsignedInt",
 			"read": true,
 			"write": false,
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -81,7 +75,6 @@
 			"type": "unsignedInt",
 			"read": true,
 			"write": false,
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -93,7 +86,6 @@
 			"type": "unsignedInt",
 			"read": true,
 			"write": false,
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -103,7 +95,6 @@
 		},
 		"Device.Services.VoiceService.{i}.Capabilities.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -115,7 +106,6 @@
 				"type": "int",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -132,7 +122,6 @@
 				"type": "int",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -149,7 +138,6 @@
 				"type": "int",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -166,7 +154,6 @@
 				"type": "int",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -183,7 +170,6 @@
 				"type": "int",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -200,7 +186,6 @@
 				"type": "int",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -217,7 +202,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -241,7 +225,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -264,7 +247,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -286,7 +268,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -308,7 +289,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -380,7 +360,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -390,7 +369,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Capabilities.SIP.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -400,7 +378,6 @@
 				"array": false,
 				"Device.Services.VoiceService.{i}.Capabilities.SIP.Client.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -412,7 +389,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -426,7 +402,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -440,7 +415,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -454,7 +428,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -475,7 +448,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -489,7 +461,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -512,7 +483,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -526,7 +496,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -547,7 +516,6 @@
 				},
 				"Device.Services.VoiceService.{i}.Capabilities.SIP.Registrar.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -559,7 +527,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -573,7 +540,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -587,7 +553,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -601,7 +566,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -622,7 +586,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -636,7 +599,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -659,7 +621,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -673,7 +634,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -695,7 +655,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Capabilities.MGCP.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -707,7 +666,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -720,7 +678,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Capabilities.H323.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -732,7 +689,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -744,7 +700,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -765,7 +720,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Capabilities.ISDN.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -777,7 +731,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -789,7 +742,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -801,7 +753,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -813,7 +764,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -825,7 +775,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -837,7 +786,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -848,7 +796,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Capabilities.POTS.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -860,7 +807,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -877,7 +823,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -889,7 +834,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -900,7 +844,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Capabilities.Codec.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -917,7 +860,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -934,7 +876,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -970,7 +911,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -983,7 +923,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1002,7 +941,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1013,7 +951,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Capabilities.QualityIndicator.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1025,7 +962,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1037,7 +973,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1055,7 +990,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1073,7 +1007,6 @@
 		},
 		"Device.Services.VoiceService.{i}.ReservedPorts.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -1085,7 +1018,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1099,7 +1031,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1112,7 +1043,6 @@
 		},
 		"Device.Services.VoiceService.{i}.ISDN.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -1124,7 +1054,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1136,7 +1065,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1146,7 +1074,6 @@
 			},
 			"Device.Services.VoiceService.{i}.ISDN.BRI.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1162,7 +1089,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1174,7 +1100,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1192,7 +1117,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1209,7 +1133,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1226,7 +1149,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1243,7 +1165,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1260,7 +1181,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1282,7 +1202,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1298,7 +1217,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1310,7 +1228,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1322,7 +1239,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1334,7 +1250,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1350,7 +1265,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1367,7 +1281,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1379,7 +1292,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1391,7 +1303,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1408,7 +1319,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1428,7 +1338,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1448,7 +1357,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1467,7 +1375,6 @@
 			},
 			"Device.Services.VoiceService.{i}.ISDN.PRI.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1483,7 +1390,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1495,7 +1401,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1513,7 +1418,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1530,7 +1434,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1547,7 +1450,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1564,7 +1466,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1581,7 +1482,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1602,7 +1502,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1618,7 +1517,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1630,7 +1528,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1647,7 +1544,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1668,7 +1564,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1684,7 +1579,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1701,7 +1595,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1721,7 +1614,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1741,7 +1633,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1761,7 +1652,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1777,7 +1667,6 @@
 		},
 		"Device.Services.VoiceService.{i}.POTS.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -1789,7 +1678,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1801,7 +1689,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1813,7 +1700,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1828,7 +1714,6 @@
 			},
 			"Device.Services.VoiceService.{i}.POTS.FXO.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -1844,7 +1729,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1856,7 +1740,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1874,7 +1757,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1891,7 +1773,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1908,7 +1789,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1925,7 +1805,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1938,7 +1817,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1957,7 +1835,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1976,7 +1853,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -1994,7 +1870,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2013,7 +1888,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2030,7 +1904,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2049,7 +1922,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2061,7 +1933,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2071,7 +1942,6 @@
 				},
 				"Device.Services.VoiceService.{i}.POTS.FXO.{i}.DiagTests.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2083,7 +1953,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2102,7 +1971,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2118,7 +1986,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2134,7 +2001,6 @@
 			},
 			"Device.Services.VoiceService.{i}.POTS.FXS.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2150,7 +2016,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2162,7 +2027,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2180,7 +2044,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2197,7 +2060,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2214,7 +2076,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2231,7 +2092,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2248,7 +2108,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2265,7 +2124,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2281,7 +2139,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2293,7 +2150,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2305,7 +2161,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2317,7 +2172,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2333,7 +2187,6 @@
 				},
 				"Device.Services.VoiceService.{i}.POTS.FXS.{i}.VoiceProcessing.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2345,7 +2198,6 @@
 						"type": "int",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2358,7 +2210,6 @@
 						"type": "int",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2371,7 +2222,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2383,7 +2233,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2395,7 +2244,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2407,7 +2255,6 @@
 				},
 				"Device.Services.VoiceService.{i}.POTS.FXS.{i}.DiagTests.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2419,7 +2266,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2438,7 +2284,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2457,7 +2302,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2473,7 +2317,6 @@
 			},
 			"Device.Services.VoiceService.{i}.POTS.Ringer.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2485,7 +2328,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2495,7 +2337,6 @@
 				},
 				"Device.Services.VoiceService.{i}.POTS.Ringer.Event.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2511,7 +2352,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2528,7 +2368,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2548,7 +2387,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2567,7 +2405,6 @@
 		},
 		"Device.Services.VoiceService.{i}.DECT.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -2579,7 +2416,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2591,7 +2427,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2601,7 +2436,6 @@
 			},
 			"Device.Services.VoiceService.{i}.DECT.Base.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2618,7 +2452,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2630,7 +2463,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2648,7 +2480,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2665,7 +2496,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2682,7 +2512,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2699,7 +2528,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2719,7 +2547,6 @@
 					"type": "hexBinary",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2736,7 +2563,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2748,7 +2574,6 @@
 					"type": "hexBinary",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2765,7 +2590,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2777,7 +2601,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2789,7 +2612,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2801,7 +2623,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2813,7 +2634,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2830,7 +2650,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2846,7 +2665,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2863,7 +2681,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2880,7 +2697,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2895,7 +2711,6 @@
 				},
 				"Device.Services.VoiceService.{i}.DECT.Base.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2907,7 +2722,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2919,7 +2733,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2931,7 +2744,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2943,7 +2755,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2955,7 +2766,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -2967,7 +2777,6 @@
 			},
 			"Device.Services.VoiceService.{i}.DECT.Portable.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -2983,7 +2792,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -2995,7 +2803,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3013,7 +2820,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3030,7 +2836,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3044,7 +2849,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3060,7 +2864,6 @@
 					"type": "hexBinary",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3077,7 +2880,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3090,7 +2892,6 @@
 					"type": "hexBinary",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3107,7 +2908,6 @@
 					"type": "hexBinary",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3124,7 +2924,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3141,7 +2940,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3163,7 +2961,6 @@
 					"type": "dateTime",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3175,7 +2972,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3191,7 +2987,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3208,7 +3003,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3225,7 +3019,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3237,7 +3030,6 @@
 					"type": "dateTime",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3249,7 +3041,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3266,7 +3057,6 @@
 		},
 		"Device.Services.VoiceService.{i}.SIP.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -3278,7 +3068,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -3290,7 +3079,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -3302,7 +3090,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -3314,7 +3101,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -3324,7 +3110,6 @@
 			},
 			"Device.Services.VoiceService.{i}.SIP.Client.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -3339,7 +3124,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3352,7 +3136,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3364,7 +3147,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3388,7 +3170,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3405,7 +3186,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3422,7 +3202,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3440,7 +3219,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3457,7 +3235,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3474,7 +3251,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3491,7 +3267,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3504,7 +3279,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3521,7 +3295,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3534,7 +3307,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3546,7 +3318,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3558,7 +3329,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3568,7 +3338,6 @@
 				},
 				"Device.Services.VoiceService.{i}.SIP.Client.{i}.Contact.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3583,7 +3352,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3596,7 +3364,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3614,7 +3381,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3631,7 +3397,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3648,7 +3413,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3665,7 +3429,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3683,7 +3446,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3700,7 +3462,6 @@
 						"type": "dateTime",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3712,7 +3473,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3731,7 +3491,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3747,7 +3506,6 @@
 				},
 				"Device.Services.VoiceService.{i}.SIP.Client.{i}.EventSubscribe.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3763,7 +3521,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3776,7 +3533,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3793,7 +3549,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3810,7 +3565,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3827,7 +3581,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -3844,7 +3597,6 @@
 			},
 			"Device.Services.VoiceService.{i}.SIP.Network.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -3859,7 +3611,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3872,7 +3623,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3884,7 +3634,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3904,7 +3653,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3921,7 +3669,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3938,7 +3685,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3957,7 +3703,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3976,7 +3721,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -3993,7 +3737,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4012,7 +3755,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4031,7 +3773,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4048,7 +3789,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4065,7 +3805,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4082,7 +3821,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4100,7 +3838,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4117,7 +3854,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4136,7 +3872,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4155,7 +3890,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4172,7 +3906,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4189,7 +3922,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4205,7 +3937,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4224,7 +3955,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4237,7 +3967,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4254,7 +3983,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4268,7 +3996,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4282,7 +4009,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4299,7 +4025,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4317,7 +4042,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4329,7 +4053,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4347,7 +4070,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4365,7 +4087,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4383,7 +4104,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4401,7 +4121,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4419,7 +4138,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4437,7 +4155,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4455,7 +4172,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4473,7 +4189,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4491,7 +4206,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4509,7 +4223,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4527,7 +4240,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4545,7 +4257,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4563,7 +4274,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4581,7 +4291,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4599,7 +4308,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4617,7 +4325,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4635,7 +4342,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4653,7 +4359,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4671,7 +4376,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4688,7 +4392,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4705,7 +4408,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4718,7 +4420,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4737,7 +4438,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4755,7 +4455,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4773,7 +4472,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4790,7 +4488,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4803,7 +4500,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4815,7 +4511,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4828,7 +4523,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4841,7 +4535,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4853,7 +4546,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4870,7 +4562,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4884,7 +4575,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4897,7 +4587,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4909,7 +4598,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4921,7 +4609,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4937,7 +4624,6 @@
 				},
 				"Device.Services.VoiceService.{i}.SIP.Network.{i}.FQDNServer.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -4953,7 +4639,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -4966,7 +4651,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -4983,7 +4667,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5000,7 +4683,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5017,7 +4699,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5036,7 +4717,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5055,7 +4735,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5073,7 +4752,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5091,7 +4769,6 @@
 				},
 				"Device.Services.VoiceService.{i}.SIP.Network.{i}.EventSubscribe.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5107,7 +4784,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5120,7 +4796,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5137,7 +4812,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5154,7 +4828,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5171,7 +4844,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5190,7 +4862,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5209,7 +4880,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5221,7 +4891,6 @@
 				},
 				"Device.Services.VoiceService.{i}.SIP.Network.{i}.ResponseMap.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5237,7 +4906,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5254,7 +4922,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5272,7 +4939,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5285,7 +4951,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5302,7 +4967,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5319,7 +4983,6 @@
 			},
 			"Device.Services.VoiceService.{i}.SIP.Proxy.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -5336,7 +4999,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5349,7 +5011,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5367,7 +5028,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5384,7 +5044,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5401,7 +5060,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5418,7 +5076,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5436,7 +5093,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5453,7 +5109,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5469,7 +5124,6 @@
 			},
 			"Device.Services.VoiceService.{i}.SIP.Registrar.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -5486,7 +5140,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5499,7 +5152,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5511,7 +5163,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5529,7 +5180,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5546,7 +5196,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5563,7 +5212,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5580,7 +5228,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5598,7 +5245,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5611,7 +5257,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5630,7 +5275,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5647,7 +5291,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5659,7 +5302,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5676,7 +5318,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5693,7 +5334,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5703,7 +5343,6 @@
 				},
 				"Device.Services.VoiceService.{i}.SIP.Registrar.{i}.Account.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -5719,7 +5358,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5737,7 +5375,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5749,7 +5386,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5773,7 +5409,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5790,7 +5425,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5807,7 +5441,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5827,7 +5460,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5844,7 +5476,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5861,7 +5492,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5877,7 +5507,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5894,7 +5523,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5911,7 +5539,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5925,7 +5552,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5942,7 +5568,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5952,7 +5577,6 @@
 					},
 					"Device.Services.VoiceService.{i}.SIP.Registrar.{i}.Account.{i}.Contact.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -5967,7 +5591,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -5980,7 +5603,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -5998,7 +5620,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -6015,7 +5636,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -6032,7 +5652,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -6049,7 +5668,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -6067,7 +5685,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -6084,7 +5701,6 @@
 							"type": "dateTime",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -6096,7 +5712,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -6115,7 +5730,6 @@
 		},
 		"Device.Services.VoiceService.{i}.MGCP.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -6127,7 +5741,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6139,7 +5752,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6149,7 +5761,6 @@
 			},
 			"Device.Services.VoiceService.{i}.MGCP.Client.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6164,7 +5775,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6177,7 +5787,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6189,7 +5798,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6213,7 +5821,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6230,7 +5837,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6247,7 +5853,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6266,7 +5871,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6283,7 +5887,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6300,7 +5903,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6317,7 +5919,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6329,7 +5930,6 @@
 			},
 			"Device.Services.VoiceService.{i}.MGCP.Network.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6344,7 +5944,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6357,7 +5956,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6369,7 +5967,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6389,7 +5986,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6406,7 +6002,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6423,7 +6018,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6442,7 +6036,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6459,7 +6052,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6478,7 +6070,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6498,7 +6089,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6517,7 +6107,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6535,7 +6124,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6553,7 +6141,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6571,7 +6158,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6583,7 +6169,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6595,7 +6180,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6608,7 +6192,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6625,7 +6208,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6639,7 +6221,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6653,7 +6234,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6666,7 +6246,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6683,7 +6262,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6697,7 +6275,6 @@
 		},
 		"Device.Services.VoiceService.{i}.H323.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -6709,7 +6286,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6721,7 +6297,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6731,7 +6306,6 @@
 			},
 			"Device.Services.VoiceService.{i}.H323.Client.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6746,7 +6320,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6759,7 +6332,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6771,7 +6343,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6795,7 +6366,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6812,7 +6382,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6825,7 +6394,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6837,7 +6405,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6849,7 +6416,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6866,7 +6432,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6883,7 +6448,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6895,7 +6459,6 @@
 			},
 			"Device.Services.VoiceService.{i}.H323.Network.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -6910,7 +6473,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6923,7 +6485,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6935,7 +6496,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6955,7 +6515,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6972,7 +6531,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6984,7 +6542,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -6997,7 +6554,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7009,7 +6565,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7023,7 +6578,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7042,7 +6596,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7060,7 +6613,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7078,7 +6630,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7091,7 +6642,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7108,7 +6658,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7122,7 +6671,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7136,7 +6684,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7149,7 +6696,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7166,7 +6712,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7180,7 +6725,6 @@
 		},
 		"Device.Services.VoiceService.{i}.Trunk.{i}.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -7195,7 +6739,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7208,7 +6751,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7220,7 +6762,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7242,7 +6783,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7259,7 +6799,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7276,7 +6815,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7293,7 +6831,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7307,7 +6844,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7319,7 +6855,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7331,7 +6866,6 @@
 				"type": "int",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7349,7 +6883,6 @@
 				"type": "int",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7367,7 +6900,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7383,7 +6915,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7399,7 +6930,6 @@
 		},
 		"Device.Services.VoiceService.{i}.CallControl.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -7411,7 +6941,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7423,7 +6952,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7435,7 +6963,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7447,7 +6974,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7459,7 +6985,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7471,7 +6996,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7483,7 +7007,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7495,7 +7018,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7507,7 +7029,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7517,7 +7038,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallControl.Line.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7533,7 +7053,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7546,7 +7065,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7558,7 +7076,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7578,7 +7095,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7595,7 +7111,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7615,7 +7130,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7631,7 +7145,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7648,7 +7161,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7665,7 +7177,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7680,7 +7191,6 @@
 				},
 				"Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7690,7 +7200,6 @@
 					"array": false,
 					"Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.IncomingCalls.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -7702,7 +7211,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7714,7 +7222,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7726,7 +7233,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7738,7 +7244,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7750,7 +7255,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7762,7 +7266,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.OutgoingCalls.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -7774,7 +7277,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7786,7 +7288,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7798,7 +7299,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7810,7 +7310,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7822,7 +7321,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7834,7 +7332,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.RTP.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -7846,7 +7343,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7858,7 +7354,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7870,7 +7365,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7882,7 +7376,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7894,7 +7387,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7905,7 +7397,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.Line.{i}.Stats.DSP.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -7917,7 +7408,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7929,7 +7419,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -7942,7 +7431,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -7958,7 +7446,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7971,7 +7458,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -7983,7 +7469,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8004,7 +7489,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8021,7 +7505,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8041,7 +7524,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8058,7 +7540,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8075,7 +7556,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8092,7 +7572,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8109,7 +7588,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8126,7 +7604,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8143,7 +7620,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8162,7 +7638,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8182,7 +7657,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8194,7 +7668,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8209,7 +7682,6 @@
 				},
 				"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.Stats.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8219,7 +7691,6 @@
 					"array": false,
 					"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.Stats.IncomingCalls.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -8231,7 +7702,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8243,7 +7713,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8255,7 +7724,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8267,7 +7735,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8279,7 +7746,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8291,7 +7757,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.Stats.OutgoingCalls.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -8303,7 +7768,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8315,7 +7779,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8327,7 +7790,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8339,7 +7801,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8351,7 +7812,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8363,7 +7823,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.Stats.RTP.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -8375,7 +7834,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8387,7 +7845,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8399,7 +7856,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8411,7 +7867,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8423,7 +7878,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8434,7 +7888,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.Extension.{i}.Stats.DSP.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -8446,7 +7899,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8458,7 +7910,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -8471,7 +7922,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallControl.Group.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -8486,7 +7936,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8503,7 +7952,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8517,7 +7965,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8534,7 +7981,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8546,7 +7992,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallControl.Mailbox.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -8561,7 +8006,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8574,7 +8018,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8591,7 +8034,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8603,7 +8045,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8616,7 +8057,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8629,7 +8069,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8646,7 +8085,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8665,7 +8103,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8682,7 +8119,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8699,7 +8135,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8718,7 +8153,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8734,7 +8168,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallControl.IncomingMap.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -8751,7 +8184,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8764,7 +8196,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8781,7 +8212,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8798,7 +8228,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8815,7 +8244,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8833,7 +8261,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8845,7 +8272,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallControl.OutgoingMap.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -8862,7 +8288,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8875,7 +8300,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8892,7 +8316,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8909,7 +8332,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8926,7 +8348,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8943,7 +8364,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8960,7 +8380,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -8975,7 +8394,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -8992,7 +8410,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9011,7 +8428,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9030,7 +8446,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9050,7 +8465,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9070,7 +8484,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9088,7 +8501,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9105,7 +8517,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9117,7 +8528,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9127,7 +8537,6 @@
 				},
 				"Device.Services.VoiceService.{i}.CallControl.NumberingPlan.{i}.PrefixInfo.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9142,7 +8551,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9159,7 +8567,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9172,7 +8579,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9189,7 +8595,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9208,7 +8613,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9227,7 +8631,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9246,7 +8649,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9265,7 +8667,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9282,7 +8683,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9299,7 +8699,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9316,7 +8715,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallControl.CallingFeatures.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -9328,7 +8726,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9338,7 +8735,6 @@
 				},
 				"Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -9353,7 +8749,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9370,7 +8765,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9382,7 +8776,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9394,7 +8787,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9406,7 +8798,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9418,7 +8809,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9435,7 +8825,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9447,7 +8836,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9464,7 +8852,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9477,7 +8864,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9489,7 +8875,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9506,7 +8891,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9519,7 +8903,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9531,7 +8914,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9543,7 +8925,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9555,7 +8936,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9567,7 +8947,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9579,7 +8958,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9591,7 +8969,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9603,7 +8980,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9615,7 +8991,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9627,7 +9002,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9639,7 +9013,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9651,7 +9024,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9663,7 +9035,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9675,7 +9046,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9687,7 +9057,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9699,7 +9068,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9711,7 +9079,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9723,7 +9090,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9735,7 +9101,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9745,7 +9110,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.CFT.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9760,7 +9124,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9772,7 +9135,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9789,7 +9151,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9811,7 +9172,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9828,7 +9188,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9845,7 +9204,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9861,7 +9219,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.SCF.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9877,7 +9234,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9890,7 +9246,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9907,7 +9262,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9924,7 +9278,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9940,7 +9293,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.SCREJ.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -9956,7 +9308,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9969,7 +9320,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -9986,7 +9336,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10002,7 +9351,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.FollowMe.{i}.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -10019,7 +9367,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10032,7 +9379,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10049,7 +9395,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10062,7 +9407,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10079,7 +9423,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10090,7 +9433,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallControl.CallingFeatures.Set.{i}.Voice2Mail.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -10102,7 +9444,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10114,7 +9455,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10127,7 +9467,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10139,7 +9478,6 @@
 							"type": "boolean",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10151,7 +9489,6 @@
 							"type": "string",
 							"read": true,
 							"write": true,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -10165,7 +9502,6 @@
 		},
 		"Device.Services.VoiceService.{i}.Interwork.{i}.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -10180,7 +9516,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10193,7 +9528,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10205,7 +9539,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10224,7 +9557,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10241,7 +9573,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10259,7 +9590,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10276,7 +9606,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10294,7 +9623,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10311,7 +9639,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10323,7 +9650,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10340,7 +9666,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10357,7 +9682,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10374,7 +9698,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10387,7 +9710,6 @@
 				"type": "dateTime",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10399,7 +9721,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10416,7 +9737,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10429,7 +9749,6 @@
 				"type": "dateTime",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10441,7 +9760,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10458,7 +9776,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10475,7 +9792,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10489,7 +9805,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10506,7 +9821,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10518,7 +9832,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10528,7 +9841,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Interwork.{i}.UserInterface.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10544,7 +9856,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10557,7 +9868,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10574,7 +9884,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10591,7 +9900,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10607,7 +9915,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Interwork.{i}.Map.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10622,7 +9929,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10635,7 +9941,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10652,7 +9957,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10669,7 +9973,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10686,7 +9989,6 @@
 					"type": "dateTime",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10698,7 +10000,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10715,7 +10016,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10732,7 +10032,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10749,7 +10048,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10766,7 +10064,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10779,7 +10076,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -10796,7 +10092,6 @@
 		},
 		"Device.Services.VoiceService.{i}.CallLog.{i}.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -10811,7 +10106,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10828,7 +10122,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10845,7 +10138,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10862,7 +10154,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10879,7 +10170,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10896,7 +10186,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10913,7 +10202,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10930,7 +10218,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10944,7 +10231,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10960,7 +10246,6 @@
 				"type": "dateTime",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10972,7 +10257,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -10985,7 +10269,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -11026,7 +10309,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -11038,7 +10320,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -11048,7 +10329,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallLog.{i}.SignalingPerformance.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -11063,7 +10343,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11079,7 +10358,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11092,7 +10370,6 @@
 					"type": "int",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11105,7 +10382,6 @@
 					"type": "int",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11117,7 +10393,6 @@
 			},
 			"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -11132,7 +10407,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11150,7 +10424,6 @@
 					"type": "dateTime",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11162,7 +10435,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11175,7 +10447,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11192,7 +10463,6 @@
 					"type": "string",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11207,7 +10477,6 @@
 				},
 				"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11217,7 +10486,6 @@
 					"array": false,
 					"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.RTP.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -11229,7 +10497,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11246,7 +10513,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11264,7 +10530,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11282,7 +10547,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11300,7 +10564,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11318,7 +10581,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11336,7 +10598,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11354,7 +10615,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11372,7 +10632,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11384,7 +10643,6 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11396,7 +10654,6 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11408,7 +10665,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11420,7 +10676,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11432,7 +10687,6 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11444,7 +10698,6 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11456,7 +10709,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11474,7 +10726,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11492,7 +10743,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11509,7 +10759,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11526,7 +10775,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11543,7 +10791,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11560,7 +10807,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11578,7 +10824,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11596,7 +10841,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11608,7 +10852,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.DSP.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -11618,7 +10861,6 @@
 						"array": false,
 						"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.DSP.ReceiveCodec.": {
 							"type": "object",
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11630,7 +10872,6 @@
 								"type": "string",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -11647,7 +10888,6 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -11659,7 +10899,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -11671,7 +10910,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -11682,7 +10920,6 @@
 						},
 						"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.DSP.TransmitCodec.": {
 							"type": "object",
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11694,7 +10931,6 @@
 								"type": "string",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -11711,7 +10947,6 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -11723,7 +10958,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -11736,7 +10970,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -11748,7 +10981,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -11760,7 +10992,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Source.VoiceQuality.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -11772,7 +11003,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11791,7 +11021,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11810,7 +11039,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11829,7 +11057,6 @@
 				},
 				"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -11839,7 +11066,6 @@
 					"array": false,
 					"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.RTP.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -11851,7 +11077,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11868,7 +11093,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11886,7 +11110,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11904,7 +11127,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11922,7 +11144,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11940,7 +11161,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11958,7 +11178,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11976,7 +11195,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -11994,7 +11212,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12006,7 +11223,6 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12018,7 +11234,6 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12030,7 +11245,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12042,7 +11256,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12054,7 +11267,6 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12066,7 +11278,6 @@
 							"type": "unsignedLong",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12078,7 +11289,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12096,7 +11306,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12114,7 +11323,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12131,7 +11339,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12148,7 +11355,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12165,7 +11371,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12182,7 +11387,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12200,7 +11404,6 @@
 							"type": "int",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12218,7 +11421,6 @@
 							"type": "unsignedInt",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12230,7 +11432,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.DSP.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12240,7 +11441,6 @@
 						"array": false,
 						"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.DSP.ReceiveCodec.": {
 							"type": "object",
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12252,7 +11452,6 @@
 								"type": "string",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -12269,7 +11468,6 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -12281,7 +11479,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -12293,7 +11490,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -12304,7 +11500,6 @@
 						},
 						"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.DSP.TransmitCodec.": {
 							"type": "object",
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12316,7 +11511,6 @@
 								"type": "string",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -12333,7 +11527,6 @@
 								"type": "boolean",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -12345,7 +11538,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -12358,7 +11550,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -12370,7 +11561,6 @@
 								"type": "unsignedInt",
 								"read": true,
 								"write": false,
-								"version": "2.0",
 								"protocols": [
 									"cwmp",
 									"usp"
@@ -12382,7 +11572,6 @@
 					},
 					"Device.Services.VoiceService.{i}.CallLog.{i}.Session.{i}.Destination.VoiceQuality.": {
 						"type": "object",
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12394,7 +11583,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12413,7 +11601,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12432,7 +11619,6 @@
 							"type": "string",
 							"read": true,
 							"write": false,
-							"version": "2.0",
 							"protocols": [
 								"cwmp",
 								"usp"
@@ -12453,7 +11639,6 @@
 		},
 		"Device.Services.VoiceService.{i}.VoIPProfile.{i}.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -12468,7 +11653,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12481,7 +11665,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12493,7 +11676,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12510,7 +11692,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12527,7 +11708,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12547,7 +11727,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12565,7 +11744,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12582,7 +11760,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12595,7 +11772,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12605,7 +11781,6 @@
 			},
 			"Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -12617,7 +11792,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12636,7 +11810,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12655,7 +11828,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12674,7 +11846,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12692,7 +11863,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12710,7 +11880,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12728,7 +11897,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12746,7 +11914,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12762,7 +11929,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12775,7 +11941,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12788,7 +11953,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12799,7 +11963,6 @@
 				},
 				"Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.RTCP.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12811,7 +11974,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12823,7 +11985,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12841,7 +12002,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12857,7 +12017,6 @@
 				},
 				"Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.SRTP.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12869,7 +12028,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12881,7 +12039,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12901,7 +12058,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12914,7 +12070,6 @@
 				},
 				"Device.Services.VoiceService.{i}.VoIPProfile.{i}.RTP.Redundancy.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -12926,7 +12081,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12939,7 +12093,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12958,7 +12111,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12977,7 +12129,6 @@
 						"type": "int",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -12996,7 +12147,6 @@
 						"type": "int",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13015,7 +12165,6 @@
 						"type": "int",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13034,7 +12183,6 @@
 						"type": "int",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13053,7 +12201,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13066,7 +12213,6 @@
 			},
 			"Device.Services.VoiceService.{i}.VoIPProfile.{i}.FaxT38.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13078,7 +12224,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13098,7 +12243,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13116,7 +12260,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13134,7 +12277,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13150,7 +12292,6 @@
 		},
 		"Device.Services.VoiceService.{i}.CodecProfile.{i}.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -13165,7 +12306,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13177,7 +12317,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13194,7 +12333,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13211,7 +12349,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13230,7 +12367,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13241,7 +12377,6 @@
 		},
 		"Device.Services.VoiceService.{i}.Tone.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -13253,7 +12388,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13265,7 +12399,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13277,7 +12410,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13289,7 +12421,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13304,7 +12435,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Tone.Description.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13319,7 +12449,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13332,7 +12461,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13349,7 +12477,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13366,7 +12493,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13383,7 +12509,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13400,7 +12525,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13419,7 +12543,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13435,7 +12558,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Tone.Pattern.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13450,7 +12572,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13463,7 +12584,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13480,7 +12600,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13493,7 +12612,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13513,7 +12631,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13527,7 +12644,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13547,7 +12663,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13561,7 +12676,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13581,7 +12695,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13595,7 +12708,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13615,7 +12727,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13629,7 +12740,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13649,7 +12759,6 @@
 					"type": "int",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13663,7 +12772,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13677,7 +12785,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13693,7 +12800,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Tone.EventProfile.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13708,7 +12814,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13725,7 +12830,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13735,7 +12839,6 @@
 				},
 				"Device.Services.VoiceService.{i}.Tone.EventProfile.{i}.Event.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13750,7 +12853,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13767,7 +12869,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13802,7 +12903,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13820,7 +12920,6 @@
 		},
 		"Device.Services.VoiceService.{i}.Terminal.{i}.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -13835,7 +12934,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13847,7 +12945,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13859,7 +12956,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13881,7 +12977,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13898,7 +12993,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13915,7 +13009,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13925,7 +13018,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Terminal.{i}.Audio.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -13940,7 +13032,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13957,7 +13048,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13972,7 +13062,6 @@
 				},
 				"Device.Services.VoiceService.{i}.Terminal.{i}.Audio.{i}.VoiceProcessing.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -13984,7 +13073,6 @@
 						"type": "int",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -13997,7 +13085,6 @@
 						"type": "int",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14010,7 +13097,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14022,7 +13108,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14034,7 +13119,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14047,7 +13131,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Terminal.{i}.ButtonMap.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14059,7 +13142,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14069,7 +13151,6 @@
 				},
 				"Device.Services.VoiceService.{i}.Terminal.{i}.ButtonMap.Button.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14084,7 +13165,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14101,7 +13181,6 @@
 						"type": "string",
 						"read": true,
 						"write": false,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14118,7 +13197,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14135,7 +13213,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14152,7 +13229,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14169,7 +13245,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14186,7 +13261,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14198,7 +13272,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Terminal.{i}.Ringer.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14210,7 +13283,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14222,7 +13294,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14232,7 +13303,6 @@
 				},
 				"Device.Services.VoiceService.{i}.Terminal.{i}.Ringer.Description.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14247,7 +13317,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14260,7 +13329,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14277,7 +13345,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14294,7 +13361,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14311,7 +13377,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14327,7 +13392,6 @@
 				},
 				"Device.Services.VoiceService.{i}.Terminal.{i}.Ringer.Pattern.{i}.": {
 					"type": "object",
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14342,7 +13406,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14355,7 +13418,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14372,7 +13434,6 @@
 						"type": "boolean",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14385,7 +13446,6 @@
 						"type": "unsignedInt",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14399,7 +13459,6 @@
 						"type": "string",
 						"read": true,
 						"write": true,
-						"version": "2.0",
 						"protocols": [
 							"cwmp",
 							"usp"
@@ -14416,7 +13475,6 @@
 			},
 			"Device.Services.VoiceService.{i}.Terminal.{i}.DiagTests.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14428,7 +13486,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14447,7 +13504,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14462,7 +13518,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": false,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14474,7 +13529,6 @@
 		},
 		"Device.Services.VoiceService.{i}.ClockSynchronization.": {
 			"type": "object",
-			"version": "2.0",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -14486,7 +13540,6 @@
 				"type": "unsignedInt",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14498,7 +13551,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14515,7 +13567,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14532,7 +13583,6 @@
 				"type": "boolean",
 				"read": true,
 				"write": true,
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14542,7 +13592,6 @@
 			},
 			"Device.Services.VoiceService.{i}.ClockSynchronization.ClockSource.{i}.": {
 				"type": "object",
-				"version": "2.0",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -14559,7 +13608,6 @@
 					"type": "boolean",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14571,7 +13619,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14588,7 +13635,6 @@
 					"type": "unsignedInt",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"
@@ -14606,7 +13652,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.0",
 					"protocols": [
 						"cwmp",
 						"usp"

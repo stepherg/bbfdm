@@ -2,7 +2,6 @@
 	"json_plugin_version": 1,
 	"Device.UCI_TEST_V1.": {
 		"type": "object",
-		"version": "2.14",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -11,7 +10,6 @@
 		"array": false,
 		"Password": {
 			"type": "string",
-			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -40,7 +38,6 @@
 			"type": "unsignedInt",
 			"read": true,
 			"write": false,
-			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -62,7 +59,6 @@
 		},		
 		"Device.UCI_TEST_V1.OWSD.{i}.": {
 			"type": "object",
-			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -85,7 +81,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.14",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -100,7 +95,6 @@
 			},
 			"Port": {
 				"type": "unsignedInt",
-				"version": "2.14",
 				"read": true,
 				"write": true,
 				"protocols": [
@@ -132,7 +126,6 @@
 				"type": "string",
 				"read": true,
 				"write": true,
-				"version": "2.14",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -159,7 +152,6 @@
 	},
 	"Device.UBUS_TEST_V1.": {
 		"type": "object",
-		"version": "2.14",
 		"protocols": [
 			"cwmp",
 			"usp"
@@ -168,7 +160,6 @@
 		"array": false,
 		"Uptime": {
 			"type": "string",
-			"version": "2.14",
 			"read": true,
 			"write": true,
 			"protocols": [
@@ -203,7 +194,6 @@
 			"type": "unsignedInt",
 			"read": true,
 			"write": false,
-			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -222,7 +212,6 @@
 		},
 		"Device.UBUS_TEST_V1.Interface.{i}.": {
 			"type": "object",
-			"version": "2.14",
 			"protocols": [
 				"cwmp",
 				"usp"
@@ -244,7 +233,6 @@
 				"type": "string",
 				"read": true,
 				"write": false,
-				"version": "2.14",
 				"protocols": [
 					"cwmp",
 					"usp"
@@ -259,7 +247,6 @@
 			},
 			"Ifname": {
 				"type": "string",
-				"version": "2.14",
 				"read": true,
 				"write": false,
 				"protocols": [
@@ -280,7 +267,6 @@
 			},
 			"Media": {
 				"type": "string",
-				"version": "2.14",
 				"read": true,
 				"write": false,
 				"protocols": [
@@ -302,7 +288,6 @@
 			},	
 			"Push!": {
 				"type": "event",
-				"version": "2.14",
 				"protocols": [
 					"usp"
 				],
@@ -310,7 +295,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.14",
 					"protocols": [
 						"usp"
 					]
@@ -319,7 +303,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.14",
 					"protocols": [
 						"usp"
 					]
@@ -328,7 +311,6 @@
 					"type": "string",
 					"read": true,
 					"write": true,
-					"version": "2.14",
 					"protocols": [
 						"usp"
 					]
@@ -336,7 +318,6 @@
 			},
 			"Periodic!": {
 				"type": "event",
-				"version": "2.13",
 				"protocols": [
 					"usp"
 				]
@@ -344,7 +325,6 @@
 			"Status()": {
 				"type": "command",
 				"async": true,
-				"version" : "2.12",
 				"protocols": [
 					"usp"
 				],
