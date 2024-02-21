@@ -1,0 +1,44 @@
+{
+    "json_plugin_version": 2,
+    "Device.WiFi.AccessPoint.{i}.Security.": {
+        "type": "object",
+        "protocols": [
+            "cwmp",
+            "usp"
+        ],
+        "access": false,
+        "array": false,
+        "{BBF_VENDOR_PREFIX}KeyPassphrase": {
+            "type": "string",
+            "read": true,
+            "write": false,
+            "protocols": [
+                "usp"
+            ],
+            "datatype": "string",
+            "mapping": [
+                {
+                    "data": "@Parent",
+                    "type": "uci_sec",
+                    "key": "key"
+                }
+            ]
+        },
+        "{BBF_VENDOR_PREFIX}SAEPassphrase": {
+            "type": "string",
+            "read": true,
+            "write": false,
+            "protocols": [
+                "usp"
+            ],
+            "datatype": "string",
+            "mapping": [
+                {
+                    "data": "@Parent",
+                    "type": "uci_sec",
+                    "key": "key"
+                }
+            ]
+        }
+    }
+}

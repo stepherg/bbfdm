@@ -88,7 +88,8 @@ obj_schema_v1 = {
 			"type": "string",
 			"enum": [
 				"cwmp",
-				"usp"
+				"usp",
+				"none"
 			]
 		}
 	},
@@ -163,7 +164,8 @@ param_schema = {
 			"type": "string",
 			"enum": [
 				"cwmp",
-				"usp"
+				"usp",
+				"none"
 			]
 		}
 	},
@@ -285,7 +287,7 @@ def parse_value( key , value ):
         print(key + " is not a valid path")
         exit(1)
 
-    if key.endswith('.') and JSON_PLUGIN_VERSION == 1:
+    if key.endswith('.') and (JSON_PLUGIN_VERSION == 1 or JSON_PLUGIN_VERSION == 2):
         __schema = obj_schema_v1
     elif key.endswith('.'):
         __schema = obj_schema

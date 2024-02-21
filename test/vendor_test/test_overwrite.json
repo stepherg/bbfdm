@@ -1,40 +1,41 @@
 {
-  "Device.DeviceInfo.": {
-    "type": "object",
-    "protocols": [
-      "cwmp",
-      "usp"
-    ],
-    "access": false,
-    "array": false,
-    "Device.DeviceInfo.Processor.": {
-      "type": "object",
-      "protocols": [
-        "cwmp",
-        "usp"
-      ],
-      "access": false,
-      "array": false,
-      "Architecture": {
-        "type": "string",
+    "json_plugin_version": 2,
+    "Device.DeviceInfo.": {
+        "type": "object",
         "protocols": [
-          "cwmp",
-          "usp"
+            "cwmp",
+            "usp"
         ],
-        "read": true,
-        "write": false,
-        "default": "x86_64"
-      }
-    },
-    "ProcessorNumberOfEntries": {
-      "type": "unsignedInt",
-      "read": true,
-      "write": false,
-      "protocols": [
-        "cwmp",
-        "usp"
-      ],
-      "default": "1"
+        "access": false,
+        "array": false,
+        "Device.DeviceInfo.Processor.": {
+            "type": "object",
+            "protocols": [
+                "cwmp",
+                "usp"
+            ],
+            "access": false,
+            "array": false,
+            "Architecture": {
+                "type": "string",
+                "protocols": [
+                    "cwmp",
+                    "usp"
+                ],
+                "read": true,
+                "write": false,
+                "default": "x86_64"
+            }
+        },
+        "ProcessorNumberOfEntries": {
+            "type": "unsignedInt",
+            "read": true,
+            "write": false,
+            "protocols": [
+                "cwmp",
+                "usp"
+            ],
+            "default": "1"
+        }
     }
-  }
 }

@@ -53,8 +53,8 @@ In the [test/vendor_test/](../../test/vendor_test) directory, you'll find an exa
 	- Add support for [Device.Firewall.Chain.{i}.Rule.{i}.X_TEST_COM_ICMPType](../../test/vendor_test/firewall.c#L178) parameter
 
 - using JSON Plugin:
-	- Add support for [Device.PD2.{i}.](../../test/vendor_test/test_extend.json#L59) object
-	- Add support for [Device.WiFi.X_IOPSYS_EU_TEST1](../../test/vendor_test/test_extend.json#L10) parameter
+	- Add support for [Device.PD2.{i}.](../../test/vendor_test/test_extend.json#L60) object
+	- Add support for [Device.WiFi.X_IOPSYS_EU_TEST1](../../test/vendor_test/test_extend.json#L11) parameter
 
 ### 2. Overwrite Data Model
 
@@ -63,8 +63,8 @@ In the [test/vendor_test/](../../test/vendor_test) directory, you'll find an exa
 	- Overwrite [Device.DeviceInfo.Manufacturer](../../test/vendor_test/deviceinfo.c#L29) parameter in the core tree
 
 - using JSON Plugin:
-	- Overwrite [Device.DeviceInfo.Processor.](../../test/vendor_test/test_overwrite.json#L10) object in the core tree
-	- Overwrite [Device.DeviceInfo.ProcessorNumberOfEntries](../../test/vendor_test/test_overwrite.json#L29) parameter in the core tree
+	- Overwrite [Device.DeviceInfo.Processor.](../../test/vendor_test/test_overwrite.json#L11) object in the core tree
+	- Overwrite [Device.DeviceInfo.ProcessorNumberOfEntries](../../test/vendor_test/test_overwrite.json#L30) parameter in the core tree
 
 ### 3. Exclude Data Model
 
@@ -73,8 +73,8 @@ In the [test/vendor_test/](../../test/vendor_test) directory, you'll find an exa
 	- Exclude [Device.Ethernet.RMONStats.{i}.Packets1024to1518Bytes](../../test/vendor_test/extension.c#L37) parameter from the core tree
 
 - using JSON Plugin:
-	- Exclude [Device.X_IOPSYS_EU_IGMP.](../../test/vendor_test/test_exclude.json#L27) object from the core tree
-	- Exclude [Device.InterfaceStackNumberOfEntries](../../test/vendor_test/test_exclude.json#L51) parameter from the core tree
+	- Exclude [Device.X_IOPSYS_EU_IGMP.](../../test/vendor_test/test_exclude.json#L28) object from the core tree
+	- Exclude [Device.InterfaceStackNumberOfEntries](../../test/vendor_test/test_exclude.json#L52) parameter from the core tree
 
 
 > Note1: The `libbbfdm` vendor list can support multiple vendors, separated by commas.

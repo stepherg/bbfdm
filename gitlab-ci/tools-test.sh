@@ -34,6 +34,22 @@ echo "Validate X_IOPSYS_EU_WiFi JSON Plugin"
 ./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/X_IOPSYS_EU_WiFi.json
 check_ret $?
 
+echo "Validate UCI_TEST_V1 JSON Plugin"
+./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/X_IOPSYS_EU_JSON_TEST_V1.json
+check_ret $?
+
+echo "Validate test extend Plugin"
+./tools/validate_json_plugin.py test/vendor_test/test_extend.json 
+check_ret $?
+
+echo "Validate test exclude Plugin"
+./tools/validate_json_plugin.py test/vendor_test/test_exclude.json 
+check_ret $?
+
+echo "Validate test overwrite Plugin"
+./tools/validate_json_plugin.py test/vendor_test/test_overwrite.json 
+check_ret $?
+
 echo "Validate TR-181 JSON Plugin after generating from XML"
 json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-*-cwmp-full.xml test/tools/tr-181-2-*-usp-full.xml Device.)
 ./tools/validate_json_plugin.py $json_path
