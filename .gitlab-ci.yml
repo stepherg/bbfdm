@@ -24,6 +24,7 @@ run_unit_test:
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
+  - "./gitlab-ci/pipeline_setup.sh"
   - "./gitlab-ci/install-dependencies.sh"
   - "./gitlab-ci/setup.sh"
   - "./gitlab-ci/unit-test.sh"
@@ -37,7 +38,7 @@ run_tools_test:
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
-  - "./gitlab-ci/setup.sh"
+  - "./gitlab-ci/pipeline_setup.sh"
   - "./gitlab-ci/tools-test.sh"
   - "./gitlab-ci/generate_supported_dm.sh"
 

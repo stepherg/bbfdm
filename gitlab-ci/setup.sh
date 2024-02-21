@@ -2,9 +2,7 @@
 
 echo "# Preparation script ..."
 
-echo "Setting Git config"
-echo "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}" > ~/.git-credential
-git config --global credential.helper "store --file ~/.git-credential"
+./gitlab-ci/pipeline_setup.sh
 
 # link '/bin/sh' to bash instead of dash
 ln -sf bash /bin/sh
