@@ -454,6 +454,35 @@ static int browseWiFiDataElementsNetworkDeviceRadioCapabilitiesCapableOperatingC
 	return 0;
 }
 
+static int browseWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *sta = NULL, *inst = NULL;
+	json_object *res = NULL, *sta_obj = NULL, *sta_arr = NULL, *inst_arr = NULL, *inst_obj = NULL;
+	int sta_id = 0, inst_id = 0, ob = 0;
+
+	sta = dmjson_get_value((json_object *)prev_data, 1, "MACAddress");
+	if (!DM_STRLEN(sta))
+		return 0;
+
+	dmubus_call("map.controller", "dump_steer_history", UBUS_ARGS{0}, 0, &res);
+
+	dmjson_foreach_obj_in_array(res, sta_arr, sta_obj, sta_id, 1, "sta") {
+		char *mac = dmjson_get_value(sta_obj, 1, "macaddr");
+
+		if (DM_STRCMP(mac, sta) != 0)
+			continue;
+
+		dmjson_foreach_obj_in_array(sta_obj, inst_arr, inst_obj, inst_id, 1, "history") {
+			inst = handle_instance_without_section(dmctx, parent_node, ++ob);
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)inst_obj, inst) == DM_STOP)
+				break;
+		}
+		break;
+	}
+
+	return 0;
+}
+
 /*
 static int browseWiFiDataElementsNetworkDeviceRadioBSSQMDescriptorInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
@@ -1950,6 +1979,13 @@ static int get_WiFiDataElementsNetworkDeviceRadioBSS_STANumberOfEntries(char *re
 	return 0;
 }
 
+static int get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_SteeringHistoryNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
 /*
 static int get_WiFiDataElementsNetworkDeviceRadioBSS_QMDescriptorNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2258,6 +2294,68 @@ static int get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummary
 static int get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStats_LastSteerTime(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmjson_get_value((json_object *)data, 3, "MultiAPSTA", "SteeringSummaryStats", "LastSteerTime");
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_Time(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "time");
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APOrigin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "ap");
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_TriggerEvent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *trigger = NULL;
+
+	trigger = dmjson_get_value((json_object *)data, 1, "trigger");
+
+	if (DM_STRCMP(trigger, "link_quality") == 0) {
+		dmasprintf(value, "%s", "Wi-Fi Link Quality");
+	} else if (DM_STRCMP(trigger, "channel_util") == 0) {
+		dmasprintf(value, "%s", "Wi-Fi Channel Utilization");
+	} else if (DM_STRCMP(trigger, "bk_link_util") == 0) {
+		dmasprintf(value, "%s", "Backhaul Link Utilization");
+	} else {
+		dmasprintf(value, "%s", "Unknown");
+	}
+
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringApproach(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *method = NULL;
+
+	method = dmjson_get_value((json_object *)data, 1, "method");
+
+	if (DM_STRCMP(method, "btm") == 0) {
+		dmasprintf(value, "%s", "BTM Request");
+	} else if (DM_STRCMP(method, "assoc_ctl") == 0) {
+		dmasprintf(value, "%s", "Blacklist");
+	} else if (DM_STRCMP(method, "async_btm") == 0) {
+		dmasprintf(value, "%s", "Async BTM Query");
+	} else {
+		dmasprintf(value, "%s", method);
+	}
+
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APDestination(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "target_ap");
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringDuration(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmjson_get_value((json_object *)data, 1, "duration");
 	return 0;
 }
 
@@ -4037,7 +4135,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAParams[] = {
 DMOBJ tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTAObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"SteeringSummaryStats", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStatsParams, NULL, BBFDM_BOTH, NULL},
-//{"SteeringHistory", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryParams, NULL, BBFDM_BOTH, NULL},
+{"SteeringHistory", &DMREAD, NULL, NULL, NULL, browseWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryInst, NULL, NULL, NULL, tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -4045,7 +4143,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTAParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 //{"AssociationTime", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_AssociationTime, NULL, BBFDM_BOTH},
 //{"Noise", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Noise, NULL, BBFDM_BOTH},
-//{"SteeringHistoryNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_SteeringHistoryNumberOfEntries, NULL, BBFDM_BOTH},
+{"SteeringHistoryNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_SteeringHistoryNumberOfEntries, NULL, BBFDM_BOTH},
 //{"Disassociate()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Disassociate, operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Disassociate, BBFDM_USP},
 //{"BTMRequest()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, BBFDM_USP},
 {0}
@@ -4067,16 +4165,16 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringSummaryStatsPa
 };
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.MultiAPSTA.SteeringHistory.{i}. *** */
-//DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryParams[] = {
+DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistoryParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-//{"Time", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_Time, NULL, BBFDM_BOTH},
-//{"APOrigin", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APOrigin, NULL, BBFDM_BOTH},
-//{"TriggerEvent", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_TriggerEvent, NULL, BBFDM_BOTH},
-//{"SteeringApproach", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringApproach, NULL, BBFDM_BOTH},
-//{"APDestination", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APDestination, NULL, BBFDM_BOTH},
-//{"SteeringDuration", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringDuration, NULL, BBFDM_BOTH},
-//{0}
-//};
+{"Time", &DMREAD, DMT_TIME, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_Time, NULL, BBFDM_BOTH},
+{"APOrigin", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APOrigin, NULL, BBFDM_BOTH},
+{"TriggerEvent", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_TriggerEvent, NULL, BBFDM_BOTH},
+{"SteeringApproach", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringApproach, NULL, BBFDM_BOTH},
+{"APDestination", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_APDestination, NULL, BBFDM_BOTH},
+{"SteeringDuration", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTASteeringHistory_SteeringDuration, NULL, BBFDM_BOTH},
+{0}
+};
 
 /* *** Device.WiFi.DataElements.Network.Device.{i}.Radio.{i}.BSS.{i}.STA.{i}.WiFi6Capabilities. *** */
 //DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAWiFi6CapabilitiesParams[] = {

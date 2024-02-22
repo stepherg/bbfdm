@@ -1,0 +1,41 @@
+{
+	"sta": [
+		{
+			"macaddr": "44:d4:37:71:be:6f",
+			"history": [
+				{
+					"time": "2024-02-04T11:12:13Z",
+					"ap": "11:22:33:44:55:66",
+					"trigger": "link_quality",
+					"method": "btm",
+					"target_ap": "77:88:99:11:22:33",
+					"duration": "10"
+				},
+				{
+					"time": "2024-02-04T11:12:13Z",
+					"ap": "11:22:33:44:55:66",
+					"trigger": "bk_link_util",
+					"method": "assoc_ctl",
+					"target_ap": "77:88:99:11:22:33",
+					"duration": "20"
+				},
+				{
+					"time": "2024-02-04T11:12:13Z",
+					"ap": "11:22:33:44:55:66",
+					"trigger": "unknown",
+					"method": "async_btm",
+					"target_ap": "77:88:99:11:22:33",
+					"duration": "0"
+				},
+				{
+					"time": "2024-02-05T11:12:13Z",
+					"ap": "11:22:33:44:55:77",
+					"trigger": "channel_util",
+					"method": "btm",
+					"target_ap": "77:88:99:11:22:33",
+					"duration": "40"
+				}
+			]
+		}	
+	]
+}

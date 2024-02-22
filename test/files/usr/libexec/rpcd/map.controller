@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+case "$1" in
+        list)
+                echo '{ "dump_steer_history": {}}'
+        ;;
+        call)
+                case "$2" in
+                         dump_steer_history)
+                                cat /tmp/map.controller.dump_steer_history 2>/dev/null
+                        ;;
+                esac
+        ;;
+esac
+
