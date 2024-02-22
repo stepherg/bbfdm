@@ -54,6 +54,7 @@ run_libbbfdm_api_functional_test:
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
+  - "./gitlab-ci/pipeline_setup.sh"
   - "./gitlab-ci/install-dependencies.sh"
   - "./gitlab-ci/setup.sh"
   - "./gitlab-ci/functional-api-test.sh"
@@ -68,6 +69,7 @@ run_libbbfdm_functional_test:
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
+  - "./gitlab-ci/pipeline_setup.sh"
   - "./gitlab-ci/install-dependencies.sh"
   - "./gitlab-ci/setup.sh"
   - "./gitlab-ci/functional-test.sh"
@@ -82,6 +84,7 @@ run_libbbfdm_memory_test:
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
+  - "./gitlab-ci/pipeline_setup.sh"
   - "./gitlab-ci/install-dependencies.sh"
   - "./gitlab-ci/setup.sh"
   - "./gitlab-ci/memory-test.sh"
@@ -96,6 +99,7 @@ run_bbfd_functional_test:
     image: ${COMMON_IMAGE}
     allow_failure: false
     script:
+    - "./gitlab-ci/pipeline_setup.sh"
     - "./gitlab-ci/install-dependencies.sh"
     - "./gitlab-ci/setup.sh"
     - "./gitlab-ci/bbfdmd-functional-test.sh"

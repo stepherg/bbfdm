@@ -2,8 +2,6 @@
 
 echo "# Preparation script ..."
 
-./gitlab-ci/pipeline_setup.sh
-
 # link '/bin/sh' to bash instead of dash
 ln -sf bash /bin/sh
 
