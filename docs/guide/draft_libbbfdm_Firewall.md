@@ -350,4 +350,37 @@ redirect sections in the firewall uci which is then picked by the fw3/fw4 for ge
 corresponding iptables/nftables rules.
 
     
+# Handling firewall zones
+
+The has been problem for us so far since 1-O-1 mapping does not exist for this particular
+object. In our current approach, we automatically create zone section when a new IP.Interface
+object is created and set its default INPUT/FORWARD/OUTPUT policy to ACCEPT/ACCEPT/ACCEPT for
+bridges and REJECT/ACCEPT/REJECT for non-bridge interface.
+
+This is restrictive and inflexible and also makes firewall object dependent on network uci.
+
+Hence, it is proposed that,
+1. The firewall zone section is created by the firewallmngr while parsing of config rule section.
+If firewallmngr encounters a rule which has a source_interface or dest_interface defined which
+does not have a corresponding zone section, then the firewallmngr creates the corresponding
+zone section in the firewall uci.
+
+This is needed since, datamodel does not mandate creation of firewall zone while openwrt
+fw3/fw4 cannot generated rules without zones being defined.
+
+3. For each zone, The default INPUT/FORWARD/OUTPUT is set to REJECT/REJECT/REJECT. If an operator
+intends to modify this, they will need to handle this by adding appropriate Firewall.Chain.Rule
+object for that object. or, we could stick to our current policy of keeping ACCEPT/ACCEPT/ACCEPT
+for bridge interface and REJECT/ACCEPT/REJECT for non bridge interfaces, if we choose the former,
+then, we are modifying the default policy for lan interfaces in IOWRT, we are firewall rules
+to allow input/output/forward traffic in our default config so as not to have any functional
+impact.
+
+5. When we implement Firewall.Policy object, then we could make default rule per interface
+configurable by mapping to the parameter Policy.TargetChain=ACCEPT/REJECT/DROP and setting
+the Policy.SourceInterface for affecting the option input, Policy.DestinationInterface for
+affecting the option output. We could choose to keep FORWARD as ACCEPT always and control
+forwarding via the config forwarding section in the firewall uci. Infact, could also map
+the option input to Policy.TargetChain and ouput to Policy.ReverseTargetChain parameter and
+handle value for option input and output via a single instance of Firewall.Policy object.
 
