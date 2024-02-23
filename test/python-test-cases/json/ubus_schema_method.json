@@ -1,0 +1,302 @@
+{
+    "object": "bbfdm",
+    "schema": [
+        {
+            "description": "Schema for empty path with first_level=true (proto usp)",
+            "input": {
+                "path": "",
+                "first_level": true,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {
+                "results": []
+            }
+        },
+        {
+            "description": "Schema for empty path with first_level=false (proto usp)",
+            "input": {
+                "path": "",
+                "first_level": false,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {
+                "results": []
+            }
+        },
+        {
+            "description": "Schema for 'Device.' path with first_level=true (proto usp)",
+            "input": {
+                "path": "Device.",
+                "first_level": true,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Schema for 'Device.' path with first_level=false (proto usp)",
+            "input": {
+                "path": "Device.",
+                "first_level": false,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Schema for 'Device.DeviceInfo.' path with first_level=true (proto usp)",
+            "input": {
+                "path": "Device.DeviceInfo.",
+                "first_level": true,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Schema for 'Device.DeviceInfo.' path with first_level=false (proto usp)",
+            "input": {
+                "path": "Device.DeviceInfo.",
+                "first_level": false,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Schema for 'Device.DeviceInfo.Manufacturer' path with first_level=true (proto usp)",
+            "input": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "first_level": true,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {
+                "results": []
+            }
+        },
+        {
+            "description": "Schema for 'Device.DeviceInfo.Manufacturer' path with first_level=false (proto usp)",
+            "input": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "first_level": false,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {
+                "results": []
+            }
+        },
+        {
+            "description": "Schema for 'Device.DeviceInfo.' & 'Device.Time.' & 'Device.WiFi.Radio.' path with first_level=true (proto usp)",
+            "input": {
+                "path": "Device.DeviceInfo.",
+                "paths": ["Device.Time.", "Device.WiFi.Radio."],
+                "first_level": true,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Schema for 'Device.DeviceInfo.' & 'Device.Time.' & 'Device.WiFi.Radio.' path with first_level=false (proto usp)",
+            "input": {
+                "path": "Device.DeviceInfo.",
+                "paths": ["Device.Time.", "Device.WiFi.Radio."],
+                "first_level": false,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Schema for 'Device.Time.' & 'Device.WiFi.Radio.' path with first_level=true (proto usp)",
+            "input": {
+                "paths": ["Device.Time.", "Device.WiFi.Radio."],
+                "first_level": true,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Schema for 'Device.Time.' & 'Device.WiFi.Radio.' path with first_level=false (proto usp)",
+            "input": {
+                "paths": ["Device.Time.", "Device.WiFi.Radio."],
+                "first_level": false,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Schema for 'Device.DeviceIn' path with first_level=true (proto usp)",
+            "input": {
+                "path": "Device.DeviceIn",
+                "first_level": true,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {
+                "results": []
+            }
+        },
+        {
+            "description": "Schema for 'Device.DeviceInfo.' path with first_level=false (proto usp)",
+            "input": {
+                "path": "Device.DeviceIn",
+                "first_level": false,
+                "optional": {"proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {
+                "results": []
+            }
+        },
+        {
+            "description": "Get Name for empty path with first_level=true (proto cwmp)",
+            "input": {
+                "path": "",
+                "first_level": true,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 0,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.",
+                        "data": "0",
+                        "type": "xsd:object"
+
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Get Name for empty path with first_level=false (proto cwmp)",
+            "input": {
+                "path": "",
+                "first_level": false,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Get Name for 'Device.' with first_level=true (proto cwmp)",
+            "input": {
+                "path": "Device.",
+                "first_level": true,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Get Name for 'Device.' path with first_level=false (proto cwmp)",
+            "input": {
+                "path": "Device.",
+                "first_level": false,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Get Name for 'Device.DeviceInfo.' with first_level=true (proto cwmp)",
+            "input": {
+                "path": "Device.DeviceInfo.",
+                "first_level": true,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Get Name for 'Device.DeviceInfo.' path with first_level=false (proto cwmp)",
+            "input": {
+                "path": "Device.DeviceInfo.",
+                "first_level": false,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 0,
+            "output": {}
+        },
+        {
+            "description": "Get Name for 'Device.DeviceInfo.Manufacturer' with first_level=true (proto cwmp)",
+            "input": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "first_level": true,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 9003,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.DeviceInfo.Manufacturer",
+                        "fault": 9003,
+                        "fault_msg": "Invalid arguments"
+
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Get Name for 'Device.DeviceInfo.Manufacturer' path with first_level=false (proto cwmp)",
+            "input": {
+                "path": "Device.DeviceInfo.Manufacturer",
+                "first_level": false,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 0,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.DeviceInfo.Manufacturer",
+                        "data": "0",
+                        "type": "xsd:string"
+
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Get Name for 'Device.DeviceInfo.Manuf' with first_level=true (proto cwmp)",
+            "input": {
+                "path": "Device.DeviceInfo.Manuf",
+                "first_level": true,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 9005,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.DeviceInfo.Manuf",
+                        "fault": 9005,
+                        "fault_msg": "Invalid parameter name"
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Get Name for 'Device.DeviceInfo.Manufac' path with first_level=false (proto cwmp)",
+            "input": {
+                "path": "Device.DeviceInfo.Manufac",
+                "first_level": false,
+                "optional": {"proto": "cwmp"}
+            },
+            "expected_error": 9005,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.DeviceInfo.Manufac",
+                        "fault": 9005,
+                        "fault_msg": "Invalid parameter name"
+                    }
+                ]
+            }
+        }
+    ]
+}

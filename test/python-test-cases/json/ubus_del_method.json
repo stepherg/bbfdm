@@ -1,0 +1,141 @@
+{
+    "object": "bbfdm",
+    "del": [
+        {
+            "description": "Del Object for '' path (proto usp)",
+            "input": {
+                "path": "",
+                "optional": {"format": "raw", "proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {
+                "results": [
+                    {
+                        "path": "",
+                        "fault": 7026,
+                        "fault_msg": "Path is not present in the data model schema"
+                    }
+                ]                
+            }
+        },
+        {
+            "description": "Del Object for '' path (proto cwmp)",
+            "input": {
+                "path": "",
+                "optional": {"format": "raw", "proto": "cwmp"}
+            },
+            "expected_error": 9005,
+            "output": {
+                "results": [
+                    {
+                        "path": "",
+                        "fault": 9005,
+                        "fault_msg": "Invalid parameter name"
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Del Object for 'Device.ATM.' path (proto usp)",
+            "input": {
+                "path": "Device.ATM.",
+                "optional": {"format": "raw", "proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.ATM.",
+                        "fault": 7026,
+                        "fault_msg": "Path is not present in the data model schema"
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Del Object for 'Device.ATM.' path (proto cwmp)",
+            "input": {
+                "path": "Device.ATM.",
+                "optional": {"format": "raw", "proto": "cwmp"}
+            },
+            "expected_error": 9005,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.ATM.",
+                        "fault": 9005,
+                        "fault_msg": "Invalid parameter name"
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Del Object for 'Device.ATM.2' path (proto usp)",
+            "input": {
+                "path": "Device.ATM.2",
+                "optional": {"format": "raw", "proto": "usp"}
+            },
+            "expected_error": 7026,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.ATM.2",
+                        "fault": 7026,
+                        "fault_msg": "Path is not present in the data model schema"
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Del Object for 'Device.ATM.2' path (proto cwmp)",
+            "input": {
+                "path": "Device.ATM.2",
+                "optional": {"format": "raw", "proto": "cwmp"}
+            },
+            "expected_error": 9005,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.ATM.2",
+                        "fault": 9005,
+                        "fault_msg": "Invalid parameter name"
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Del Object for 'Device.ATM.Link.2.' path (proto usp)",
+            "input": {
+                "path": "Device.ATM.Link.2.",
+                "optional": {"format": "raw", "proto": "usp"}
+            },
+            "expected_error": 0,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.ATM.Link.2.",
+                        "data": "1"
+                    }
+                ]
+            }
+        },
+        {
+            "description": "Del Object for 'Device.ATM.Link.3.' path (proto cwmp)",
+            "input": {
+                "path": "Device.ATM.Link.3.",
+                "optional": {"format": "raw", "proto": "cwmp"}
+            },
+            "expected_error": 0,
+            "output": {
+                "results": [
+                    {
+                        "path": "Device.ATM.Link.3.",
+                        "data": "1"
+                    }
+                ]
+            }
+        }
+    ]
+}
+
+
