@@ -76,7 +76,7 @@ int free_dotso_plugin(void *lib_handle)
 
 int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list, struct list_head *json_memhead, const char *file_path, DMOBJ **main_entry)
 {
-	int json_plugin_version = 0;
+	int json_plugin_version = JSON_VERSION_0;
 
 	if (!file_path || !strlen(file_path) || !main_entry)
 		return -1;
@@ -91,7 +91,7 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 		char node_obj[1024] = {0};
 
 		if (strcmp(key, "json_plugin_version") == 0) {
-			json_plugin_version = json_object_get_int(jobj);
+			json_plugin_version = get_json_plugin_version(jobj);
 			continue;
 		}
 

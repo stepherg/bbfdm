@@ -44,12 +44,6 @@ struct dm_json_obj {
 	event_args event_arg;
 };
 
-enum json_plugin_version {
-	JSON_VERSION_0 = 1,
-	JSON_VERSION_1 = 1 << 1,
-	JSON_VERSION_2 = 1 << 2
-};
-
 static void save_json_data(struct list_head *json_list, char *name, json_object *data, int json_version,
 			   const char **in_p, const char **out_p, const char **ev_arg)
 {
@@ -112,7 +106,7 @@ static void free_loaded_json_files(struct list_head *json_list)
 	}
 }
 
-static int get_json_plugin_version(json_object *json_obj)
+int get_json_plugin_version(json_object *json_obj)
 {
 	if (json_obj == NULL || json_object_get_type(json_obj) != json_type_int)
 		return JSON_VERSION_0; // Return JSON_VERSION_0 for invalid input
