@@ -2106,7 +2106,7 @@ char *replace_str(const char *input_str, const char *old_substr, const char *new
 	}
 
 	// Count occurrences of old_substr in input_str
-	for (size_t i = 0; input_str[i] != '\0'; i++) {
+	for (size_t i = 0; i<input_str_len; i++) {
 		if (strstr(&input_str[i], old_substr) == &input_str[i]) {
 			occurrences++;
 			i += old_substr_len;
