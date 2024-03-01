@@ -3111,7 +3111,7 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 				dmuci_set_value_by_section(s, "ssid", ssid);
 				dmuci_set_value_by_section(s, "key", key);
 				// TR181-2.16 does not have option to configure encryption mode, so use the sae as default encryption
-				dmuci_set_value_by_section(s, "encryption", "sae");
+				dmuci_set_value_by_section(s, "encryption", "sae-mixed");
 				dmuci_set_value_by_section(s, "type", "fronthaul");
 				dmuci_set_value_by_section(s, "band", (*pch == '2') ? "2" : pch);
 				dmuci_set_value_by_section(s, "enabled", "1");
