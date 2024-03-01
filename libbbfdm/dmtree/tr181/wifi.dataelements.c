@@ -26,7 +26,7 @@ struct wifi_event_args
 
 struct wifi_ap_fronthaul_args
 {
-	char *ssid;
+	struct uci_section *uci_s;
 	char *band_list;
 };
 
@@ -144,7 +144,7 @@ static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *pa
 		if (is_ssid_exists(section_name(p->config_section), ssid, &band_list))
 			continue;
 
-		curr_wifi_ap_fronthaul_args.ssid = ssid;
+		curr_wifi_ap_fronthaul_args.uci_s = p->config_section;
 		curr_wifi_ap_fronthaul_args.band_list = band_list;
 
 		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "wifi_da_ssid_instance", "wifi_da_ssid_alias");
@@ -746,9 +746,9 @@ static int get_WiFiDataElementsNetwork_SSIDNumberOfEntries(char *refparam, struc
 
 static int get_WiFiDataElementsNetworkSSID_SSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct wifi_ap_fronthaul_args *data_args = (struct wifi_ap_fronthaul_args *)data;
+	struct wifi_ap_fronthaul_args *args = (struct wifi_ap_fronthaul_args *)data;
 
-	*value = (data_args && data_args->ssid) ? data_args->ssid : "";
+	dmuci_get_value_by_section_string(args->uci_s, "ssid", value);
 	return 0;
 }
 
