@@ -372,7 +372,7 @@ int transaction_abort(bbfdm_data_t *data, int trans_id)
 		g_current_trans.trans_id = 0;
 		g_current_trans.app[0] = '\0';
 
-		if (bb) arr = blobmsg_open_array(bb, "reverted_configs");
+		if (bb) arr = blobmsg_open_array(bb, "updated_services");
 		bbf_entry_revert_changes(bb);
 		if (data && data->trans_id) {
 			// Call transaction for registered services only if transaction id is defined

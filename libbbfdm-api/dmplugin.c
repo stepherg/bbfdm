@@ -119,10 +119,9 @@ bool load_service(DMOBJ *main_dm, struct list_head *srv_list, char *srv_name, ch
 
 static void ubus_transaction_callback(struct ubus_request *req, int type __attribute__((unused)), struct blob_attr *msg)
 {
-	struct blob_attr *tb[2] = {0};
-	const struct blobmsg_policy p[2] = {
+	struct blob_attr *tb[1] = {0};
+	const struct blobmsg_policy p[1] = {
 			{ "updated_services", BLOBMSG_TYPE_ARRAY },
-			{ "reverted_configs", BLOBMSG_TYPE_ARRAY }
 	};
 
 	if (msg == NULL || req == NULL)
@@ -132,7 +131,7 @@ static void ubus_transaction_callback(struct ubus_request *req, int type __attri
 	if (bb == NULL)
 		return;
 
-	blobmsg_parse(p, 2, tb, blobmsg_data(msg), blobmsg_len(msg));
+	blobmsg_parse(p, 1, tb, blobmsg_data(msg), blobmsg_len(msg));
 
 	if (tb[0]) {
 		struct blob_attr *service = NULL;
@@ -140,15 +139,6 @@ static void ubus_transaction_callback(struct ubus_request *req, int type __attri
 
 		blobmsg_for_each_attr(service, tb[0], rem) {
 			blobmsg_add_string(bb, NULL, blobmsg_get_string(service));
-		}
-	}
-
-	if (tb[1]) {
-		struct blob_attr *config = NULL;
-		size_t rem;
-
-		blobmsg_for_each_attr(config, tb[1], rem) {
-			blobmsg_add_string(bb, NULL, blobmsg_get_string(config));
 		}
 	}
 }
