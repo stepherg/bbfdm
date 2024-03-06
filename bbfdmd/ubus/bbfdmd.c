@@ -950,6 +950,7 @@ enum {
 	BBF_SERVICE_NAME,
 	BBF_SERVICE_PARENT_DM,
 	BBF_SERVICE_OBJECT,
+	BBF_SERVICE_MULTI_OBJECTS,
 	__BBF_SERVICE_MAX,
 };
 
@@ -958,6 +959,7 @@ static const struct blobmsg_policy service_policy[] = {
 	[BBF_SERVICE_NAME] = { .name = "name", .type = BLOBMSG_TYPE_STRING },
 	[BBF_SERVICE_PARENT_DM] = { .name = "parent_dm", .type = BLOBMSG_TYPE_STRING },
 	[BBF_SERVICE_OBJECT] = { .name = "object", .type = BLOBMSG_TYPE_STRING },
+	[BBF_SERVICE_MULTI_OBJECTS] = { .name = "multiple_objects", .type = BLOBMSG_TYPE_ARRAY },
 };
 
 static void service_list(struct blob_buf *bb)
@@ -1026,16 +1028,31 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 			goto end;
 		}
 
-		if (!tb[BBF_SERVICE_OBJECT]) {
-			blobmsg_add_string(&bb, "error", "service object should be defined!!");
+		if (!tb[BBF_SERVICE_OBJECT] && !tb[BBF_SERVICE_MULTI_OBJECTS]) {
+			blobmsg_add_string(&bb, "error", "service object/multiple_objects should be defined!!");
 			goto end;
 		}
 
 		char *srv_name = blobmsg_get_string(tb[BBF_SERVICE_NAME]);
 		char *srv_parent_dm = blobmsg_get_string(tb[BBF_SERVICE_PARENT_DM]);
-		char *srv_obj = blobmsg_get_string(tb[BBF_SERVICE_OBJECT]);
+		char *srv_obj = NULL;
+		bool res = true;
 
-		bool res = load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, srv_name, srv_parent_dm, srv_obj);
+		if (tb[BBF_SERVICE_MULTI_OBJECTS]) {
+			struct blob_attr *objs = tb[BBF_SERVICE_MULTI_OBJECTS];
+			struct blob_attr *obj = NULL;
+			size_t rem;
+
+			blobmsg_for_each_attr(obj, objs, rem) {
+				srv_obj = blobmsg_get_string(obj);
+				res |= load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, srv_name, srv_parent_dm, srv_obj);
+			}
+		} else if (tb[BBF_SERVICE_OBJECT]) {
+			srv_obj = blobmsg_get_string(tb[BBF_SERVICE_OBJECT]);
+			res = load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, srv_name, srv_parent_dm, srv_obj);
+		} else {
+			res = false;
+		}
 
 		blobmsg_add_u8(&bb, "status", res);
 		run_schema_updater(u);
@@ -1345,7 +1362,7 @@ static void periodic_instance_updater(struct uloop_timeout *t)
 
 static bool register_service(struct ubus_context *ctx)
 {
-	struct blob_buf bb;
+	struct blob_buf bb = {0};
 	uint32_t ubus_id;
 	struct bbfdm_context *u;
 
@@ -1365,7 +1382,15 @@ static bool register_service(struct ubus_context *ctx)
 	blobmsg_add_string(&bb, "cmd", "register");
 	blobmsg_add_string(&bb, "name", u->config.out_name);
 	blobmsg_add_string(&bb, "parent_dm", u->config.out_parent_dm);
-	blobmsg_add_string(&bb, "object", u->config.out_object);
+
+	if (DM_STRLEN(u->config.multi_object[0]) != 0) {
+		void *arr = blobmsg_open_array(&bb, "multiple_objects");
+		for (int i = 0; i < MAX_MULTI_OBJS && DM_STRLEN(u->config.multi_object[i]) != 0; i++)
+			blobmsg_add_string(&bb, NULL, u->config.multi_object[i]);
+		blobmsg_close_array(&bb, arr);
+	} else {
+		blobmsg_add_string(&bb, "object", u->config.out_object);
+	}
 
 	ubus_invoke(ctx, ubus_id, "service", bb.head, NULL, NULL, 5000);
 	blob_buf_free(&bb);
@@ -1433,6 +1458,19 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 	opt_val = dmjson_get_value(deamon_obj, 2, "output", "object");
 	if (DM_STRLEN(opt_val)) {
 		replace_str(opt_val, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, config->out_object, sizeof(config->out_object));
+	}
+
+	json_object *arr_obj = NULL;
+	char *mem_obj = NULL;
+	int i = 0;
+
+	dmjson_foreach_value_in_array(deamon_obj, arr_obj, mem_obj, i, 2, "output", "multiple_objects") {
+		if (i < MAX_MULTI_OBJS) {
+			replace_str(mem_obj, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, config->multi_object[i], sizeof(config->multi_object[i]));
+		} else {
+			WARNING("More multiple_object defined, can handle only %d ...", MAX_MULTI_OBJS);
+			break;
+		}
 	}
 
 	opt_val = dmjson_get_value(deamon_obj, 2, "output", "root_obj");
@@ -1637,10 +1675,12 @@ int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 			ERR("output parent dm not defined");
 			return -1;
 		}
-		if (DM_STRLEN(daemon_ctx->config.out_object) == 0) {
-			ERR("output object not defined");
+
+		if (DM_STRLEN(daemon_ctx->config.out_object) == 0 && DM_STRLEN(daemon_ctx->config.multi_object[0]) == 0) {
+			ERR("output object and multiple_objects both are not defined");
 			return -1;
 		}
+
 		if (DM_STRLEN(daemon_ctx->config.out_root_obj) == 0) {
 			ERR("output root obj not defined");
 			return -1;

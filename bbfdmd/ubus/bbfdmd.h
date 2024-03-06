@@ -7,6 +7,8 @@
 
 #include "dmbbf.h"
 
+#define MAX_MULTI_OBJS 5
+
 struct bbfdm_async_req {
 	struct ubus_context *ctx;
 	struct ubus_request_data req;
@@ -28,6 +30,7 @@ typedef struct bbfdm_config {
 	char out_name[32];
 	char out_parent_dm[32];
 	char out_object[32];
+	char multi_object[MAX_MULTI_OBJS][32];
 	char out_root_obj[32];
 	char cli_in_type[32];
 	char cli_in_name[128];

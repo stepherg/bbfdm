@@ -59,12 +59,14 @@ static bool add_service_to_main_tree(DMOBJ *main_dm, char *srv_name, char *srv_p
 	return true;
 }
 
-static bool is_service_registered(struct list_head *srvlist, char *srv_name)
+static bool is_service_registered(struct list_head *srvlist, char *srv_name, char *srv_parent_dm, char *srv_obj)
 {
 	struct service *srv = NULL;
 
 	list_for_each_entry(srv, srvlist, list) {
-		if (DM_STRCMP(srv->name, srv_name) == 0)
+		if (DM_STRCMP(srv->name, srv_name) == 0 &&
+			DM_STRCMP(srv->parent_dm, srv_parent_dm) == 0 &&
+			DM_STRCMP(srv->object, srv_obj) == 0)
 			return true;
 	}
 
@@ -102,7 +104,7 @@ bool load_service(DMOBJ *main_dm, struct list_head *srv_list, char *srv_name, ch
 	if (!main_dm || !srv_list || !srv_name || !srv_parent_dm || !srv_obj)
 		return false;
 
-	if (is_service_registered(srv_list, srv_name))
+	if (is_service_registered(srv_list, srv_name, srv_parent_dm, srv_obj))
 		return false;
 
 	if (!add_service_to_main_tree(main_dm, srv_name, srv_parent_dm, srv_obj))
