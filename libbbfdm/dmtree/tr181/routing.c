@@ -392,8 +392,8 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 {
 	struct uci_section *router_s = (struct uci_section *)prev_data;
 	struct routingfwdargs curr_routefwdargs = {0};
+	struct dm_data *curr_data = NULL;
 	struct uci_section *s = NULL;
-	struct dmmap_dup *p = NULL;
 	char *rt_table = NULL;
 	char *inst = NULL;
 	LIST_HEAD(dup_list);
@@ -402,16 +402,16 @@ static int browseIPv4ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 
 	// Enable Routes
 	synchronize_specific_config_sections_with_dmmap("network", "route", "dmmap_routing", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 		char *table = NULL;
 
-		dmuci_get_value_by_section_string(p->config_section, "table", &table);
+		dmuci_get_value_by_section_string(curr_data->config_section, "table", &table);
 		if (DM_STRCMP(rt_table, table) != 0 || (DM_STRLEN(table) == 0 && DM_STRCMP(rt_table, "254") != 0))
 			continue;
 
-		init_args_route_forwarding(&curr_routefwdargs, p->config_section, ROUTE_STATIC);
+		init_args_route_forwarding(&curr_routefwdargs, curr_data->config_section, ROUTE_STATIC);
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "route_instance", "route_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "route_instance", "route_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_routefwdargs, inst) == DM_STOP)
 			goto end;
@@ -439,8 +439,8 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 {
 	struct uci_section *router_s = (struct uci_section *)prev_data;
 	struct routingfwdargs curr_route6fwdargs = {0};
+	struct dm_data *curr_data = NULL;
 	struct uci_section *s = NULL;
-	struct dmmap_dup *p = NULL;
 	char *rt_table = NULL;
 	char *inst = NULL;
 	LIST_HEAD(dup_list);
@@ -449,16 +449,16 @@ static int browseIPv6ForwardingInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 
 	// Enable Routes
 	synchronize_specific_config_sections_with_dmmap("network", "route6", "dmmap_routing", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 		char *table = NULL;
 
-		dmuci_get_value_by_section_string(p->config_section, "table", &table);
+		dmuci_get_value_by_section_string(curr_data->config_section, "table", &table);
 		if (DM_STRCMP(rt_table, table) != 0 || (DM_STRLEN(table) == 0 && DM_STRCMP(rt_table, "254") != 0))
 			continue;
 
-		init_args_route_forwarding(&curr_route6fwdargs, p->config_section, ROUTE_STATIC);
+		init_args_route_forwarding(&curr_route6fwdargs, curr_data->config_section, ROUTE_STATIC);
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "route6_instance", "route6_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "route6_instance", "route6_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_route6fwdargs, inst) == DM_STOP)
 			goto end;

@@ -477,7 +477,7 @@ static void test_bbf_api_json(void **state)
 	char *json_value = NULL;
 	int idx = 0;
 
-	dmubus_call("wifi.ap.test2", "status", UBUS_ARGS{0}, 0, &wifi_status);
+	dmubus_call("wifi.ap.test2_0", "status", UBUS_ARGS{0}, 0, &wifi_status);
 	assert_non_null(wifi_status);
 
 	/*

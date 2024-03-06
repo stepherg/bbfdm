@@ -15,16 +15,16 @@
 *************************************************************/
 static int browseGRETunnelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "proto", "gre", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "gretunnel_instance", "gretunnel_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "gretunnel_instance", "gretunnel_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -44,20 +44,21 @@ static struct uci_section *has_tunnel_interface_route(char *interface)
 static int browseGRETunnelInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL, device[128] = {0};
-	struct dmmap_dup *p = NULL, *dm = (struct dmmap_dup *)prev_data;
-	struct uci_section *s = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
 
-	snprintf(device, sizeof(device), "@%s", section_name(dm->config_section));
-	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "device", device, &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	snprintf(device, sizeof(device), "@%s", section_name(((struct dm_data *)prev_data)->config_section));
 
-		if ((s = has_tunnel_interface_route(section_name(p->config_section))) == NULL)
+	synchronize_specific_config_sections_with_dmmap_eq("network", "interface", "dmmap_network", "device", device, &dup_list);
+	list_for_each_entry(curr_data, &dup_list, list) {
+		struct uci_section *s = NULL;
+
+		if ((s = has_tunnel_interface_route(section_name(curr_data->config_section))) == NULL)
 			continue;
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "greiface_instance", "greiface_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "greiface_instance", "greiface_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -86,9 +87,9 @@ static int delObjGRETunnel(char *refparam, struct dmctx *ctx, void *data, char *
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "gretunnel_instance", "");
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "gretunnel_alias", "");
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "gretunnel_instance", "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "gretunnel_alias", "");
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_option_eq_safe("network", "interface", "proto", "gre", stmp, s) {
@@ -111,7 +112,7 @@ static int addObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 	char device_buf[32];
 
 	dmuci_add_section("network", "interface", &greiface_sec);
-	snprintf(device_buf, sizeof(device_buf), "@%s", section_name(((struct dmmap_dup *)data)->config_section));
+	snprintf(device_buf, sizeof(device_buf), "@%s", section_name(((struct dm_data *)data)->config_section));
 	dmuci_set_value_by_section(greiface_sec, "device", device_buf);
 
 	dmuci_add_section("network", "route", &route_sec);
@@ -119,7 +120,7 @@ static int addObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 
 	dmuci_add_section_bbfdm("dmmap_network", "interface", &dmmap_sec);
 	dmuci_set_value_by_section(dmmap_sec, "section_name", section_name(greiface_sec));
-	dmuci_set_value_by_section(dmmap_sec, "gre_tunnel_sect", section_name(((struct dmmap_dup *)data)->config_section));
+	dmuci_set_value_by_section(dmmap_sec, "gre_tunnel_sect", section_name(((struct dm_data *)data)->config_section));
 	dmuci_set_value_by_section(dmmap_sec, "greiface_instance", *instance);
 	return 0;
 }
@@ -130,13 +131,13 @@ static int delObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "greiface_instance", "");
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "greiface_alias", "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "greiface_instance", "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "greiface_alias", "");
 
-			if ((s = has_tunnel_interface_route(section_name(((struct dmmap_dup *)data)->config_section))) != NULL)
+			if ((s = has_tunnel_interface_route(section_name(((struct dm_data *)data)->config_section))) != NULL)
 				dmuci_delete_by_section(s, NULL, NULL);
 
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("network", "interface", stmp, s) {
@@ -145,7 +146,7 @@ static int delObjGRETunnelInterface(char *refparam, struct dmctx *ctx, void *dat
 				char *device = NULL;
 
 				dmuci_get_value_by_section_string(s, "device", &device);
-				snprintf(device_buf, sizeof(device_buf), "@%s", section_name(((struct dmmap_dup *)data)->config_section));
+				snprintf(device_buf, sizeof(device_buf), "@%s", section_name(((struct dm_data *)data)->config_section));
 
 				if (!device || DM_STRCMP(device, device_buf) != 0)
 					continue;
@@ -193,17 +194,17 @@ static int get_GRE_TunnelNumberOfEntries(char *refparam, struct dmctx *ctx, void
 /*#Device.GRE.Tunnel.{i}.Alias!UCI:dmmap_network/interface,@i-1/gretunnel_alias*/
 static int get_GRETunnel_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "gretunnel_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "gretunnel_alias", instance, value);
 }
 
 static int set_GRETunnel_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "gretunnel_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "gretunnel_alias", instance, value);
 }
 
 static int get_GRETunnel_KeepAliveThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "keepalive", "3");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "keepalive", "3");
 	return 0;
 }
 
@@ -215,7 +216,7 @@ static int set_GRETunnel_KeepAliveThreshold(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "keepalive", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "keepalive", value);
 			break;
 	}
 	return 0;
@@ -223,7 +224,7 @@ static int set_GRETunnel_KeepAliveThreshold(char *refparam, struct dmctx *ctx, v
 
 static int get_GRETunnel_ConnectedRemoteEndpoint(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "peeraddr", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "peeraddr", value);
 	return 0;
 }
 
@@ -236,90 +237,90 @@ static int get_GRETunnel_InterfaceNumberOfEntries(char *refparam, struct dmctx *
 
 static int get_GRETunnelStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value= get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "tx_bytes");
+	*value= get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "tx_bytes");
 	return 0;
 }
 
 static int get_GRETunnelStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value= get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "rx_bytes");
+	*value= get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "rx_bytes");
 	return 0;
 }
 
 static int get_GRETunnelStats_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value= get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "tx_packets");
+	*value= get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "tx_packets");
 	return 0;
 }
 
 static int get_GRETunnelStats_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value= get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "rx_packets");
+	*value= get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "rx_packets");
 	return 0;
 }
 
 static int get_GRETunnelStats_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value= get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "tx_errors");
+	*value= get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "tx_errors");
 	return 0;
 }
 
 static int get_GRETunnelStats_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value= get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "rx_errors");
+	*value= get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "rx_errors");
 	return 0;
 }
 
 /*#Device.GRE.Tunnel.{i}.Interface.{i}.Alias!UCI:dmmap_network/interface,@i-1/greiface_alias*/
 static int get_GRETunnelInterface_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "greiface_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "greiface_alias", instance, value);
 }
 
 static int set_GRETunnelInterface_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "greiface_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "greiface_alias", instance, value);
 }
 
 static int get_GRETunnelInterface_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup(section_name(((struct dmmap_dup *)data)->config_section));
+	*value = dmstrdup(section_name(((struct dm_data *)data)->config_section));
 	return 0;
 }
 
 static int get_GRETunnelInterfaceStats_BytesSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "tx_bytes");
+	*value = get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "tx_bytes");
 	return 0;
 }
 
 static int get_GRETunnelInterfaceStats_BytesReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "rx_bytes");
+	*value = get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "rx_bytes");
 	return 0;
 }
 
 static int get_GRETunnelInterfaceStats_PacketsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "tx_packets");
+	*value = get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "tx_packets");
 	return 0;
 }
 
 static int get_GRETunnelInterfaceStats_PacketsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "rx_packets");
+	*value = get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "rx_packets");
 	return 0;
 }
 
 static int get_GRETunnelInterfaceStats_ErrorsSent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "tx_errors");
+	*value = get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "tx_errors");
 	return 0;
 }
 
 static int get_GRETunnelInterfaceStats_ErrorsReceived(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_gre_tunnel_interface_statistics(section_name(((struct dmmap_dup *)data)->config_section), "rx_errors");
+	*value = get_gre_tunnel_interface_statistics(section_name(((struct dm_data *)data)->config_section), "rx_errors");
 	return 0;
 }
 

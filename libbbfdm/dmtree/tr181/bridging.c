@@ -1066,16 +1066,16 @@ static void Update_BridgeVLANPort_VLAN_Layer(char *path, struct uci_section *bri
 static int browseBridgingBridgeInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct bridge_args curr_bridging_args = {0};
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	char *inst = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_bridge_config_sections_with_dmmap_bridge_eq("network", "device", "dmmap_bridge", "type", "bridge", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "bridge_instance", "bridge_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "bridge_instance", "bridge_alias");
 
-		init_bridging_args(&curr_bridging_args, p->config_section ? p->config_section : p->dmmap_section, p->dmmap_section, inst);
+		init_bridging_args(&curr_bridging_args, curr_data->config_section ? curr_data->config_section : curr_data->dmmap_section, curr_data->dmmap_section, inst);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_bridging_args, inst) == DM_STOP)
 			break;

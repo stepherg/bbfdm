@@ -75,6 +75,12 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
     } \
 } while(0)
 
+#define BBF_WARNING(MESSAGE, ...) do { \
+    if (gLogLevel >= 2) { \
+        syslog(LOG_WARNING, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
+    } \
+} while(0)
+
 #define BBF_INFO(MESSAGE, ...) do { \
     if (gLogLevel >= 3) { \
         syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \

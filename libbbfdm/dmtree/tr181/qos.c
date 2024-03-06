@@ -69,16 +69,16 @@ static void qos_update_order(const char *order, bool is_del)
 *************************************************************/
 static int browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dmmap_dup *p = NULL;
-	char *inst = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("qos", "classify", "dmmap_qos", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "classify_instance", "classify_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "classify_instance", "classify_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -87,16 +87,16 @@ static int browseQoSClassificationInst(struct dmctx *dmctx, DMNODE *parent_node,
 
 static int browseQoSPolicerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("qos", "policer", "dmmap_qos", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "policer_instance", "policeralias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "policer_instance", "policeralias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -106,18 +106,18 @@ static int browseQoSPolicerInst(struct dmctx *dmctx, DMNODE *parent_node, void *
 /*#Device.QoS.Queue.{i}.!UCI:qos/queue/dmmap_qos*/
 static int browseQoSQueueInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("qos", "queue", "dmmap_qos", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		dmuci_set_value_by_section(p->dmmap_section, "queuealias", section_name(p->config_section));
+		dmuci_set_value_by_section(curr_data->dmmap_section, "queuealias", section_name(curr_data->config_section));
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "queueinstance", "queuealias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "queueinstance", "queuealias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -141,16 +141,16 @@ static int browseQoSQueueStatsInst(struct dmctx *dmctx, DMNODE *parent_node, voi
 
 static int browseQoSShaperInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("qos", "shaper", "dmmap_qos", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "shaperinstance", "shaperalias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "shaperinstance", "shaperalias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -189,11 +189,11 @@ static int delObjQoSClassification(char *refparam, struct dmctx *ctx, void *data
 
 	switch (del_action) {
 	case DEL_INST:
-		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "order", &curr_order);
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "order", &curr_order);
 		qos_update_order(curr_order, true);
 
-		dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-		dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+		dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+		dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 		break;
 	case DEL_ALL:
 		uci_foreach_sections_safe("qos", "classify", stmp, s) {
@@ -238,7 +238,7 @@ static int delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char 
 		case DEL_INST:
 			// store section name to update corresponding classification
 			// section if any
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", &p_name);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "name", &p_name);
 
 			// Set the Classification.Policer to blank if corresponding
 			// Policer instance has been deleted
@@ -246,8 +246,8 @@ static int delObjQoSPolicer(char *refparam, struct dmctx *ctx, void *data, char 
 				dmuci_set_value_by_section(sec, "policer", "");
 			}
 
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("qos", "policer", stmp, s) {
@@ -293,8 +293,8 @@ static int delObjQoSQueue(char *refparam, struct dmctx *ctx, void *data, char *i
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("qos", "queue", stmp, s) {
@@ -357,8 +357,8 @@ static int delObjQoSShaper(char *refparam, struct dmctx *ctx, void *data, char *
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("qos", "shaper", stmp, s) {
@@ -381,7 +381,7 @@ static int get_QInterface(char *refparam, struct dmctx *ctx, void *data, char *i
 {
 	char *linker = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ifname", &linker);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "ifname", &linker);
 
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 
@@ -419,7 +419,7 @@ static int set_QInterface(char *refparam, struct dmctx *ctx, void *data, char *i
 
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ifname", reference.value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ifname", reference.value);
 		break;
 	}
 	return 0;
@@ -515,7 +515,7 @@ static int get_QAvailableAppList(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_QoSClassification_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "enable", "1");
 	return 0;
 }
 
@@ -530,7 +530,7 @@ static int set_QoSClassification_Enable(char *refparam, struct dmctx *ctx, void 
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", (b) ? "1" : "0");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enable", (b) ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -538,7 +538,7 @@ static int set_QoSClassification_Enable(char *refparam, struct dmctx *ctx, void 
 
 static int get_QoSClassification_Order(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "order", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "order", value);
 	return 0;
 }
 
@@ -552,11 +552,11 @@ static int set_QoSClassification_Order(char *refparam, struct dmctx *ctx, void *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "order", &curr_order);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "order", &curr_order);
 			if (qos_is_order_exists(value))
 				qos_update_order(value, false);
 
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "order", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "order", value);
 			break;
 	}
 	return 0;
@@ -567,7 +567,7 @@ static int get_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, voi
 	char *dest_ip = NULL;
 	char *mask = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", &dest_ip);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dest_ip", &dest_ip);
 	// dest_ip can be of type, 'x.x.x.x' or 'x.x.x.x/y'
 	if (DM_STRLEN(dest_ip))
 		mask = strchr(dest_ip, '/');
@@ -600,13 +600,13 @@ static int set_QoSClassification_DestMask(char *refparam, struct dmctx *ctx, voi
 		}
 
 		// get destination ip addr from qos classify uci section
-		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", &ip);
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dest_ip", &ip);
 
 		ip_addr = strtok(ip, "/");
 
 		snprintf(dest_ip, sizeof(dest_ip), "%s/%s", ip_addr ? ip_addr : "0.0.0.0", mask);
 
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_ip", dest_ip);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dest_ip", dest_ip);
 		break;
 	}
 	return 0;
@@ -617,7 +617,7 @@ static int get_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, v
 	char *src_ip = NULL;
 	char *mask = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_ip", &src_ip);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_ip", &src_ip);
 	// src_ip can be of type, 'x.x.x.x' or 'x.x.x.x/y'
 	if (DM_STRLEN(src_ip))
 		mask = strchr(src_ip, '/');
@@ -650,13 +650,13 @@ static int set_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, v
 		}
 
 		// get source ip addr from qos classify uci section
-		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_ip", &ip);
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_ip", &ip);
 
 		ip_addr = strtok(ip, "/");
 
 		snprintf(dest_ip, sizeof(dest_ip), "%s/%s", ip_addr ? ip_addr : "0.0.0.0", mask);
 
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_ip", dest_ip);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_ip", dest_ip);
 		break;
 	}
 	return 0;
@@ -664,12 +664,12 @@ static int set_QoSClassification_SourceMask(char *refparam, struct dmctx *ctx, v
 
 static int get_QoSClassification_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "classify_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "classify_alias", instance, value);
 }
 
 static int set_QoSClassification_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "classify_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "classify_alias", instance, value);
 }
 
 static int get_QoSClassification_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -684,7 +684,7 @@ static int set_QoSClassification_Interface(char *refparam, struct dmctx *ctx, vo
 
 static int get_QoSClassification_AllInterfaces(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "all_interfaces", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "all_interfaces", "0");
 	return 0;
 }
 
@@ -699,7 +699,7 @@ static int set_QoSClassification_AllInterfaces(char *refparam, struct dmctx *ctx
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "all_interfaces", (b) ? "1" : "0");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "all_interfaces", (b) ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -709,7 +709,7 @@ static int get_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void 
 {
 	char *dest_ip = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", &dest_ip);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dest_ip", &dest_ip);
 	if (DM_STRLEN(dest_ip)) {
 		char *mask = strchr(dest_ip, '/');
 		if (mask)
@@ -734,7 +734,7 @@ static int set_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void 
 		 * IP addr can be of type, 'x.x.x.x' or 'x.x.x.x/y'
 		 * If IP addr is of type 'x.x.x.x/y' then get its mask(y) and use with the new dest IP.
 		 */
-		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", &ip);
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dest_ip", &ip);
 
 		if (ip[0] != '\0') {
 			strtok(ip, "/");
@@ -745,9 +745,9 @@ static int set_QoSClassification_DestIP(char *refparam, struct dmctx *ctx, void 
 			char dest_ip[64] = {0};
 
 			snprintf(dest_ip, sizeof(dest_ip), "%s/%s", value, dest_mask);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_ip", dest_ip);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dest_ip", dest_ip);
 		} else {
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_ip", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dest_ip", value);
 		}
 		break;
 	}
@@ -758,7 +758,7 @@ static int get_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, voi
 {
 	char *src_ip = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_ip", &src_ip);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_ip", &src_ip);
 	if (DM_STRLEN(src_ip)) {
 		char *mask = strchr(src_ip, '/');
 		if (mask)
@@ -783,7 +783,7 @@ static int set_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, voi
 		 * IP addr can be of type, 'x.x.x.x' or 'x.x.x.x/y'
 		 * If IP addr is of type 'x.x.x.x/y' then get its mask(y) and use with the new source IP.
 		 */
-		dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_ip", &src_mask);
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_ip", &src_mask);
 
 		if (src_mask[0] != '\0') {
 			strtok(src_mask, "/");
@@ -794,9 +794,9 @@ static int set_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, voi
 			char src_ip[64] = {0};
 
 			snprintf(src_ip, sizeof(src_ip), "%s/%s", value, mask);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_ip", src_ip);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_ip", src_ip);
 		} else {
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_ip", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_ip", value);
 		}
 		break;
 	}
@@ -805,7 +805,7 @@ static int set_QoSClassification_SourceIP(char *refparam, struct dmctx *ctx, voi
 
 static int get_QoSClassification_Protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "proto", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "proto", "-1");
 	return 0;
 }
 
@@ -817,7 +817,7 @@ static int set_QoSClassification_Protocol(char *refparam, struct dmctx *ctx, voi
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "proto", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "proto", value);
 		break;
 	}
 	return 0;
@@ -826,7 +826,7 @@ static int set_QoSClassification_Protocol(char *refparam, struct dmctx *ctx, voi
 
 static int get_QoSClassification_DestPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "dest_port", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "dest_port", "-1");
 	return 0;
 }
 
@@ -838,7 +838,7 @@ static int set_QoSClassification_DestPort(char *refparam, struct dmctx *ctx, voi
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_port", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dest_port", value);
 		break;
 	}
 	return 0;
@@ -846,7 +846,7 @@ static int set_QoSClassification_DestPort(char *refparam, struct dmctx *ctx, voi
 
 static int get_QoSClassification_DestPortRangeMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "dest_port_range", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "dest_port_range", "-1");
 	return 0;
 }
 
@@ -858,7 +858,7 @@ static int set_QoSClassification_DestPortRangeMax(char *refparam, struct dmctx *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_port_range", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dest_port_range", value);
 			break;
 	}
 	return 0;
@@ -866,7 +866,7 @@ static int set_QoSClassification_DestPortRangeMax(char *refparam, struct dmctx *
 
 static int get_QoSClassification_SourcePort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "src_port", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "src_port", "-1");
 	return 0;
 }
 
@@ -878,7 +878,7 @@ static int set_QoSClassification_SourcePort(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_port", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_port", value);
 			break;
 	}
 	return 0;
@@ -886,7 +886,7 @@ static int set_QoSClassification_SourcePort(char *refparam, struct dmctx *ctx, v
 
 static int get_QoSClassification_SourcePortRangeMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "src_port_range", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "src_port_range", "-1");
 	return 0;
 }
 
@@ -898,7 +898,7 @@ static int set_QoSClassification_SourcePortRangeMax(char *refparam, struct dmctx
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_port_range", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_port_range", value);
 		break;
 	}
 	return 0;
@@ -906,7 +906,7 @@ static int set_QoSClassification_SourcePortRangeMax(char *refparam, struct dmctx
 
 static int get_QoSClassification_SourceMACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_mac", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_mac", value);
 	return 0;
 }
 
@@ -918,7 +918,7 @@ static int set_QoSClassification_SourceMACAddress(char *refparam, struct dmctx *
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_mac", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_mac", value);
 		break;
 	}
 	return 0;
@@ -926,7 +926,7 @@ static int set_QoSClassification_SourceMACAddress(char *refparam, struct dmctx *
 
 static int get_QoSClassification_DestMACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dst_mac", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dst_mac", value);
 	return 0;
 }
 
@@ -938,7 +938,7 @@ static int set_QoSClassification_DestMACAddress(char *refparam, struct dmctx *ct
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dst_mac", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dst_mac", value);
 		break;
 	}
 	return 0;
@@ -946,7 +946,7 @@ static int set_QoSClassification_DestMACAddress(char *refparam, struct dmctx *ct
 
 static int get_QoSClassification_Ethertype(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ethertype", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "ethertype", "-1");
 	return 0;
 }
 
@@ -958,7 +958,7 @@ static int set_QoSClassification_Ethertype(char *refparam, struct dmctx *ctx, vo
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ethertype", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ethertype", value);
 		break;
 	}
 	return 0;
@@ -966,7 +966,7 @@ static int set_QoSClassification_Ethertype(char *refparam, struct dmctx *ctx, vo
 
 static int get_QoSClassification_SourceVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_vendor_class_id", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_vendor_class_id", value);
 	return 0;
 }
 
@@ -978,7 +978,7 @@ static int set_QoSClassification_SourceVendorClassID(char *refparam, struct dmct
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_vendor_class_id", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_vendor_class_id", value);
 		break;
 	}
 	return 0;
@@ -986,7 +986,7 @@ static int set_QoSClassification_SourceVendorClassID(char *refparam, struct dmct
 
 static int get_QoSClassification_DestVendorClassID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dst_vendor_class_id", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dst_vendor_class_id", value);
 	return 0;
 }
 
@@ -998,7 +998,7 @@ static int set_QoSClassification_DestVendorClassID(char *refparam, struct dmctx 
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dst_vendor_class_id", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dst_vendor_class_id", value);
 		break;
 	}
 	return 0;
@@ -1008,7 +1008,7 @@ static int get_QoSClassification_SourceClientID(char *refparam, struct dmctx *ct
 {
 	char *srcclid = NULL, hex[256] = {0};
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_client_id", &srcclid);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_client_id", &srcclid);
 
 	if (srcclid && *srcclid)
 		convert_string_to_hex(srcclid, hex, sizeof(hex));
@@ -1028,7 +1028,7 @@ static int set_QoSClassification_SourceClientID(char *refparam, struct dmctx *ct
 			break;
 		case VALUESET:
 			convert_hex_to_string(value, res, sizeof(res));
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_client_id", res);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_client_id", res);
 			break;
 	}
 	return 0;
@@ -1038,7 +1038,7 @@ static int get_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx,
 {
 	char *dstclid = NULL, hex[256] = {0};
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dst_client_id", &dstclid);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dst_client_id", &dstclid);
 
 	if (dstclid && *dstclid)
 		convert_string_to_hex(dstclid, hex, sizeof(hex));
@@ -1058,7 +1058,7 @@ static int set_QoSClassification_DestClientID(char *refparam, struct dmctx *ctx,
 			break;
 		case VALUESET:
 			convert_hex_to_string(value, res, sizeof(res));
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dst_client_id", res);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dst_client_id", res);
 			break;
 	}
 	return 0;
@@ -1068,7 +1068,7 @@ static int get_QoSClassification_SourceUserClassID(char *refparam, struct dmctx 
 {
 	char *srcusrclid = NULL, hex[256] = {0};
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_user_class_id", &srcusrclid);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_user_class_id", &srcusrclid);
 
 	if (srcusrclid && *srcusrclid)
 		convert_string_to_hex(srcusrclid, hex, sizeof(hex));
@@ -1088,7 +1088,7 @@ static int set_QoSClassification_SourceUserClassID(char *refparam, struct dmctx 
 		break;
 	case VALUESET:
 		convert_hex_to_string(value, res, sizeof(res));
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_user_class_id", res);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_user_class_id", res);
 		break;
 	}
 	return 0;
@@ -1098,7 +1098,7 @@ static int get_QoSClassification_DestUserClassID(char *refparam, struct dmctx *c
 {
 	char *dstusrclid = NULL, hex[256] = {0};
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dst_user_class_id", &dstusrclid);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dst_user_class_id", &dstusrclid);
 
 	if (dstusrclid && *dstusrclid)
 		convert_string_to_hex(dstusrclid, hex, sizeof(hex));
@@ -1118,7 +1118,7 @@ static int set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *c
 		break;
 	case VALUESET:
 		convert_hex_to_string(value, res, sizeof(res));
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dst_user_class_id", res);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dst_user_class_id", res);
 		break;
 	}
 	return 0;
@@ -1126,7 +1126,7 @@ static int set_QoSClassification_DestUserClassID(char *refparam, struct dmctx *c
 
 static int get_QoSClassification_IPLengthMin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ip_len_min", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "ip_len_min", "0");
 	return 0;
 }
 
@@ -1138,7 +1138,7 @@ static int set_QoSClassification_IPLengthMin(char *refparam, struct dmctx *ctx, 
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ip_len_min", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ip_len_min", value);
 		break;
 	}
 	return 0;
@@ -1146,7 +1146,7 @@ static int set_QoSClassification_IPLengthMin(char *refparam, struct dmctx *ctx, 
 
 static int get_QoSClassification_IPLengthMax(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ip_len_max", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "ip_len_max", "0");
 	return 0;
 }
 
@@ -1158,7 +1158,7 @@ static int set_QoSClassification_IPLengthMax(char *refparam, struct dmctx *ctx, 
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ip_len_max", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ip_len_max", value);
 		break;
 	}
 	return 0;
@@ -1166,7 +1166,7 @@ static int set_QoSClassification_IPLengthMax(char *refparam, struct dmctx *ctx, 
 
 static int get_QoSClassification_DSCPCheck(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "dscp_filter", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "dscp_filter", "-1");
 	return 0;
 }
 
@@ -1178,7 +1178,7 @@ static int set_QoSClassification_DSCPCheck(char *refparam, struct dmctx *ctx, vo
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dscp_filter", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dscp_filter", value);
 		break;
 	}
 	return 0;
@@ -1187,7 +1187,7 @@ static int set_QoSClassification_DSCPCheck(char *refparam, struct dmctx *ctx, vo
 /*#Device.QoS.Classification.{i}.DSCPMark!UCI:qos/classify,@i-1/dscp*/
 static int get_QoSClassification_DSCPMark(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "dscp_mark", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "dscp_mark", "-1");
 	return 0;
 }
 
@@ -1199,14 +1199,14 @@ static int set_QoSClassification_DSCPMark(char *refparam, struct dmctx *ctx, voi
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dscp_mark", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dscp_mark", value);
 		break;
 	}
 	return 0;
 }
 static int get_QoSClassification_EthernetPriorityCheck(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "pcp_check", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "pcp_check", "-1");
 	return 0;
 }
 
@@ -1218,7 +1218,7 @@ static int set_QoSClassification_EthernetPriorityCheck(char *refparam, struct dm
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "pcp_check", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "pcp_check", value);
 		break;
 	}
 	return 0;
@@ -1226,7 +1226,7 @@ static int set_QoSClassification_EthernetPriorityCheck(char *refparam, struct dm
 
 static int get_QoSClassification_VLANIDCheck(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "vid_check", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "vid_check", "-1");
 	return 0;
 }
 
@@ -1238,7 +1238,7 @@ static int set_QoSClassification_VLANIDCheck(char *refparam, struct dmctx *ctx, 
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "vid_check", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "vid_check", value);
 		break;
 	}
 	return 0;
@@ -1246,7 +1246,7 @@ static int set_QoSClassification_VLANIDCheck(char *refparam, struct dmctx *ctx, 
 
 static int get_QoSClassification_ForwardingPolicy(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "forwarding_policy", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "forwarding_policy", value);
 	return 0;
 }
 
@@ -1258,7 +1258,7 @@ static int set_QoSClassification_ForwardingPolicy(char *refparam, struct dmctx *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "forwarding_policy", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "forwarding_policy", value);
 			break;
 	}
 	return 0;
@@ -1266,7 +1266,7 @@ static int set_QoSClassification_ForwardingPolicy(char *refparam, struct dmctx *
 
 static int get_QoSClassification_TrafficClass(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "traffic_class", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "traffic_class", "-1");
 	return 0;
 }
 
@@ -1278,7 +1278,7 @@ static int set_QoSClassification_TrafficClass(char *refparam, struct dmctx *ctx,
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "traffic_class", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "traffic_class", value);
 		break;
 	}
 	return 0;
@@ -1289,7 +1289,7 @@ static int get_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void
 	struct uci_section *dmmap_s = NULL;
 	char *linker = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "policer", &linker);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "policer", &linker);
 	get_dmmap_section_of_config_section_eq("dmmap_qos", "policer", "section_name", linker, &dmmap_s);
 	if (dmmap_s != NULL) {
 		char *p_inst = NULL;
@@ -1318,7 +1318,7 @@ static int set_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void
 
 				get_dmmap_section_of_config_section_eq("dmmap_qos", "policer", "policer_instance", link_inst, &dmmap_s);
 				dmuci_get_value_by_section_string(dmmap_s, "section_name", &linker);
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "policer", linker);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "policer", linker);
 			}
 			break;
 	}
@@ -1327,7 +1327,7 @@ static int set_QoSClassification_Policer(char *refparam, struct dmctx *ctx, void
 
 static int get_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "enable", "1");
 	return 0;
 }
 
@@ -1341,7 +1341,7 @@ static int set_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, 
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enable", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -1349,24 +1349,24 @@ static int set_QoSPolicer_Enable(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_QoSPolicer_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enable", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "enable", value);
 	*value = (*value[0] == '1') ? "Enabled" : "Disabled";
 	return 0;
 }
 
 static int get_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "policeralias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "policeralias", instance, value);
 }
 
 static int set_QoSPolicer_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "policeralias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "policeralias", instance, value);
 }
 
 static int get_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "committed_rate", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "committed_rate", value);
 	return 0;
 }
 
@@ -1378,7 +1378,7 @@ static int set_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "committed_rate", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "committed_rate", value);
 			break;
 	}
 	return 0;
@@ -1386,7 +1386,7 @@ static int set_QoSPolicer_CommittedRate(char *refparam, struct dmctx *ctx, void 
 
 static int get_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "committed_burst_size", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "committed_burst_size", value);
 	return 0;
 }
 
@@ -1398,7 +1398,7 @@ static int set_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "committed_burst_size", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "committed_burst_size", value);
 			break;
 	}
 	return 0;
@@ -1406,7 +1406,7 @@ static int set_QoSPolicer_CommittedBurstSize(char *refparam, struct dmctx *ctx, 
 
 static int get_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "excess_burst_size", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "excess_burst_size", value);
 	return 0;
 }
 
@@ -1418,7 +1418,7 @@ static int set_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "excess_burst_size", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "excess_burst_size", value);
 			break;
 	}
 	return 0;
@@ -1426,7 +1426,7 @@ static int set_QoSPolicer_ExcessBurstSize(char *refparam, struct dmctx *ctx, voi
 
 static int get_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "peak_rate", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "peak_rate", value);
 	return 0;
 }
 
@@ -1438,7 +1438,7 @@ static int set_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "peak_rate", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "peak_rate", value);
 			break;
 	}
 	return 0;
@@ -1446,7 +1446,7 @@ static int set_QoSPolicer_PeakRate(char *refparam, struct dmctx *ctx, void *data
 
 static int get_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "peak_burst_size", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "peak_burst_size", value);
 	return 0;
 }
 
@@ -1458,7 +1458,7 @@ static int set_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "peak_burst_size", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "peak_burst_size", value);
 			break;
 	}
 	return 0;
@@ -1466,7 +1466,7 @@ static int set_QoSPolicer_PeakBurstSize(char *refparam, struct dmctx *ctx, void 
 
 static int get_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "meter_type", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "meter_type", value);
 	if (DM_LSTRNCMP(*value, "1", 1) == 0)
 		*value = "SingleRateThreeColor";
 	else if (DM_LSTRNCMP(*value, "2", 1) == 0)
@@ -1486,11 +1486,11 @@ static int set_QoSPolicer_MeterType(char *refparam, struct dmctx *ctx, void *dat
 			break;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "SimpleTokenBucket") == 0)
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "meter_type", "0");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "meter_type", "0");
 			else if (DM_LSTRCMP(value, "SingleRateThreeColor") == 0)
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "meter_type", "1");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "meter_type", "1");
 			else if (DM_LSTRCMP(value, "TwoRateThreeColor") == 0)
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "meter_type", "2");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "meter_type", "2");
 			break;
 	}
 	return 0;
@@ -1504,7 +1504,7 @@ static int get_QoSPolicer_PossibleMeterTypes(char *refparam, struct dmctx *ctx, 
 
 static int get_QoSQueue_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "enable", "1");
 	return 0;
 }
 
@@ -1518,7 +1518,7 @@ static int set_QoSQueue_Enable(char *refparam, struct dmctx *ctx, void *data, ch
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enable", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -1526,14 +1526,14 @@ static int set_QoSQueue_Enable(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_QoSQueue_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enable", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "enable", value);
 	*value = (*value[0] == '1') ? "Enabled" : "Disabled";
 	return 0;
 }
 
 static int get_QoSQueue_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup(section_name(((struct dmmap_dup *)data)->config_section));
+	*value = dmstrdup(section_name(((struct dm_data *)data)->config_section));
 	return 0;
 }
 
@@ -1544,7 +1544,7 @@ static int set_QoSQueue_Alias(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int get_QoSQueue_TrafficClasses(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "traffic_class", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "traffic_class", value);
 	return 0;
 }
 
@@ -1554,7 +1554,7 @@ static int set_QoSQueue_TrafficClasses(char *refparam, struct dmctx *ctx, void *
 		case VALUECHECK:
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "traffic_class", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "traffic_class", value);
 			break;
 	}
 	return 0;
@@ -1572,7 +1572,7 @@ static int set_QoSQueue_Interface(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_QoSQueue_Weight(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "weight", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "weight", "0");
 	return 0;
 }
 
@@ -1584,7 +1584,7 @@ static int set_QoSQueue_Weight(char *refparam, struct dmctx *ctx, void *data, ch
 				return FAULT_9007;
 			break;
 			case VALUESET:
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "weight", value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "weight", value);
 			break;
 	}
 	return 0;
@@ -1593,7 +1593,7 @@ static int set_QoSQueue_Weight(char *refparam, struct dmctx *ctx, void *data, ch
 /*#Device.QoS.Queue.{i}.Precedence!UCI:qos/queue,@i-1/precedence*/
 static int get_QoSQueue_Precedence(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "precedence", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "precedence", "1");
 	return 0;
 }
 
@@ -1605,7 +1605,7 @@ static int set_QoSQueue_Precedence(char *refparam, struct dmctx *ctx, void *data
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "precedence", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "precedence", value);
 			break;
 	}
 	return 0;
@@ -1613,7 +1613,7 @@ static int set_QoSQueue_Precedence(char *refparam, struct dmctx *ctx, void *data
 
 static int get_QoSQueue_SchedulerAlgorithm(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "scheduling", "SP");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "scheduling", "SP");
 	return 0;
 }
 
@@ -1627,7 +1627,7 @@ static int set_QoSQueue_SchedulerAlgorithm(char *refparam, struct dmctx *ctx, vo
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "scheduling", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "scheduling", value);
 			break;
 	}
 	return 0;
@@ -1636,7 +1636,7 @@ static int set_QoSQueue_SchedulerAlgorithm(char *refparam, struct dmctx *ctx, vo
 /*#Device.QoS.Queue.{i}.ShapingRate!UCI:qos/class,@i-1/rate*/
 static int get_QoSQueue_ShapingRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "rate", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "rate", "-1");
 	return 0;
 }
 
@@ -1649,7 +1649,7 @@ static int set_QoSQueue_ShapingRate(char *refparam, struct dmctx *ctx, void *dat
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "rate", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "rate", value);
 			break;
 	}
 	return 0;
@@ -1657,7 +1657,7 @@ static int set_QoSQueue_ShapingRate(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_QoSQueue_ShapingBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "burst_size", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "burst_size", "0");
 	return 0;
 }
 
@@ -1669,7 +1669,7 @@ static int set_QoSQueue_ShapingBurstSize(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "burst_size", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "burst_size", value);
 			break;
 	}
 	return 0;
@@ -1835,7 +1835,7 @@ static int get_QoSQueueStats_DroppedBytes(char *refparam, struct dmctx *ctx, voi
 
 static int get_QoSShaper_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "enable", "1");
 	return 0;
 }
 
@@ -1849,7 +1849,7 @@ static int set_QoSShaper_Enable(char *refparam, struct dmctx *ctx, void *data, c
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enable", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -1857,19 +1857,19 @@ static int set_QoSShaper_Enable(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_QoSShaper_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "enable", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "enable", value);
 	*value = (*value[0] == '1') ? "Enabled" : "Disabled";
 	return 0;
 }
 
 static int get_QoSShaper_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "shaperalias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "shaperalias", instance, value);
 }
 
 static int set_QoSShaper_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "shaperalias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "shaperalias", instance, value);
 }
 
 static int get_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1884,7 +1884,7 @@ static int set_QoSShaper_Interface(char *refparam, struct dmctx *ctx, void *data
 
 static int get_QoSShaper_ShapingRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "rate", "-1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "rate", "-1");
 	return 0;
 }
 
@@ -1896,7 +1896,7 @@ static int set_QoSShaper_ShapingRate(char *refparam, struct dmctx *ctx, void *da
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "rate", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "rate", value);
 			break;
 	}
 	return 0;
@@ -1904,7 +1904,7 @@ static int set_QoSShaper_ShapingRate(char *refparam, struct dmctx *ctx, void *da
 
 static int get_QoSShaper_ShapingBurstSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "burst_size", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "burst_size", "0");
 	return 0;
 }
 
@@ -1916,7 +1916,7 @@ static int set_QoSShaper_ShapingBurstSize(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "burst_size", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "burst_size", value);
 			break;
 	}
 	return 0;

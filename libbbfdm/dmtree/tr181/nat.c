@@ -21,15 +21,15 @@ static int get_nat_port_mapping_external_port_end_range(char *refparam, struct d
 static int browseInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "zone", "dmmap_firewall", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "interface_setting_instance", "interface_setting_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "interface_setting_instance", "interface_setting_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -39,14 +39,14 @@ static int browseInterfaceSettingInst(struct dmctx *dmctx, DMNODE *parent_node, 
 /*#Device.NAT.PortMapping.{i}.!UCI:firewall/redirect/dmmap_firewall*/
 static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *target;
-	struct dmmap_dup *p = NULL;
+	char *inst = NULL, *target = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "redirect", "dmmap_firewall", &dup_list);
 
-	list_for_each_entry(p, &dup_list, list) {
-		dmuci_get_value_by_section_string(p->config_section, "target", &target);
+	list_for_each_entry(curr_data, &dup_list, list) {
+		dmuci_get_value_by_section_string(curr_data->config_section, "target", &target);
 		if (*target != '\0' && DM_LSTRCMP(target, "DNAT") != 0)
 			continue;
 
@@ -54,16 +54,16 @@ static int browsePortMappingInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 		 * Add port range end in dmmap section if needed
 		 */
 		char *src_dport = NULL;
-		dmuci_get_value_by_section_string(p->config_section, "src_dport", &src_dport);
+		dmuci_get_value_by_section_string(curr_data->config_section, "src_dport", &src_dport);
 		if (DM_STRLEN(src_dport) != 0) {
 			char *tmp = DM_STRCHR(src_dport, '-');
 			if (tmp)
-				dmuci_set_value_by_section(p->dmmap_section, "src_dport_end", tmp + 1);
+				dmuci_set_value_by_section(curr_data->dmmap_section, "src_dport_end", tmp + 1);
 		}
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "port_mapping_instance", "port_mapping_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "port_mapping_instance", "port_mapping_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -101,8 +101,8 @@ static int delete_NAT_InterfaceSetting(char *refparam, struct dmctx *ctx, void *
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("firewall", "zone", stmp, s) {
@@ -144,8 +144,8 @@ static int delete_NAT_PortMapping(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("firewall", "redirect", stmp, s) {
@@ -184,7 +184,7 @@ static int get_nat_port_mapping_number_of_entries(char *refparam, struct dmctx *
 static int get_nat_interface_setting_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *val;
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "masq", &val);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "masq", &val);
 	*value = (*val == '1') ? "1" : "0";
 	return 0;
 }
@@ -199,7 +199,7 @@ static int set_nat_interface_setting_enable(char *refparam, struct dmctx *ctx, v
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "masq", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "masq", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -209,7 +209,7 @@ static int set_nat_interface_setting_enable(char *refparam, struct dmctx *ctx, v
 static int get_nat_interface_setting_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *val;
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "masq", &val);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "masq", &val);
 	*value = (*val == '1') ? "Enabled" : "Disabled";
 	return 0;
 }
@@ -217,12 +217,12 @@ static int get_nat_interface_setting_status(char *refparam, struct dmctx *ctx, v
 /*#Device.NAT.InterfaceSetting.{i}.Alias!UCI:dmmap_firewall/zone,@i-1/interface_setting_alias*/
 static int get_nat_interface_setting_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "interface_setting_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "interface_setting_alias", instance, value);
 }
 
 static int set_nat_interface_setting_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "interface_setting_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "interface_setting_alias", instance, value);
 }
 
 static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -232,7 +232,7 @@ static int get_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 	unsigned pos = 0;
 
 	buf[0] = 0;
-	dmuci_get_value_by_section_list(((struct dmmap_dup *)data)->config_section, "network", &v);
+	dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "network", &v);
 	if (v) {
 		struct uci_element *e = NULL;
 		char *ifaceobj = NULL;
@@ -269,8 +269,8 @@ static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "network", "");
-			dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "network", reference.value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "network", "");
+			dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, "network", reference.value);
 			return 0;
 	}
 	return 0;
@@ -279,7 +279,7 @@ static int set_nat_interface_setting_interface(char *refparam, struct dmctx *ctx
 /*#Device.NAT.PortMapping.{i}.Enable!UCI:firewall/redirect,@i-1/enabled*/
 static int get_nat_port_mapping_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->dmmap_section, "enabled", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->dmmap_section, "enabled", "1");
 	return 0;
 }
 
@@ -294,8 +294,8 @@ static int set_nat_port_mapping_enable(char *refparam, struct dmctx *ctx, void *
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "enabled", b ? "1" : "0");
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enabled", b ? "1" : "0");
 	}
 	return 0;
 }
@@ -311,12 +311,12 @@ static int get_nat_port_mapping_status(char *refparam, struct dmctx *ctx, void *
 /*#Device.NAT.PortMapping.{i}.Alias!UCI:dmmap_firewall/redirect,@i-1/port_mapping_alias*/
 static int get_nat_port_mapping_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "port_mapping_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "port_mapping_alias", instance, value);
 }
 
 static int set_nat_port_mapping_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "port_mapping_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "port_mapping_alias", instance, value);
 }
 
 static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -326,12 +326,12 @@ static int get_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 	char *zone_name = NULL, *name = NULL, *src_dip = NULL, buf[256];
 	unsigned pos = 0;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dip", &src_dip);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_dip", &src_dip);
 	if (src_dip && DM_LSTRCMP(src_dip, "*") == 0)
 		return 0;
 
 	buf[0] = 0;
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src", &zone_name);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src", &zone_name);
 	uci_foreach_sections("firewall", "zone", s) {
 		dmuci_get_value_by_section_string(s, "name", &name);
 		if (zone_name && name && DM_STRCMP(zone_name, name) == 0) {
@@ -391,20 +391,20 @@ static int set_nat_port_mapping_interface(char *refparam, struct dmctx *ctx, voi
 
 						dmuci_get_value_by_section_string(s, "name", &zone_name);
 						dmuci_get_value_by_section_string(s, "masq", &zone_masq);
-						dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src", zone_name);
+						dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src", zone_name);
 
 						// set this section enable parameter based on the configured zone masq value
-						dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->dmmap_section, "enabled", &val);
+						dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "enabled", &val);
 						sect_enable = (*val == '1') ? true : false;
 						zone_enable = (*zone_masq == '1') ? true : false;
 
 						sect_enable = sect_enable && zone_enable;
-						dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", sect_enable ? "1" : "0");
+						dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enabled", sect_enable ? "1" : "0");
 						break;
 					}
 				}
 			} else {
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src", "");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src", "");
 			}
 			break;
 	}
@@ -415,7 +415,7 @@ static int get_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx,
 {
 	char *src_dip = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dip", &src_dip);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_dip", &src_dip);
 	*value = (src_dip && *src_dip == '*') ? "1" : "0";
 	return 0;
 }
@@ -432,11 +432,11 @@ static int set_nat_port_mapping_all_interface(char *refparam, struct dmctx *ctx,
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dip", b ? "*" : "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_dip", b ? "*" : "");
 			if (b) {
-				dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src", &src);
+				dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src", &src);
 				if (src == NULL || *src == '\0')
-					dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src", "wan");
+					dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src", "wan");
 			}
 			break;
 	}
@@ -448,7 +448,7 @@ static int get_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx
 {
 	char *expiry_date = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "expiry", &expiry_date);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "expiry", &expiry_date);
 	if (expiry_date && *expiry_date != '\0' && DM_STRTOL(expiry_date) > 0) {
 		dmasprintf(value, "%lld", (long long)(DM_STRTOL(expiry_date) - time(NULL)));
 	} else {
@@ -471,7 +471,7 @@ static int set_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx
 				break;
 
 			snprintf(expiry_date, sizeof(expiry_date), "%lld", (long long)(DM_STRTOL(value) + time(NULL)));
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "expiry", expiry_date);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "expiry", expiry_date);
 			break;
 	}
 	return 0;
@@ -480,7 +480,7 @@ static int set_nat_port_mapping_lease_duration(char *refparam, struct dmctx *ctx
 /*#Device.NAT.PortMapping.{i}.RemoteHost!UCI:firewall/redirect,@i-1/src_dip*/
 static int get_nat_port_mapping_remote_host(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_ip", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_ip", value);
 	return 0;
 }
 
@@ -492,7 +492,7 @@ static int set_nat_port_mapping_remote_host(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_ip", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_ip", value);
 			return 0;
 	}
 	return 0;
@@ -502,7 +502,7 @@ static int set_nat_port_mapping_remote_host(char *refparam, struct dmctx *ctx, v
 static int get_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *src_dport = NULL;
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "src_dport", &src_dport);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "src_dport", &src_dport);
 	if (src_dport && *src_dport == '\0') {
 		*value = "0";
 		return 0;
@@ -537,7 +537,7 @@ static int set_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx,
 			return 0;
 		case VALUESET:
 			if (strcmp(value, "0") == 0) { /* 0 means no external port */
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", "");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_dport", "");
 				return 0;
 			}
 
@@ -547,7 +547,7 @@ static int set_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx,
 			else
 				snprintf(buffer, sizeof(buffer), "%d-%d", start_port, end_port);
 
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", buffer);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_dport", buffer);
 			return 0;
 	}
 	return 0;
@@ -556,7 +556,7 @@ static int set_nat_port_mapping_external_port(char *refparam, struct dmctx *ctx,
 /*#Device.NAT.PortMapping.{i}.ExternalPortEndRange!UCI:firewall/redirect,@i-1/src_dport*/
 static int get_nat_port_mapping_external_port_end_range(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->dmmap_section, "src_dport_end", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->dmmap_section, "src_dport_end", "0");
 	return 0;
 }
 
@@ -583,7 +583,7 @@ static int set_nat_port_mapping_external_port_end_range(char *refparam, struct d
 
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->dmmap_section, "src_dport_end", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "src_dport_end", value);
 
 			dport = DM_STRTOL(value);
 
@@ -593,7 +593,7 @@ static int set_nat_port_mapping_external_port_end_range(char *refparam, struct d
 				else
 					snprintf(buffer, sizeof(buffer), "%d", sport);
 
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_dport", buffer);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_dport", buffer);
 			}
 
 			return 0;
@@ -604,7 +604,7 @@ static int set_nat_port_mapping_external_port_end_range(char *refparam, struct d
 /*#Device.NAT.PortMapping.{i}.InternalPort!UCI:firewall/redirect,@i-1/dest_port*/
 static int get_nat_port_mapping_internal_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "dest_port", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "dest_port", "0");
 	return 0;
 }
 
@@ -616,7 +616,7 @@ static int set_nat_port_mapping_internal_port(char *refparam, struct dmctx *ctx,
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_port", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dest_port", value);
 			return 0;
 	}
 	return 0;
@@ -626,7 +626,7 @@ static int set_nat_port_mapping_internal_port(char *refparam, struct dmctx *ctx,
 static int get_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *proto = NULL;
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "proto", &proto);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "proto", &proto);
 	*value = (proto && DM_LSTRCMP(proto, "udp") == 0) ? "UDP" : "TCP";
 	return 0;
 }
@@ -641,7 +641,7 @@ static int set_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "proto", (DM_LSTRCMP(value, "UDP") == 0) ? "udp" : "tcp");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "proto", (DM_LSTRCMP(value, "UDP") == 0) ? "udp" : "tcp");
 			return 0;
 	}
 	return 0;
@@ -650,7 +650,7 @@ static int set_nat_port_mapping_protocol(char *refparam, struct dmctx *ctx, void
 /*#Device.NAT.PortMapping.{i}.InternalClient!UCI:firewall/redirect,@i-1/dest_ip*/
 static int get_nat_port_mapping_internal_client(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dest_ip", value);
 	return 0;
 }
 
@@ -662,7 +662,7 @@ static int set_nat_port_mapping_internal_client(char *refparam, struct dmctx *ct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_ip", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dest_ip", value);
 			return 0;
 	}
 	return 0;
@@ -671,7 +671,7 @@ static int set_nat_port_mapping_internal_client(char *refparam, struct dmctx *ct
 /*#Device.NAT.PortMapping.{i}.Description!UCI:firewall/redirect,@i-1/name*/
 static int get_nat_port_mapping_description(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "name", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "name", value);
 	return 0;
 }
 
@@ -683,7 +683,7 @@ static int set_nat_port_mapping_description(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "name", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "name", value);
 			return 0;
 	}
 	return 0;

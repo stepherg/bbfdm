@@ -1,6 +1,6 @@
 config controller 'controller'
         option enabled '1'
-        option registrar '5 2'
+        option registrar '2 5'
         option debug '0'
         option enable_sta_steer '0'
         option enable_bsta_steer '0'
@@ -9,16 +9,29 @@ config controller 'controller'
         option primary_vid '1'
         option primary_pcp '0'
 
-config interface 'lan'
-
 config ap
         option band '2'
         option ssid 'iopsysWrt-44D43771B810'
-        option encryption 'MPUEO3L7WHJ45P'
+        option encryption 'sae-mixed'
         option key 'PCTQ44TNVKK5NU'
         option vid '1'
         option type 'fronthaul'
-        option network 'lan'
+
+config ap
+        option band '5'
+        option ssid 'iopsysWrt-44D43771B810'
+        option encryption 'sae-mixed'
+        option key 'PCTQ44TNVKK5NU'
+        option vid '1'
+        option type 'fronthaul'
+
+config ap
+        option band '2'
+        option ssid 'MAP-44D43771B810-BH-5GHz'
+        option encryption 'sae'
+        option type 'backhaul'
+        option vid '1'
+        option key '029be741b7ff7b4caf9b1b3c48c56030fed877c22f5031bc9cf0132d1672c2c'
 
 config ap
         option band '5'
@@ -26,7 +39,6 @@ config ap
         option encryption 'sae'
         option type 'backhaul'
         option vid '1'
-        option network 'lan'
         option key '029be741b7ff7b4caf9b1b3c48c56030fed877c22f5031bc9cf0132d1672c2c'
 
 config node

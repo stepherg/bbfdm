@@ -1,5 +1,6 @@
 {
-	"Device.X_IOPSYS_EU_TEST.": {
+	"json_plugin_version": 2,
+	"Device.{BBF_VENDOR_PREFIX}TEST.{i}.": {
 		"type": "object",
 		"protocols": [
 			"cwmp",
@@ -7,16 +8,18 @@
 		],
 		"access": true,
 		"array": true,
-		"mapping": {
-			"type": "uci", 
-			"uci": {
-				"file": "cwmp", 
-				"section": {
-					"type": "test"
-				}, 
-				"dmmapfile": "dmmap_cwmp"
+		"mapping": [
+			{
+				"type": "uci", 
+				"uci": {
+					"file": "cwmp", 
+					"section": {
+						"type": "test"
+					}, 
+					"dmmapfile": "dmmap_cwmp"
+				}
 			}
-		},
+		],
 		"Enable": {
 			"type": "boolean",
 			"read": true,

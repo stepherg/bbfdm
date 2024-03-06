@@ -1,109 +1,125 @@
 {
-	"Device.WiFi.X_IOPSYS_EU_Radio.{i}.": {
-		"type": "object",
-		"protocols": [
-			"cwmp",
-			"usp"
-		],
-		"access": false,
-		"array": true,
-		"mapping": {
-			"type": "ubus",
-			"ubus": {
-				"object": "wifi",
-				"method": "status",
-				"args": {},
-				"key": "radios"
-			}
-		},
-		"Noise": {
-			"type": "int",
-			"read": true,
-			"write": true,
-			"protocols": [
-				"cwmp",
-				"usp"
-			],
-			"mapping": [
-				{
-					"type" : "ubus",
-					"ubus" : {
-						"object" : "wifi",
-						"method" : "status",
-						"args" : {},
-						"key" : "radios[@i-1].noise"
-					}
-				}
-			]
-		},
-		"Band": {
-			"type": "string",
-			"read": true,
-			"write": true,
-			"protocols": [
-				"cwmp",
-				"usp"
-			],
-			"mapping": [
-				{
-					"type" : "ubus",
-					"ubus" : {
-						"object" : "wifi",
-						"method" : "status",
-						"args" : {},
-						"key" : "radios[@i-1].band"
-					}
-				}
-			]		
-		},
-		"Device.WiFi.X_IOPSYS_EU_Radio.{i}.Stats.": {
-			"type": "object",
-			"protocols": [
-				"cwmp",
-				"usp"
-			],
-			"access": false,
-			"array": false,
-			"BytesSent": {
-				"type": "unsignedInt",
-				"read": true,
-				"write": true,
-				"protocols": [
-					"cwmp",
-					"usp"
-				],
-				"mapping": [
-					{
-						"type" : "ubus",
-						"ubus" : {
-							"object" : "wifi",
-							"method" : "status",
-							"args" : {},
-							"key" : "radios[@i-1].stats.tx_bytes"
-						}
-					}
-				]
-			},
-			"PacketsReceived": {
-				"type": "unsignedInt",
-				"read": true,
-				"write": true,
-				"protocols": [
-					"cwmp",
-					"usp"
-				],
-				"mapping": [
-					{
-						"type" : "ubus",
-						"ubus" : {
-							"object" : "wifi",
-							"method" : "status",
-							"args" : {},
-							"key" : "radios[@i-1].stats.rx_packets"
-						}
-					}
-				]
-			}
-		}
-	}	
+    "json_plugin_version": 2,
+    "Device.WiFi.": {
+        "type": "object",
+        "protocols": [
+            "cwmp",
+            "usp"
+        ],
+        "access": false,
+        "array": false,
+        "{BBF_VENDOR_PREFIX}RadioNumberOfEntries": {
+            "type": "unsignedInt",
+            "protocols": [
+                "cwmp",
+                "usp"
+            ],
+            "read": true,
+            "write": false,
+            "mapping": [
+                {
+                    "type": "ubus",
+                    "ubus": {
+                        "object": "wifi",
+                        "method": "status",
+                        "args": {},
+                        "key": "radios.@Count"
+                    }
+                }
+            ]
+        },
+        "Device.WiFi.{BBF_VENDOR_PREFIX}Radio.{i}.": {
+            "type": "object",
+            "protocols": [
+                "cwmp",
+                "usp"
+            ],
+            "access": false,
+            "array": true,
+            "mapping": [
+                {
+                    "type": "ubus",
+                    "ubus": {
+                        "object": "wifi",
+                        "method": "status",
+                        "args": {},
+                        "key": "radios"
+                    }
+                }
+            ],
+            "Noise": {
+                "type": "int",
+                "read": true,
+                "write": true,
+                "protocols": [
+                    "cwmp",
+                    "usp"
+                ],
+                "mapping": [
+                    {
+                        "data": "@Parent",
+                        "type": "json",
+                        "key": "noise"
+                    }
+                ]
+            },
+            "Band": {
+                "type": "string",
+                "read": true,
+                "write": true,
+                "protocols": [
+                    "cwmp",
+                    "usp"
+                ],
+                "mapping": [
+                    {
+                        "data": "@Parent",
+                        "type": "json",
+                        "key": "band"
+                    }
+                ]
+            },
+            "Device.WiFi.{BBF_VENDOR_PREFIX}Radio.{i}.Stats.": {
+                "type": "object",
+                "protocols": [
+                    "cwmp",
+                    "usp"
+                ],
+                "access": false,
+                "array": false,
+                "BytesSent": {
+                    "type": "unsignedInt",
+                    "read": true,
+                    "write": true,
+                    "protocols": [
+                        "cwmp",
+                        "usp"
+                    ],
+                    "mapping": [
+                        {
+                            "data": "@Parent",
+                            "type": "json",
+                            "key": "stats.tx_bytes"
+                        }
+                    ]
+                },
+                "PacketsReceived": {
+                    "type": "unsignedInt",
+                    "read": true,
+                    "write": true,
+                    "protocols": [
+                        "cwmp",
+                        "usp"
+                    ],
+                    "mapping": [
+                        {
+                            "data": "@Parent",
+                            "type": "json",
+                            "key": "stats.rx_packets"
+                        }
+                    ]
+                }
+            }
+        }
+    }
 }

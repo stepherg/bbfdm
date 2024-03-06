@@ -84,16 +84,16 @@ static int browseIEEE1905ALInterfaceLinkInst(struct dmctx *dmctx, DMNODE *parent
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.!UCI:ieee1905/forwarding_rule/dmmap_forwarding_rule*/
 static int browseIEEE1905ALForwardingTableForwardingRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("ieee1905", "forwarding_rule", "dmmap_forwarding_rule", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "forwardingruleinstance", "forwardingrulealias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "forwardingruleinstance", "forwardingrulealias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -386,8 +386,8 @@ static int delObjIEEE1905ALForwardingTableForwardingRule(char *refparam, struct 
 
 	switch (del_action) {
 	case DEL_INST:
-		dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-		dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+		dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+		dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 		break;
 	case DEL_ALL:
 		uci_foreach_sections_safe("ieee1905", "forwarding_rule", stmp, s) {
@@ -828,7 +828,7 @@ static int get_IEEE1905ALForwardingTable_ForwardingRuleNumberOfEntries(char *ref
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.InterfaceList!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/interface_list*/
 static int get_IEEE1905ALForwardingTableForwardingRule_InterfaceList(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface_list", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "interface_list", value);
 	return 0;
 }
 
@@ -840,7 +840,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_InterfaceList(char *refpa
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface_list", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "interface_list", value);
 		break;
 	}
 	return 0;
@@ -849,7 +849,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_InterfaceList(char *refpa
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.MACDestinationAddress!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/mac_destination_addr*/
 static int get_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac_destination_addr", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "mac_destination_addr", value);
 	return 0;
 }
 
@@ -861,7 +861,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress(cha
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac_destination_addr", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "mac_destination_addr", value);
 		break;
 	}
 	return 0;
@@ -870,7 +870,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddress(cha
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.MACDestinationAddressFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/mac_destination_addr_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac_destination_addr_flag", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "mac_destination_addr_flag", value);
 	return 0;
 }
 
@@ -885,7 +885,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac_destination_addr_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "mac_destination_addr_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -894,7 +894,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACDestinationAddressFlag
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.MACSourceAddress!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/mac_source_addr*/
 static int get_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-        dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac_source_addr", value);
+        dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "mac_source_addr", value);
         return 0;
 }
 
@@ -906,7 +906,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress(char *re
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac_source_addr", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "mac_source_addr", value);
 		break;
 	}
 	return 0;
@@ -915,7 +915,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddress(char *re
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.MACSourceAddressFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/mac_source_addr_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-        dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "mac_source_addr_flag", value);
+        dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "mac_source_addr_flag", value);
         return 0;
 }
 
@@ -930,7 +930,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag(char
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "mac_source_addr_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "mac_source_addr_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -939,7 +939,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_MACSourceAddressFlag(char
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.EtherType!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/ether_type*/
 static int get_IEEE1905ALForwardingTableForwardingRule_EtherType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "ether_type", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "ether_type", "0");
 	return 0;
 }
 
@@ -951,7 +951,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherType(char *refparam,
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ether_type", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ether_type", value);
 		break;
 	}
 	return 0;
@@ -960,7 +960,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherType(char *refparam,
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.EtherTypeFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/ether_type_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "ether_type_flag", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "ether_type_flag", value);
 	return 0;
 }
 
@@ -975,7 +975,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag(char *refpa
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "ether_type_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ether_type_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -984,7 +984,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_EtherTypeFlag(char *refpa
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.Vid!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/vid*/
 static int get_IEEE1905ALForwardingTableForwardingRule_Vid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "vid", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "vid", "0");
 	return 0;
 }
 
@@ -996,7 +996,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_Vid(char *refparam, struc
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "vid", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "vid", value);
 		break;
 	}
 	return 0;
@@ -1005,7 +1005,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_Vid(char *refparam, struc
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.VidFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/vid_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_VidFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "vid_flag", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "vid_flag", value);
 	return 0;
 }
 
@@ -1020,7 +1020,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_VidFlag(char *refparam, s
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "vid_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "vid_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;
@@ -1029,7 +1029,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_VidFlag(char *refparam, s
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.PCP!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/pcp*/
 static int get_IEEE1905ALForwardingTableForwardingRule_PCP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "pcp", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "pcp", "0");
 	return 0;
 }
 
@@ -1041,7 +1041,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCP(char *refparam, struc
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "pcp", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "pcp", value);
 		break;
 	}
 	return 0;
@@ -1050,7 +1050,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCP(char *refparam, struc
 /*#Device.IEEE1905.AL.ForwardingTable.ForwardingRule.{i}.PCPFlag!UCI:dmmap_forwarding_rule/forwarding_rule,@i-1/pcp_flag*/
 static int get_IEEE1905ALForwardingTableForwardingRule_PCPFlag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "pcp_flag", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "pcp_flag", value);
 	return 0;
 }
 
@@ -1065,7 +1065,7 @@ static int set_IEEE1905ALForwardingTableForwardingRule_PCPFlag(char *refparam, s
 		break;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "pcp_flag", b ? "1" : "0");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "pcp_flag", b ? "1" : "0");
 		break;
 	}
 	return 0;

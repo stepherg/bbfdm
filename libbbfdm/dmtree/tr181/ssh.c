@@ -20,14 +20,6 @@ struct ssh_session_args {
 	char pid[15];
 };
 
-struct dmmap_ssh
-{
-	struct list_head list;
-	struct uci_section *config_section;
-	struct uci_section *dmmap_section;
-	struct list_head *sessions;
-};
-
 static void add_pubkey(const char *cur, const char *new)
 {
 	if (DM_STRLEN(cur) == 0) {
@@ -126,56 +118,6 @@ static bool key_exists(const char *key)
 	}
 
 	return exists;
-}
-
-static void add_ssh_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section)
-{
-	struct dmmap_ssh *dmmap_config;
-
-	dmmap_config = dmcalloc(1, sizeof(struct dmmap_ssh));
-	list_add_tail(&dmmap_config->list, dup_list);
-	dmmap_config->config_section = config_section;
-	dmmap_config->dmmap_section = dmmap_section;
-}
-
-static void free_ssh_config_dup_list(struct list_head *dup_list)
-{
-	struct dmmap_ssh *dmmap_config = NULL, *tmp = NULL;
-
-	list_for_each_entry_safe(dmmap_config, tmp, dup_list, list) {
-		list_del(&dmmap_config->list);
-		dmfree(dmmap_config);
-	}
-}
-
-static void synchronize_ssh_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list)
-{
-	struct uci_section *s, *stmp, *dmmap_sect;
-	char *v;
-
-	uci_foreach_sections(package, section_type, s) {
-		/*
-		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
-		 */
-		if ((dmmap_sect = get_dup_section_in_dmmap(dmmap_package, section_type, section_name(s))) == NULL) {
-			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sect);
-			dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(s));
-		}
-
-		/*
-		 * Add system and dmmap sections to the list
-		 */
-		add_ssh_config_dup_list(dup_list, s, dmmap_sect);
-	}
-
-	/*
-	 * Delete unused dmmap sections
-	 */
-	uci_path_foreach_sections_safe(bbfdm, dmmap_package, section_type, stmp, s) {
-		dmuci_get_value_by_section_string(s, "section_name", &v);
-		if (get_origin_section_from_config(package, section_type, v) == NULL)
-			dmuci_delete_by_section(s, NULL, NULL);
-	}
 }
 
 static void ssh_server_session_init(struct list_head *sess_list)
@@ -324,17 +266,19 @@ static int delObjSSHServer(char *refparam, struct dmctx *ctx, void *data, char *
 
 	switch (del_action) {
 		case DEL_INST:
-			close_active_sessions(((struct dmmap_ssh *)data)->config_section);
-			dmuci_delete_by_section(((struct dmmap_ssh *)data)->config_section, NULL, NULL);
-			dmuci_delete_by_section(((struct dmmap_ssh *)data)->dmmap_section, NULL, NULL);
+			close_active_sessions(((struct dm_data *)data)->config_section);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("dropbear", "dropbear", stmp, s) {
 				struct uci_section *dmmap_section = NULL;
+
 				get_dmmap_section_of_config_section("dmmap_dropbear", "dropbear", section_name(s), &dmmap_section);
+				dmuci_delete_by_section(dmmap_section, NULL, NULL);
+
 				close_active_sessions(s);
 				dmuci_delete_by_section(s, NULL, NULL);
-				dmuci_delete_by_section(dmmap_section, NULL, NULL);
 			}
 			break;
 	}
@@ -376,34 +320,34 @@ static int delObjSSHKey(char *refparam, struct dmctx *ctx, void *data, char *ins
  *************************************************************/
 static int browseSSHServerInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dmmap_ssh *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
 	LIST_HEAD(session_list);
 	char *inst = NULL;
 
 	ssh_server_session_init(&session_list);
-	synchronize_ssh_config_sections_with_dmmap("dropbear", "dropbear", "dmmap_dropbear", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	synchronize_specific_config_sections_with_dmmap("dropbear", "dropbear", "dmmap_dropbear", &dup_list);
+	list_for_each_entry(curr_data, &dup_list, list) {
 		bool b;
-		char *enable = dmuci_get_value_by_section_fallback_def(p->config_section, "enable", "1");
-		char *act_date = dmuci_get_value_by_section_fallback_def(p->dmmap_section, "activationdate", "");
+		char *enable = dmuci_get_value_by_section_fallback_def(curr_data->config_section, "enable", "1");
+		char *act_date = dmuci_get_value_by_section_fallback_def(curr_data->dmmap_section, "activationdate", "");
 
 		string_to_bool(enable, &b);
 		if (b && DM_STRLEN(act_date) == 0) {
 			char *tm = NULL;
 			dm_time_format(time(NULL), &tm);
-			dmuci_set_value_by_section(p->dmmap_section, "activationdate", tm);
+			dmuci_set_value_by_section(curr_data->dmmap_section, "activationdate", tm);
 		}
 
-		p->sessions = &session_list;
+		curr_data->additional_data = (void *)&session_list;
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "server_instance", "server_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "server_instance", "server_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_ssh_session_list(&session_list);
-	free_ssh_config_dup_list(&dup_list);
+	free_dmmap_config_dup_list(&dup_list);
 	return 0;
 }
 
@@ -469,7 +413,7 @@ static int browseSSHServerSessionInst(struct dmctx *dmctx, DMNODE *parent_node, 
 	char *inst = NULL;
 	int id = 0;
 
-	struct uci_section *s = ((struct dmmap_ssh *)prev_data)->config_section;
+	struct uci_section *s = ((struct dm_data *)prev_data)->config_section;
 	char *value = dmuci_get_value_by_section_fallback_def(s, "enable", "1");
 	string_to_bool(value, &b);
 	if (!b)
@@ -513,7 +457,7 @@ static int browseSSHServerSessionInst(struct dmctx *dmctx, DMNODE *parent_node, 
 		}
 
 		struct ssh_session_args *session = NULL;
-		struct list_head *sess_list = ((struct dmmap_ssh *)prev_data)->sessions;
+		struct list_head *sess_list = (struct list_head *)((struct dm_data *)prev_data)->additional_data;
 		bool found = false;
 		list_for_each_entry(session, sess_list, list) {
 			if (DM_STRCMP(session->pid, line) == 0) {
@@ -565,7 +509,7 @@ static int get_ssh_server_session_num(char *refparam, struct dmctx *ctx, void *d
 
 static int get_ssh_server_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_ssh *)data)->config_section, "enable", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "enable", "1");
 	return 0;
 }
 
@@ -580,7 +524,7 @@ static int set_ssh_server_enable(char *refparam, struct dmctx *ctx, void *data, 
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			char *cur = dmuci_get_value_by_section_fallback_def(((struct dmmap_ssh *)data)->config_section, "enable", "1");
+			char *cur = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "enable", "1");
 			bool cur_val;
 			string_to_bool(cur, &cur_val);
 
@@ -588,14 +532,14 @@ static int set_ssh_server_enable(char *refparam, struct dmctx *ctx, void *data, 
 				break;
 
 			if (b) {
-				dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "enable", "1");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enable", "1");
 				char *tm = NULL;
 				dm_time_format(time(NULL), &tm);
-				dmuci_set_value_by_section(((struct dmmap_ssh *)data)->dmmap_section, "activationdate", tm);
+				dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "activationdate", tm);
 			} else {
-				close_active_sessions(((struct dmmap_ssh *)data)->config_section);
-				dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "enable", "0");
-				dmuci_set_value_by_section(((struct dmmap_ssh *)data)->dmmap_section, "activationdate", "");
+				close_active_sessions(((struct dm_data *)data)->config_section);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enable", "0");
+				dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "activationdate", "");
 			}
 			break;
 	}
@@ -604,19 +548,19 @@ static int set_ssh_server_enable(char *refparam, struct dmctx *ctx, void *data, 
 
 static int get_ssh_server_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_ssh *)data)->dmmap_section, "server_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "server_alias", instance, value);
 }
 
 static int set_ssh_server_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_ssh *)data)->dmmap_section, "server_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "server_alias", instance, value);
 }
 
 static int get_ssh_server_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_ssh *)data)->config_section, "Interface", &linker);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "Interface", &linker);
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
 	return 0;
 }
@@ -638,7 +582,7 @@ static int set_ssh_server_interface(char *refparam, struct dmctx *ctx, void *dat
 
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "Interface", reference.value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "Interface", reference.value);
 			break;
 	}
 	return 0;	
@@ -646,7 +590,7 @@ static int set_ssh_server_interface(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_ssh_server_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_ssh *)data)->config_section, "Port", "22");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "Port", "22");
 	return 0;
 }
 
@@ -658,7 +602,7 @@ static int set_ssh_server_port(char *refparam, struct dmctx *ctx, void *data, ch
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "Port", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "Port", value);
 			break;
 	}
 	return 0;	
@@ -666,7 +610,7 @@ static int set_ssh_server_port(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_ssh_server_idle(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_ssh *)data)->config_section, "IdleTimeout", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "IdleTimeout", "0");
 	return 0;
 }
 
@@ -678,7 +622,7 @@ static int set_ssh_server_idle(char *refparam, struct dmctx *ctx, void *data, ch
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "IdleTimeout", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "IdleTimeout", value);
 			break;
 	}
 	return 0;	
@@ -686,7 +630,7 @@ static int set_ssh_server_idle(char *refparam, struct dmctx *ctx, void *data, ch
 
 static int get_ssh_server_keepalive(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_ssh *)data)->config_section, "SSHKeepAlive", "300");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "SSHKeepAlive", "300");
 	return 0;
 }
 
@@ -698,7 +642,7 @@ static int set_ssh_server_keepalive(char *refparam, struct dmctx *ctx, void *dat
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "SSHKeepAlive", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "SSHKeepAlive", value);
 			break;
 	}
 	return 0;	
@@ -706,7 +650,7 @@ static int set_ssh_server_keepalive(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_ssh_server_rootlogin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_ssh *)data)->config_section, "RootLogin", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "RootLogin", "1");
 	return 0;
 }
 
@@ -721,7 +665,7 @@ static int set_ssh_server_rootlogin(char *refparam, struct dmctx *ctx, void *dat
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "RootLogin", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "RootLogin", b ? "1" : "0");
 			break;
 	}
 	return 0;	
@@ -729,7 +673,7 @@ static int set_ssh_server_rootlogin(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_ssh_server_passwordlogin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_ssh *)data)->config_section, "PasswordAuth", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "PasswordAuth", "1");
 	return 0;
 }
 
@@ -744,7 +688,7 @@ static int set_ssh_server_passwordlogin(char *refparam, struct dmctx *ctx, void 
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "PasswordAuth", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "PasswordAuth", b ? "1" : "0");
 			break;
 	}
 	return 0;	
@@ -752,7 +696,7 @@ static int set_ssh_server_passwordlogin(char *refparam, struct dmctx *ctx, void 
 
 static int get_ssh_server_rootpasswordlogin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_ssh *)data)->config_section, "RootPasswordAuth", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "RootPasswordAuth", "1");
 	return 0;
 }
 
@@ -767,7 +711,7 @@ static int set_ssh_server_rootpasswordlogin(char *refparam, struct dmctx *ctx, v
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "RootPasswordAuth", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "RootPasswordAuth", b ? "1" : "0");
 			break;
 	}
 	return 0;	
@@ -775,7 +719,7 @@ static int set_ssh_server_rootpasswordlogin(char *refparam, struct dmctx *ctx, v
 
 static int get_ssh_server_maxauthtries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_ssh *)data)->config_section, "MaxAuthTries", "3");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "MaxAuthTries", "3");
 	return 0;
 }
 
@@ -787,7 +731,7 @@ static int set_ssh_server_maxauthtries(char *refparam, struct dmctx *ctx, void *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_ssh *)data)->config_section, "MaxAuthTries", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "MaxAuthTries", value);
 			break;
 	}
 	return 0;	
@@ -795,14 +739,14 @@ static int set_ssh_server_maxauthtries(char *refparam, struct dmctx *ctx, void *
 
 static int get_ssh_server_activationdate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_ssh *)data)->dmmap_section, "activationdate", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "activationdate", value);
 	return 0;
 }
 
 static int get_ssh_server_pid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	bool b;
-	struct uci_section *s = ((struct dmmap_ssh *)data)->config_section;
+	struct uci_section *s = ((struct dm_data *)data)->config_section;
 	char *en = dmuci_get_value_by_section_fallback_def(s, "enable", "1");
 
 	*value = "0";

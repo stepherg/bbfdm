@@ -410,25 +410,21 @@ void hex_to_ip(char *address, char *ret, size_t size)
  */
 void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *config_section, struct uci_section *dmmap_section)
 {
-	struct dmmap_dup *dmmap_config;
+	struct dm_data *dm_data = NULL;
 
-	dmmap_config = dmcalloc(1, sizeof(struct dmmap_dup));
-	list_add_tail(&dmmap_config->list, dup_list);
-	dmmap_config->config_section = config_section;
-	dmmap_config->dmmap_section = dmmap_section;
-}
-
-static void dmmap_config_dup_delete(struct dmmap_dup *dmmap_config)
-{
-	list_del(&dmmap_config->list);
+	dm_data = dmcalloc(1, sizeof(struct dm_data));
+	list_add_tail(&dm_data->list, dup_list);
+	dm_data->config_section = config_section;
+	dm_data->dmmap_section = dmmap_section;
 }
 
 void free_dmmap_config_dup_list(struct list_head *dup_list)
 {
-	struct dmmap_dup *dmmap_config = NULL;
-	while (dup_list->next != dup_list) {
-		dmmap_config = list_entry(dup_list->next, struct dmmap_dup, list);
-		dmmap_config_dup_delete(dmmap_config);
+	struct dm_data *dm_data = NULL, *tmp = NULL;
+
+	list_for_each_entry_safe(dm_data, tmp, dup_list, list) {
+		list_del(&dm_data->list);
+		dmfree(dm_data);
 	}
 }
 

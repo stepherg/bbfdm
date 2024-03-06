@@ -542,26 +542,25 @@ static int delObjIPInterfaceIPv6(void *data, unsigned char del_action, char *dmm
 /*#Device.IP.Interface.{i}.!UCI:network/interface/dmmap_network*/
 static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	char *proto, *device;
-	struct dmmap_dup *p = NULL;
+	char *proto = NULL, *device = NULL, *inst = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("network", "interface", "dmmap_network", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		dmuci_get_value_by_section_string(p->config_section, "proto", &proto);
-		dmuci_get_value_by_section_string(p->config_section, "device", &device);
+		dmuci_get_value_by_section_string(curr_data->config_section, "proto", &proto);
+		dmuci_get_value_by_section_string(curr_data->config_section, "device", &device);
 
-		if (strcmp(section_name(p->config_section), "loopback") == 0 ||
+		if (strcmp(section_name(curr_data->config_section), "loopback") == 0 ||
 			*proto == '\0' ||
 			DM_STRCHR(device, '@') ||
-			ip___is_ip_interface_instance_exists(section_name(p->config_section), device))
+			ip___is_ip_interface_instance_exists(section_name(curr_data->config_section), device))
 			continue;
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "ip_int_instance", "ip_int_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "ip_int_instance", "ip_int_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data->config_section, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);

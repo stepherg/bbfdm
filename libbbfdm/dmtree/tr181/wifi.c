@@ -38,37 +38,25 @@ struct radio_scan_args
 	struct blob_attr *msg;
 };
 
-struct wifi_radio_args
+struct radio_power_args
 {
-	struct dmmap_dup *sections;
 	int transmit_power[MAX_POWER_INDEX];
 	int power_count;
-};
-
-struct wifi_ssid_args
-{
-	struct uci_section *config_s;
-	struct uci_section *dmmap_s;
-	char *ifname;
-};
-
-struct wifi_enp_args
-{
-	struct dmmap_dup *sections;
-	char *ifname;
 };
 
 /**************************************************************************
 * INIT
 ***************************************************************************/
-static inline int init_wifi_radio(struct wifi_radio_args *args, struct dmmap_dup *s)
+static inline int init_wifi_radio_power(struct dm_data *curr_data)
 {
-	char *device = NULL;
 	json_object *res = NULL, *arrobj = NULL, *power = NULL;
 	int i = 0, j = 0, ind = 0;
 
-	args->sections = s;
-	device = section_name(s->config_section);
+	struct radio_power_args *curr_radio_power = dmcalloc(1, sizeof(struct radio_power_args));
+
+	curr_data->additional_data = (void *)curr_radio_power;
+
+	char *device = section_name(curr_data->config_section);
 	if (DM_STRLEN(device) == 0)
 		return 0;
 
@@ -79,38 +67,23 @@ static inline int init_wifi_radio(struct wifi_radio_args *args, struct dmmap_dup
 			continue;
 		int power = (int)strtod(dbm, NULL);
 		if (ind < MAX_POWER_INDEX) {
-			args->transmit_power[ind] = power;
+			curr_radio_power->transmit_power[ind] = power;
 			ind++;
 		}
 	}
 
-	args->power_count = ind;
+	curr_radio_power->power_count = ind;
 	/* sort the power list */
 	for (i = 0; i < ind; i++)  {
 		for (j = i + 1; j < ind; j++) {
-			if (args->transmit_power[i] > args->transmit_power[j]) {
-				int tmp =  args->transmit_power[i];
-				args->transmit_power[i] = args->transmit_power[j];
-				args->transmit_power[j] = tmp;
+			if (curr_radio_power->transmit_power[i] > curr_radio_power->transmit_power[j]) {
+				int tmp =  curr_radio_power->transmit_power[i];
+				curr_radio_power->transmit_power[i] = curr_radio_power->transmit_power[j];
+				curr_radio_power->transmit_power[j] = tmp;
 			}
 		}
 	}
 
-	return 0;
-}
-
-static inline int init_wifi_ssid(struct wifi_ssid_args *args, struct uci_section *config_s, struct uci_section *dmmap_s, char *ifname)
-{
-	args->config_s = config_s;
-	args->dmmap_s = dmmap_s;
-	args->ifname = ifname;
-	return 0;
-}
-
-static inline int init_wifi_enp(struct wifi_enp_args *args, struct dmmap_dup *s, char *wiface)
-{
-	args->sections = s;
-	args->ifname = wiface;
 	return 0;
 }
 
@@ -347,15 +320,15 @@ static int delete_wifi_ssid(char *refparam, struct dmctx *ctx, void *data, char 
 
 	switch (del_action) {
 		case DEL_INST:
-			if (((struct wifi_ssid_args *)data)->config_s) {
-				dmuci_delete_by_section(((struct wifi_ssid_args *)data)->config_s, "device", NULL);
-				dmuci_delete_by_section(((struct wifi_ssid_args *)data)->config_s, "ssid", NULL);
+			if (((struct dm_data *)data)->config_section) {
+				dmuci_delete_by_section(((struct dm_data *)data)->config_section, "device", NULL);
+				dmuci_delete_by_section(((struct dm_data *)data)->config_section, "ssid", NULL);
 
-				dmmap_s = get_dup_section_in_dmmap("dmmap_wireless", "wifi-iface", section_name(((struct wifi_ssid_args *)data)->config_s));
+				dmmap_s = get_dup_section_in_dmmap("dmmap_wireless", "wifi-iface", section_name(((struct dm_data *)data)->config_section));
 				dmuci_set_value_by_section(dmmap_s, "added_by_user", "1");
 			}
 
-			dmuci_delete_by_section(((struct wifi_ssid_args *)data)->dmmap_s, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_path_foreach_sections_safe(bbfdm, "dmmap_wireless", "ssid", stmp, ssid_s) {
@@ -405,11 +378,10 @@ static int delete_wifi_accesspoint(char *refparam, struct dmctx *ctx, void *data
 	switch (del_action) {
 		case DEL_INST:
 			// Remove dmmap section
-			get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name((struct uci_section *)data), &dmmap_s);
-			dmuci_delete_by_section(dmmap_s, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 
 			// Remove config section
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("wireless", "wifi-iface", stmp, s) {
@@ -448,8 +420,8 @@ static int delObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (del_action) {
 	case DEL_INST:
-		dmuci_set_value_by_section((((struct wifi_enp_args *)data)->sections)->config_section, "endpointinstance", "");
-		dmuci_set_value_by_section((((struct wifi_enp_args *)data)->sections)->config_section, "mode", "");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "endpointinstance", "");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "mode", "");
 		break;
 	case DEL_ALL:
 		uci_foreach_sections("wireless", "wifi-iface", s) {
@@ -475,20 +447,18 @@ static int delObjWiFiEndPoint(char *refparam, struct dmctx *ctx, void *data, cha
 /*#Device.WiFi.Radio.{i}.!UCI:wireless/wifi-device/dmmap_wireless*/
 static int browseWifiRadioInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct wifi_radio_args curr_wifi_radio_args;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
-
-	memset(&curr_wifi_radio_args, 0, sizeof(struct wifi_radio_args));
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("wireless", "wifi-device", "dmmap_wireless", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-		init_wifi_radio(&curr_wifi_radio_args, p);
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "radioinstance", "radioalias");
+		init_wifi_radio_power(curr_data);
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_radio_args, inst) == DM_STOP)
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "radioinstance", "radioalias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -558,7 +528,7 @@ static void dmmap_synchronizeWiFiSSID(struct dmctx *dmctx, DMNODE *parent_node, 
 /*#Device.WiFi.SSID.{i}.!UCI:wireless/wifi-iface/dmmap_wireless*/
 static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct wifi_ssid_args curr_wifi_ssid_args = {0};
+	struct dm_data curr_data = {0};
 	struct uci_section *dmmap_s = NULL;
 	char *inst = NULL;
 
@@ -574,11 +544,13 @@ static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 			if (config_s) dmuci_get_value_by_section_string(config_s, "ifname", &ifname);
 		}
 
-		init_wifi_ssid(&curr_wifi_ssid_args, config_s, dmmap_s, ifname);
+		curr_data.config_section = config_s;
+		curr_data.dmmap_section = dmmap_s;
+		curr_data.additional_data = (void *)ifname;
 
 		inst = handle_instance(dmctx, parent_node, dmmap_s, "ssid_instance", "ssid_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_ssid_args, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -587,21 +559,25 @@ static int browseWifiSsidInst(struct dmctx *dmctx, DMNODE *parent_node, void *pr
 /*#Device.WiFi.AccessPoint.{i}.!UCI:wireless/wifi-iface/dmmap_wireless*/
 static int browseWifiAccessPointInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dmmap_dup *p = NULL;
-	char *inst = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("wireless", "wifi-iface", "dmmap_wireless", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-		char *mode = NULL;
+	list_for_each_entry(curr_data, &dup_list, list) {
+		char *mode = NULL, *ifname = NULL;
 
-		dmuci_get_value_by_section_string(p->config_section, "mode", &mode);
+		dmuci_get_value_by_section_string(curr_data->config_section, "mode", &mode);
 		if (DM_LSTRCMP(mode, "ap") != 0)
 			continue;
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "ap_instance", "ap_alias");
+		dmuci_get_value_by_section_string(curr_data->config_section, "ifname", &ifname);
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		curr_data->additional_data = (void *)ifname;
+
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "ap_instance", "ap_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -611,24 +587,25 @@ static int browseWifiAccessPointInst(struct dmctx *dmctx, DMNODE *parent_node, v
 /*#Device.WiFi.EndPoint.{i}.!UCI:wireless/wifi-iface/dmmap_wireless*/
 static int browseWiFiEndPointInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL, *ifname, *mode = NULL;
-	struct wifi_enp_args curr_wifi_enp_args = {0};
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("wireless", "wifi-iface", "dmmap_wireless", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
+		char *ifname = NULL, *mode = NULL;
 
-		dmuci_get_value_by_section_string(p->config_section, "mode", &mode);
+		dmuci_get_value_by_section_string(curr_data->config_section, "mode", &mode);
 		if (DM_LSTRCMP(mode, "sta") != 0)
 			continue;
 
-		dmuci_get_value_by_section_string(p->config_section, "ifname", &ifname);
-		init_wifi_enp(&curr_wifi_enp_args, p, ifname);
+		dmuci_get_value_by_section_string(curr_data->config_section, "ifname", &ifname);
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "endpointinstance", "endpointalias");
+		curr_data->additional_data = (void *)ifname;
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_wifi_enp_args, inst) == DM_STOP)
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "endpointinstance", "endpointalias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -638,27 +615,31 @@ static int browseWiFiEndPointInst(struct dmctx *dmctx, DMNODE *parent_node, void
 static int browseWiFiEndPointProfileInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *ep_instance = NULL;
-	struct wifi_enp_args *ep_args = (struct wifi_enp_args *)prev_data;
 
-	dmuci_get_value_by_section_string(ep_args->sections->dmmap_section, "endpointinstance", &ep_instance);
+	dmuci_get_value_by_section_string(((struct dm_data *)prev_data)->dmmap_section, "endpointinstance", &ep_instance);
+
 	struct uci_section *s = is_dmmap_section_exist_eq("dmmap_wireless", "ep_profile", "ep_key", ep_instance);
-	if (!s)
-		dmuci_add_section_bbfdm("dmmap_wireless", "ep_profile", &s);
+	if (!s) dmuci_add_section_bbfdm("dmmap_wireless", "ep_profile", &s);
 	dmuci_set_value_by_section_bbfdm(s, "ep_key", ep_instance);
 
-	DM_LINK_INST_OBJ(dmctx, parent_node, ep_args->sections->config_section, "1");
+	DM_LINK_INST_OBJ(dmctx, parent_node, prev_data, "1");
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.!UBUS:wifi.radio.@Name/scanresults//accesspoints*/
 static int browseWifiNeighboringWiFiDiagnosticResultInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
+	struct dm_data curr_data = {0};
 	struct uci_section *s = NULL;
 	char *inst = NULL;
 
 	uci_path_foreach_sections(bbfdm, "dmmap_wifi_neighboring", "result", s) {
+
+		curr_data.config_section = s;
+
 		inst = handle_instance(dmctx, parent_node, s, "wifineighbor_instance", "wifineighbor_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -667,16 +648,20 @@ static int browseWifiNeighboringWiFiDiagnosticResultInst(struct dmctx *dmctx, DM
 static int browse_wifi_associated_device(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *stations = NULL, *arrobj = NULL;
-	char object[32], *ifname = NULL, *inst = NULL;
+	char object[32], *inst = NULL;
+	struct dm_data curr_data = {0};
 	int id = 0, i = 0;
 
-	dmuci_get_value_by_section_string((struct uci_section *)prev_data, "ifname", &ifname);
-
-	snprintf(object, sizeof(object), "wifi.ap.%s", ifname);
+	snprintf(object, sizeof(object), "wifi.ap.%s", (char *)((struct dm_data *)prev_data)->additional_data);
 	dmubus_call(object, "stations", UBUS_ARGS{0}, 0, &res);
+
 	dmjson_foreach_obj_in_array(res, arrobj, stations, i, 1, "stations") {
+
+		curr_data.json_object = stations;
+
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)stations, inst) == DM_STOP)
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
 			return 0;
 	}
 	return 0;
@@ -719,7 +704,7 @@ static int get_WiFi_EndPointNumberOfEntries(char *refparam, struct dmctx *ctx, v
 
 static int get_wifi_ssid_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "enabled", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "enabled", value);
 	return 0;
 }
 
@@ -729,14 +714,14 @@ static int set_wifi_ssid_enable(char *refparam, struct dmctx *ctx, void *data, c
 	char *multi_ap = NULL;
 	bool b;
 
-	map_s = find_mapcontroller_section(((struct wifi_ssid_args *)data)->config_s);
+	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->config_s, "multi_ap", &multi_ap);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
 			if (DM_STRLEN(multi_ap) && !map_s)
 				return FAULT_9007;
 
@@ -745,14 +730,14 @@ static int set_wifi_ssid_enable(char *refparam, struct dmctx *ctx, void *data, c
 			string_to_bool(value, &b);
 
 			// wireless config: Update disabled option
-			if (((struct wifi_ssid_args *)data)->config_s)
-				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->config_s, "disabled", b ? "0" : "1");
+			if (((struct dm_data *)data)->config_section)
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "disabled", b ? "0" : "1");
 
 			// mapcontroller config: Update the corresponding ap section if exists
 			if (map_s)
 				dmuci_set_value_by_section(map_s, "enabled", b ? "1" : "0");
 
-			dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "enabled", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -760,13 +745,13 @@ static int set_wifi_ssid_enable(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_wifi_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_net_device_status(((struct wifi_ssid_args *)data)->ifname, value);
+	return get_net_device_status((char *)((struct dm_data *)data)->additional_data, value);
 }
 
 /*#Device.WiFi.SSID.{i}.SSID!UCI:wireless/wifi-iface,@i-1/ssid*/
 static int get_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "ssid", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "ssid", value);
 	return 0;
 }
 
@@ -775,28 +760,28 @@ static int set_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *in
 	struct uci_section *map_s = NULL;
 	char *multi_ap = NULL;
 
-	map_s = find_mapcontroller_section(((struct wifi_ssid_args *)data)->config_s);
+	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, 32, NULL, NULL))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->config_s, "multi_ap", &multi_ap);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
 			if (DM_STRLEN(multi_ap) && !map_s)
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
 			// wireless config: Update ssid option
-			if (((struct wifi_ssid_args *)data)->config_s)
-				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->config_s, "ssid", value);
+			if (((struct dm_data *)data)->config_section)
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ssid", value);
 
 			// mapcontroller config: Update the corresponding ap section if exists
 			if (map_s)
 				dmuci_set_value_by_section(map_s, "ssid", value);
 
-			dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "ssid", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "ssid", value);
 			return 0;
 	}
 	return 0;
@@ -804,20 +789,20 @@ static int set_wlan_ssid(char *refparam, struct dmctx *ctx, void *data, char *in
 
 static int get_wlan_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "name", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "name", value);
 	return 0;
 }
 
 /*#Device.WiFi.SSID.{i}.MACAddress!SYSFS:/sys/class/net/@Name/address*/
 static int get_WiFiSSID_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_net_device_sysfs(((struct wifi_ssid_args *)data)->ifname, "address", value);
+	return get_net_device_sysfs(((struct dm_data *)data)->additional_data, "address", value);
 }
 
 /*#Device.WiFi.Radio.{i}.Enable!UCI:wireless/wifi-device,@i-1/disabled*/
 static int get_radio_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "disabled", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "disabled", value);
 	*value = ((*value)[0] == '1') ? "0" : "1";
 	return 0;
 }
@@ -833,7 +818,7 @@ static int set_radio_enable(char *refparam, struct dmctx *ctx, void *data, char 
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "disabled", b ? "0" : "1");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "disabled", b ? "0" : "1");
 			return 0;
 	}
 	return 0;
@@ -846,7 +831,7 @@ static int get_radio_status(char *refparam, struct dmctx *ctx, void *data, char 
 	dmubus_call("network.wireless", "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "Down");
 
-	char *isup = dmjson_get_value(res, 2, section_name((((struct wifi_radio_args *)data)->sections)->config_section), "up");
+	char *isup = dmjson_get_value(res, 2, section_name(((struct dm_data *)data)->config_section), "up");
 	*value = (DM_STRCMP(isup, "false") == 0) ? "Down" : "Up";
 	return 0;
 }
@@ -872,7 +857,7 @@ static int set_WiFiRadio_LowerLayers(char *refparam, struct dmctx *ctx, void *da
 
 static int get_WiFiRadio_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmasprintf(value, "%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	dmasprintf(value, "%s", section_name(((struct dm_data *)data)->config_section));
 	return 0;
 }
 
@@ -885,7 +870,7 @@ static int get_WiFiRadio_AutoChannelSupported(char *refparam, struct dmctx *ctx,
 /*#Device.WiFi.Radio.{i}.AutoChannelRefreshPeriod!UCI:wireless/wifi-device,@i-1/acs_refresh_period*/
 static int get_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_radio_args *)data)->sections)->config_section, "acs_refresh_period", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "acs_refresh_period", "0");
 	return 0;
 }
 
@@ -897,7 +882,7 @@ static int set_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "acs_refresh_period", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "acs_refresh_period", value);
 			break;
 	}
 	return 0;
@@ -906,14 +891,14 @@ static int set_WiFiRadio_AutoChannelRefreshPeriod(char *refparam, struct dmctx *
 /*#Device.WiFi.Radio.{i}.MaxSupportedAssociations!UCI:wireless/wifi-device,@i-1/maxassoc*/
 static int get_WiFiRadio_MaxSupportedAssociations(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_radio_args *)data)->sections)->config_section, "maxassoc", "32");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "maxassoc", "32");
 	return 0;
 }
 
 /*#Device.WiFi.Radio.{i}.FragmentationThreshold!UCI:wireless/wifi-device,@i-1/frag_threshold*/
 static int get_WiFiRadio_FragmentationThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_radio_args *)data)->sections)->config_section, "frag_threshold", "2346");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "frag_threshold", "2346");
 	return 0;
 }
 
@@ -925,7 +910,7 @@ static int set_WiFiRadio_FragmentationThreshold(char *refparam, struct dmctx *ct
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "frag_threshold", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "frag_threshold", value);
 			break;
 	}
 	return 0;
@@ -934,7 +919,7 @@ static int set_WiFiRadio_FragmentationThreshold(char *refparam, struct dmctx *ct
 /*#Device.WiFi.Radio.{i}.RTSThreshold!UCI:wireless/wifi-device,@i-1/rts_threshold*/
 static int get_WiFiRadio_RTSThreshold(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_radio_args *)data)->sections)->config_section, "rts_threshold", "2347");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "rts_threshold", "2347");
 	return 0;
 }
 
@@ -946,7 +931,7 @@ static int set_WiFiRadio_RTSThreshold(char *refparam, struct dmctx *ctx, void *d
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "rts_threshold", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "rts_threshold", value);
 			break;
 	}
 	return 0;
@@ -955,7 +940,7 @@ static int set_WiFiRadio_RTSThreshold(char *refparam, struct dmctx *ctx, void *d
 /*#Device.WiFi.Radio.{i}.BeaconPeriod!UCI:wireless/wifi-device,@i-1/beacon_int*/
 static int get_WiFiRadio_BeaconPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_radio_args *)data)->sections)->config_section, "beacon_int", "100");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "beacon_int", "100");
 	return 0;
 }
 
@@ -967,7 +952,7 @@ static int set_WiFiRadio_BeaconPeriod(char *refparam, struct dmctx *ctx, void *d
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "beacon_int", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "beacon_int", value);
 			break;
 	}
 	return 0;
@@ -976,7 +961,7 @@ static int set_WiFiRadio_BeaconPeriod(char *refparam, struct dmctx *ctx, void *d
 /*#Device.WiFi.Radio.{i}.DTIMPeriod!UCI:wireless/wifi-device,@i-1/dtim_period*/
 static int get_WiFiRadio_DTIMPeriod(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_radio_args *)data)->sections)->config_section, "dtim_period", "2");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "dtim_period", "2");
 	return 0;
 }
 
@@ -993,7 +978,7 @@ static int set_WiFiRadio_DTIMPeriod(char *refparam, struct dmctx *ctx, void *dat
 			//Here need to loop the iface and match the section name then add the dtim_period on each section
 			//as this param is read by mac80211.sh script and is overwriten as 2 if not written in all section
 			//of radio
-			uci_foreach_option_eq("wireless", "wifi-iface", "device", section_name((((struct wifi_radio_args *)data)->sections)->config_section), s) {
+			uci_foreach_option_eq("wireless", "wifi-iface", "device", section_name(((struct dm_data *)data)->config_section), s) {
 				char *mode;
 
 				dmuci_get_value_by_section_string(s, "mode", &mode);
@@ -1004,7 +989,7 @@ static int set_WiFiRadio_DTIMPeriod(char *refparam, struct dmctx *ctx, void *dat
 				dmuci_set_value_by_section(s, "dtim_period", value);
 			}
 
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "dtim_period", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dtim_period", value);
 			break;
 	}
 	return 0;
@@ -1015,7 +1000,7 @@ static int get_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 {
 	char *htmode = NULL;
 
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "htmode", &htmode);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "htmode", &htmode);
 
 	if (htmode && *htmode) {
 		int freq;
@@ -1035,7 +1020,7 @@ static int get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, str
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "Auto");
 
@@ -1069,7 +1054,7 @@ static int set_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 		case VALUESET:
 			sscanf(value, "%d", &freq);
 
-			dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "htmode", &curr_htmode);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "htmode", &curr_htmode);
 
 			if (DM_LSTRNCMP(curr_htmode, "EHT", 3) == 0)
 				snprintf(htmode, sizeof(htmode), "EHT%d", freq);
@@ -1080,7 +1065,7 @@ static int set_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 			else
 				snprintf(htmode, sizeof(htmode), "HE%d", freq);
 
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "htmode", htmode);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "htmode", htmode);
 			break;
 	}
 	return 0;
@@ -1089,7 +1074,7 @@ static int set_WiFiRadio_OperatingChannelBandwidth(char *refparam, struct dmctx 
 /*#Device.WiFi.Radio.{i}.PreambleType!UCI:wireless/wifi-device,@i-1/short_preamble*/
 static int get_WiFiRadio_PreambleType(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "short_preamble", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "short_preamble", value);
 	*value = ((*value)[0] == '1') ? "short" : "long";
 	return 0;
 }
@@ -1104,7 +1089,7 @@ static int set_WiFiRadio_PreambleType(char *refparam, struct dmctx *ctx, void *d
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "short_preamble", (DM_LSTRCMP(value, "short") == 0) ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "short_preamble", (DM_LSTRCMP(value, "short") == 0) ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -1116,7 +1101,7 @@ static int get_WiFiRadio_IEEE80211hSupported(char *refparam, struct dmctx *ctx, 
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "dot11h_capable");
@@ -1126,7 +1111,7 @@ static int get_WiFiRadio_IEEE80211hSupported(char *refparam, struct dmctx *ctx, 
 /*#Device.WiFi.Radio.{i}.IEEE80211hEnabled!UCI:wireless/wifi-device,@i-1/doth*/
 static int get_WiFiRadio_IEEE80211hEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_radio_args *)data)->sections)->config_section, "doth", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "doth", "0");
 	return 0;
 }
 
@@ -1140,7 +1125,7 @@ static int set_WiFiRadio_IEEE80211hEnabled(char *refparam, struct dmctx *ctx, vo
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "doth", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "doth", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -1155,15 +1140,15 @@ static int get_WiFiRadio_TransmitPowerSupported(char *refparam, struct dmctx *ct
 	snprintf(supported_list, sizeof(supported_list), "-1,");
 	space_left = space_left - 3;
 
-	struct wifi_radio_args *args = (struct wifi_radio_args *)data;
+	struct radio_power_args *curr_radio_power = ((struct dm_data *)data)->additional_data;
 
-	if (args->power_count <= 0)
+	if (curr_radio_power->power_count <= 0)
 		goto end;
 
-	int max_power = args->transmit_power[args->power_count - 1];
+	int max_power = curr_radio_power->transmit_power[curr_radio_power->power_count - 1];
 
-	for (i = 0; i < args->power_count; i++) {
-		int percent = ceil((double)(args->transmit_power[i] * 100) / max_power);
+	for (i = 0; i < curr_radio_power->power_count; i++) {
+		int percent = ceil((double)(curr_radio_power->transmit_power[i] * 100) / max_power);
 		char strval[4] = {0};
 		snprintf(strval, sizeof(strval), "%d", percent);
 
@@ -1184,17 +1169,17 @@ end:
 
 static int get_WiFiRadio_TransmitPower(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct wifi_radio_args *args = (struct wifi_radio_args *)data;
-	char *config = dmuci_get_value_by_section_fallback_def((args->sections)->config_section, "txpower", "-1");
+	struct radio_power_args *curr_radio_power = ((struct dm_data *)data)->additional_data;
+	char *config = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "txpower", "-1");
 	if (DM_STRCMP(config, "-1") == 0) {
 		*value = "-1";
 		return 0;
 	}
 
-	if (args->power_count <= 0)
+	if (curr_radio_power->power_count <= 0)
 		return 0;
 
-	int max_power = args->transmit_power[args->power_count - 1];
+	int max_power = curr_radio_power->transmit_power[curr_radio_power->power_count - 1];
 	int dbm = (int)strtod(config, NULL);
 	int percent = ceil((double)(dbm * 100) / max_power);
 
@@ -1205,9 +1190,9 @@ static int get_WiFiRadio_TransmitPower(char *refparam, struct dmctx *ctx, void *
 
 static int set_WiFiRadio_TransmitPower(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct radio_power_args *curr_radio_power = ((struct dm_data *)data)->additional_data;
 	char *supported_list = NULL;
 	bool found = false;
-	struct wifi_radio_args *args = (struct wifi_radio_args *)data;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1231,20 +1216,20 @@ static int set_WiFiRadio_TransmitPower(char *refparam, struct dmctx *ctx, void *
 			break;
 		case VALUESET:
 			if (DM_STRCMP(value, "-1") == 0) {
-				dmuci_set_value_by_section((args->sections)->config_section, "txpower", "");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "txpower", "");
 				break;
 			}
 
-			if (args->power_count <= 0)
+			if (curr_radio_power->power_count <= 0)
 				break;
 
-			int max_power = args->transmit_power[args->power_count - 1];
+			int max_power = curr_radio_power->transmit_power[curr_radio_power->power_count - 1];
 			int req_val = (int)strtod(value, NULL);
 			int percent = (int)round((max_power * req_val) / 100);
 
 			char str_val[10] = {0};
 			snprintf(str_val, sizeof(str_val), "%d", percent);
-			dmuci_set_value_by_section((args->sections)->config_section, "txpower", str_val);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "txpower", str_val);
 			break;
 	}
 
@@ -1256,8 +1241,8 @@ static int get_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, voi
 {
 	char *conf_country, *dmmap_contry = NULL;
 
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "country", &conf_country);
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->dmmap_section, "country", &dmmap_contry);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "country", &conf_country);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "country", &dmmap_contry);
 
 	dmasprintf(value, "%s%c", conf_country, (dmmap_contry && *dmmap_contry) ? dmmap_contry[2] : ' ');
 	return 0;
@@ -1273,13 +1258,13 @@ static int set_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, voi
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->dmmap_section, "country", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "country", value);
 
 			// uci only support country code, so strip I/O from value before setting
 			if (DM_STRLEN(value) == 3)
 				value[2] = '\0';
 
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "country", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "country", value);
 			break;
 	}
 	return 0;
@@ -1291,7 +1276,7 @@ static int get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *
 	json_object *res = NULL;
 	char object[UBUS_OBJ_LEN], *bandwidth = NULL;
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 
@@ -1305,7 +1290,7 @@ static int get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *
 
 static int get_radio_channels_in_use(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "channel");
+	*value = get_radio_option_nocache(section_name(((struct dm_data *)data)->config_section), "channel");
 	return 0;
 }
 
@@ -1313,10 +1298,10 @@ static int get_radio_channel(char *refparam, struct dmctx *ctx, void *data, char
 {
 	char *channel = NULL;
 
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "channel", &channel);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "channel", &channel);
 
 	if (DM_LSTRCMP(channel, "auto") == 0 || DM_STRLEN(channel) == 0)
-		channel = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "channel");
+		channel = get_radio_option_nocache(section_name(((struct dm_data *)data)->config_section), "channel");
 
 	*value = channel;
 	return 0;
@@ -1340,7 +1325,7 @@ static int set_radio_channel(char *refparam, struct dmctx *ctx, void *data, char
 
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "channel", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "channel", value);
 			return 0;
 	}
 	return 0;
@@ -1348,7 +1333,7 @@ static int set_radio_channel(char *refparam, struct dmctx *ctx, void *data, char
 
 static int get_radio_auto_channel_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_radio_args *)data)->sections)->config_section, "channel", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "channel", value);
 	if (DM_LSTRCMP(*value, "auto") == 0 || (*value)[0] == '\0')
 		*value = "1";
 	else
@@ -1370,9 +1355,9 @@ static int set_radio_auto_channel_enable(char *refparam, struct dmctx *ctx, void
 			if (b)
 				value = "auto";
 			else
-				value = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "channel");
+				value = get_radio_option_nocache(section_name(((struct dm_data *)data)->config_section), "channel");
 
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "channel", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "channel", value);
 			return 0;
 	}
 	return 0;
@@ -1381,7 +1366,7 @@ static int set_radio_auto_channel_enable(char *refparam, struct dmctx *ctx, void
 /*#Device.WiFi.AccessPoint.{i}.SSIDAdvertisementEnabled!UCI:wireless/wifi-iface,@i-1/hidden*/
 static int get_wlan_ap_advertisement_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "hidden", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "hidden", value);
 	*value = ((*value)[0] == '1') ? "0" : "1";
 	return 0;
 }
@@ -1397,7 +1382,7 @@ static int set_wlan_ap_advertisement_enable(char *refparam, struct dmctx *ctx, v
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "hidden", b ? "0" : "1");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "hidden", b ? "0" : "1");
 			return 0;
 
 	}
@@ -1407,7 +1392,7 @@ static int set_wlan_ap_advertisement_enable(char *refparam, struct dmctx *ctx, v
 /*#Device.WiFi.AccessPoint.{i}.WMMEnable!UCI:wireless/wifi-device,@i-1/wmm*/
 static int get_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "wmm", "1");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "wmm", "1");
 	return 0;
 }
 
@@ -1422,7 +1407,7 @@ static int set_wmm_enabled(char *refparam, struct dmctx *ctx, void *data, char *
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "wmm", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "wmm", value);
 			return 0;
 	}
 	return 0;
@@ -1433,7 +1418,7 @@ static int get_access_point_control_enable(char *refparam, struct dmctx *ctx, vo
 {
 	char *macfilter;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "macfilter", &macfilter);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "macfilter", &macfilter);
 	if (macfilter[0] == 0 || DM_LSTRCMP(macfilter, "deny") == 0 || DM_LSTRCMP(macfilter, "disable") == 0)
 		*value = "false";
 	else
@@ -1450,7 +1435,7 @@ static int get_WiFiAccessPoint_WMMCapability(char *refparam, struct dmctx *ctx, 
 /*#Device.WiFi.AccessPoint.{i}.MaxAllowedAssociations!UCI:wireless/wifi-iface,@i-1/maxassoc*/
 static int get_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "maxassoc", "32");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "maxassoc", "32");
 	return 0;
 }
 
@@ -1462,7 +1447,7 @@ static int set_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmc
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "maxassoc", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "maxassoc", value);
 			break;
 	}
 	return 0;
@@ -1471,7 +1456,7 @@ static int set_WiFiAccessPoint_MaxAllowedAssociations(char *refparam, struct dmc
 /*#Device.WiFi.AccessPoint.{i}.IsolationEnable!UCI:wireless/wifi-iface,@i-1/isolate*/
 static int get_WiFiAccessPoint_IsolationEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "isolate", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "isolate", "0");
 	return 0;
 }
 
@@ -1486,7 +1471,7 @@ static int set_WiFiAccessPoint_IsolationEnable(char *refparam, struct dmctx *ctx
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "isolate", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "isolate", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -1496,7 +1481,7 @@ static int set_WiFiAccessPoint_IsolationEnable(char *refparam, struct dmctx *ctx
 static int get_WiFiAccessPoint_AllowedMACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *val = NULL;
-	dmuci_get_value_by_section_list((struct uci_section *)data, "maclist", &val);
+	dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "maclist", &val);
 	*value = dmuci_list_to_string(val, ",");
 	return 0;
 }
@@ -1514,9 +1499,9 @@ static int set_WiFiAccessPoint_AllowedMACAddress(char *refparam, struct dmctx *c
 			break;
 		case VALUESET:
 			arr = strsplit(value, ",", &length);
-			dmuci_set_value_by_section((struct uci_section *)data, "maclist", "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "maclist", "");
 			for (i = 0; i < length; i++)
-				dmuci_add_list_value_by_section((struct uci_section *)data, "maclist", arr[i]);
+				dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, "maclist", arr[i]);
 			break;
 	}
 	return 0;
@@ -1539,7 +1524,7 @@ static int set_access_point_control_enable(char *refparam, struct dmctx *ctx, vo
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "macfilter", b ? "allow" : "disable");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "macfilter", b ? "allow" : "disable");
 			return 0;
 	}
 	return 0;
@@ -1548,7 +1533,7 @@ static int set_access_point_control_enable(char *refparam, struct dmctx *ctx, vo
 /*#Device.WiFi.AccessPoint.{i}.UAPSDEnable!UCI:wireless/wifi-iface,@i-1/wmm_apsd*/
 static int get_WiFiAccessPoint_UAPSDEnable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "wmm_apsd", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "wmm_apsd", "0");
 	return 0;
 }
 
@@ -1563,7 +1548,7 @@ static int set_WiFiAccessPoint_UAPSDEnable(char *refparam, struct dmctx *ctx, vo
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "wmm_apsd", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "wmm_apsd", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -1571,11 +1556,7 @@ static int set_WiFiAccessPoint_UAPSDEnable(char *refparam, struct dmctx *ctx, vo
 
 static int get_access_point_security_supported_modes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ifname = NULL;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
-
-	return get_supported_modes("wifi.ap", ifname, value);
+	return get_supported_modes("wifi.ap", (char *)((struct dm_data *)data)->additional_data, value);
 }
 
 static bool is_different_group(const char *mode1, const char *mode2)
@@ -1712,7 +1693,7 @@ static void set_security_mode(struct uci_section *wireless_s, struct uci_section
 /*#Device.WiFi.AccessPoint.{i}.Security.ModeEnabled!UCI:wireless/wifi-iface,@i-1/encryption&UCI:wireless/wifi-iface,@i-1/encryption*/
 static int get_access_point_security_modes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_security_mode((struct uci_section *)data);
+	*value = get_security_mode(((struct dm_data *)data)->config_section);
 	return 0;
 }
 
@@ -1722,7 +1703,7 @@ static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 	char *supported_modes = NULL;
 	char *multi_ap = NULL;
 
-	map_s = find_mapcontroller_section((struct uci_section *)data);
+	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
@@ -1736,13 +1717,13 @@ static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 			if (!value_exits_in_str_list(supported_modes, ",", value))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "multi_ap", &multi_ap);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
 			if (DM_STRLEN(multi_ap) && !map_s)
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			set_security_mode((struct uci_section *)data, map_s, value);
+			set_security_mode(((struct dm_data *)data)->config_section, map_s, value);
 			return 0;
 	}
 	return 0;
@@ -1752,10 +1733,10 @@ static int get_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 {
 	char *key_index = NULL, buf[16];
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "key", &key_index);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", &key_index);
 	snprintf(buf, sizeof(buf),"key%s", DM_STRLEN(key_index) ? key_index : "1");
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, buf, value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, buf, value);
 	return 0;
 }
 
@@ -1765,28 +1746,28 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 	char *encryption;
 	char *multi_ap = NULL;
 
-	map_s = find_mapcontroller_section((struct uci_section *)data);
+	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{"5","5"},{"13","13"}}, 2))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "multi_ap", &multi_ap);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
 			if (DM_STRLEN(multi_ap) && !map_s)
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "wep")) {
 				char *key_index = NULL, buf[16];
 
-				dmuci_get_value_by_section_string((struct uci_section *)data, "key", &key_index);
+				dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", &key_index);
 				snprintf(buf, sizeof(buf),"key%s", DM_STRLEN(key_index) ? key_index : "1");
 
 				// wireless config: Update key option
-				dmuci_set_value_by_section((struct uci_section *)data, buf, value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, buf, value);
 
 				// mapcontroller config: Update the corresponding ap section if exists
 				if (map_s)
@@ -1799,7 +1780,7 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 
 static int get_access_point_security_shared_key(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
 	return 0;
 }
 
@@ -1809,24 +1790,24 @@ static int set_access_point_security_shared_key(char *refparam, struct dmctx *ct
 	char *encryption = NULL;
 	char *multi_ap = NULL;
 
-	map_s = find_mapcontroller_section((struct uci_section *)data);
+	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"32"}}, 1))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "multi_ap", &multi_ap);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
 			if (DM_STRLEN(multi_ap) && !map_s)
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "psk")) {
 
 				// wireless config: Update key option
-				dmuci_set_value_by_section((struct uci_section *)data, "key", value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
 
 				// mapcontroller config: Update the corresponding ap section if exists
 				if (map_s)
@@ -1840,7 +1821,7 @@ static int set_access_point_security_shared_key(char *refparam, struct dmctx *ct
 
 static int get_access_point_security_passphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
 	return 0;
 }
 
@@ -1854,7 +1835,7 @@ static int set_access_point_security_passphrase(char *refparam, struct dmctx *ct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "psk"))
 				set_access_point_security_shared_key(refparam, ctx, data, instance, value, action);
 			return 0;
@@ -1865,7 +1846,7 @@ static int set_access_point_security_passphrase(char *refparam, struct dmctx *ct
 /*#Device.WiFi.AccessPoint.{i}.Security.RekeyingInterval!UCI:wireless/wifi-iface,@i-1/wpa_group_rekey*/
 static int get_access_point_security_rekey_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "wpa_group_rekey", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "wpa_group_rekey", "0");
 	return 0;
 }
 
@@ -1879,9 +1860,9 @@ static int set_access_point_security_rekey_interval(char *refparam, struct dmctx
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (!DM_LSTRSTR(encryption, "wep") && DM_LSTRCMP(encryption, "none") != 0)
-				dmuci_set_value_by_section((struct uci_section *)data, "wpa_group_rekey", value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "wpa_group_rekey", value);
 			return 0;
 	}
 	return 0;
@@ -1890,7 +1871,7 @@ static int set_access_point_security_rekey_interval(char *refparam, struct dmctx
 /*#Device.WiFi.AccessPoint.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
 static int get_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
 	return 0;
 }
 
@@ -1900,24 +1881,24 @@ static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmct
 	char *encryption = NULL;
 	char *multi_ap = NULL;
 
-	map_s = find_mapcontroller_section((struct uci_section *)data);
+	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 
 	switch (action)	{
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "multi_ap", &multi_ap);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
 			if (DM_STRLEN(multi_ap) && !map_s)
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "sae")) {
 
 				// wireless config: Update key option
-				dmuci_set_value_by_section((struct uci_section *)data, "key", value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
 
 				// mapcontroller config: Update the corresponding ap section if exists
 				if (map_s)
@@ -1931,7 +1912,7 @@ static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmct
 /*#Device.WiFi.AccessPoint.{i}.Security.RadiusServerIPAddr!UCI:wireless/wifi-iface,@i-1/auth_server*/
 static int get_access_point_security_radius_ip_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "auth_server", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "auth_server", value);
 	return 0;
 }
 
@@ -1945,9 +1926,9 @@ static int set_access_point_security_radius_ip_address(char *refparam, struct dm
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "wpa"))
-				dmuci_set_value_by_section((struct uci_section *)data, "auth_server", value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "auth_server", value);
 			return 0;
 	}
 	return 0;
@@ -1956,7 +1937,7 @@ static int set_access_point_security_radius_ip_address(char *refparam, struct dm
 /*#Device.WiFi.AccessPoint.{i}.Security.RadiusServerPort!UCI:wireless/wifi-iface,@i-1/auth_port*/
 static int get_access_point_security_radius_server_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "auth_port", "1812");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "auth_port", "1812");
 	return 0;
 }
 
@@ -1970,9 +1951,9 @@ static int set_access_point_security_radius_server_port(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "wpa"))
-				dmuci_set_value_by_section((struct uci_section *)data, "auth_port", value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "auth_port", value);
 			return 0;
 	}
 	return 0;
@@ -1980,7 +1961,7 @@ static int set_access_point_security_radius_server_port(char *refparam, struct d
 
 static int get_access_point_security_radius_secret(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "auth_secret", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "auth_secret", value);
 	return 0;
 }
 
@@ -1994,9 +1975,9 @@ static int set_access_point_security_radius_secret(char *refparam, struct dmctx 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "wpa"))
-				dmuci_set_value_by_section((struct uci_section *)data, "auth_secret", value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "auth_secret", value);
 			return 0;
 	}
 	return 0;
@@ -2005,7 +1986,7 @@ static int set_access_point_security_radius_secret(char *refparam, struct dmctx 
 /*#Device.WiFi.AccessPoint.{i}.Security.MFPConfig!UCI:wireless/wifi-iface,@i-1/ieee80211w*/
 static int get_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ieee80211w", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "ieee80211w", value);
 
 	if (*value[0] == '1')
 		*value = "Optional";
@@ -2087,7 +2068,7 @@ static int set_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *c
 				return FAULT_9007;
 
 			/*Here we also need to validate the encyption algo whether the MFP can be set*/
-			if (validate_mfp_config((struct uci_section *)data, value))
+			if (validate_mfp_config(((struct dm_data *)data)->config_section, value))
 				return FAULT_9007;
 
 			break;
@@ -2099,7 +2080,7 @@ static int set_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *c
 			else if (DM_LSTRCMP(value, "Required") == 0)
 				buf[0] = '2';
 			buf[1] = 0;
-			dmuci_set_value_by_section((struct uci_section *)data, "ieee80211w", buf);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ieee80211w", buf);
 			break;
 	}
 	return 0;
@@ -2108,7 +2089,7 @@ static int set_WiFiAccessPointSecurity_MFPConfig(char *refparam, struct dmctx *c
 /*#Device.WiFi.AccessPoint.{i}.WPS.Enable!UCI:wireless/wifi-iface,@i-1/wps_pushbutton*/
 static int get_WiFiAccessPointWPS_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "wps_pushbutton", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "wps_pushbutton", "0");
 	return 0;
 }
 
@@ -2123,7 +2104,7 @@ static int set_WiFiAccessPointWPS_Enable(char *refparam, struct dmctx *ctx, void
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((struct uci_section *)data, "wps_pushbutton", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "wps_pushbutton", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -2163,7 +2144,7 @@ static int set_WiFiAccessPointWPS_ConfigMethodsEnabled(char *refparam, struct dm
 static int get_WiFiAccessPointWPS_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *wps_status;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "wps_pushbutton", &wps_status);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "wps_pushbutton", &wps_status);
 	*value = (wps_status[0] == '1') ? "Configured" : "Disabled";
 	return 0;
 }
@@ -2183,12 +2164,10 @@ static int get_operate_args_WiFiAccessPointWPS_InitiateWPSPBC(char *refparam, st
 
 static int operate_WiFiAccessPointWPS_InitiateWPSPBC(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *ifname = (char *)((struct dm_data *)data)->additional_data;
 	char *status = "Success";
 	char object[256];
-	char *ifname = NULL;
 	int ubus_ret = 0;
-
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
 
 	if (DM_STRLEN(ifname) == 0)
 		return USP_FAULT_COMMAND_FAILURE;
@@ -2205,7 +2184,7 @@ static int operate_WiFiAccessPointWPS_InitiateWPSPBC(char *refparam, struct dmct
 /*#Device.WiFi.AccessPoint.{i}.Accounting.ServerIPAddr!UCI:wireless/wifi-iface,@i-1/acct_server*/
 static int get_WiFiAccessPointAccounting_ServerIPAddr(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "acct_server", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "acct_server", value);
 	return 0;
 }
 
@@ -2217,7 +2196,7 @@ static int set_WiFiAccessPointAccounting_ServerIPAddr(char *refparam, struct dmc
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "acct_server", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "acct_server", value);
 			break;
 	}
 	return 0;
@@ -2226,7 +2205,7 @@ static int set_WiFiAccessPointAccounting_ServerIPAddr(char *refparam, struct dmc
 /*#Device.WiFi.AccessPoint.{i}.Accounting.ServerPort!UCI:wireless/wifi-iface,@i-1/acct_port*/
 static int get_WiFiAccessPointAccounting_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((struct uci_section *)data, "acct_port", "1813");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "acct_port", "1813");
 	return 0;
 }
 
@@ -2238,7 +2217,7 @@ static int set_WiFiAccessPointAccounting_ServerPort(char *refparam, struct dmctx
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "acct_port", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "acct_port", value);
 			break;
 	}
 	return 0;
@@ -2247,7 +2226,7 @@ static int set_WiFiAccessPointAccounting_ServerPort(char *refparam, struct dmctx
 /*#Device.WiFi.AccessPoint.{i}.Accounting.Secret!UCI:wireless/wifi-iface,@i-1/acct_secret*/
 static int get_WiFiAccessPointAccounting_Secret(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "acct_secret", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "acct_secret", value);
 	return 0;
 }
 
@@ -2259,7 +2238,7 @@ static int set_WiFiAccessPointAccounting_Secret(char *refparam, struct dmctx *ct
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "acct_secret", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "acct_secret", value);
 			break;
 	}
 	return 0;
@@ -2268,7 +2247,7 @@ static int set_WiFiAccessPointAccounting_Secret(char *refparam, struct dmctx *ct
 /*#Device.WiFi.EndPoint.{i}.Enable!UCI:wireless/wifi-iface,@i-1/disabled*/
 static int get_WiFiEndPoint_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct wifi_enp_args *)data)->sections)->config_section, "disabled", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "disabled", value);
 	*value = ((*value)[0] == '1') ? "0" : "1";
 	return 0;
 }
@@ -2283,7 +2262,7 @@ static int set_WiFiEndPoint_Enable(char *refparam, struct dmctx *ctx, void *data
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_enp_args *)data)->sections)->config_section, "disabled", b ? "0" : "1");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "disabled", b ? "0" : "1");
 			break;
 	}
 	return 0;
@@ -2291,26 +2270,23 @@ static int set_WiFiEndPoint_Enable(char *refparam, struct dmctx *ctx, void *data
 
 static int get_WiFiEndPoint_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *ifname = NULL;
-
-	dmuci_get_value_by_section_string((((struct wifi_enp_args *)data)->sections)->config_section, "ifname", &ifname);
-	return get_net_device_status(ifname, value);
+	return get_net_device_status((char *)((struct dm_data *)data)->additional_data, value);
 }
 
 /*#Device.WiFi.EndPoint.{i}.Alias!UCI:dmmap_wireless/wifi-iface,@i-1/endpointalias*/
 static int get_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, (((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "endpointalias", instance, value);
 }
 
 static int set_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, (((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "endpointalias", instance, value);
 }
 
 static int get_WiFiEndPoint_SSIDReference(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", ((struct wifi_enp_args *)data)->ifname);
+	struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", (char *)((struct dm_data *)data)->additional_data);
 
 	adm_entry_get_reference_param(ctx, "Device.WiFi.SSID.*.Name", section_name(iface_s), value);
 	return 0;
@@ -2321,7 +2297,7 @@ static int get_WiFiEndPointStats_LastDataDownlinkRate(char *refparam, struct dmc
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.backhaul.%s", ((struct wifi_enp_args *)data)->ifname);
+	snprintf(object, sizeof(object), "wifi.backhaul.%s", (char *)((struct dm_data *)data)->additional_data);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 3, "stats", "rx_rate_latest", "rate");
@@ -2333,7 +2309,7 @@ static int get_WiFiEndPointStats_LastDataUplinkRate(char *refparam, struct dmctx
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.backhaul.%s", ((struct wifi_enp_args *)data)->ifname);
+	snprintf(object, sizeof(object), "wifi.backhaul.%s", (char *)((struct dm_data *)data)->additional_data);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 3, "stats", "tx_rate_latest", "rate");
@@ -2345,7 +2321,7 @@ static int get_WiFiEndPointStats_SignalStrength(char *refparam, struct dmctx *ct
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.backhaul.%s", ((struct wifi_enp_args *)data)->ifname);
+	snprintf(object, sizeof(object), "wifi.backhaul.%s", (char *)((struct dm_data *)data)->additional_data);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "rssi");
@@ -2357,7 +2333,7 @@ static int get_WiFiEndPointStats_Retransmissions(char *refparam, struct dmctx *c
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.backhaul.%s", ((struct wifi_enp_args *)data)->ifname);
+	snprintf(object, sizeof(object), "wifi.backhaul.%s", (char *)((struct dm_data *)data)->additional_data);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 2, "stats", "tx_pkts_retries");
@@ -2366,7 +2342,7 @@ static int get_WiFiEndPointStats_Retransmissions(char *refparam, struct dmctx *c
 
 static int get_WiFiEndPointSecurity_ModesSupported(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return get_supported_modes("wifi.backhaul", ((struct wifi_enp_args *)data)->ifname, value);
+	return get_supported_modes("wifi.backhaul", (char *)((struct dm_data *)data)->additional_data, value);
 }
 
 static int get_WiFiEndPointProfile_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -2399,7 +2375,7 @@ static int get_dmmap_wireless_section(char *refparam, struct dmctx *ctx, void *d
 	struct uci_section *dmmap_section = NULL, *dm = NULL;
 	char *epinst = NULL;
 
-	get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name((struct uci_section*)data), &dmmap_section);
+	get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name(((struct dm_data *)data)->config_section), &dmmap_section);
 	dmuci_get_value_by_section_string(dmmap_section, "endpointinstance", &epinst);
 	get_dmmap_section_of_config_section_eq("dmmap_wireless", "ep_profile", "ep_key", epinst, &dm);
 	dmuci_get_value_by_section_string(dm, section_name, value);
@@ -2417,7 +2393,7 @@ static int set_dmmap_wireless_section(char *refparam, struct dmctx *ctx, void *d
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name((struct uci_section*)data), &dmmap_section);
+			get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name(((struct dm_data *)data)->config_section), &dmmap_section);
 			dmuci_get_value_by_section_string(dmmap_section, "endpointinstance", &epinst);
 			get_dmmap_section_of_config_section_eq("dmmap_wireless", "ep_profile", "ep_key", epinst, &dm);
 			dmuci_set_value_by_section_bbfdm(dm, section_name, value);
@@ -2452,7 +2428,7 @@ static int set_WiFiEndPointProfile_Alias(char *refparam, struct dmctx *ctx, void
 /*#Device.WiFi.EndPoint.{i}.Profile.{i}.SSID!UCI:wireless/wifi-iface,@i-1/ssid*/
 static int get_WiFiEndPointProfile_SSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section*)data, "ssid", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "ssid", value);
 	return 0;
 }
 
@@ -2464,7 +2440,7 @@ static int set_WiFiEndPointProfile_SSID(char *refparam, struct dmctx *ctx, void 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section*)data, "ssid", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ssid", value);
 			break;
 	}
 	return 0;
@@ -2473,7 +2449,7 @@ static int set_WiFiEndPointProfile_SSID(char *refparam, struct dmctx *ctx, void 
 /*#Device.WiFi.EndPoint.{i}.Profile.{i}.Security.ModeEnabled!UCI:wireless/wifi-iface,@i-1/encryption*/
 static int get_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_security_mode((struct uci_section *)data);
+	*value = get_security_mode(((struct dm_data *)data)->config_section);
 	return 0;
 }
 
@@ -2483,7 +2459,7 @@ static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 	char *supported_modes = NULL;
 	char *multi_ap = NULL;
 
-	map_s = find_mapcontroller_section((struct uci_section *)data);
+	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
@@ -2497,13 +2473,13 @@ static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 			if (!value_exits_in_str_list(supported_modes, ",", value))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "multi_ap", &multi_ap);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
 			if (DM_STRLEN(multi_ap) && !map_s)
 				return FAULT_9007;
 
 			return 0;
 		case VALUESET:
-			set_security_mode((struct uci_section *)data, map_s, value);
+			set_security_mode(((struct dm_data *)data)->config_section, map_s, value);
 			return 0;
 	}
 	return 0;
@@ -2513,10 +2489,10 @@ static int get_WiFiEndPointProfileSecurity_WEPKey(char *refparam, struct dmctx *
 {
 	char *key_index = NULL, buf[16];
 
-	dmuci_get_value_by_section_string((struct uci_section*)data, "key", &key_index);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", &key_index);
 	snprintf(buf, sizeof(buf),"key%s", DM_STRLEN(key_index) ? key_index : "1");
 
-	dmuci_get_value_by_section_string((struct uci_section*)data, buf, value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, buf, value);
 	return 0;
 }
 
@@ -2530,13 +2506,13 @@ static int set_WiFiEndPointProfileSecurity_WEPKey(char *refparam, struct dmctx *
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section*)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "wep")) {
 				char *key_index = NULL, buf[16];
 
-				dmuci_get_value_by_section_string((struct uci_section*)data, "key", &key_index);
+				dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", &key_index);
 				snprintf(buf, sizeof(buf),"key%s", DM_STRLEN(key_index) ? key_index : "1");
-				dmuci_set_value_by_section((struct uci_section*)data, buf, value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, buf, value);
 			}
 			return 0;
 	}
@@ -2545,7 +2521,7 @@ static int set_WiFiEndPointProfileSecurity_WEPKey(char *refparam, struct dmctx *
 
 static int get_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section*)data, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
 	return 0;
 }
 
@@ -2559,9 +2535,9 @@ static int set_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section*)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "psk"))
-				dmuci_set_value_by_section((struct uci_section*)data, "key", value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
 			return 0;
 	}
 	return 0;
@@ -2569,7 +2545,7 @@ static int set_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct d
 
 static int get_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section*)data, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
 	return 0;
 }
 
@@ -2583,7 +2559,7 @@ static int set_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section*)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "psk"))
 				set_WiFiEndPointProfileSecurity_PreSharedKey(refparam, ctx, data, instance, value, action);
 			return 0;
@@ -2594,7 +2570,7 @@ static int set_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct 
 /*#Device.WiFi.EndPoint.{i}.Profile.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
 static int get_WiFiEndPointProfileSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section*)data, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
 	return 0;
 }
 
@@ -2608,9 +2584,9 @@ static int set_WiFiEndPointProfileSecurity_SAEPassphrase(char *refparam, struct 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string((struct uci_section*)data, "encryption", &encryption);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
 			if (DM_LSTRSTR(encryption, "sae"))
-				dmuci_set_value_by_section((struct uci_section*)data, "key", value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
 			break;
 	}
 	return 0;
@@ -2619,7 +2595,7 @@ static int set_WiFiEndPointProfileSecurity_SAEPassphrase(char *refparam, struct 
 /*#Device.WiFi.EndPoint.{i}.Profile.{i}.Security.MFPConfig!UCI:wireless/wifi-iface,@i-1/ieee80211w*/
 static int get_WiFiEndPointProfileSecurity_MFPConfig(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section*)data, "ieee80211w", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "ieee80211w", value);
 	if(*value[0] == 0 || *value[0] == '0')
 		*value = "Disabled";
 	else if (DM_LSTRCMP(*value, "1") == 0)
@@ -2638,11 +2614,11 @@ static int set_WiFiEndPointProfileSecurity_MFPConfig(char *refparam, struct dmct
 			break;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "Disabled") == 0)
-				dmuci_set_value_by_section((struct uci_section*)data, "ieee80211w", "0");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ieee80211w", "0");
 			else if (DM_LSTRCMP(value, "Optional") == 0)
-				dmuci_set_value_by_section((struct uci_section*)data, "ieee80211w", "1");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ieee80211w", "1");
 			else if (DM_LSTRCMP(value, "Required") == 0)
-				dmuci_set_value_by_section((struct uci_section*)data, "ieee80211w", "2");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ieee80211w", "2");
 			break;
 	}
 	return 0;
@@ -2651,7 +2627,7 @@ static int set_WiFiEndPointProfileSecurity_MFPConfig(char *refparam, struct dmct
 /*#Device.WiFi.EndPoint.{i}.WPS.Enable!UCI:wireless/wifi-iface,@i-1/wps_pushbutton*/
 static int get_WiFiEndPointWPS_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def((((struct wifi_enp_args *)data)->sections)->config_section, "wps_pushbutton", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "wps_pushbutton", "0");
 	return 0;
 }
 
@@ -2666,7 +2642,7 @@ static int set_WiFiEndPointWPS_Enable(char *refparam, struct dmctx *ctx, void *d
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct wifi_enp_args *)data)->sections)->config_section, "wps_pushbutton", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "wps_pushbutton", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -2706,7 +2682,7 @@ static int set_WiFiEndPointWPS_ConfigMethodsEnabled(char *refparam, struct dmctx
 static int get_WiFiEndPointWPS_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *wps_status;
-	dmuci_get_value_by_section_string((((struct wifi_enp_args *)data)->sections)->config_section, "wps_pushbutton", &wps_status);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "wps_pushbutton", &wps_status);
 	*value = (wps_status[0] == '1') ? "Configured" : "Disabled";
 	return 0;
 }
@@ -2717,56 +2693,48 @@ static int get_WiFiEndPointWPS_Status(char *refparam, struct dmctx *ctx, void *d
 /*#Device.WiFi.Radio.{i}.Alias!UCI:dmmap_wireless/wifi-device,@i-1/radioalias*/
 static int get_radio_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, (((struct wifi_radio_args *)data)->sections)->dmmap_section, "radioalias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "radioalias", instance, value);
 }
 
 static int set_radio_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, (((struct wifi_radio_args *)data)->sections)->dmmap_section, "radioalias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "radioalias", instance, value);
 }
 
 /*#Device.WiFi.SSID.{i}.Alias!UCI:dmmap_wireless/wifi-iface,@i-1/ssidalias*/
 static int get_ssid_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct wifi_ssid_args *)data)->dmmap_s, "ssid_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "ssid_alias", instance, value);
 }
 
 static int set_ssid_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct wifi_ssid_args *)data)->dmmap_s, "ssid_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "ssid_alias", instance, value);
 }
 
 /*#Device.WiFi.AccessPoint.{i}.Alias!UCI:dmmap_wireless/wifi-iface,@i-1/ap_alias*/
 static int get_access_point_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *dmmap_s = NULL;
-
-	get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name((struct uci_section *)data), &dmmap_s);
-
-	return bbf_get_alias(ctx, dmmap_s, "ap_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "ap_alias", instance, value);
 }
 
 static int set_access_point_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dmmap_s = NULL;
-
-	get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name((struct uci_section *)data), &dmmap_s);
-
-	return bbf_set_alias(ctx, dmmap_s, "ap_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "ssid_alias", instance, value);
 }
 
 static int get_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "LowerLayers", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "LowerLayers", value);
 
 	if ((*value)[0] == '\0') {
 		char *device = NULL;
 
-		dmuci_get_value_by_section_string(((struct wifi_ssid_args *)data)->dmmap_s, "device", &device);
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "device", &device);
 		adm_entry_get_reference_param(ctx, "Device.WiFi.Radio.*.Name", device, value);
 
 		// Store LowerLayers value
-		dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "LowerLayers", *value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "LowerLayers", *value);
 	} else {
 		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
@@ -2793,12 +2761,12 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 			return 0;
 		case VALUESET:
 			// Store LowerLayers value under dmmap section
-			dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "LowerLayers", reference.path);
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "LowerLayers", reference.path);
 
-			dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->dmmap_s, "device", reference.value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "device", reference.value);
 
-			if (((struct wifi_ssid_args *)data)->config_s)
-				dmuci_set_value_by_section(((struct wifi_ssid_args *)data)->config_s, "device", reference.value);
+			if (((struct dm_data *)data)->config_section)
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "device", reference.value);
 
 			return 0;
 	}
@@ -2807,17 +2775,13 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *dmmap_s = NULL;
-
-	get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name((struct uci_section *)data), &dmmap_s);
-
-	dmuci_get_value_by_section_string(dmmap_s, "LowerLayers", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "LowerLayers", value);
 
 	if ((*value)[0] == '\0') {
-		adm_entry_get_reference_param(ctx, "Device.WiFi.SSID.*.Name", section_name((struct uci_section *)data), value);
+		adm_entry_get_reference_param(ctx, "Device.WiFi.SSID.*.Name", section_name(((struct dm_data *)data)->config_section), value);
 
 		// Store LowerLayers value
-		dmuci_set_value_by_section(dmmap_s, "LowerLayers", *value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "LowerLayers", *value);
 	} else {
 		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
@@ -2829,7 +2793,7 @@ static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	char *allowed_objects[] = {"Device.WiFi.SSID.", NULL};
-	struct uci_section *ss = NULL, *dmmap_s = NULL;
+	struct uci_section *ss = NULL;
 	struct dm_reference reference = {0};
 
 	bbf_get_reference_args(value, &reference);
@@ -2844,20 +2808,18 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 
 			break;
 		case VALUESET:
-			get_dmmap_section_of_config_section("dmmap_wireless", "wifi-iface", section_name((struct uci_section *)data), &dmmap_s);
-
 			// Store LowerLayers value under dmmap_wireless section
-			dmuci_set_value_by_section(dmmap_s, "LowerLayers", reference.path);
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "LowerLayers", reference.path);
 
 			if (DM_STRLEN(reference.value)) {
 				char *device = NULL, *ssid = NULL, *enabled = NULL;
 
-				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", section_name((struct uci_section *)data));
+				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", section_name(((struct dm_data *)data)->config_section));
 				if (ss == NULL) {
 					ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "name", reference.value);
 				}
 
-				dmuci_set_value_by_section(ss, "ap_section_name", section_name((struct uci_section *)data));
+				dmuci_set_value_by_section(ss, "ap_section_name", section_name(((struct dm_data *)data)->config_section));
 
 				dmuci_get_value_by_section_string(ss, "device", &device);
 				dmuci_get_value_by_section_string(ss, "ssid", &ssid);
@@ -2865,15 +2827,15 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 
 				bool b = dmuci_string_to_boolean(enabled);
 
-				dmuci_set_value_by_section((struct uci_section *)data, "ssid", ssid);
-				dmuci_set_value_by_section((struct uci_section *)data, "device", device);
-				dmuci_set_value_by_section((struct uci_section *)data, "disabled", b ? "0" : "1");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ssid", ssid);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "device", device);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "disabled", b ? "0" : "1");
 			} else {
-				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", section_name((struct uci_section *)data));
+				ss = get_dup_section_in_dmmap_opt("dmmap_wireless", "ssid", "ap_section_name", section_name(((struct dm_data *)data)->config_section));
 				dmuci_set_value_by_section(ss, "ap_section_name", "");
 
-				dmuci_set_value_by_section((struct uci_section *)data, "ssid", "");
-				dmuci_set_value_by_section((struct uci_section *)data, "device", "");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "ssid", "");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "device", "");
 			}
 			break;
 	}
@@ -2906,31 +2868,31 @@ static int get_wlan_bssid(char *refparam, struct dmctx *ctx, void *data, char *i
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.ap.%s", ((struct wifi_ssid_args *)data)->ifname);
+	snprintf(object, sizeof(object), "wifi.ap.%s", (char *)((struct dm_data *)data)->additional_data);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value(res, 1, "bssid");
 	return 0;
 }
 
-static int ssid_read_ubus(const struct wifi_ssid_args *args, const char *name, char **value)
+static int ssid_read_ubus(const struct dm_data *args, const char *name, char **value)
 {
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.ap.%s", args->ifname);
+	snprintf(object, sizeof(object), "wifi.ap.%s", (char *)args->additional_data);
 	dmubus_call(object, "stats", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, name);
 	return 0;
 }
 
-static int radio_read_ubus(const struct wifi_radio_args *args, const char *name, char **value)
+static int radio_read_ubus(const struct dm_data *args, const char *name, char **value)
 {
 	json_object *res = NULL;
 	char object[UBUS_OBJ_LEN];
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(args->sections->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(args->config_section));
 	dmubus_call(object, "stats", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, name);
@@ -2943,7 +2905,7 @@ static int get_WiFiRadioStats_Noise(char *refparam, struct dmctx *ctx, void *dat
 	json_object *res = NULL;
 	char object[UBUS_OBJ_LEN];
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "255");
 	*value = dmjson_get_value(res, 1, "noise");
@@ -3139,21 +3101,21 @@ static int get_WiFiAccessPointAssociatedDevice_Active(char *refparam, struct dmc
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Noise!UBUS:wifi.ap.@Name/stations//stations[i-1].noise*/
 static int get_WiFiAccessPointAssociatedDevice_Noise(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "noise");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "noise");
 	return 0;
 }
 
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.MACAddress!UBUS:wifi.ap.@Name/stations//stations[i-1].macaddr*/
 static int get_WiFiAccessPointAssociatedDevice_MACAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "macaddr");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "macaddr");
 	return 0;
 }
 
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataDownlinkRate!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.rx_rate_latest.rate*/
 static int get_WiFiAccessPointAssociatedDevice_LastDataDownlinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *rate_mbps = dmjson_get_value((json_object *)data, 3, "stats", "rx_rate_latest", "rate");
+	char *rate_mbps = dmjson_get_value(((struct dm_data *)data)->json_object, 3, "stats", "rx_rate_latest", "rate");
 	float rate_kbps = (rate_mbps && *rate_mbps != '\0') ? atof(rate_mbps) * 1000 : 1000;
 
 	dmasprintf(value, "%u", (unsigned int)rate_kbps);
@@ -3163,7 +3125,7 @@ static int get_WiFiAccessPointAssociatedDevice_LastDataDownlinkRate(char *refpar
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.LastDataUplinkRate!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.tx_rate_latest.rate*/
 static int get_WiFiAccessPointAssociatedDevice_LastDataUplinkRate(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *rate_mbps = dmjson_get_value((json_object *)data, 3, "stats", "tx_rate_latest", "rate");
+	char *rate_mbps = dmjson_get_value(((struct dm_data *)data)->json_object, 3, "stats", "tx_rate_latest", "rate");
 	float rate_kbps = (rate_mbps && *rate_mbps != '\0') ? atof(rate_mbps) * 1000 : 1000;
 
 	dmasprintf(value, "%u", (unsigned int)rate_kbps);
@@ -3173,7 +3135,7 @@ static int get_WiFiAccessPointAssociatedDevice_LastDataUplinkRate(char *refparam
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.SignalStrength!UBUS:wifi.ap.@Name/stations//stations[i-1].rssi*/
 static int get_WiFiAccessPointAssociatedDevice_SignalStrength(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "rssi");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "rssi");
 	return 0;
 }
 
@@ -3182,7 +3144,7 @@ static int get_WiFiAccessPointAssociatedDevice_AssociationTime(char *refparam, s
 {
 	*value = "0001-01-01T00:00:00Z";
 
-	char *in_network = dmjson_get_value((json_object *)data, 1, "in_network");
+	char *in_network = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "in_network");
 	if (in_network && *in_network != '\0' && DM_STRTOL(in_network) > 0) {
 		time_t t_time = time(NULL) - DM_STRTOL(in_network);
 		if (gmtime(&t_time) == NULL)
@@ -3201,49 +3163,49 @@ static int get_WiFiAccessPointAssociatedDevice_AssociationTime(char *refparam, s
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.BytesSent!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.tx_total_bytes*/
 static int get_access_point_associative_device_statistics_tx_bytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 2, "stats", "tx_total_bytes");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 2, "stats", "tx_total_bytes");
 	return 0;
 }
 
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.BytesReceived!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.rx_data_bytes*/
 static int get_access_point_associative_device_statistics_rx_bytes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 2, "stats", "rx_data_bytes");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 2, "stats", "rx_data_bytes");
 	return 0;
 }
 
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.PacketsSent!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.tx_total_pkts*/
 static int get_access_point_associative_device_statistics_tx_packets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 2, "stats", "tx_total_pkts");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 2, "stats", "tx_total_pkts");
 	return 0;
 }
 
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.PacketsReceived!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.rx_data_pkts*/
 static int get_access_point_associative_device_statistics_rx_packets(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 2, "stats", "rx_data_pkts");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 2, "stats", "rx_data_pkts");
 	return 0;
 }
 
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.ErrorsSent!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.tx_failures*/
 static int get_access_point_associative_device_statistics_tx_errors(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 2, "stats", "tx_failures");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 2, "stats", "tx_failures");
 	return 0;
 }
 
 /*#Device.WiFi.AccessPoint.{i}.AssociatedDevice.{i}.Stats.RetransCount!UBUS:wifi.ap.@Name/stations//stations[i-1].stats.tx_pkts_retries*/
 static int get_access_point_associative_device_statistics_retrans_count(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 2, "stats", "tx_pkts_retries");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 2, "stats", "tx_pkts_retries");
 	return 0;
 }
 
 /*#Device.WiFi.AccessPoint.{i}.Enable!UCI:wireless/wifi-iface,@i-1/disabled*/
 static int get_access_point_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "disabled", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "disabled", value);
 	*value = ((*value)[0] == '1') ? "0" : "1";
 	return 0;
 }
@@ -3254,14 +3216,14 @@ static int set_access_point_enable(char *refparam, struct dmctx *ctx, void *data
 	char *multi_ap = NULL;
 	bool b;
 
-	map_s = find_mapcontroller_section((struct uci_section *)data);
+	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_boolean(ctx, value))
 				return FAULT_9007;
 
-			dmuci_get_value_by_section_string((struct uci_section *)data, "multi_ap", &multi_ap);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
 			if (DM_STRLEN(multi_ap) && !map_s)
 				return FAULT_9007;
 
@@ -3270,7 +3232,7 @@ static int set_access_point_enable(char *refparam, struct dmctx *ctx, void *data
 			string_to_bool(value, &b);
 
 			// wireless config: Update disabled option
-			dmuci_set_value_by_section((struct uci_section *)data, "disabled", b ? "0" : "1");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "disabled", b ? "0" : "1");
 
 			// mapcontroller config: Update the corresponding ap section if exists
 			if (map_s)
@@ -3285,11 +3247,9 @@ static int set_access_point_enable(char *refparam, struct dmctx *ctx, void *data
 static int get_wifi_access_point_status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	json_object *res = NULL;
-	char object[32], *ifname = NULL, *status = NULL;
+	char object[32], *status = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ifname", &ifname);
-
-	snprintf(object, sizeof(object), "wifi.ap.%s", ifname);
+	snprintf(object, sizeof(object), "wifi.ap.%s", (char *)((struct dm_data *)data)->additional_data);
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "Disabled");
 	status = dmjson_get_value(res, 1, "status");
@@ -3307,7 +3267,7 @@ static int get_radio_max_bit_rate (char *refparam, struct dmctx *ctx, void *data
 	json_object *res = NULL;
 	char object[UBUS_OBJ_LEN];
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "0");
 	*value = dmjson_get_value(res, 1, "maxrate");
@@ -3320,7 +3280,7 @@ static int get_radio_supported_frequency_bands(char *refparam, struct dmctx *ctx
 	json_object *res = NULL;
 	char object[UBUS_OBJ_LEN];
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value_array_all(res, ",", 1, "supp_bands");
@@ -3333,7 +3293,7 @@ static int get_radio_frequency(char *refparam, struct dmctx *ctx, void *data, ch
 	json_object *res = NULL;
 	char object[UBUS_OBJ_LEN];
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "");
 	*value = dmjson_get_value(res, 1, "band");
@@ -3361,7 +3321,7 @@ static int set_radio_frequency(char *refparam, struct dmctx *ctx, void *data, ch
 
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "band", (value[0] == '6') ? "6g" : (value[0] == '5') ? "5g" : "2g");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "band", (value[0] == '6') ? "6g" : (value[0] == '5') ? "5g" : "2g");
 			break;
 	}
 	return 0;
@@ -3385,72 +3345,72 @@ static int get_neighboring_wifi_diagnostics_result_number_entries(char *refparam
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.SSID!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].ssid*/
 static int get_neighboring_wifi_diagnostics_result_ssid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ssid", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "ssid", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.BSSID!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].bssid*/
 static int get_neighboring_wifi_diagnostics_result_bssid(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "bssid", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "bssid", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.Channel!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].channel*/
 static int get_neighboring_wifi_diagnostics_result_channel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "channel", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "channel", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.SignalStrength!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].rssi*/
 static int get_neighboring_wifi_diagnostics_result_signal_strength(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "rssi", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "rssi", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.OperatingFrequencyBand!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].band*/
 static int get_neighboring_wifi_diagnostics_result_operating_frequency_band(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "band", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "band", value);
 	return 0;
 }
 
 /*#Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}.Noise!UBUS:wifi.radio.@Name/scanresults//accesspoints[@i-1].noise*/
 static int get_neighboring_wifi_diagnostics_result_noise(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "noise", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "noise", value);
 	return 0;
 }
 
 static int get_neighboring_wifi_diagnostics_result_radio(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "radio", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "radio", value);
 	return 0;
 }
 
 static int get_neighboring_wifi_diagnostics_result_operating_ch_band(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "bandwidth", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "bandwidth", value);
 	return 0;
 }
 
 static int get_neighboring_wifi_diagnostics_result_op_std(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "standard", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "standard", value);
 	return 0;
 }
 
 static int get_neighboring_wifi_diagnostics_result_sec_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "encryption", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", value);
 	return 0;
 }
 
 static int get_neighboring_wifi_diagnostics_result_enc_mode(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "ciphers", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "ciphers", value);
 	return 0;
 }
 
@@ -3460,7 +3420,7 @@ static int get_WiFiRadio_CurrentOperatingChannelBandwidth(char *refparam, struct
 	json_object *res = NULL;
 	char object[32];
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "20MHz");
 	*value = get_data_model_band(dmjson_get_value(res, 1, "bandwidth"));
@@ -3475,7 +3435,7 @@ static int get_radio_supported_standard(char *refparam, struct dmctx *ctx, void 
 	char *supp_std = NULL;
 	unsigned pos = 0, idx = 0;
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "n,ax");
 
@@ -3497,7 +3457,7 @@ static int get_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 	json_object *res = NULL;
 	char object[UBUS_OBJ_LEN] = {0};
 
-	snprintf(object, sizeof(object), "wifi.radio.%s", section_name((((struct wifi_radio_args *)data)->sections)->config_section));
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "n,ax");
 	*value = get_data_model_standard(dmjson_get_value(res, 1, "standard"));
@@ -3531,7 +3491,7 @@ static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 
 				break;
 			case VALUESET:
-				bandwidth = get_radio_option_nocache(section_name((((struct wifi_radio_args *)data)->sections)->config_section), "bandwidth");
+				bandwidth = get_radio_option_nocache(section_name(((struct dm_data *)data)->config_section), "bandwidth");
 				if (DM_STRLEN(bandwidth) == 0)
 					bandwidth = "20";
 
@@ -3546,7 +3506,7 @@ static int set_radio_operating_standard(char *refparam, struct dmctx *ctx, void 
 				else
 					snprintf(htmode, sizeof(htmode), "NOHT");
 
-				dmuci_set_value_by_section((((struct wifi_radio_args *)data)->sections)->config_section, "htmode", htmode);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "htmode", htmode);
 				break;
 		}
 		return 0;
@@ -3914,9 +3874,9 @@ end:
 
 static int operate_WiFiAccessPointSecurity_Reset(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	dmuci_set_value_by_section((struct uci_section *)data, "encryption", "psk");
-	dmuci_set_value_by_section((struct uci_section *)data, "key", get_default_wpa_key());
-	dmuci_set_value_by_section((struct uci_section *)data, "wps_pushbutton", "1");
+	dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "encryption", "psk");
+	dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", get_default_wpa_key());
+	dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "wps_pushbutton", "1");
 
 	return 0;
 }

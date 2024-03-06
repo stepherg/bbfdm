@@ -828,16 +828,16 @@ static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 
 static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dmmap_dup *p = NULL;
-	char *inst = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("system", "system", "dmmap", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "vlf_instance", "vlf_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "vlf_instance", "vlf_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -1247,25 +1247,25 @@ static int set_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 
 static int get_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "vlf_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "vlf_alias", instance, value);
 }
 
 static int set_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "vlf_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "vlf_alias", instance, value);
 }
 
 static int get_vlf_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "log_file", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "log_file", value);
 	return 0;
 }
 
-static int get_vlf_max_size (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_vlf_max_size(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	int size = 0;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "log_size", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "log_size", value);
 
 	// Value defined in system is in KiB in datamodel this is in bytes, convert the value in bytes
 	size = (*value && **value) ? DM_STRTOL(*value) * 1000 : 0;
@@ -1612,7 +1612,7 @@ static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *
 	if (url[0] == '\0')
 		return USP_FAULT_INVALID_ARGUMENT;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "log_file", &vlf_file_path);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "log_file", &vlf_file_path);
 
 	if (DM_STRLEN(vlf_file_path) == 0) {
 		vlf_file_path = DEF_VENDOR_LOG_FILE;

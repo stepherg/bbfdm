@@ -1,5 +1,6 @@
 {
-	"Device.X_IOPSYS_EU_Dropbear.{i}.": {
+	"json_plugin_version": 2,
+	"Device.{BBF_VENDOR_PREFIX}Dropbear.{i}.": {
 		"type": "object",
 		"protocols": [
 			"cwmp", 
@@ -7,16 +8,18 @@
 		],
 		"access": true,
 		"array": true,
-		"mapping": {
-			"type": "uci",
-			"uci": {
-				"file": "dropbear", 
-				"section": {
-					"type": "dropbear"
-				}, 
-				"dmmapfile": "dmmap_dropbear"
+		"mapping": [
+			{
+				"type": "uci",
+				"uci": {
+					"file": "dropbear", 
+					"section": {
+						"type": "dropbear"
+					}, 
+					"dmmapfile": "dmmap_dropbear"
+				}
 			}
-		},
+		],
 		"Alias": {
 			"type": "string",
 			"protocols": [
@@ -27,18 +30,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci", 
-					"uci": {
-						"file": "dmmap_dropbear", 
-						"section": {
-							"type": "dropbear", 
-							"index": "@i-1"
-						}, 
-						"option": {
-							"name": "dropbearalias"
-						},
-						"path":"/etc/bbfdm"
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "alias"
 				}
 			]
 		},
@@ -52,17 +46,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "PasswordAuth"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "PasswordAuth"
 				}
 			]
 		},
@@ -76,17 +62,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "RootPasswordAuth"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "RootPasswordAuth"
 				}
 			]
 		},
@@ -100,17 +78,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						}, 
-						"option": {
-							"name": "Port"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "Port"
 				}
 			]
 		},
@@ -124,17 +94,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "RootLogin"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "RootLogin"
 				}
 			]
 		},
@@ -148,17 +110,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "GatewayPorts"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "GatewayPorts"
 				}
 			]
 		},
@@ -172,17 +126,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "Interface"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "Interface"
 				}
 			]
 		},
@@ -196,17 +142,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "rsakeyfile"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "rsakeyfile"
 				}
 			]
 		},
@@ -220,17 +158,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "dsskeyfile"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "dsskeyfile"
 				}
 			]
 		},
@@ -244,17 +174,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						}, 
-						"option": {
-							"name": "SSHKeepAlive"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "SSHKeepAlive"
 				}
 			]
 		},
@@ -268,17 +190,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "IdleTimeout"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "IdleTimeout"
 				}
 			]
 		},
@@ -292,17 +206,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "verbose"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "verbose"
 				}
 			]
 		},
@@ -316,17 +222,9 @@
 			"write": true,
 			"mapping": [
 				{
-					"type": "uci",
-					"uci": {
-						"file": "dropbear",
-						"section": {
-							"type": "dropbear",
-							"index": "@i-1"
-						},
-						"option": {
-							"name": "BannerFile"
-						}
-					}
+					"data": "@Parent",
+					"type": "uci_sec",
+					"key": "BannerFile"
 				}
 			]
 		}

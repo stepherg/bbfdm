@@ -16,16 +16,16 @@
 **************************************************************/
 int browse_dropbear_instance(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("dropbear", "dropbear", "dmmap_dropbear", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "dropbearinstance", "dropbearalias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "dropbearinstance", "dropbearalias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -58,8 +58,8 @@ int delete_dropbear_instance(char *refparam, struct dmctx *ctx, void *data, char
 
 	switch (del_action) {
 		case DEL_INST:
-				dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-				dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+				dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+				dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("dropbear", "dropbear", stmp, s) {
@@ -80,7 +80,7 @@ int delete_dropbear_instance(char *refparam, struct dmctx *ctx, void *data, char
 **************************************************************/
 static int get_x_test_com_dropbear_password_auth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *res = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "PasswordAuth", "1");
+	char *res = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "PasswordAuth", "1");
 	*value = ((DM_STRCMP(res, "on") == 0) || *res == '1') ? "1" : "0";
 	return 0;
 }
@@ -96,7 +96,7 @@ static int set_x_test_com_dropbear_password_auth(char *refparam, struct dmctx *c
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "PasswordAuth", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "PasswordAuth", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -104,7 +104,7 @@ static int set_x_test_com_dropbear_password_auth(char *refparam, struct dmctx *c
 
 static int get_x_test_com_dropbear_root_password_auth(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *res = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "RootPasswordAuth", "1");
+	char *res = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "RootPasswordAuth", "1");
 	*value = ((DM_STRCMP(res, "on") == 0) || *res == '1') ? "1" : "0";
 	return 0;
 }
@@ -120,7 +120,7 @@ static int set_x_test_com_dropbear_root_password_auth(char *refparam, struct dmc
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "RootPasswordAuth", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "RootPasswordAuth", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -128,7 +128,7 @@ static int set_x_test_com_dropbear_root_password_auth(char *refparam, struct dmc
 
 static int get_x_test_com_dropbear_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "Port", "22");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "Port", "22");
 	return 0;
 }
 
@@ -139,7 +139,7 @@ static int set_x_test_com_dropbear_port(char *refparam, struct dmctx *ctx, void 
 		case VALUECHECK:
 			return 0;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "Port", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "Port", value);
 			return 0;
 	}
 	return 0;
@@ -147,7 +147,7 @@ static int set_x_test_com_dropbear_port(char *refparam, struct dmctx *ctx, void 
 
 static int get_x_test_com_dropbear_root_login(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "RootLogin", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "RootLogin", value);
 	if ((*value)[0] == '\0' || ((*value)[0] == 'o' && (*value)[1] == 'n') || (*value)[0] == '1' )
 		*value = "1";
 	else
@@ -166,7 +166,7 @@ static int set_x_test_com_dropbear_root_login(char *refparam, struct dmctx *ctx,
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "RootLogin", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "RootLogin", b ? "1" : "0");
 			return 0;
 	}
 	return 0;
@@ -174,7 +174,7 @@ static int set_x_test_com_dropbear_root_login(char *refparam, struct dmctx *ctx,
 
 static int get_x_test_com_dropbear_gateway_ports(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "GatewayPorts", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "GatewayPorts", "0");
 	return 0;
 }
 
@@ -189,7 +189,7 @@ static int set_x_test_com_dropbear_gateway_ports(char *refparam, struct dmctx *c
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "GatewayPorts", b ? "1" : "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "GatewayPorts", b ? "1" : "");
 			return 0;
 	}
 	return 0;

@@ -15,7 +15,7 @@ static int get_multi_ap_mode(char *refparam, struct dmctx *ctx, void *data, char
 {
 	char *multi_ap = NULL;
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "multi_ap", &multi_ap);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
 
 	if (DM_STRCMP(multi_ap, "1") == 0)
 		*value = "Backhaul";

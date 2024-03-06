@@ -205,8 +205,8 @@ static int delService(char *refparam, struct dmctx *ctx, void *data, char *insta
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("firewall", "service", stmp, s) {
@@ -377,16 +377,16 @@ static int browseRuleInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_d
 /*#Device.Firewall.DMZ.{i}.!UCI:firewall/dmz/dmmap_dmz*/
 static int browseFirewallDMZInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dmmap_dup *p = NULL;
-	char *inst = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "dmz", "dmmap_dmz", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "dmz_instance", "dmz_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "dmz_instance", "dmz_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -395,15 +395,15 @@ static int browseFirewallDMZInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 
 static int browseServiceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap("firewall", "service", "dmmap_firewall", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "service_instance", "service_alias");
+	list_for_each_entry(curr_data, &dup_list, list) {
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "service_instance", "service_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -513,8 +513,8 @@ static int delObjFirewallDMZ(char *refparam, struct dmctx *ctx, void *data, char
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->config_section, NULL, NULL);
-			dmuci_delete_by_section(((struct dmmap_dup *)data)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("firewall", "dmz", stmp, s) {
@@ -1981,18 +1981,18 @@ static int get_firewall_dmz_number_of_entries(char *refparam, struct dmctx *ctx,
 /*#Device.Firewall.DMZ.{i}.Alias!UCI:dmmap_dmz/DMZ,@i-1/alias*/
 static int get_FirewallDMZ_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "dmz_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "dmz_alias", instance, value);
 }
 
 static int set_FirewallDMZ_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "dmz_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "dmz_alias", instance, value);
 }
 
 /*#Device.Firewall.DMZ.{i}.Enable!UCI:firewall/dmz,@i-1/enabled*/
 static int get_FirewallDMZ_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enabled", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "enabled", "0");
 	return 0;
 }
 
@@ -2007,7 +2007,7 @@ static int set_FirewallDMZ_Enable(char *refparam, struct dmctx *ctx, void *data,
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enabled", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enabled", b ? "1" : "0");
 			break;
 	}
 	return 0;
@@ -2016,7 +2016,7 @@ static int set_FirewallDMZ_Enable(char *refparam, struct dmctx *ctx, void *data,
 /*#Device.Firewall.DMZ.{i}.Status!UCI:firewall/dmz,@i-1/status*/
 static int get_FirewallDMZ_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct dmmap_dup *dmz_args = (struct dmmap_dup *)data;
+	struct dm_data *dmz_args = (struct dm_data *)data;
 	char *v, *destip, *interface;
 
 	dmuci_get_value_by_section_string(dmz_args->config_section, "interface", &interface);
@@ -2034,7 +2034,7 @@ static int get_FirewallDMZ_Status(char *refparam, struct dmctx *ctx, void *data,
 /*#Device.Firewall.DMZ.{i}.Origin!UCI:firewall/dmz,@i-1/origin*/
 static int get_FirewallDMZ_Origin(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "origin", "Controller");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "origin", "Controller");
 	return 0;
 }
 
@@ -2048,7 +2048,7 @@ static int set_FirewallDMZ_Origin(char *refparam, struct dmctx *ctx, void *data,
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "origin", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "origin", value);
 			break;
 	}
 	return 0;
@@ -2057,7 +2057,7 @@ static int set_FirewallDMZ_Origin(char *refparam, struct dmctx *ctx, void *data,
 /*#Device.Firewall.DMZ.{i}.Description!UCI:firewall/dmz,@i-1/description*/
 static int get_FirewallDMZ_Description(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "description", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "description", value);
 	return 0;
 }
 
@@ -2069,7 +2069,7 @@ static int set_FirewallDMZ_Description(char *refparam, struct dmctx *ctx, void *
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "description", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "description", value);
 			break;
 	}
 	return 0;
@@ -2080,7 +2080,7 @@ static int get_FirewallDMZ_Interface(char *refparam, struct dmctx *ctx, void *da
 {
 	char *interf = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &interf);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "interface", &interf);
 
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", interf, value);
 	return 0;
@@ -2103,7 +2103,7 @@ static int set_FirewallDMZ_Interface(char *refparam, struct dmctx *ctx, void *da
 
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", reference.value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "interface", reference.value);
 			break;
 	}
 	return 0;
@@ -2112,7 +2112,7 @@ static int set_FirewallDMZ_Interface(char *refparam, struct dmctx *ctx, void *da
 /*#Device.Firewall.DMZ.{i}.DestIP!UCI:firewall/dmz,@i-1/dest_ip*/
 static int get_FirewallDMZ_DestIP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "dest_ip", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dest_ip", value);
 	return 0;
 }
 
@@ -2124,7 +2124,7 @@ static int set_FirewallDMZ_DestIP(char *refparam, struct dmctx *ctx, void *data,
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_ip", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dest_ip", value);
 			break;
 	}
 	return 0;
@@ -2133,7 +2133,7 @@ static int set_FirewallDMZ_DestIP(char *refparam, struct dmctx *ctx, void *data,
 /*#Device.Firewall.DMZ.{i}.SourcePrefix!UCI:firewall/dmz,@i-1/source_prefix*/
 static int get_FirewallDMZ_SourcePrefix(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "source_prefix", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "source_prefix", value);
 	return 0;
 }
 
@@ -2145,7 +2145,7 @@ static int set_FirewallDMZ_SourcePrefix(char *refparam, struct dmctx *ctx, void 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "source_prefix", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "source_prefix", value);
 			break;
 	}
 	return 0;
@@ -2153,17 +2153,17 @@ static int set_FirewallDMZ_SourcePrefix(char *refparam, struct dmctx *ctx, void 
 
 static int get_service_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "service_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "service_alias", instance, value);
 }
 
 static int set_service_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dmmap_dup *)data)->dmmap_section, "service_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "service_alias", instance, value);
 }
 
 static int get_service_enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "enable", "0");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "enable", "0");
 	return 0;
 }
 
@@ -2178,7 +2178,7 @@ static int set_service_enable(char *refparam, struct dmctx *ctx, void *data, cha
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "enable", b ? "1" : "0");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "enable", b ? "1" : "0");
 			break;
 	}
 
@@ -2189,7 +2189,7 @@ static int get_service_intf(char *refparam, struct dmctx *ctx, void *data, char 
 {
 	char *intf = NULL;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "interface", &intf);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "interface", &intf);
 
 	if (intf == NULL || *intf == '\0')
 		return 0;
@@ -2221,7 +2221,7 @@ static int set_service_intf(char *refparam, struct dmctx *ctx, void *data, char 
 				if (!firewall_zone_exists(reference.value))
 					firewall__create_zone_section(reference.value);
 
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "interface", reference.value);
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "interface", reference.value);
 			}
 			break;
 	}
@@ -2232,7 +2232,7 @@ static int set_service_intf(char *refparam, struct dmctx *ctx, void *data, char 
 static int get_service_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *val = NULL;
-	dmuci_get_value_by_section_list(((struct dmmap_dup *)data)->config_section, "dest_port", &val);
+	dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "dest_port", &val);
 	*value = dmuci_list_to_string(val, ",");
 	return 0;
 }
@@ -2250,9 +2250,9 @@ static int set_service_port(char *refparam, struct dmctx *ctx, void *data, char 
 			break;
 		case VALUESET:
 			arr = strsplit(value, ",", &length);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_port", "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dest_port", "");
 			for (i = 0; i < length; i++)
-				dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "dest_port", arr[i]);
+				dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, "dest_port", arr[i]);
 			break;
 	}
 
@@ -2263,7 +2263,7 @@ static int get_service_ipver(char *refparam, struct dmctx *ctx, void *data, char
 {
 	char *ipversion;
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "family", &ipversion);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "family", &ipversion);
 	if (strcasecmp(ipversion, "ipv4") == 0) {
 		*value = "4";
 	} else if (strcasecmp(ipversion, "ipv6") == 0) {
@@ -2284,11 +2284,11 @@ static int set_service_ipver(char *refparam, struct dmctx *ctx, void *data, char
 			break;
 		case VALUESET:
 			if (DM_LSTRCMP(value, "4") == 0)
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "family", "ipv4");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "family", "ipv4");
 			else if (DM_LSTRCMP(value, "6") == 0)
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "family", "ipv6");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "family", "ipv6");
 			else if (DM_LSTRCMP(value, "-1") == 0)
-				dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "family", "");
+				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "family", "");
 			break;
 	}
         return 0;
@@ -2297,7 +2297,7 @@ static int set_service_ipver(char *refparam, struct dmctx *ctx, void *data, char
 static int get_service_protocol(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *val = NULL;
-	dmuci_get_value_by_section_list(((struct dmmap_dup *)data)->config_section, "proto", &val);
+	dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "proto", &val);
 	*value = dmuci_list_to_string(val, ",");
 	return 0;
 }
@@ -2315,9 +2315,9 @@ static int set_service_protocol(char *refparam, struct dmctx *ctx, void *data, c
 			break;
 		case VALUESET:
 			arr = strsplit(value, ",", &length);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "proto", "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "proto", "");
 			for (i = 0; i < length; i++)
-				dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "proto", arr[i]);
+				dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, "proto", arr[i]);
 			break;
 	}
 
@@ -2326,7 +2326,7 @@ static int set_service_protocol(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_service_icmp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "icmp_type", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "icmp_type", value);
 	return 0;
 }
 
@@ -2338,7 +2338,7 @@ static int set_service_icmp(char *refparam, struct dmctx *ctx, void *data, char 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "icmp_type", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "icmp_type", value);
 			break;
 	}
         return 0;
@@ -2347,7 +2347,7 @@ static int set_service_icmp(char *refparam, struct dmctx *ctx, void *data, char 
 static int get_service_src_prefix(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_list *val = NULL;
-	dmuci_get_value_by_section_list(((struct dmmap_dup *)data)->config_section, "src_prefix", &val);
+	dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "src_prefix", &val);
 	*value = dmuci_list_to_string(val, ",");
 	return 0;
 }
@@ -2364,9 +2364,9 @@ static int set_service_src_prefix(char *refparam, struct dmctx *ctx, void *data,
 			break;
 		case VALUESET:
 			arr = strsplit(value, ",", &length);
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "src_prefix", "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "src_prefix", "");
 			for (i = 0; i < length; i++)
-				dmuci_add_list_value_by_section(((struct dmmap_dup *)data)->config_section, "src_prefix", arr[i]);
+				dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, "src_prefix", arr[i]);
 			break;
 	}
         return 0;
@@ -2374,7 +2374,7 @@ static int set_service_src_prefix(char *refparam, struct dmctx *ctx, void *data,
 
 static int get_service_action(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "target", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "target", value);
 	return 0;
 }
 
@@ -2388,7 +2388,7 @@ static int set_service_action(char *refparam, struct dmctx *ctx, void *data, cha
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "target", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "target", value);
 			break;
 	}
         return 0;
@@ -2412,7 +2412,7 @@ static int get_service_status(char *refparam, struct dmctx *ctx, void *data, cha
 		return 0;
 	}
 
-	*value = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "status", "Enabled");
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "status", "Enabled");
 
 	return 0;
 }
