@@ -169,16 +169,7 @@ static struct uci_section *find_device_uci_section(char *unique_key)
 			return s;
 	}
 
-	// Device not found ==> create a new device uci section
-	char node_name[32];
-
-	snprintf(node_name, sizeof(node_name), "node_%s", unique_key);
-	remove_char(node_name, ':');
-
-	dmuci_add_section("mapcontroller", "node", &s);
-	dmuci_rename_section_by_section(s, node_name);
-	dmuci_set_value_by_section(s, "agent_id", unique_key);
-	return s;
+	return NULL;
 }
 
 static struct uci_section *find_radio_uci_section(char *agent_id, char *unique_key)
@@ -195,17 +186,7 @@ static struct uci_section *find_radio_uci_section(char *agent_id, char *unique_k
 			return s;
 	}
 
-	// Radio not found ==> create a new radio uci section
-	char radio_name[64];
-
-	snprintf(radio_name, sizeof(radio_name), "radio_%s", unique_key);
-	remove_char(radio_name, ':');
-
-	dmuci_add_section("mapcontroller", "radio", &s);
-	dmuci_rename_section_by_section(s, radio_name);
-	dmuci_set_value_by_section(s, "agent_id", agent_id);
-	dmuci_set_value_by_section(s, "macaddr", unique_key);
-	return s;
+	return NULL;
 }
 
 static int browseWiFiDataElementsNetworkDeviceInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
