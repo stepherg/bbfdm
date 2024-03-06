@@ -95,5 +95,6 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | Device.PeriodicStatistics.		       | periodicstats  | https://dev.iopsys.eu/bbf/periodicstats.git  |
 | Device.SoftwareModules.		           | swmodd         | https://dev.iopsys.eu/lcm/swmodd.git         |
 | Device.Time.		                       | timemngr       | https://dev.iopsys.eu/bbf/timemngr.git       |
+| Device.DynamicDNS.	                       | ddnsmngr       | https://dev.iopsys.eu/bbf/ddnsmngr.git       |
 | Device.Hosts.		                       | hostmngr       | https://dev.iopsys.eu/iopsys/hostmngr.git    |
 | Device.Services.VoiceService.            | tr104          | https://dev.iopsys.eu/voice/tr104.git        |
