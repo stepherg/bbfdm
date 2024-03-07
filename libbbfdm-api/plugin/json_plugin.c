@@ -875,15 +875,15 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance)
 {
 	struct json_object *data_s = NULL;
-	struct json_object *key = NULL;
+	struct json_object *key = NULL, *linker_jobj = NULL;
 	char *value = "";
 
 	json_object_object_get_ex(mapping_obj, "data", &data_s);
 	json_object_object_get_ex(mapping_obj, "key", &key);
+	json_object_object_get_ex(mapping_obj, "linker_obj", &linker_jobj);
 
 	if (data == NULL || data_s == NULL || (data_s && strcmp(json_object_get_string(data_s), "@Parent") != 0))
 		goto end;
-
 
 	if (key) {
 		if (strcmp(json_object_get_string(key), "@Name") == 0) {
@@ -891,7 +891,19 @@ static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct d
 		} else if (strstr(refparam, ".Alias")) {
 			bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, json_object_get_string(key), instance, &value);
 		} else {
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, json_object_get_string(key), &value);
+			char *res = NULL;
+
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, json_object_get_string(key), &res);
+			if (linker_jobj) {
+				char *link = json_object_get_string(linker_jobj);
+				char *linker = NULL;
+
+				linker = replace_str(link, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, NULL, 0);
+				adm_entry_get_reference_param(ctx, linker, res, &value);
+				FREE(linker);
+			} else {
+				value = res;
+			}
 		}
 	}
 
@@ -903,19 +915,31 @@ static char *ubus_v1_get_value(json_object *mapping_obj, char *refparam, struct 
 {
 	struct json_object *data_json = NULL;
 	struct json_object *key = NULL;
+	struct json_object *linker_jobj = NULL;
 	char *value = "";
 
 	json_object_object_get_ex(mapping_obj, "data", &data_json);
 	json_object_object_get_ex(mapping_obj, "key", &key);
+	json_object_object_get_ex(mapping_obj, "linker_obj", &linker_jobj);
 
 	if (data == NULL || data_json == NULL || (data_json && strcmp(json_object_get_string(data_json), "@Parent") != 0))
 		goto end;
 
 	if (key) {
-		char key_name[128] = {32};
+		char key_name[128] = {32}, *res = NULL;
 
 		json_object *json_obj = get_requested_json_obj(((struct dm_data *)data)->json_object, instance, json_object_get_string(key), key_name, sizeof(key_name));
-		value = dmjson_get_value(json_obj, 1, key_name);
+		res = dmjson_get_value(json_obj, 1, key_name);
+		if (linker_jobj) {
+			char *link = json_object_get_string(linker_jobj);
+			char *linker = NULL;
+
+			linker = replace_str(link, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, NULL, 0);
+			adm_entry_get_reference_param(ctx, linker, res, &value);
+			FREE(linker);
+		} else {
+			value = res;
+		}
 	}
 
 end:
