@@ -124,7 +124,7 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/bbf/ddnsmngr.git",
+      "repo": "https://dev.iopsys.eu/network/ddnsmngr.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
