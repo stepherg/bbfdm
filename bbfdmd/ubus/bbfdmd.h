@@ -67,5 +67,4 @@ typedef struct bbfdm_data {
 	int trans_id;
 } bbfdm_data_t;
 
-void register_periodic_timers(struct ubus_context *ctx);
 #endif /* BBFDMD_H */
