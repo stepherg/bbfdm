@@ -12,31 +12,11 @@
 #include "dhcpv4.h"
 #include "dhcpv6.h"
 
-
-struct dhcpv6_client_args
-{
-	struct uci_section *iface_s;
-	struct uci_section *dmmap_s;
-};
-
-struct dhcpv6_args
-{
-	struct dmmap_dup *dhcp_sections;
-	char *interface;
-};
-
 struct clientv6_args
 {
 	json_object *client;
 	json_object *clientparam;
 	int idx;
-};
-
-struct dhcpv6_client_option_args {
-	struct uci_section *client_sect;
-	struct uci_section *dmmap_sect;
-	char *option_tag;
-	char *value;
 };
 
 /*************************************************************
@@ -129,21 +109,14 @@ static inline int init_dhcpv6_client_args(struct clientv6_args *args, json_objec
 	return 0;
 }
 
-static inline int init_dhcpv6_args(struct dhcpv6_args *args, struct dmmap_dup *s, char *interface)
-{
-	args->dhcp_sections = s;
-	args->interface = interface;
-	return 0;
-}
-
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
 /*#Device.DHCPv6.Client.{i}.!UCI:network/interface/dmmap_dhcpv6*/
 static int browseDHCPv6ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dhcpv6_client_args curr_dhcpv6_client_args = {0};
 	struct uci_section *dmmap_s = NULL;
+	struct dm_data curr_data = {0};
 	char *inst = NULL;
 
 	dmmap_synchronizeDHCPv6Client(dmctx, parent_node, prev_data, prev_instance);
@@ -155,12 +128,12 @@ static int browseDHCPv6ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 		if (DM_STRLEN(iface_name))
 			get_config_section_of_dmmap_section("network", "interface", iface_name, &iface_s);
 
-		curr_dhcpv6_client_args.iface_s = iface_s;
-		curr_dhcpv6_client_args.dmmap_s = dmmap_s;
+		curr_data.config_section = iface_s;
+		curr_data.dmmap_section = dmmap_s;
 
 		inst = handle_instance(dmctx, parent_node, dmmap_s, "bbf_dhcpv6client_instance", "bbf_dhcpv6client_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcpv6_client_args, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -170,28 +143,27 @@ static int browseDHCPv6ClientInst(struct dmctx *dmctx, DMNODE *parent_node, void
 static int browseDHCPv6ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *ignore = NULL, *interface, *inst = NULL, *v;
-	struct dhcpv6_args curr_dhcp6_args = {0};
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("dhcp", "dhcp", "dmmap_dhcpv6", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
 		// skip the section if option ignore = '1'
-		dmuci_get_value_by_section_string(p->config_section, "ignore", &ignore);
+		dmuci_get_value_by_section_string(curr_data->config_section, "ignore", &ignore);
 		if (ignore && DM_LSTRCMP(ignore, "1") == 0)
 			continue;
 
-		dmuci_get_value_by_section_string(p->config_section, "interface", &interface);
-		init_dhcpv6_args(&curr_dhcp6_args, p, interface);
+		dmuci_get_value_by_section_string(curr_data->config_section, "interface", &interface);
+		curr_data->additional_data = (void *)interface;
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "dhcpv6_serv_pool_instance", "dhcpv6_serv_pool_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "dhcpv6_serv_pool_instance", "dhcpv6_serv_pool_alias");
 
-		dmuci_get_value_by_section_string(p->dmmap_section, "order", &v);
+		dmuci_get_value_by_section_string(curr_data->dmmap_section, "order", &v);
 		if (v == NULL || DM_STRLEN(v) == 0)
-			set_section_order("dhcp", "dmmap_dhcpv6", "dhcp", p->dmmap_section, p->config_section, 0, inst);
+			set_section_order("dhcp", "dmmap_dhcpv6", "dhcp", curr_data->dmmap_section, curr_data->config_section, 0, inst);
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_dhcp6_args, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -201,13 +173,13 @@ static int browseDHCPv6ServerPoolInst(struct dmctx *dmctx, DMNODE *parent_node, 
 
 static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dhcpv6_args *dhcp_arg= (struct dhcpv6_args *)prev_data;
+	struct dm_data *dhcp_arg= (struct dm_data *)prev_data;
 	json_object *res = NULL, *res1 = NULL, *jobj = NULL, *dev_obj = NULL, *net_obj = NULL;
 	struct clientv6_args curr_dhcp_client_args = {0};
 	int i = 0;
 	char *inst = NULL, *device;
 
-	char *if_name = section_name(dhcp_arg->dhcp_sections->config_section);
+	char *if_name = section_name(dhcp_arg->config_section);
 	dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res1);
 	if (!res1) return 0;
 	device = dmjson_get_value(res1, 1, "device");
@@ -232,44 +204,44 @@ static int browseDHCPv6ServerPoolClientInst(struct dmctx *dmctx, DMNODE *parent_
 
 static int browseDHCPv6ServerPoolOptionInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dhcpv6_args *curr_dhcp_args = (struct dhcpv6_args *)prev_data;
-	struct uci_list *dhcp_options_list = NULL;
+	struct option_args curr_option_args = {0};
+	struct uci_list *options_list = NULL;
+	struct dm_data curr_data = {0};
 	struct uci_element *e = NULL;
-	struct uci_section *dmmap_sect = NULL;
-	char **dhcpv6_option = NULL, *inst = NULL, *dhcpv6_tag, *dhcpv6_value;
+	struct uci_section *dmmap_s = NULL;
+	char **option = NULL, *inst = NULL;
 	size_t length = 0;
-	struct dhcpv6_client_option_args dhcpv6_client_opt_args = {0};
 
-	dmuci_get_value_by_section_list(curr_dhcp_args->dhcp_sections->config_section, "dhcp_option", &dhcp_options_list);
+	dmuci_get_value_by_section_list(((struct dm_data *)prev_data)->config_section, "dhcp_option", &options_list);
 
-	if (dhcp_options_list != NULL) {
-		uci_foreach_element(dhcp_options_list, e) {
+	if (options_list != NULL) {
+		uci_foreach_element(options_list, e) {
 
-			dhcpv6_option = strsplit(e->name, ",", &length);
-			if (!dhcpv6_option)
+			option = strsplit(e->name, ",", &length);
+			if (!option)
 				continue;
 
-			if ((dmmap_sect = get_dup_section_in_dmmap_eq("dmmap_dhcpv6", "servpool_option", section_name(curr_dhcp_args->dhcp_sections->config_section), "option_tag", dhcpv6_option[0])) == NULL) {
-				dmuci_add_section_bbfdm("dmmap_dhcpv6", "servpool_option", &dmmap_sect);
-				dmuci_set_value_by_section_bbfdm(dmmap_sect, "option_tag", dhcpv6_option[0]);
-				dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(curr_dhcp_args->dhcp_sections->config_section));
-				dmuci_set_value_by_section_bbfdm(dmmap_sect, "option_value", length > 1 ? dhcpv6_option[1] : "");
+			if ((dmmap_s = get_dup_section_in_dmmap_eq("dmmap_dhcpv6", "servpool_option", section_name(((struct dm_data *)prev_data)->config_section), "option_tag", option[0])) == NULL) {
+				dmuci_add_section_bbfdm("dmmap_dhcpv6", "servpool_option", &dmmap_s);
+				dmuci_set_value_by_section_bbfdm(dmmap_s, "option_tag", option[0]);
+				dmuci_set_value_by_section_bbfdm(dmmap_s, "section_name", section_name(((struct dm_data *)prev_data)->config_section));
+				dmuci_set_value_by_section_bbfdm(dmmap_s, "option_value", length > 1 ? option[1] : "");
 			}
 		}
 	}
 
-	uci_path_foreach_option_eq(bbfdm, "dmmap_dhcpv6", "servpool_option", "section_name", section_name(curr_dhcp_args->dhcp_sections->config_section), dmmap_sect) {
-		dmuci_get_value_by_section_string(dmmap_sect, "option_tag", &dhcpv6_tag);
-		dmuci_get_value_by_section_string(dmmap_sect, "option_value", &dhcpv6_value);
+	uci_path_foreach_option_eq(bbfdm, "dmmap_dhcpv6", "servpool_option", "section_name", section_name(((struct dm_data *)prev_data)->config_section), dmmap_s) {
 
-		dhcpv6_client_opt_args.client_sect = curr_dhcp_args->dhcp_sections->config_section;
-		dhcpv6_client_opt_args.dmmap_sect = dmmap_sect;
-		dhcpv6_client_opt_args.option_tag = dhcpv6_tag;
-		dhcpv6_client_opt_args.value = dhcpv6_value;
+		dmuci_get_value_by_section_string(dmmap_s, "option_tag", &curr_option_args.tag);
+		dmuci_get_value_by_section_string(dmmap_s, "option_value", &curr_option_args.value);
 
-		inst = handle_instance(dmctx, parent_node, dmmap_sect, "bbf_dhcpv6_servpool_option_instance", "bbf_dhcpv6_servpool_option_alias");
+		curr_data.config_section = ((struct dm_data *)prev_data)->config_section;
+		curr_data.dmmap_section = dmmap_s;
+		curr_data.additional_data = &curr_option_args;
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&dhcpv6_client_opt_args, inst) == DM_STOP)
+		inst = handle_instance(dmctx, parent_node, dmmap_s, "bbf_dhcpv6_servpool_option_instance", "bbf_dhcpv6_servpool_option_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -342,20 +314,20 @@ static int delObjDHCPv6Client(char *refparam, struct dmctx *ctx, void *data, cha
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section(((struct dhcpv6_client_args *)data)->dmmap_s, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 
-			if (((struct dhcpv6_client_args *)data)->iface_s) {
+			if (((struct dm_data *)data)->config_section) {
 				char *ip_instance = NULL;
 
-				struct uci_section *dmmap_s = get_dup_section_in_dmmap("dmmap_network", "interface", section_name(((struct dhcpv6_client_args *)data)->iface_s));
+				struct uci_section *dmmap_s = get_dup_section_in_dmmap("dmmap_network", "interface", section_name(((struct dm_data *)data)->config_section));
 				dmuci_get_value_by_section_string(dmmap_s, "ip_int_instance", &ip_instance);
 				if (dmmap_s && DM_STRLEN(ip_instance) == 0) {
-					dmuci_delete_by_section(((struct dhcpv6_client_args *)data)->iface_s, NULL, NULL);
+					dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
 				} else {
-					dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "proto", "none");
-					dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "reqaddress", "");
-					dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "reqprefix", "");
-					dmuci_set_value_by_section(((struct dhcpv6_client_args *)data)->iface_s, "reqopts", "");
+					dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "proto", "none");
+					dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "reqaddress", "");
+					dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "reqprefix", "");
+					dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "reqopts", "");
 				}
 			}
 			break;
@@ -414,8 +386,8 @@ static int delObjDHCPv6ServerPool(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_delete_by_section((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, NULL, NULL);
-			dmuci_delete_by_section((((struct dhcpv6_args *)data)->dhcp_sections)->dmmap_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			uci_foreach_sections_safe("dhcp", "dhcp", stmp, s) {
@@ -438,12 +410,12 @@ static int delObjDHCPv6ServerPool(char *refparam, struct dmctx *ctx, void *data,
 
 static int addObjDHCPv6ServerPoolOption(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	struct dhcpv6_args *dhcpv6_arg = (struct dhcpv6_args *)data;
+	struct dm_data *dhcpv6_arg = (struct dm_data *)data;
 	struct uci_section *dmmap_sect;
 
 	dmuci_add_section_bbfdm("dmmap_dhcpv6", "servpool_option", &dmmap_sect);
-	dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(dhcpv6_arg->dhcp_sections->config_section));
-	char *option_tag = generate_tag_option("dmmap_dhcpv6", "servpool_option", "section_name", section_name(dhcpv6_arg->dhcp_sections->config_section), "option_tag");
+	dmuci_set_value_by_section_bbfdm(dmmap_sect, "section_name", section_name(dhcpv6_arg->config_section));
+	char *option_tag = generate_tag_option("dmmap_dhcpv6", "servpool_option", "section_name", section_name(dhcpv6_arg->config_section), "option_tag");
 	dmuci_set_value_by_section_bbfdm(dmmap_sect, "option_tag", option_tag);
 	dmuci_set_value_by_section_bbfdm(dmmap_sect, "bbf_dhcpv6_servpool_option_instance", *instance);
 	return 0;
@@ -456,18 +428,19 @@ static int delObjDHCPv6ServerPoolOption(char *refparam, struct dmctx *ctx, void 
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_get_value_by_section_list(((struct dhcpv6_client_option_args *)data)->client_sect, "dhcp_option", &dhcp_options_list);
+			dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "dhcp_option", &dhcp_options_list);
 			if (dhcp_options_list != NULL) {
+				struct option_args *option = (struct option_args *)((struct dm_data *)data)->additional_data;
 				char tag_value[128] = {0};
 
-				snprintf(tag_value, sizeof(tag_value), "%s,%s", ((struct dhcpv6_client_option_args *)data)->option_tag, ((struct dhcpv6_client_option_args *)data)->value);
-				dmuci_del_list_value_by_section(((struct dhcpv6_client_option_args *)data)->client_sect, "dhcp_option", tag_value);
+				snprintf(tag_value, sizeof(tag_value), "%s,%s", option->tag, option->value);
+				dmuci_del_list_value_by_section(((struct dm_data *)data)->config_section, "dhcp_option", tag_value);
 			}
 
-			dmuci_delete_by_section(((struct dhcpv6_client_option_args *)data)->dmmap_sect, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			dmuci_set_value_by_section((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, "dhcp_option", "");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dhcp_option", "");
 			uci_path_foreach_sections_safe(bbfdm, "dmmap_dhcpv6", "servpool_option", stmp, s) {
 				dmuci_delete_by_section(s, NULL, NULL);
 			}
@@ -489,17 +462,17 @@ static int get_DHCPv6_ClientNumberOfEntries(char *refparam, struct dmctx *ctx, v
 /*#Device.DHCPv6.Client.{i}.Enable!UCI:network/interface,@i-1/disabled*/
 static int get_DHCPv6Client_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct dhcpv6_client_args *dhcpv6_client = (struct dhcpv6_client_args *)data;
+	struct dm_data *dhcpv6_client = (struct dm_data *)data;
 	char *disabled = NULL;
 
-	dmuci_get_value_by_section_string(dhcpv6_client->iface_s ? dhcpv6_client->iface_s : dhcpv6_client->dmmap_s, "disabled", &disabled);
+	dmuci_get_value_by_section_string(dhcpv6_client->config_section ? dhcpv6_client->config_section : dhcpv6_client->dmmap_section, "disabled", &disabled);
 	*value = (disabled[0] == '1') ? "0" : "1";
 	return 0;
 }
 
 static int set_DHCPv6Client_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct dhcpv6_client_args *dhcpv6_client = (struct dhcpv6_client_args *)data;
+	struct dm_data *dhcpv6_client = (struct dm_data *)data;
 	bool b;
 
 	switch (action)	{
@@ -509,9 +482,9 @@ static int set_DHCPv6Client_Enable(char *refparam, struct dmctx *ctx, void *data
 		return 0;
 	case VALUESET:
 		string_to_bool(value, &b);
-		dmuci_set_value_by_section(dhcpv6_client->dmmap_s, "disabled", b ? "0" : "1");
-		if (dhcpv6_client->iface_s)
-			dmuci_set_value_by_section(dhcpv6_client->iface_s, "disabled", b ? "0" : "1");
+		dmuci_set_value_by_section(dhcpv6_client->dmmap_section, "disabled", b ? "0" : "1");
+		if (dhcpv6_client->config_section)
+			dmuci_set_value_by_section(dhcpv6_client->config_section, "disabled", b ? "0" : "1");
 		return 0;
 	}
 	return 0;
@@ -519,27 +492,27 @@ static int set_DHCPv6Client_Enable(char *refparam, struct dmctx *ctx, void *data
 
 static int get_DHCPv6Client_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dhcpv6_client_args *)data)->dmmap_s, "bbf_dhcpv6client_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "bbf_dhcpv6client_alias", instance, value);
 }
 
 static int set_DHCPv6Client_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dhcpv6_client_args *)data)->dmmap_s, "bbf_dhcpv6client_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "bbf_dhcpv6client_alias", instance, value);
 }
 
 static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *iface_name = NULL;
 
-	dmuci_get_value_by_section_string(((struct dhcpv6_client_args *)data)->dmmap_s, "iface_name", &iface_name);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "iface_name", &iface_name);
 
 	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", iface_name, value);
 
-	if (DM_STRLEN(*value) == 0 && ((struct dhcpv6_client_args *)data)->iface_s) {
+	if (DM_STRLEN(*value) == 0 && ((struct dm_data *)data)->config_section) {
 		struct uci_section *s = NULL;
 		char *device = NULL;
 
-		dmuci_get_value_by_section_string(((struct dhcpv6_client_args *)data)->iface_s, "device", &device);
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "device", &device);
 		if (DM_STRLEN(device) == 0)
 			return 0;
 
@@ -553,7 +526,7 @@ static int get_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct dhcpv6_client_args *dhcpv6_client = (struct dhcpv6_client_args *)data;
+	struct dm_data *dhcpv6_client = (struct dm_data *)data;
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
@@ -569,23 +542,23 @@ static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 
 			break;
 		case VALUESET:
-			if (dhcpv6_client->iface_s) {
+			if (dhcpv6_client->config_section) {
 				char *ip_instance = NULL;
 
-				struct uci_section *dmmap_s = get_dup_section_in_dmmap("dmmap_network", "interface", section_name(dhcpv6_client->iface_s));
+				struct uci_section *dmmap_s = get_dup_section_in_dmmap("dmmap_network", "interface", section_name(dhcpv6_client->config_section));
 				dmuci_get_value_by_section_string(dmmap_s, "ip_int_instance", &ip_instance);
 				if (dmmap_s && DM_STRLEN(ip_instance) == 0) {
-					dmuci_delete_by_section(dhcpv6_client->iface_s, NULL, NULL);
+					dmuci_delete_by_section(dhcpv6_client->config_section, NULL, NULL);
 				} else {
-					dmuci_set_value_by_section(dhcpv6_client->iface_s, "proto", "none");
-					dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqaddress", "");
-					dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqprefix", "");
-					dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqopts", "");
+					dmuci_set_value_by_section(dhcpv6_client->config_section, "proto", "none");
+					dmuci_set_value_by_section(dhcpv6_client->config_section, "reqaddress", "");
+					dmuci_set_value_by_section(dhcpv6_client->config_section, "reqprefix", "");
+					dmuci_set_value_by_section(dhcpv6_client->config_section, "reqopts", "");
 				}
 			}
 
 			// Update iface_name option
-			dmuci_set_value_by_section_bbfdm(dhcpv6_client->dmmap_s, "iface_name", reference.value);
+			dmuci_set_value_by_section_bbfdm(dhcpv6_client->dmmap_section, "iface_name", reference.value);
 
 			if (DM_STRLEN(reference.value)) {
 				struct uci_section *interface_s = NULL;
@@ -617,16 +590,16 @@ static int set_DHCPv6Client_Interface(char *refparam, struct dmctx *ctx, void *d
 					dmuci_set_value_by_section(interface_s, "device", curr_device);
 
 					// Update iface_name option
-					dmuci_set_value_by_section_bbfdm(dhcpv6_client->dmmap_s, "iface_name", buf);
+					dmuci_set_value_by_section_bbfdm(dhcpv6_client->dmmap_section, "iface_name", buf);
 				}
 
 				// Update proto option of config section
 				dmuci_set_value_by_section(interface_s, "proto", "dhcpv6");
 
 				// Get the current value of requested parameters
-				dmuci_get_value_by_section_string(dhcpv6_client->dmmap_s, "reqaddress", &reqaddress);
-				dmuci_get_value_by_section_string(dhcpv6_client->dmmap_s, "reqprefix", &reqprefix);
-				dmuci_get_value_by_section_string(dhcpv6_client->dmmap_s, "reqopts", &reqopts);
+				dmuci_get_value_by_section_string(dhcpv6_client->dmmap_section, "reqaddress", &reqaddress);
+				dmuci_get_value_by_section_string(dhcpv6_client->dmmap_section, "reqprefix", &reqprefix);
+				dmuci_get_value_by_section_string(dhcpv6_client->dmmap_section, "reqopts", &reqopts);
 
 				// Set requested parameters
 				dmuci_set_value_by_section(interface_s, "reqaddress", reqaddress);
@@ -649,7 +622,7 @@ static int get_DHCPv6Client_Status(char *refparam, struct dmctx *ctx, void *data
 /*#Device.DHCPv6.Client.{i}.DUID!UBUS:network.interface/status/interface,@Name/data.passthru*/
 static int get_DHCPv6Client_DUID(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *dhcpv6_s = ((struct dhcpv6_client_args *)data)->iface_s;
+	struct uci_section *dhcpv6_s = ((struct dm_data *)data)->config_section;
 	if (dhcpv6_s) {
 		json_object *res = NULL;
 
@@ -663,17 +636,17 @@ static int get_DHCPv6Client_DUID(char *refparam, struct dmctx *ctx, void *data, 
 /*#Device.DHCPv6.Client.{i}.RequestAddresses!UCI:network/interface,@i-1/reqaddress*/
 static int get_DHCPv6Client_RequestAddresses(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct dhcpv6_client_args *dhcpv6_client = (struct dhcpv6_client_args *)data;
+	struct dm_data *dhcpv6_client = (struct dm_data *)data;
 	char *reqaddress = NULL;
 
-	dmuci_get_value_by_section_string(dhcpv6_client->iface_s ? dhcpv6_client->iface_s : dhcpv6_client->dmmap_s, "reqaddress", &reqaddress);
+	dmuci_get_value_by_section_string(dhcpv6_client->config_section ? dhcpv6_client->config_section : dhcpv6_client->dmmap_section, "reqaddress", &reqaddress);
 	*value = (reqaddress && DM_LSTRCMP(reqaddress, "none") == 0) ? "0" : "1";
 	return 0;
 }
 
 static int set_DHCPv6Client_RequestAddresses(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct dhcpv6_client_args *dhcpv6_client = (struct dhcpv6_client_args *)data;
+	struct dm_data *dhcpv6_client = (struct dm_data *)data;
 	bool b;
 
 	switch (action)	{
@@ -683,9 +656,9 @@ static int set_DHCPv6Client_RequestAddresses(char *refparam, struct dmctx *ctx, 
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(dhcpv6_client->dmmap_s, "reqaddress", b ? "force" : "none");
-			if (dhcpv6_client->iface_s)
-				dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqaddress", b ? "force" : "none");
+			dmuci_set_value_by_section(dhcpv6_client->dmmap_section, "reqaddress", b ? "force" : "none");
+			if (dhcpv6_client->config_section)
+				dmuci_set_value_by_section(dhcpv6_client->config_section, "reqaddress", b ? "force" : "none");
 			break;
 	}
 	return 0;
@@ -694,17 +667,17 @@ static int set_DHCPv6Client_RequestAddresses(char *refparam, struct dmctx *ctx, 
 /*#Device.DHCPv6.Client.{i}.RequestPrefixes!UCI:network/interface,@i-1/reqprefix*/
 static int get_DHCPv6Client_RequestPrefixes(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct dhcpv6_client_args *dhcpv6_client = (struct dhcpv6_client_args *)data;
+	struct dm_data *dhcpv6_client = (struct dm_data *)data;
 	char *reqprefix = NULL;
 
-	dmuci_get_value_by_section_string(dhcpv6_client->iface_s ? dhcpv6_client->iface_s : dhcpv6_client->dmmap_s, "reqprefix", &reqprefix);
+	dmuci_get_value_by_section_string(dhcpv6_client->config_section ? dhcpv6_client->config_section : dhcpv6_client->dmmap_section, "reqprefix", &reqprefix);
 	*value = (reqprefix && DM_LSTRCMP(reqprefix, "auto") == 0) ? "1" : "0";
 	return 0;
 }
 
 static int set_DHCPv6Client_RequestPrefixes(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct dhcpv6_client_args *dhcpv6_client = (struct dhcpv6_client_args *)data;
+	struct dm_data *dhcpv6_client = (struct dm_data *)data;
 	bool b;
 
 	switch (action)	{
@@ -714,9 +687,9 @@ static int set_DHCPv6Client_RequestPrefixes(char *refparam, struct dmctx *ctx, v
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section(dhcpv6_client->dmmap_s, "reqprefix", b ? "auto" : "no");
-			if (dhcpv6_client->iface_s)
-				dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqprefix", b ? "auto" : "no");
+			dmuci_set_value_by_section(dhcpv6_client->dmmap_section, "reqprefix", b ? "auto" : "no");
+			if (dhcpv6_client->config_section)
+				dmuci_set_value_by_section(dhcpv6_client->config_section, "reqprefix", b ? "auto" : "no");
 			return 0;
 	}
 	return 0;
@@ -730,7 +703,7 @@ static int get_DHCPv6Client_Renew(char *refparam, struct dmctx *ctx, void *data,
 
 static int set_DHCPv6Client_Renew(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dhcpv6_s = ((struct dhcpv6_client_args *)data)->iface_s;
+	struct uci_section *dhcpv6_s = ((struct dm_data *)data)->config_section;
 	bool b;
 
 	switch (action)	{
@@ -753,15 +726,15 @@ static int set_DHCPv6Client_Renew(char *refparam, struct dmctx *ctx, void *data,
 /*#Device.DHCPv6.Client.{i}.RequestedOptions!UCI:network/interface,@i-1/reqopts*/
 static int get_DHCPv6Client_RequestedOptions(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct dhcpv6_client_args *dhcpv6_client = (struct dhcpv6_client_args *)data;
+	struct dm_data *dhcpv6_client = (struct dm_data *)data;
 
-	dmuci_get_value_by_section_string(dhcpv6_client->iface_s ? dhcpv6_client->iface_s : dhcpv6_client->dmmap_s, "reqopts", value);
+	dmuci_get_value_by_section_string(dhcpv6_client->config_section ? dhcpv6_client->config_section : dhcpv6_client->dmmap_section, "reqopts", value);
 	return 0;
 }
 
 static int set_DHCPv6Client_RequestedOptions(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct dhcpv6_client_args *dhcpv6_client = (struct dhcpv6_client_args *)data;
+	struct dm_data *dhcpv6_client = (struct dm_data *)data;
 
 	switch (action)	{
 		case VALUECHECK:
@@ -769,9 +742,9 @@ static int set_DHCPv6Client_RequestedOptions(char *refparam, struct dmctx *ctx, 
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section(dhcpv6_client->dmmap_s, "reqopts", value);
-			if (dhcpv6_client->iface_s)
-				dmuci_set_value_by_section(dhcpv6_client->iface_s, "reqopts", value);
+			dmuci_set_value_by_section(dhcpv6_client->dmmap_section, "reqopts", value);
+			if (dhcpv6_client->config_section)
+				dmuci_set_value_by_section(dhcpv6_client->config_section, "reqopts", value);
 			break;
 	}
 	return 0;
@@ -814,7 +787,7 @@ static int get_DHCPv6Server_PoolNumberOfEntries(char *refparam, struct dmctx *ct
 /*#Device.DHCPv6.Server.Pool.{i}.Enable!UCI:dhcp/dhcp,@i-1/dhcpv6*/
 static int get_DHCPv6ServerPool_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, "dhcpv6", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dhcpv6", value);
 	*value = (*value && DM_LSTRCMP(*value, "disabled") == 0) ? "0" : "1";
 	return 0;
 }
@@ -830,7 +803,7 @@ static int set_DHCPv6ServerPool_Enable(char *refparam, struct dmctx *ctx, void *
 			return 0;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_set_value_by_section((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, "dhcpv6", b ? "server" : "disabled");
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "dhcpv6", b ? "server" : "disabled");
 			return 0;
 	}
 	return 0;
@@ -839,7 +812,7 @@ static int set_DHCPv6ServerPool_Enable(char *refparam, struct dmctx *ctx, void *
 /*#Device.DHCPv6.Server.Pool.{i}.Status!UCI:dhcp/dhcp,@i-1/dhcpv6*/
 static int get_DHCPv6ServerPool_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, "dhcpv6", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "dhcpv6", value);
 	*value = (*value && DM_LSTRCMP(*value, "disabled") == 0) ? "Disabled" : "Enabled";
 	return 0;
 }
@@ -847,17 +820,17 @@ static int get_DHCPv6ServerPool_Status(char *refparam, struct dmctx *ctx, void *
 /*#Device.DHCPv6.Server.Pool.{i}.Alias!UCI:dmmap_dhcpv6/dhcp,@i-1/dhcpv6_serv_pool_alias*/
 static int get_DHCPv6ServerPool_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, (((struct dhcpv6_args *)data)->dhcp_sections)->dmmap_section, "dhcpv6_serv_pool_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "dhcpv6_serv_pool_alias", instance, value);
 }
 
 static int set_DHCPv6ServerPool_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, (((struct dhcpv6_args *)data)->dhcp_sections)->dmmap_section, "dhcpv6_serv_pool_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "dhcpv6_serv_pool_alias", instance, value);
 }
 
 static int get_DHCPv6ServerPool_Order(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((((struct dhcpv6_args *)data)->dhcp_sections)->dmmap_section, "order", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "order", value);
 	return 0;
 }
 
@@ -869,7 +842,7 @@ static int set_DHCPv6ServerPool_Order(char *refparam, struct dmctx *ctx, void *d
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			set_section_order("dhcp", "dmmap_dhcpv6", "dhcp", (((struct dhcpv6_args *)data)->dhcp_sections)->dmmap_section, (((struct dhcpv6_args *)data)->dhcp_sections)->config_section, 1, value);
+			set_section_order("dhcp", "dmmap_dhcpv6", "dhcp", ((struct dm_data *)data)->dmmap_section, ((struct dm_data *)data)->config_section, 1, value);
 			break;
 	}
 	return 0;
@@ -877,7 +850,7 @@ static int set_DHCPv6ServerPool_Order(char *refparam, struct dmctx *ctx, void *d
 
 static int get_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", ((struct dhcpv6_args *)data)->interface, value);
+	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", (char *)((struct dm_data *)data)->additional_data, value);
 	return 0;
 }
 
@@ -898,7 +871,7 @@ static int set_DHCPv6ServerPool_Interface(char *refparam, struct dmctx *ctx, voi
 
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((((struct dhcpv6_args *)data)->dhcp_sections)->config_section, "interface", reference.value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "interface", reference.value);
 			break;
 	}
 	return 0;
@@ -909,7 +882,7 @@ static int get_DHCPv6ServerPool_VendorClassID(char *refparam, struct dmctx *ctx,
 {
 	char hex[256] = {0}, *vcid = NULL;
 
-	struct uci_section *vendorclassidclassifier = get_dhcpv6_classifier("vendorclass", ((struct dhcpv6_args *)data)->interface);
+	struct uci_section *vendorclassidclassifier = get_dhcpv6_classifier("vendorclass", (char *)((struct dm_data *)data)->additional_data);
 	dmuci_get_value_by_section_string(vendorclassidclassifier, "vendorclass", &vcid);
 
 	if (vcid && *vcid)
@@ -932,10 +905,10 @@ static int set_DHCPv6ServerPool_VendorClassID(char *refparam, struct dmctx *ctx,
 		case VALUESET:
 			convert_hex_to_string(value, res, sizeof(res));
 
-			vendorclassidclassifier = get_dhcpv6_classifier("vendorclass", ((struct dhcpv6_args *)data)->interface);
+			vendorclassidclassifier = get_dhcpv6_classifier("vendorclass", (char *)((struct dm_data *)data)->additional_data);
 			if (!vendorclassidclassifier) {
 				dmuci_add_section("dhcp", "vendorclass", &vendorclassidclassifier);
-				dmuci_set_value_by_section(vendorclassidclassifier, "networkid", ((struct dhcpv6_args *)data)->interface);
+				dmuci_set_value_by_section(vendorclassidclassifier, "networkid", (char *)((struct dm_data *)data)->additional_data);
 			}
 			dmuci_set_value_by_section(vendorclassidclassifier, "vendorclass", res);
 			break;
@@ -948,7 +921,7 @@ static int get_DHCPv6ServerPool_UserClassID(char *refparam, struct dmctx *ctx, v
 {
 	char hex[256] = {0}, *ucid = NULL;
 
-	struct uci_section *userclassidclassifier = get_dhcpv6_classifier("userclass", ((struct dhcpv6_args *)data)->interface);
+	struct uci_section *userclassidclassifier = get_dhcpv6_classifier("userclass", (char *)((struct dm_data *)data)->additional_data);
 	dmuci_get_value_by_section_string(userclassidclassifier, "userclass", &ucid);
 
 	if (ucid && *ucid)
@@ -971,10 +944,10 @@ static int set_DHCPv6ServerPool_UserClassID(char *refparam, struct dmctx *ctx, v
 		case VALUESET:
 			convert_hex_to_string(value, res, sizeof(res));
 
-			userclassidclassifier = get_dhcpv6_classifier("userclass", ((struct dhcpv6_args *)data)->interface);
+			userclassidclassifier = get_dhcpv6_classifier("userclass", (char *)((struct dm_data *)data)->additional_data);
 			if (!userclassidclassifier) {
 				dmuci_add_section("dhcp", "userclass", &userclassidclassifier);
-				dmuci_set_value_by_section(userclassidclassifier, "networkid", ((struct dhcpv6_args *)data)->interface);
+				dmuci_set_value_by_section(userclassidclassifier, "networkid", (char *)((struct dm_data *)data)->additional_data);
 			}
 			dmuci_set_value_by_section(userclassidclassifier, "userclass", res);
 			break;
@@ -984,7 +957,7 @@ static int set_DHCPv6ServerPool_UserClassID(char *refparam, struct dmctx *ctx, v
 
 static int get_DHCPv6ServerPool_SourceAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *classifier_s = get_dhcpv6_classifier("mac", ((struct dhcpv6_args *)data)->interface);
+	struct uci_section *classifier_s = get_dhcpv6_classifier("mac", (char *)((struct dm_data *)data)->additional_data);
 	if (classifier_s == NULL) {
 		*value = "";
 		return 0;
@@ -1008,7 +981,7 @@ static int set_DHCPv6ServerPool_SourceAddress(char *refparam, struct dmctx *ctx,
 
 static int get_DHCPv6ServerPool_SourceAddressMask(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *classifier_s = get_dhcpv6_classifier("mac", ((struct dhcpv6_args *)data)->interface);
+	struct uci_section *classifier_s = get_dhcpv6_classifier("mac", (char *)((struct dm_data *)data)->additional_data);
 	if (classifier_s == NULL) {
 		*value = "";
 		return 0;
@@ -1155,29 +1128,30 @@ static int get_DHCPv6ServerPoolClientIPv6Prefix_ValidLifetime(char *refparam, st
 
 static int get_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct dhcpv6_client_option_args *dhcpv6_client_s = (struct dhcpv6_client_option_args *)data;
-	struct uci_list *dhcp_option_list;
+	struct uci_list *option_list;
 
-	dmuci_get_value_by_section_list(dhcpv6_client_s->client_sect, "dhcp_option", &dhcp_option_list);
-	if (dhcp_option_list != NULL) {
+	dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "dhcp_option", &option_list);
+	if (option_list != NULL) {
+		struct option_args *option = (struct option_args *)((struct dm_data *)data)->additional_data;
 		struct uci_element *e = NULL;
 		size_t length;
 
-		uci_foreach_element(dhcp_option_list, e) {
+		uci_foreach_element(option_list, e) {
 			char **buf = strsplit(e->name, ",", &length);
-			if (buf && *buf && DM_STRCMP(buf[0], dhcpv6_client_s->option_tag) == 0) {
+			if (buf && *buf && DM_STRCMP(buf[0], option->tag) == 0) {
 				*value = "1";
 				return 0;
 			}
 		}
 	}
-	*value= "0";
+
+	*value = "0";
 	return 0;
 }
 
 static int set_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct dhcpv6_client_option_args *dhcpv6_client_s = (struct dhcpv6_client_option_args *)data;
+	struct option_args *option = (struct option_args *)((struct dm_data *)data)->additional_data;
 	struct uci_list *dhcp_option_list = NULL;
 	char opt_value[128] = {0};
 	bool option_enabled = false, b;
@@ -1189,8 +1163,8 @@ static int set_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 			break;
 		case VALUESET:
 			string_to_bool(value, &b);
-			dmuci_get_value_by_section_list(dhcpv6_client_s->client_sect, "dhcp_option", &dhcp_option_list);
-			snprintf(opt_value, sizeof(opt_value), "%s,%s", dhcpv6_client_s->option_tag, dhcpv6_client_s->value);
+			dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "dhcp_option", &dhcp_option_list);
+			snprintf(opt_value, sizeof(opt_value), "%s,%s", option->tag, option->value);
 
 			if (dhcp_option_list != NULL) {
 				struct uci_element *e = NULL;
@@ -1198,40 +1172,40 @@ static int set_DHCPv6ServerPoolOption_Enable(char *refparam, struct dmctx *ctx, 
 
 				uci_foreach_element(dhcp_option_list, e) {
 					char **buf = strsplit(e->name, ",", &length);
-					if (buf && *buf && DM_STRCMP(buf[0], dhcpv6_client_s->option_tag) == 0) {
+					if (buf && *buf && DM_STRCMP(buf[0], option->tag) == 0) {
 						option_enabled = true;
 						if (!b)
-							dmuci_del_list_value_by_section(dhcpv6_client_s->client_sect, "dhcp_option", opt_value);
+							dmuci_del_list_value_by_section(((struct dm_data *)data)->config_section, "dhcp_option", opt_value);
 						break;
 					}
 				}
 			}
 
 			if(!option_enabled && b)
-				dmuci_add_list_value_by_section(dhcpv6_client_s->client_sect, "dhcp_option", opt_value);
+				dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, "dhcp_option", opt_value);
 	}
 	return 0;
 }
 
 static int get_DHCPv6ServerPoolOption_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dhcpv6_client_option_args *)data)->dmmap_sect, "bbf_dhcpv6_servpool_option_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "bbf_dhcpv6_servpool_option_alias", instance, value);
 }
 
 static int set_DHCPv6ServerPoolOption_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dhcpv6_client_option_args *)data)->dmmap_sect, "bbf_dhcpv6_servpool_option_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "bbf_dhcpv6_servpool_option_alias", instance, value);
 }
 
 static int get_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup(((struct dhcpv6_client_option_args *)data)->option_tag);
+	*value = dmstrdup(((struct option_args *)((struct dm_data *)data)->additional_data)->tag);
 	return 0;
 }
 
 static int set_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct dhcpv6_client_option_args *dhcpv6_client_s = (struct dhcpv6_client_option_args *)data;
+	struct option_args *option = (struct option_args *)((struct dm_data *)data)->additional_data;
 	struct uci_list *dhcp_option_list = NULL;
 	bool option_enabled = false;
 
@@ -1240,16 +1214,16 @@ static int set_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"0","65535"}}, 1))
 				return FAULT_9007;
 
-			if (dhcpv6_client_s->option_tag && DM_STRCMP(dhcpv6_client_s->option_tag, value) == 0)
+			if (option->tag && DM_STRCMP(option->tag, value) == 0)
 				break;
 
-			char *name = section_name(dhcpv6_client_s->client_sect);
+			char *name = section_name(((struct dm_data *)data)->config_section);
 			if (tag_option_exists("dmmap_dhcpv6", "servpool_option", "section_name", name, "option_tag", value))
 				return FAULT_9007;
 
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_list(dhcpv6_client_s->client_sect, "dhcp_option", &dhcp_option_list);
+			dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "dhcp_option", &dhcp_option_list);
 
 			if (dhcp_option_list != NULL) {
 				struct uci_element *e = NULL;
@@ -1257,7 +1231,7 @@ static int set_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 
 				uci_foreach_element(dhcp_option_list, e) {
 					char **buf = strsplit(e->name, ",", &length);
-					if (buf && *buf && DM_STRCMP(buf[0], dhcpv6_client_s->option_tag) == 0) {
+					if (buf && *buf && DM_STRCMP(buf[0], option->tag) == 0) {
 						option_enabled = true;
 						break;
 					}
@@ -1267,13 +1241,13 @@ static int set_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 			if (option_enabled) {
 				char new_tag_value[128] = {0}, old_tag_value[128] = {0};
 
-				snprintf(old_tag_value, sizeof(old_tag_value), "%s,%s", dhcpv6_client_s->option_tag, dhcpv6_client_s->value);
-				snprintf(new_tag_value, sizeof(new_tag_value), "%s,%s", value, dhcpv6_client_s->value);
-				dmuci_del_list_value_by_section(dhcpv6_client_s->client_sect, "dhcp_option", old_tag_value);
-				dmuci_add_list_value_by_section(dhcpv6_client_s->client_sect, "dhcp_option", new_tag_value);
+				snprintf(old_tag_value, sizeof(old_tag_value), "%s,%s", option->tag, option->value);
+				snprintf(new_tag_value, sizeof(new_tag_value), "%s,%s", value, option->value);
+				dmuci_del_list_value_by_section(((struct dm_data *)data)->config_section, "dhcp_option", old_tag_value);
+				dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, "dhcp_option", new_tag_value);
 			}
 
-			dmuci_set_value_by_section_bbfdm(dhcpv6_client_s->dmmap_sect, "option_tag", value);
+			dmuci_set_value_by_section_bbfdm(((struct dm_data *)data)->dmmap_section, "option_tag", value);
 			break;
 	}
 	return 0;
@@ -1281,7 +1255,7 @@ static int set_DHCPv6ServerPoolOption_Tag(char *refparam, struct dmctx *ctx, voi
 
 static int get_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	const char *tag_value = ((struct dhcpv6_client_option_args *)data)->value;
+	const char *tag_value = ((struct option_args *)((struct dm_data *)data)->additional_data)->value;
 	char hex[256] = {0};
 
 	if (tag_value && *tag_value)
@@ -1293,8 +1267,8 @@ static int get_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 
 static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct dhcpv6_client_option_args *dhcpv6_client_s = (struct dhcpv6_client_option_args *)data;
-	struct uci_list *dhcp_option_list = NULL;
+	struct option_args *option = (struct option_args *)((struct dm_data *)data)->additional_data;
+	struct uci_list *option_list = NULL;
 	char res[256] = {0};
 	bool option_enabled = false;
 
@@ -1304,15 +1278,15 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_list(dhcpv6_client_s->client_sect, "dhcp_option", &dhcp_option_list);
+			dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, "dhcp_option", &option_list);
 
-			if (dhcp_option_list != NULL) {
+			if (option_list != NULL) {
 				struct uci_element *e = NULL;
 				size_t length;
 
-				uci_foreach_element(dhcp_option_list, e) {
+				uci_foreach_element(option_list, e) {
 					char **buf = strsplit(e->name, ",", &length);
-					if (buf && *buf && DM_STRCMP(buf[0], dhcpv6_client_s->option_tag) == 0) {
+					if (buf && *buf && DM_STRCMP(buf[0], option->tag) == 0) {
 						option_enabled = true;
 						break;
 					}
@@ -1324,13 +1298,13 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
 			if (option_enabled) {
 				char new_tag_value[512] = {0}, old_tag_value[128] = {0};
 
-				snprintf(old_tag_value, sizeof(old_tag_value), "%s,%s", dhcpv6_client_s->option_tag, dhcpv6_client_s->value);
-				snprintf(new_tag_value, sizeof(new_tag_value), "%s,%s", dhcpv6_client_s->option_tag, res);
-				dmuci_del_list_value_by_section(dhcpv6_client_s->client_sect, "dhcp_option", old_tag_value);
-				dmuci_add_list_value_by_section(dhcpv6_client_s->client_sect, "dhcp_option", new_tag_value);
+				snprintf(old_tag_value, sizeof(old_tag_value), "%s,%s", option->tag, option->value);
+				snprintf(new_tag_value, sizeof(new_tag_value), "%s,%s", option->tag, res);
+				dmuci_del_list_value_by_section(((struct dm_data *)data)->config_section, "dhcp_option", old_tag_value);
+				dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, "dhcp_option", new_tag_value);
 			}
 
-			dmuci_set_value_by_section_bbfdm(dhcpv6_client_s->dmmap_sect, "option_value", res);
+			dmuci_set_value_by_section_bbfdm(((struct dm_data *)data)->dmmap_section, "option_value", res);
 			break;
 	}
 	return 0;
@@ -1341,7 +1315,7 @@ static int set_DHCPv6ServerPoolOption_Value(char *refparam, struct dmctx *ctx, v
  *************************************************************/
 static int operate_DHCPv6Client_Renew(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *dhcpv6_s = ((struct dhcpv6_client_args *)data)->iface_s;
+	struct uci_section *dhcpv6_s = ((struct dm_data *)data)->config_section;
 
 	if (dhcpv6_s) {
 		char *if_name = section_name(dhcpv6_s);

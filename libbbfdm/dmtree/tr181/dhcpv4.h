@@ -37,6 +37,12 @@ extern DMOBJ tDHCPv4RelayObj[];
 extern DMLEAF tDHCPv4RelayParams[];
 extern DMLEAF tDHCPv4RelayForwardingParams[];
 
+struct option_args
+{
+	char *tag;
+	char *value;
+};
+
 int set_section_order(char *package, char *dmpackage, char* sect_type, struct uci_section *dmmap_sect, struct uci_section *conf, int set_force, char* order);
 int get_value_in_mac_format(struct uci_section *s, char *option_name, bool type, char **value);
 bool tag_option_exists(char *dmmap_package, char *section, char *opt_check, char *value_check, char *tag_name, char *tag_value);

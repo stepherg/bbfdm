@@ -21,11 +21,12 @@ static int add_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char
 
 	dmuci_add_section("mcast", "proxy", &s);
 	dmuci_rename_section_by_section(s, s_name);
+
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "proto", "mld");
 	dmuci_set_value_by_section(s, "last_member_query_interval", "10");
-        dmuci_set_value_by_section(s, "query_interval", "125");
-        dmuci_set_value_by_section(s, "query_response_interval", "100");
+	dmuci_set_value_by_section(s, "query_interval", "125");
+	dmuci_set_value_by_section(s, "query_response_interval", "100");
 	dmuci_set_value_by_section(s, "version", "2");
 	dmuci_set_value_by_section(s, "robustness", "2");
 	dmuci_set_value_by_section(s, "aggregation", "0");
@@ -44,16 +45,16 @@ static int del_mld_proxy_obj(char *refparam, struct dmctx *ctx, void *data, char
 
 static int browse_mld_proxy_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "proxy", "dmmap_mcast", "proto", "mld", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "proxy_instance", "proxy_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "proxy_instance", "proxy_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 
@@ -63,13 +64,14 @@ static int browse_mld_proxy_inst(struct dmctx *dmctx, DMNODE *parent_node, void 
 
 static int add_mld_snooping_obj(char *refparam, struct dmctx *ctx, void *data, char **instance)
 {
-	struct uci_section  *dmmap = NULL, *s = NULL;
+	struct uci_section *dmmap = NULL, *s = NULL;
 	char s_name[32];
 
 	snprintf(s_name, sizeof(s_name), "mld_snoop_%s", *instance);
 
 	dmuci_add_section("mcast", "snooping", &s);
 	dmuci_rename_section_by_section(s, s_name);
+
 	dmuci_set_value_by_section(s, "enable", "0");
 	dmuci_set_value_by_section(s, "proto", "mld");
 	dmuci_set_value_by_section(s, "last_member_query_interval", "10");
@@ -92,16 +94,16 @@ static int del_mld_snooping_obj(char *refparam, struct dmctx *ctx, void *data, c
 
 static int browse_mld_snooping_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
-	struct dmmap_dup *p = NULL;
+	struct dm_data *curr_data = NULL;
 	LIST_HEAD(dup_list);
+	char *inst = NULL;
 
 	synchronize_specific_config_sections_with_dmmap_cont("mcast", "snooping", "dmmap_mcast", "proto", "mld", &dup_list);
-	list_for_each_entry(p, &dup_list, list) {
+	list_for_each_entry(curr_data, &dup_list, list) {
 
-		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "snooping_instance", "snooping_alias");
+		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "snooping_instance", "snooping_alias");
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p->config_section, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
 			break;
 	}
 	free_dmmap_config_dup_list(&dup_list);
@@ -110,26 +112,14 @@ static int browse_mld_snooping_inst(struct dmctx *dmctx, DMNODE *parent_node, vo
 
 static int get_mlds_no_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_foreach_option_eq("mcast", "snooping", "proto", "mld", s) {
-		cnt++;
-	}
-
+	int cnt = get_number_of_entries(ctx, data, instance, browse_mld_snooping_inst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
 
 static int get_mldp_no_of_entries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct uci_section *s = NULL;
-	int cnt = 0;
-
-	uci_foreach_option_eq("mcast", "proxy", "proto", "mld", s) {
-		cnt++;
-	}
-
+	int cnt = get_number_of_entries(ctx, data, instance, browse_mld_proxy_inst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -153,13 +143,13 @@ static int add_mlds_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 	struct uci_section *dmmap_mlds_filter = NULL;
 
 	dmuci_add_section_bbfdm("dmmap_mcast", "snooping_filter", &dmmap_mlds_filter);
-	dmuci_set_value_by_section(dmmap_mlds_filter, "section_name", section_name((struct uci_section *)data));
+	dmuci_set_value_by_section(dmmap_mlds_filter, "section_name", section_name(((struct dm_data *)data)->config_section));
 	dmuci_set_value_by_section(dmmap_mlds_filter, "enable", "0");
 	dmuci_set_value_by_section(dmmap_mlds_filter, "filter_instance", *instance);
 	return 0;
 }
 
-static int browse_mlds_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+int browse_mlds_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	return browse_filter_inst(dmctx, parent_node, prev_data, "snooping", "snooping_filter", "mld");
 }
@@ -167,7 +157,7 @@ static int browse_mlds_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, voi
 static int get_mld_version(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *val;
-	dmuci_get_value_by_section_string((struct uci_section *)data, "version", &val);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "version", &val);
 	*value = (DM_LSTRCMP(val, "1") == 0) ? "V1" : "V2";
 	return 0;
 }
@@ -180,7 +170,7 @@ static int set_mld_version(char *refparam, struct dmctx *ctx, void *data, char *
 			return FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section((struct uci_section *)data, "version", (DM_LSTRCMP(value, "V2") == 0) ? "2" : "1");
+		dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "version", (DM_LSTRCMP(value, "V2") == 0) ? "2" : "1");
 		break;
 	}
 
@@ -192,7 +182,7 @@ static int add_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 	struct uci_section *dmmap_mldp_interface = NULL;
 
 	dmuci_add_section_bbfdm("dmmap_mcast", "proxy_interface", &dmmap_mldp_interface);
-	dmuci_set_value_by_section(dmmap_mldp_interface, "section_name", section_name((struct uci_section *)data));
+	dmuci_set_value_by_section(dmmap_mldp_interface, "section_name", section_name(((struct dm_data *)data)->config_section));
 	dmuci_set_value_by_section(dmmap_mldp_interface, "upstream", "0");
 	dmuci_set_value_by_section(dmmap_mldp_interface, "snooping_mode", "0");
 	dmuci_set_value_by_section(dmmap_mldp_interface, "iface_instance", *instance);
@@ -205,7 +195,7 @@ static int del_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 
 	switch (del_action) {
 	case DEL_INST:
-		uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface", "section_name", section_name((struct uci_section *)data), mldp_s) {
+		uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface", "section_name", section_name(((struct dm_data *)data)->config_section), mldp_s) {
 			char *f_inst = NULL, *if_name = NULL, *upstream = NULL;
 			int found = 0;
 
@@ -220,16 +210,16 @@ static int del_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 
 			if (found) {
 				if (upstream && DM_LSTRCMP(upstream, "1") == 0)
-					dmuci_del_list_value_by_section((struct uci_section *)data, "upstream_interface", if_name);
+					dmuci_del_list_value_by_section(((struct dm_data *)data)->config_section, "upstream_interface", if_name);
 				else
-					dmuci_del_list_value_by_section((struct uci_section *)data, "downstream_interface", if_name);
+					dmuci_del_list_value_by_section(((struct dm_data *)data)->config_section, "downstream_interface", if_name);
 				break;
 			}
 		}
 
 		break;
 	case DEL_ALL:
-		uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface", "section_name", section_name((struct uci_section *)data), mldp_s) {
+		uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface", "section_name", section_name(((struct dm_data *)data)->config_section), mldp_s) {
 			char *if_name = NULL, *upstream = NULL;
 
 			dmuci_get_value_by_section_string(mldp_s, "ifname", &if_name);
@@ -237,20 +227,20 @@ static int del_mldp_interface_obj(char *refparam, struct dmctx *ctx, void *data,
 
 			if (if_name[0] != '\0') {
 				if (DM_LSTRCMP(upstream, "1") == 0)
-					dmuci_del_list_value_by_section((struct uci_section *)data, "upstream_interface", if_name);
+					dmuci_del_list_value_by_section(((struct dm_data *)data)->config_section, "upstream_interface", if_name);
 				else
-					dmuci_del_list_value_by_section((struct uci_section *)data, "downstream_interface", if_name);
+					dmuci_del_list_value_by_section(((struct dm_data *)data)->config_section, "downstream_interface", if_name);
 			}
 		}
 
-		del_dmmap_sec_with_opt_eq("dmmap_mcast", "proxy_interface", "section_name", section_name((struct uci_section *)data));
+		del_dmmap_sec_with_opt_eq("dmmap_mcast", "proxy_interface", "section_name", section_name(((struct dm_data *)data)->config_section));
 		break;
 	}
 
 	return 0;
 }
 
-static int browse_mldp_interface_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+int browse_mldp_interface_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	return browse_proxy_interface_inst(dmctx, parent_node, prev_data, "mld");
 }
@@ -260,13 +250,13 @@ static int add_mldp_filter_obj(char *refparam, struct dmctx *ctx, void *data, ch
 	struct uci_section *dmmap_mldp_filter = NULL;
 
 	dmuci_add_section_bbfdm("dmmap_mcast", "proxy_filter", &dmmap_mldp_filter);
-	dmuci_set_value_by_section(dmmap_mldp_filter, "section_name", section_name((struct uci_section *)data));
+	dmuci_set_value_by_section(dmmap_mldp_filter, "section_name", section_name(((struct dm_data *)data)->config_section));
 	dmuci_set_value_by_section(dmmap_mldp_filter, "enable", "0");
 	dmuci_set_value_by_section(dmmap_mldp_filter, "filter_instance", *instance);
 	return 0;
 }
 
-static int browse_mldp_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+int browse_mldp_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	return browse_filter_inst(dmctx, parent_node, prev_data, "proxy", "proxy_filter", "mld");
 }
@@ -284,13 +274,13 @@ static int set_mldp_filter_address(char *refparam, struct dmctx *ctx, void *data
 		break;
 	case VALUESET:
 		uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_filter",
-				"section_name", section_name((struct uci_section *)data), s) {
+				"section_name", section_name(((struct dm_data *)data)->config_section), s) {
 			dmuci_get_value_by_section_string(s, "filter_instance", &s_inst);
 			if (DM_STRCMP(s_inst, instance) == 0) {
 				dmuci_set_value_by_section(s, "ipaddr", value);
 				dmuci_get_value_by_section_string(s, "enable", &up);
 				string_to_bool(up, &b);
-				sync_dmmap_bool_to_uci_list((struct uci_section *)data, "filter", value, b);
+				sync_dmmap_bool_to_uci_list(((struct dm_data *)data)->config_section, "filter", value, b);
 				break;
 			}
 		}
@@ -477,17 +467,17 @@ static int set_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 		}
 
 		uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface",
-				"section_name", section_name((struct uci_section *)data), d_sec) {
+				"section_name", section_name(((struct dm_data *)data)->config_section), d_sec) {
 			dmuci_get_value_by_section_string(d_sec, "iface_instance", &f_inst);
 			if (DM_STRCMP(instance, f_inst) == 0) {
 				dmuci_set_value_by_section(d_sec, "ifname", interface_linker);
 				dmuci_get_value_by_section_string(d_sec, "upstream", &up);
 				string_to_bool(up, &b);
-				sync_dmmap_bool_to_uci_list((struct uci_section *)data, "downstream_interface", interface_linker, !b);
+				sync_dmmap_bool_to_uci_list(((struct dm_data *)data)->config_section, "downstream_interface", interface_linker, !b);
 
 				// Now update the proxy_interface list
-				sync_dmmap_bool_to_uci_list((struct uci_section *)data, "upstream_interface", interface_linker, b);
-				update_snooping_mode((struct uci_section *)data);
+				sync_dmmap_bool_to_uci_list(((struct dm_data *)data)->config_section, "upstream_interface", interface_linker, b);
+				update_snooping_mode(((struct dm_data *)data)->config_section);
 				break;
 			}
 		}
@@ -505,7 +495,7 @@ static int get_mldp_interface_iface(char *refparam, struct dmctx *ctx, void *dat
 	char sec_name[16] = {0};
 	int found = 0;
 
-	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface", "section_name", section_name((struct uci_section *)data), mldp_s) {
+	uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface", "section_name", section_name(((struct dm_data *)data)->config_section), mldp_s) {
 		dmuci_get_value_by_section_string(mldp_s, "iface_instance", &f_inst);
 		if (DM_STRCMP(instance, f_inst) == 0) {
 			dmuci_get_value_by_section_string(mldp_s, "ifname", &mldp_ifname);
@@ -581,15 +571,15 @@ static int set_mldp_interface_upstream(char *refparam, struct dmctx *ctx, void *
 	case VALUESET:
 		string_to_bool(value, &b);
 		uci_path_foreach_option_eq(bbfdm, "dmmap_mcast", "proxy_interface",
-				"section_name", section_name((struct uci_section *)data), d_sec) {
+				"section_name", section_name(((struct dm_data *)data)->config_section), d_sec) {
 			dmuci_get_value_by_section_string(d_sec, "iface_instance", &f_inst);
 			if (DM_STRCMP(instance, f_inst) == 0) {
 				dmuci_get_value_by_section_string(d_sec, "ifname", &ifname);
 				dmuci_set_value_by_section(d_sec, "upstream", (b) ? "1" : "0");
 
-				sync_dmmap_bool_to_uci_list((struct uci_section *)data, "downstream_interface", ifname, !b);
-				sync_dmmap_bool_to_uci_list((struct uci_section *)data, "upstream_interface", ifname, b);
-				update_snooping_mode((struct uci_section *)data);
+				sync_dmmap_bool_to_uci_list(((struct dm_data *)data)->config_section, "downstream_interface", ifname, !b);
+				sync_dmmap_bool_to_uci_list(((struct dm_data *)data)->config_section, "upstream_interface", ifname, b);
+				update_snooping_mode(((struct dm_data *)data)->config_section);
 
 				break;
 			}

@@ -95,5 +95,8 @@ void synchronize_specific_config_sections_with_dmmap_mcast_iface(char *package, 
 void synchronize_specific_config_sections_with_dmmap_mcast_filter(char *package, char *section_type,
 		void *data, char *dmmap_package, char *dmmap_sec, char *proto,
 		struct list_head *dup_list);
+int browse_mlds_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
+int browse_mldp_interface_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
+int browse_mldp_filter_inst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
 
 #endif //__IOPSYS_IGMP_H

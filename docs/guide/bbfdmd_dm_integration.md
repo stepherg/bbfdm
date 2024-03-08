@@ -45,6 +45,7 @@ inputs
 		|BBF_OPERATE	|path		|	NA	| 	NA		|	NA	   	|
 		|BBF_SCHEMA	|paramter	||$ref(type)	|writable(0/1)		|unique keys  		|
 		|BBF_INSTANCES	|parameter	| NA		|NA			|NA		   	|
+		|BBF_EVENT	|path		|	NA	| 	NA		|	NA	   	|
 		
 	int cmd
 		command to API to tell how the data model is to be read, possible values are
@@ -53,9 +54,10 @@ inputs
 		BBF_SET_VALUE		-	Set value of specified parameters in the data model
 		BBF_ADD_OBJECT		-	Add object in a multi instance parameter in the data model
 		BBF_DEL_OBJECT		-	Delete object from a multi instance parameter in the data model	
-		BBF_OPERATE	- 	execute the specified command
-		BBF_SCHEMA		- 	Read all the parameter type parameter from data model.
-		BBF_INSTANCES	-	Read all the instance of multi instance parameter from data model.
+		BBF_OPERATE			- 	execute the specified command
+		BBF_SCHEMA			- 	Read all the parameter type parameter from data model.
+		BBF_INSTANCES		-	Read all the instance of multi instance parameter from data model.
+		BBF_EVENT			-	execute the specified event
 
 return
 	int fault
@@ -201,11 +203,11 @@ Example:
 ```bash
 static int get_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, (((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "endpointalias", instance, value);
 }
 
 static int set_WiFiEndPoint_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, (((struct wifi_enp_args *)data)->sections)->dmmap_section, "endpointalias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "endpointalias", instance, value);
 }
 ```
