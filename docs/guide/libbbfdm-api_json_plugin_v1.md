@@ -337,10 +337,50 @@ Multi-instance mapping either maps to array of json objects or uci section, so f
 			"key": "PasswordAuth"
         }
       ]
+    },
+    "Name": {
+      "type": "string",
+      "protocols": [
+        "cwmp",
+        "usp"
+      ],
+      "read": true,
+      "write": true,
+      "mapping": [
+        {
+			"data": "@Parent",
+			"type": "dmmap_sec",
+			"key": "name"
+        }
+      ]
+    },
+    "Interface": {
+      "type": "string",
+      "protocols": [
+        "cwmp",
+        "usp"
+      ],
+      "read": true,
+      "write": true,
+      "flags": [
+        "Reference"
+      ],
+      "mapping": [
+        {
+			"data": "@Parent",
+			"type": "uci_sec",
+			"key": "interface",
+			"linker_obj": "Device.IP.Interface.*.Name"
+        }
+      ]
     }
   }
 }
 ```
+
+> Note1: If you want to get/set data from dmmap section instead of config section, ensure you specify the `type` as `dmmap_sec` instead of `uci_sec`, as demonstrated in the example above.
+> Note2: To display a parameter value as a `reference`, you should add `flags` option as `Reference` and include `linker_obj` from which the reference will be obtained, as illustrated in the example above.
+
 Ubus example for the same
 ```json
 {

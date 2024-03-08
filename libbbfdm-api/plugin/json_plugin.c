@@ -872,28 +872,42 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 	return value;
 }
 
-static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance)
+static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance, bool is_dmmap)
 {
 	struct json_object *data_s = NULL;
-	struct json_object *key = NULL, *linker_jobj = NULL;
+	struct json_object *key = NULL, *list = NULL, *linker_jobj = NULL;
 	char *value = "";
 
 	json_object_object_get_ex(mapping_obj, "data", &data_s);
 	json_object_object_get_ex(mapping_obj, "key", &key);
+	json_object_object_get_ex(mapping_obj, "list", &list);
 	json_object_object_get_ex(mapping_obj, "linker_obj", &linker_jobj);
 
 	if (data == NULL || data_s == NULL || (data_s && strcmp(json_object_get_string(data_s), "@Parent") != 0))
 		goto end;
 
-	if (key) {
-		if (strcmp(json_object_get_string(key), "@Name") == 0) {
-			dmuci_get_section_name(section_name(((struct dm_data *)data)->config_section), &value);
+	char *key_value = key ? json_object_get_string(key) : NULL;
+	char *list_value = list ? json_object_get_string(list) : NULL;
+
+	struct uci_section *req_sec = is_dmmap ? ((struct dm_data *)data)->dmmap_section : ((struct dm_data *)data)->config_section;
+
+	if (list_value) {
+		struct uci_list *list_val;
+
+		dmuci_get_value_by_section_list(req_sec, list_value, &list_val);
+		value = dmuci_list_to_string(list_val, ",");
+		goto end;
+	}
+
+	if (key_value) {
+		if (strcmp(key_value, "@Name") == 0) {
+			dmuci_get_section_name(section_name(req_sec), &value);
 		} else if (strstr(refparam, ".Alias")) {
-			bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, json_object_get_string(key), instance, &value);
+			bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, key_value, instance, &value);
 		} else {
 			char *res = NULL;
 
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, json_object_get_string(key), &res);
+			dmuci_get_value_by_section_string(req_sec, key_value, &res);
 			if (linker_jobj) {
 				char *link = json_object_get_string(linker_jobj);
 				char *linker = NULL;
@@ -974,16 +988,20 @@ static char *get_value_from_mapping(json_object *param_obj, int json_version, ch
 			if (rpc && (json_version & JSON_VERSION_1) && strcmp(json_object_get_string(rpc), "get") != 0)
 				continue;
 
-			if (type && strcmp(json_object_get_string(type), "uci") == 0) {
+			char *type_value = type ? json_object_get_string(type) : NULL;
+			if (type_value == NULL)
+				break;
+
+			if (strcmp(type_value, "uci") == 0) {
 				val = uci_get_value(mapping, json_version, refparam, ctx, data, instance);
 				break;
-			} else if (type && strcmp(json_object_get_string(type), "ubus") == 0) {
+			} else if (strcmp(type_value, "ubus") == 0) {
 				val = ubus_get_value(mapping, json_version, refparam, ctx, data, instance);
 				break;
-			} else if (type && strcmp(json_object_get_string(type), "uci_sec") == 0 && (json_version & JSON_VERSION_1)) {
-				val = uci_v1_get_value(mapping, refparam, ctx, data, instance);
+			} else if (((strcmp(type_value, "uci_sec") == 0) || (strcmp(type_value, "dmmap_sec") == 0)) && (json_version & JSON_VERSION_1)) {
+				val = uci_v1_get_value(mapping, refparam, ctx, data, instance, !strcmp(type_value, "dmmap_sec"));
 				break;
-			} else if (type && strcmp(json_object_get_string(type), "json") == 0 && (json_version & JSON_VERSION_1)) {
+			} else if (strcmp(type_value, "json") == 0 && (json_version & JSON_VERSION_1)) {
 				val = ubus_v1_get_value(mapping, refparam, ctx, data, instance);
 				break;
 			} else
@@ -1509,22 +1527,56 @@ static int ubus_set_value(json_object *mapping_obj, int json_version, char *refp
 	return res;
 }
 
-static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
+static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, bool is_dmmap)
 {
 	struct json_object *data_s = NULL;
-	struct json_object *key = NULL;
+	struct json_object *key = NULL, *list = NULL;
 
 	json_object_object_get_ex(mapping_obj, "data", &data_s);
 	json_object_object_get_ex(mapping_obj, "key", &key);
+	json_object_object_get_ex(mapping_obj, "list", &list);
 
-	if (data == NULL || key == NULL || data_s == NULL || strcmp(json_object_get_string(data_s), "@Parent") != 0)
+	if (data == NULL || data_s == NULL || strcmp(json_object_get_string(data_s), "@Parent") != 0)
 		return -1;
 
-	if (strstr(refparam, ".Alias")) {
-		return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, json_object_get_string(key), instance, value);
-	} else {
-		return dmuci_set_value_by_section(((struct dm_data *)data)->config_section, json_object_get_string(key), value);
+	char *key_value = key ? json_object_get_string(key) : NULL;
+	char *list_value = list ? json_object_get_string(list) : NULL;
+
+	struct uci_section *req_sec = is_dmmap ? ((struct dm_data *)data)->dmmap_section : ((struct dm_data *)data)->config_section;
+
+	if (list_value) {
+		if (value != NULL) {
+			dmuci_delete_by_section(req_sec, list_value, NULL);
+
+			char *p = strtok(value, ",");
+			while (p) {
+				strip_lead_trail_whitespace(p);
+				dmuci_add_list_value_by_section(req_sec, list_value, p);
+				p = strtok(NULL, ",");
+			}
+		}
+
+		return 0;
 	}
+
+	if (key_value) {
+		if (strcmp(key_value, "@Name") == 0) {
+			char sec_name[256] = {0};
+
+			if (dmuci_set_section_name(value, sec_name, sizeof(sec_name)))
+				return -1;
+
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "section_name", sec_name);
+			dmuci_rename_section_by_section(((struct dm_data *)data)->config_section, sec_name);
+			return 0;
+		} else if (strstr(refparam, ".Alias")) {
+			return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, key_value, instance, value);
+		} else {
+			return dmuci_set_value_by_section(req_sec, key_value, value);
+		}
+	}
+
+	return -1;
 }
 
 static int set_value_from_mapping(json_object *param_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
@@ -1560,12 +1612,16 @@ static int set_value_from_mapping(json_object *param_obj, int json_version, char
 			if (rpc && (json_version & JSON_VERSION_1) && strcmp(json_object_get_string(rpc), "set") != 0)
 				continue;
 
-			if (type && strcmp(json_object_get_string(type), "uci") == 0)
+			char *type_value = type ? json_object_get_string(type) : NULL;
+			if (type_value == NULL)
+				return -1;
+
+			if (strcmp(type_value, "uci") == 0)
 				res = uci_set_value(mapping, json_version, refparam, ctx, data, instance, value);
-			else if (type && strcmp(json_object_get_string(type), "ubus") == 0)
+			else if (strcmp(type_value, "ubus") == 0)
 				res = ubus_set_value(mapping, json_version, refparam, ctx, data, instance, value);
-			else if (type && strcmp(json_object_get_string(type), "uci_sec") == 0 && (json_version & JSON_VERSION_1))
-				res = uci_v1_set_value(mapping, json_version, refparam, ctx, data, instance, value);
+			else if (((strcmp(type_value, "uci_sec") == 0) || (strcmp(type_value, "dmmap_sec") == 0)) && (json_version & JSON_VERSION_1))
+				res = uci_v1_set_value(mapping, json_version, refparam, ctx, data, instance, value, !strcmp(type_value, "dmmap_sec"));
 			else
 				res = -1;
 
