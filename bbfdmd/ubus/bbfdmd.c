@@ -64,9 +64,9 @@ static void sig_handler(int sig)
 
 static void service_sig_handler(int sig)
 {
-	WARNING("# PID[%ld] received %d signal ...", getpid(), sig);
+	WARNING("# Micro-service PID[%ld] received %d signal ...", getpid(), sig);
 	if (sig == SIGSEGV) {
-		ERR("# Exception in PID[%ld] ...", getpid());
+		ERR("# Micro-service  in PID[%ld] ...", getpid());
 	}
 	exit(-1);
 }
@@ -1083,7 +1083,7 @@ static int bbfdm_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 			    struct blob_attr *msg)
 {
 	struct blob_attr *tb[__BBF_NOTIFY_MAX] = {NULL};
-	char method_name[40] = {0};
+	char method_name[256] = {0};
 	struct bbfdm_context *u;
 
 	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
@@ -1132,7 +1132,7 @@ static struct ubus_object bbf_object = {
 static void run_schema_updater(struct bbfdm_context *u)
 {
 	bool ret;
-	char method_name[45] = {0};
+	char method_name[256] = {0};
 
 	ret = is_object_schema_update_available(u);
 	if (ret && (is_micro_service == false)) {
@@ -1172,7 +1172,7 @@ static void broadcast_add_del_event(const char *method, struct list_head *inst, 
 	a = blobmsg_open_array(&bb, "instances");
 	list_for_each_entry(ptr, inst, list) {
 		blobmsg_add_string(&bb, NULL, ptr->path);
-		DEBUG("#%s:: %s #", (is_add)?"Add":"Del", ptr->path);
+		DEBUG("#%s:: %s, method %s #", (is_add)?"Add":"Del", ptr->path, method);
 	}
 	blobmsg_close_array(&bb, a);
 
@@ -1383,10 +1383,10 @@ static bool register_service(struct ubus_context *ctx)
 	blobmsg_add_string(&bb, "name", u->config.out_name);
 	blobmsg_add_string(&bb, "parent_dm", u->config.out_parent_dm);
 
-	if (DM_STRLEN(u->config.multi_object[0]) != 0) {
+	if (DM_STRLEN(u->config.out_multi_objects[0]) != 0) {
 		void *arr = blobmsg_open_array(&bb, "multiple_objects");
-		for (int i = 0; i < MAX_MULTI_OBJS && DM_STRLEN(u->config.multi_object[i]) != 0; i++)
-			blobmsg_add_string(&bb, NULL, u->config.multi_object[i]);
+		for (int i = 0; i < MAX_MULTI_OBJS && DM_STRLEN(u->config.out_multi_objects[i]) != 0; i++)
+			blobmsg_add_string(&bb, NULL, u->config.out_multi_objects[i]);
 		blobmsg_close_array(&bb, arr);
 	} else {
 		blobmsg_add_string(&bb, "object", u->config.out_object);
@@ -1445,11 +1445,6 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 		config->subprocess_level = BBF_SUBPROCESS_DEPTH;
 	}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "output", "name");
-	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->out_name, opt_val, sizeof(config->out_name));
-	}
-
 	opt_val = dmjson_get_value(deamon_obj, 2, "output", "parent_dm");
 	if (DM_STRLEN(opt_val)) {
 		strncpyt(config->out_parent_dm, opt_val, sizeof(config->out_parent_dm));
@@ -1466,7 +1461,7 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 
 	dmjson_foreach_value_in_array(deamon_obj, arr_obj, mem_obj, i, 2, "output", "multiple_objects") {
 		if (i < MAX_MULTI_OBJS) {
-			replace_str(mem_obj, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, config->multi_object[i], sizeof(config->multi_object[i]));
+			replace_str(mem_obj, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, config->out_multi_objects[i], sizeof(config->out_multi_objects[i]));
 		} else {
 			WARNING("More multiple_object defined, can handle only %d ...", MAX_MULTI_OBJS);
 			break;
@@ -1476,6 +1471,31 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 	opt_val = dmjson_get_value(deamon_obj, 2, "output", "root_obj");
 	if (DM_STRLEN(opt_val)) {
 		strncpyt(config->out_root_obj, opt_val, sizeof(config->out_root_obj));
+	}
+
+	opt_val = dmjson_get_value(deamon_obj, 2, "output", "name");
+	if (is_micro_service == false) {
+		strncpyt(config->out_name, opt_val, sizeof(config->out_name));
+	} else {
+		char val[256] = {0};
+
+		if (DM_STRLEN(config->out_object)) {
+			snprintf(val, sizeof(val), "%s.%s", config->out_root_obj, config->out_object);
+		} else { //out_multi_objects present
+			snprintf(val, sizeof(val), "%s", config->out_root_obj);
+			for (i = 0; i < MAX_MULTI_OBJS; i++) {
+				if (DM_STRLEN(config->out_multi_objects[i]) == 0) {
+					break;
+				}
+				if (i == 0) {
+					snprintf(val, sizeof(val), "%s.%s", config->out_root_obj, config->out_multi_objects[0]);
+				} else {
+					int len = DM_STRLEN(val);
+					snprintf(val+len, sizeof(val) - len, "_%s", config->out_multi_objects[i]);
+				}
+			}
+		}
+		strncpyt(config->out_name, val, sizeof(config->out_name));
 	}
 
 	opt_val = dmjson_get_value(deamon_obj, 2, "input", "plugin_dir");
@@ -1676,7 +1696,7 @@ int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 			return -1;
 		}
 
-		if (DM_STRLEN(daemon_ctx->config.out_object) == 0 && DM_STRLEN(daemon_ctx->config.multi_object[0]) == 0) {
+		if (DM_STRLEN(daemon_ctx->config.out_object) == 0 && DM_STRLEN(daemon_ctx->config.out_multi_objects[0]) == 0) {
 			ERR("output object and multiple_objects both are not defined");
 			return -1;
 		}

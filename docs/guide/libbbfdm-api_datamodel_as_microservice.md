@@ -71,7 +71,6 @@ It's a three step process, if DotSO or JSON plugin already present, if not refer
 		},
 		"output": {
 			"type": "UBUS",
-			"name": "bbfdm.bulkdata",  // name of the ubus object to register for micro-service
 			"parent_dm": "Device.",    // Parent tree to attach the plugin
 			"object": "BulkData",      // Name of the object
 			"root_obj": "bbfdm"        // Name of the root tree ubus object which is bbfdm

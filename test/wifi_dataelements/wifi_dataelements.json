@@ -6,7 +6,6 @@
 		},
 		"output": {
 			"type": "UBUS",
-			"name": "bbfdm.dataelements",
 			"parent_dm": "Device.WiFi.",
 			"object": "DataElements",
 			"root_obj": "bbfdm"

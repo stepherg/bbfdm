@@ -27,10 +27,10 @@ typedef struct bbfdm_config {
 	char in_name[128];
 	char in_plugin_dir[128];
 	char out_type[32];
-	char out_name[32];
+	char out_name[128];
 	char out_parent_dm[32];
 	char out_object[32];
-	char multi_object[MAX_MULTI_OBJS][32];
+	char out_multi_objects[MAX_MULTI_OBJS][32];
 	char out_root_obj[32];
 	char cli_in_type[32];
 	char cli_in_name[128];

@@ -69,7 +69,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 
 	struct dm_parameter *param = NULL;
 	struct blob_buf b = {0}, bb = {0};
-	char method_name[64] = {0};
+	char method_name[256] = {0};
 
 	memset(&b, 0, sizeof(struct blob_buf));
 	memset(&bb, 0, sizeof(struct blob_buf));
