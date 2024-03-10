@@ -79,11 +79,27 @@ It's a three step process, if DotSO or JSON plugin already present, if not refer
 }
 ```
 
-3. Update init script to start the datamodel micro-service, which made simpler with `bbfdm` [init hooks](https://dev.iopsys.eu/feed/iopsys/-/commit/8bdfd3ea51a81941ee9c53a46a66cf6c0f6eb88f)
+3. Add an uci-default script to add the micro-service in bbfdm
 
 ```bash
-. /etc/bbfdm/bbfdm_services.sh
-bbfdm_add_service "bbfdm.bulkdata" "/etc/bulkdata/input.json"
+$ cat bulkdata/files/etc/uci-defaults/50_add_bulkdata_dm_microservice
+#!/bin/sh
+
+if ! uci -q get bbfdm.bulkdata >/dev/null; then
+        uci set bbfdm.bulkdata=micro_service
+        uci set bbfdm.bulkdata.enable=1
+        uci set bbfdm.bulkdata.input_json="/etc/bulkdata/input.json"
+        uci set bbfdm.bulkdata.loglevel=1
+fi
+```
+
+Which adds a micro-service handler into bbfdm uci
+
+```bash
+config micro_service 'bulkdata'
+        option enable '1'
+        option input_json '/etc/bulkdata/input.json'
+        option loglevel '1'
 ```
 
 ## When to switch to micro-service model

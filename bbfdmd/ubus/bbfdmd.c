@@ -975,16 +975,12 @@ static const struct blobmsg_policy service_policy[] = {
 static void service_list(struct blob_buf *bb)
 {
 	void *array;
-	char val[32] = {0};
-	char cmd[] = "grep -hsw bbfdm_add_service /etc/init.d/*|wc -l";
 
 	array = blobmsg_open_array(bb, "supported_cmd");
 	blobmsg_add_string(bb, NULL, "register");
 	blobmsg_add_string(bb, NULL, "list");
 	blobmsg_close_array(bb, array);
 
-	run_cmd(cmd, val, sizeof(val));
-	blobmsg_add_u32(bb, "expected_services_num", atoi(val));
 	array = blobmsg_open_array(bb, "registered_service");
 	get_list_of_registered_service(&head_registered_service, bb);
 	blobmsg_close_array(bb, array);
