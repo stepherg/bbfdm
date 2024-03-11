@@ -162,6 +162,14 @@
         "-I libdmtree",
         "-I libdm/common"
       ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/port-trigger.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "bbf_plugin/nat_porttrigger.c"
+      ]
     }
   ],
   "output": {
