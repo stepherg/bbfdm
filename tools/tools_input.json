@@ -74,7 +74,7 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "urlfilter/files/etc/bbfdm/plugins/urlfilter.json",
+        "urlfilter/files/etc/urlfilter/urlfilter.json",
         "obuspa/files/etc/bbfdm/json/USPAgent.json",
         "icwmp/files/etc/bbfdm/json/CWMPManagementServer.json",
         "ponmngr/files/etc/bbfdm/json/xpon.json"
