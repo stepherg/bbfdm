@@ -318,6 +318,10 @@ except ValueError:
 for __key, __value in json_data.items():
 
     if __key == "json_plugin_version":
+
+        if not isinstance(__value, int) or __value not in [0, 1, 2]:
+            raise ValueError("Invalid value for json_plugin_version")
+
         JSON_PLUGIN_VERSION = __value
         continue
 
