@@ -170,6 +170,16 @@
       "dm_files": [
         "bbf_plugin/nat_porttrigger.c"
       ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/hal/dslmngr.git",
+      "proto": "git",
+      "dm_files": [
+        "bbf_plugin/dsl.c",
+	"bbf_plugin/fast.c",
+        "bbf_plugin/atm.c",
+	"bbf_plugin/ptm.c"
+      ]
     }
   ],
   "output": {

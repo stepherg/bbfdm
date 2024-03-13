@@ -98,3 +98,7 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | Device.DynamicDNS.	                       | ddnsmngr       | https://dev.iopsys.eu/bbf/ddnsmngr.git       |
 | Device.Hosts.		                       | hostmngr       | https://dev.iopsys.eu/iopsys/hostmngr.git    |
 | Device.Services.VoiceService.            | tr104          | https://dev.iopsys.eu/voice/tr104.git        |
+| Device.DSL.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
+| Device.FAST.                             | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
+| Device.ATM.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
+| Device.PTM.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |

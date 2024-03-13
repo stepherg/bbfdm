@@ -18,15 +18,11 @@
 #include "ethernet.h"
 #include "bridging.h"
 #include "wifi.h"
-#include "atm.h"
-#include "ptm.h"
 #include "dhcpv4.h"
 #include "nat.h"
 #include "ppp.h"
 #include "routing.h"
 #include "firewall.h"
-#include "dsl.h"
-#include "fast.h"
 #include "dhcpv6.h"
 #include "interfacestack.h"
 #include "qos.h"
@@ -96,10 +92,6 @@ DMOBJ tDeviceObj[] = {
 {"Bridging", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tBridgingObj, tBridgingParams, NULL, BBFDM_BOTH, NULL},
 {"IP", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tIPObj, tIPParams, NULL, BBFDM_BOTH, NULL},
 {"Ethernet", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tEthernetObj, tEthernetParams, NULL, BBFDM_BOTH, NULL},
-{"DSL", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, NULL, tDSLObj, tDSLParams, NULL, BBFDM_BOTH, NULL},
-{"FAST", &DMREAD, NULL, NULL, "ubus:fast", NULL, NULL, NULL, tFASTObj, tFASTParams, NULL, BBFDM_BOTH, NULL},
-{"ATM", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, NULL, tATMObj, NULL, NULL, BBFDM_BOTH, NULL},
-{"PTM", &DMREAD, NULL, NULL, "file:/etc/config/dsl", NULL, NULL, NULL, tPTMObj, NULL, NULL, BBFDM_BOTH, NULL},
 {"DHCPv4", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/dhcp.sh,/etc/config/dhcp", NULL, NULL, NULL, tDHCPv4Obj, tDHCPv4Params, NULL, BBFDM_BOTH, NULL},
 {"DHCPv6", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/dhcpv6.sh,/etc/config/dhcp", NULL, NULL, NULL, tDHCPv6Obj, tDHCPv6Params, NULL, BBFDM_BOTH, NULL},
 {"NAT", &DMREAD, NULL, NULL, "file:/etc/config/firewall", NULL, NULL, NULL, tNATObj, tNATParams, NULL, BBFDM_BOTH, NULL},
