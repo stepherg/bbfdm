@@ -229,20 +229,6 @@ static int plugin_leaf_nextlevel_match(DMOBJECT_ARGS)
 	return FAULT_9005;
 }
 
-static int plugin_obj_supported_dm_match(DMOBJECT_ARGS)
-{
-	if (node->matched)
-		return 0;
-
-	if (!dmctx->inparam_isparam && DM_STRSTR(node->current_object,dmctx->in_param) == node->current_object) {
-		node->matched ++;
-		dmctx->findparam = 1;
-		return 0;
-	}
-
-	return 0;
-}
-
 static int plugin_obj_wildcard_match(DMOBJECT_ARGS)
 {
 	if (node->matched)
@@ -1065,6 +1051,7 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 {
 	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
+	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
@@ -1073,7 +1060,7 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 
 	dmubus_call(ubus_name, "get",
 			UBUS_ARGS{
-						{"path", dmctx->in_param, String},
+						{"path", in_path, String},
 						{"optional", json_object_to_json_string(in_args), Table}
 			},
 			2, &res);
@@ -1143,6 +1130,7 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 {
 	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
+	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
@@ -1151,14 +1139,11 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 
 	dmubus_call(ubus_name, "schema",
 			UBUS_ARGS{
-						{"path", dmctx->in_param, String},
+						{"path", in_path, String},
 						{"first_level", dmctx->nextlevel ? "1" : "0", Boolean},
-						{"commands", dmctx->iscommand ? "1" : "0", Boolean},
-						{"events", dmctx->isevent ? "1" : "0", Boolean},
-						{"params", dmctx->isinfo ? "1" : "0", Boolean},
 						{"optional", json_object_to_json_string(in_args), Table}
 			},
-			6, &res);
+			3, &res);
 
 	json_object_put(in_args);
 
@@ -1170,6 +1155,10 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 		return 0;
 
 	size_t nbre_obj = json_object_array_length(res_array);
+	if (nbre_obj == 0) {
+		dmctx->findparam = 1;
+		return 0;
+	}
 
 	for (size_t i = 0; i < nbre_obj; i++) {
 		res_obj = json_object_array_get_idx(res_array, i);
@@ -1177,6 +1166,8 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
 		if (DM_STRLEN(fault))
 			continue;
+
+		dmctx->findparam = 1;
 
 		char *path = dmjson_get_value(res_obj, 1, "path");
 		char *data = dmjson_get_value(res_obj, 1, "data");
@@ -1501,6 +1492,7 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 	unsigned int in_path_dot_num = count_occurrences(dmctx->in_param, '.');
 	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
+	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string("cwmp"));
@@ -1509,7 +1501,7 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 
 	dmubus_call(ubus_name, "schema",
 			UBUS_ARGS{
-						{"path", dmctx->in_param, String},
+						{"path", in_path, String},
 						{"first_level", dmctx->nextlevel ? "1" : "0", Boolean},
 						{"optional", json_object_to_json_string(in_args), Table}
 			},
@@ -2070,6 +2062,7 @@ int dm_entry_get_supported_dm(struct dmctx *ctx)
 	DMOBJ *root = ctx->dm_entryobj;
 	DMNODE node = {.current_object = ""};
 	size_t plen = DM_STRLEN(ctx->in_param);
+	int err = 0;
 
 	if (plen == 0 || ctx->in_param[plen - 1] != '.')
 		return FAULT_9005;
@@ -2078,12 +2071,14 @@ int dm_entry_get_supported_dm(struct dmctx *ctx)
 	ctx->isgetschema = 1;
 	ctx->findparam = 1;
 	ctx->stop =0;
-	ctx->checkobj = plugin_obj_supported_dm_match;
+	ctx->checkobj = plugin_obj_match;
 	ctx->checkleaf = NULL;
 	ctx->method_obj = mobj_get_supported_dm;
 	ctx->method_param = mparam_get_supported_dm;
 
-	return dm_browse(ctx, &node, root, NULL, NULL);
+	err = dm_browse(ctx, &node, root, NULL, NULL);
+
+	return (ctx->findparam) ? 0 : err;
 }
 
 /* **************
