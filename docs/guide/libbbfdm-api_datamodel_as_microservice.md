@@ -60,11 +60,14 @@ Micro-service approach, disintegrate the plugins further and run them as individ
 It's a three step process, if DotSO or JSON plugin already present, if not refer to the plugins document.
 
 1. Install the DotSO/JSON plugin to non-bbf plugin location
-2. Create an input.json file, like below
+2. Create an json file with required input parameters, like below
 
 ```json
 {
 	"daemon": {
+		"config": {
+			"loglevel": "1"
+		},
 		"input": {
 			"type": "JSON",  // JSON or DotSO
 			"name": "/etc/bulkdata/bulkdata.json" // Path of the plugin
@@ -79,28 +82,30 @@ It's a three step process, if DotSO or JSON plugin already present, if not refer
 }
 ```
 
-3. Add an uci-default script to add the micro-service in bbfdm
+3. Place this json file in micro-service(`/etc/bbfdm/micro_services`) directory
 
 ```bash
-$ cat bulkdata/files/etc/uci-defaults/50_add_bulkdata_dm_microservice
-#!/bin/sh
-
-if ! uci -q get bbfdm.bulkdata >/dev/null; then
-        uci set bbfdm.bulkdata=micro_service
-        uci set bbfdm.bulkdata.enable=1
-        uci set bbfdm.bulkdata.input_json="/etc/bulkdata/input.json"
-        uci set bbfdm.bulkdata.loglevel=1
-fi
+$ cat /etc/bbfdm/micro_services/bulkdata.json
+{
+	"daemon": {
+		"config": {
+			"loglevel": "1"
+		},
+		"input": {
+			"type": "JSON",
+			"name": "/etc/bulkdata/bulkdata.json"
+		},
+		"output": {
+			"type": "UBUS",
+			"parent_dm": "Device.",
+			"object": "BulkData",
+			"root_obj": "bbfdm"
+		}
+	}
+}
 ```
 
-Which adds a micro-service handler into bbfdm uci
-
-```bash
-config micro_service 'bulkdata'
-        option enable '1'
-        option input_json '/etc/bulkdata/input.json'
-        option loglevel '1'
-```
+Which then gets started by `bbfdmd` init script.
 
 ## When to switch to micro-service model
 There are few parameters which can help in answer this query,

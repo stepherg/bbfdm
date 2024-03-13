@@ -176,9 +176,9 @@
       "proto": "git",
       "dm_files": [
         "bbf_plugin/dsl.c",
-	"bbf_plugin/fast.c",
+        "bbf_plugin/fast.c",
         "bbf_plugin/atm.c",
-	"bbf_plugin/ptm.c"
+        "bbf_plugin/ptm.c"
       ]
     }
   ],

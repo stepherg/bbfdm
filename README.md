@@ -95,9 +95,11 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | Device.PeriodicStatistics.		       | periodicstats  | https://dev.iopsys.eu/bbf/periodicstats.git  |
 | Device.SoftwareModules.		           | swmodd         | https://dev.iopsys.eu/lcm/swmodd.git         |
 | Device.Time.		                       | timemngr       | https://dev.iopsys.eu/bbf/timemngr.git       |
-| Device.DynamicDNS.	                       | ddnsmngr       | https://dev.iopsys.eu/bbf/ddnsmngr.git       |
+| Device.DynamicDNS.	                   | ddnsmngr       | https://dev.iopsys.eu/bbf/ddnsmngr.git       |
 | Device.Hosts.		                       | hostmngr       | https://dev.iopsys.eu/iopsys/hostmngr.git    |
 | Device.Services.VoiceService.            | tr104          | https://dev.iopsys.eu/voice/tr104.git        |
+| Device.NAT.PortTrigger.	               | port-trigger   | https://dev.iopsys.eu/network/port-trigger.git |
+| Device.DNS.                              | dnsmngr        | https://dev.iopsys.eu/network/dnsmngr.git    |
 | Device.DSL.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
 | Device.FAST.                             | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
 | Device.ATM.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
