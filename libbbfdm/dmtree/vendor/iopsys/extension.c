@@ -12,7 +12,6 @@
 #include "device.h"
 #include "deviceinfo.h"
 #include "bridging.h"
-#include "ethernet.h"
 #include "ip.h"
 #include "times.h"
 #include "wifi.h"
@@ -22,7 +21,6 @@ DM_MAP_OBJ tDynamicObj[] = {
 /* parentobj, nextobject, parameter */
 {"Device.", tIOPSYS_DeviceObj, NULL},
 {"Device.DeviceInfo.", NULL, tIOPSYS_DeviceInfoParams},
-{"Device.Ethernet.", tIOPSYS_EthernetObj, NULL},
 {"Device.Time.", NULL, tIOPSYS_TimeParams},
 {"Device.Bridging.Bridge.{i}.Port.{i}.", NULL, tIOPSYS_BridgingBridgePortParams},
 {"Device.WiFi.AccessPoint.{i}.", NULL, tIOPSYS_WiFiAccessPointParams},
