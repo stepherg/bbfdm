@@ -872,8 +872,12 @@ static char *get_value_by_reference(struct dmctx *ctx, char *value)
 			goto end;
 
 		int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
-		if (n != 2)
-			goto end;
+		if (n != 2) {
+			n = sscanf(match_str, "%255[^=]==%255[^]]", key_name, key_value);
+			if (n != 2) {
+				goto end;
+			}
+		}
 
 		snprintf(path + len, sizeof(path) - len, "*.%s", key_name);
 

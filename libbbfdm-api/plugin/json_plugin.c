@@ -44,6 +44,8 @@ struct dm_json_obj {
 	event_args event_arg;
 };
 
+static int handle_linker_json_object(struct json_object *linker_jobj, struct dmctx *ctx, char *in, char **out);
+
 static void save_json_data(struct list_head *json_list, char *name, json_object *data, int json_version,
 			   const char **in_p, const char **out_p, const char **ev_arg)
 {
@@ -714,11 +716,6 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 		opt_temp = json_object_get_string(option_name);
 	}
 
-	if (linker_jobj) {
-		char *link = json_object_get_string(linker_jobj);
-		linker = replace_str(link, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, NULL, 0);
-	}
-
 	if (file && type && opt_temp && strstr(refparam, "NumberOfEntries")) {
 
 		if (strcmp(opt_temp, "@Count") != 0 && (json_version & JSON_VERSION_1))
@@ -763,7 +760,7 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 					dmuci_get_option_value_string(json_object_get_string(file), uci_type, opt_temp, &res);
 
 				if (linker_jobj)
-					adm_entry_get_reference_param(ctx, linker, res, &value);
+					handle_linker_json_object(linker_jobj, ctx, res, &value);
 				else
 					value = res;
 			} else {
@@ -782,7 +779,7 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 			dmuci_get_option_value_string(json_object_get_string(file), json_object_get_string(section_name), opt_temp, &res);
 
 			if (linker_jobj)
-				adm_entry_get_reference_param(ctx, linker, res, &value);
+				handle_linker_json_object(linker_jobj, ctx, res, &value);
 			else
 				value = res;
 		} else {
@@ -872,6 +869,24 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 	return value;
 }
 
+static int handle_linker_json_object(struct json_object *linker_jobj, struct dmctx *ctx, char *in, char **out)
+{
+	char *link = json_object_get_string(linker_jobj);
+	char linker[256] = {0}, ref[256] = {0};
+	char *external_ref = NULL;
+
+	replace_str(link, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, linker, sizeof(linker));
+	external_ref = strstr(link, "==");
+	if (external_ref == NULL) {
+		adm_entry_get_reference_param(ctx, linker, in, out);
+	} else {
+		replace_str(linker, "@key", in, ref, sizeof(ref));
+		*out = dmstrdup(ref);
+	}
+
+	return 0;
+}
+
 static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance, bool is_dmmap)
 {
 	struct json_object *data_s = NULL;
@@ -909,12 +924,7 @@ static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct d
 
 			dmuci_get_value_by_section_string(req_sec, key_value, &res);
 			if (linker_jobj) {
-				char *link = json_object_get_string(linker_jobj);
-				char *linker = NULL;
-
-				linker = replace_str(link, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, NULL, 0);
-				adm_entry_get_reference_param(ctx, linker, res, &value);
-				FREE(linker);
+				handle_linker_json_object(linker_jobj, ctx, res, &value);
 			} else {
 				value = res;
 			}
@@ -945,12 +955,7 @@ static char *ubus_v1_get_value(json_object *mapping_obj, char *refparam, struct 
 		json_object *json_obj = get_requested_json_obj(((struct dm_data *)data)->json_object, instance, json_object_get_string(key), key_name, sizeof(key_name));
 		res = dmjson_get_value(json_obj, 1, key_name);
 		if (linker_jobj) {
-			char *link = json_object_get_string(linker_jobj);
-			char *linker = NULL;
-
-			linker = replace_str(link, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, NULL, 0);
-			adm_entry_get_reference_param(ctx, linker, res, &value);
-			FREE(linker);
+			handle_linker_json_object(linker_jobj, ctx, res, &value);
 		} else {
 			value = res;
 		}
