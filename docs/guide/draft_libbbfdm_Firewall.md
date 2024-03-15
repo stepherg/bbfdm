@@ -384,3 +384,38 @@ forwarding via the config forwarding section in the firewall uci. Infact, could 
 the option input to Policy.TargetChain and ouput to Policy.ReverseTargetChain parameter and
 handle value for option input and output via a single instance of Firewall.Policy object.
 
+# Handling firewall include sections
+
+One of the motivations behind the firewallmngr is to get rid of the long list of include
+sections that we have in the firewall uci at the moment and also to make it possible to
+achieve firewall modifications by standard firewall uci params as much as possible. The
+added advantage with this is that we do not have to worry about the undelying fw3 or fw4.
+
+Hence, it is proposed that the firewall include sections that can be replaced are identified
+and replaced. The following is proposed with this regards,
+* firewall.user - cannot be replaced and is maintained as is in the firewall uci config
+* firewall.ddos - cannot be replaced and is maintained as is in the firewall uci config
+* firewall.dmz - is replaced. The firewallmngr library script should take care that the
+  data model params are converted to corresponding config redirect section.
+* firewall.protect_port - cannot be replaced
+* firewall.mast - is replaced. The mcastmngr should generate the corresponding firewall rule section.
+  Also, mcastmngr should have a service trigger for firewallmngr so that rules are maintained
+  over firewall reload and are not deleted on firewallmngr reloads.
+* firewall.cwmp - is replaced. The icwmpd should generate the corresponding firewall rule section.
+  Also, icwmpd should have service trigger for firewallmngr to maintain rules over reloads.
+* firewall.twamp - is replaced. The twamp rules should be generated in firewall rule section format.
+  Also, should be maintained over firewallmngr reloads.
+* firewall.portmap - is replaced. The firewallmngr library script should take care that the
+  data model params are converted to corresponding config redirect section.
+* firewall.service - is replaced. The firewallmngr library script should take care that the
+  data model params are converted to corresponding config rule section.
+* firewall.include of miniupnpd - find ways of handling this from inside miniupnpd. The new
+  improved init scripts seems to be making efforts in this direction and should perhaps be
+  evaluated, enhanced and reused.
+* qca-nss-ecm - cannot be replaced, is qualcomm specific. Should be maintained.
+* firewall.hosts - is replaced. The hostmngr should generate the corresponding firewall rule section.
+  Aslo, should be maintained over firewallmngr reloads.
+
+Any future firewall rules needed by any manager should be directly added to firewall uci file using
+the standard firewall uci sections and options as much as possible.
+
