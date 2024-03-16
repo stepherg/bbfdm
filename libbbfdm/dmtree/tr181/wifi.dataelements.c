@@ -3199,7 +3199,6 @@ end:
 	return 0;
 }
 
-/*
 static operation_args WiFiDataElementsNetworkDevice_SetSTASteeringState_args = {
 	.in = (const char *[]) {
 		"Disallowed",
@@ -3229,7 +3228,9 @@ static int operate_WiFiDataElementsNetworkDevice_SetSTASteeringState(char *refpa
 	}
 
 	string_to_bool(disallowed, &b);
-	dmuci_set_value_by_section((((struct dm_data *)data)->config_section)->config_section, "steer_disallow", b ? "1" : "0");
+	dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "steer_disallow", b ? "1" : "0");
+
+	// Commit mapcontroller config changes
 	dmuci_save_package("mapcontroller");
 	dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
 
@@ -3238,6 +3239,7 @@ end:
 	return 0;
 }
 
+/*
 static operation_args WiFiDataElementsNetworkDevice_SetDFSState_args = {
 	.in = (const char *[]) {
 		"DFSEnable",
@@ -3349,6 +3351,139 @@ static int operate_WiFiDataElementsNetworkDeviceRadio_WiFiRestart(char *refparam
     //TODO
     return 0;
 }*/
+
+static operation_args wifidataelementsnetworkdevicemultiapdevicebackhaul_steerwifibackhaul_args = {
+    .in = (const char *[]) {
+        "TargetBSS",
+        "Channel", // NOT used by ubus map.controller steer_backhaul
+        "TimeOut",
+        NULL
+    },
+    .out = (const char *[]) {
+        "Status",
+        NULL
+    }
+};
+
+static int get_operate_args_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+    *value = (char *)&wifidataelementsnetworkdevicemultiapdevicebackhaul_steerwifibackhaul_args;
+    return 0;
+}
+
+static int operate_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	json_object *res = NULL;
+	char *status = "Success";
+
+	char *target_bbs = dmjson_get_value((json_object *)value, 1, "TargetBSS");
+	char *time_out = dmjson_get_value((json_object *)value, 1, "TimeOut");
+	if (DM_STRLEN(target_bbs) == 0 || DM_STRLEN(time_out) == 0) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	char *agent = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "ID");
+	if (DM_STRLEN(agent) == 0) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	char *bsta = dmjson_get_value(((struct dm_data *)data)->json_object, 3, "MultiAPDevice", "Backhaul", "MACAddress");
+	if (DM_STRLEN(bsta) == 0) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	dmubus_call("map.controller", "steer_backhaul", UBUS_ARGS{{"agent", agent, String},
+															{"target_bssid", target_bbs, String},
+															{"bsta", bsta, String},
+															{"timeout", time_out, Integer}}, 4, &res);
+
+	if (res == NULL) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	char *res_status = dmjson_get_value((json_object *)res, 1, "status");
+	if (DM_STRCMP(res_status, "ok") != 0)
+		status = "Error_Other";
+
+end:
+	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
+	return 0;
+}
+
+static operation_args wifidataelementsnetworkdeviceradiobssstamultiapsta_btmrequest_args = {
+    .in = (const char *[]) {
+        "DisassociationImminent", // NOT used by ubus map.controller steer
+        "DisassociationTimer",
+        "BSSTerminationDuration", // NOT used by ubus map.controller steer
+        "ValidityInterval", // NOT used by ubus map.controller steer
+        "SteeringTimer", // NOT used by ubus map.controller steer
+        "TargetBSS",
+        NULL
+    },
+    .out = (const char *[]) {
+        "Status",
+        NULL
+    }
+};
+
+static int get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+    *value = (char *)&wifidataelementsnetworkdeviceradiobssstamultiapsta_btmrequest_args;
+    return 0;
+}
+
+static int operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	json_object *res = NULL;
+	char *status = "Success";
+	char buf[1024] = {0};
+	char *agent = NULL;
+
+	char *target_bbs = dmjson_get_value((json_object *)value, 1, "TargetBSS");
+	char *diass_timer = dmjson_get_value((json_object *)value, 1, "DisassociationTimer");
+	if (DM_STRLEN(target_bbs) == 0 || DM_STRLEN(diass_timer) == 0) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	DM_STRNCPY(buf, refparam, sizeof(buf));
+	char *p = DM_STRSTR(buf, "Radio");
+	if (p) *p = 0;
+
+	adm_entry_get_reference_value(ctx, buf, &agent);
+	if (DM_STRLEN(agent) == 0) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	char *sta = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "MACAddress");
+	if (DM_STRLEN(sta) == 0) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	dmubus_call("map.controller", "steer", UBUS_ARGS{{"agent", agent, String},
+															{"sta", sta, String},
+															{"target_bssid", target_bbs, String},
+															{"disassoc_tmo", diass_timer, Integer}}, 4, &res);
+
+	if (res == NULL) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
+
+	char *res_status = dmjson_get_value((json_object *)res, 1, "status");
+	if (DM_STRCMP(res_status, "ok") != 0)
+		status = "Error_Other";
+
+end:
+	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
+	return 0;
+}
 
 /*************************************************************
  * EVENTS
@@ -3567,7 +3702,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceParams[] = {
 {"SPRuleNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_SPRuleNumberOfEntries, NULL, BBFDM_BOTH},
 {"AnticipatedChannelsNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_AnticipatedChannelsNumberOfEntries, NULL, BBFDM_BOTH},
 {"AnticipatedChannelUsageNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDevice_AnticipatedChannelUsageNumberOfEntries, NULL, BBFDM_BOTH},
-//{"SetSTASteeringState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetSTASteeringState, operate_WiFiDataElementsNetworkDevice_SetSTASteeringState, BBFDM_USP},
+{"SetSTASteeringState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetSTASteeringState, operate_WiFiDataElementsNetworkDevice_SetSTASteeringState, BBFDM_USP},
 //{"SetDFSState()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetDFSState, operate_WiFiDataElementsNetworkDevice_SetDFSState, BBFDM_USP},
 //{"SetAnticipatedChannelPreference()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDevice_SetAnticipatedChannelPreference, operate_WiFiDataElementsNetworkDevice_SetAnticipatedChannelPreference, BBFDM_USP},
 {0}
@@ -3724,7 +3859,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceMultiAPDeviceBackhaulParams[] = {
 {"BackhaulDeviceID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_BackhaulDeviceID, NULL, BBFDM_BOTH},
 {"MACAddress", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_MACAddress, NULL, BBFDM_BOTH},
 //{"CurrentOperatingClassProfileNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_CurrentOperatingClassProfileNumberOfEntries, NULL, BBFDM_BOTH},
-//{"SteerWiFiBackhaul()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, operate_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, BBFDM_USP},
+{"SteerWiFiBackhaul()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, operate_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiBackhaul, BBFDM_USP},
 {0}
 };
 
@@ -4189,7 +4324,7 @@ DMLEAF tWiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTAParams[] = {
 //{"Noise", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Noise, NULL, BBFDM_BOTH},
 {"SteeringHistoryNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_SteeringHistoryNumberOfEntries, NULL, BBFDM_BOTH},
 //{"Disassociate()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Disassociate, operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_Disassociate, BBFDM_USP},
-//{"BTMRequest()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, BBFDM_USP},
+{"BTMRequest()", &DMASYNC, DMT_COMMAND, get_operate_args_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, operate_WiFiDataElementsNetworkDeviceRadioBSSSTAMultiAPSTA_BTMRequest, BBFDM_USP},
 {0}
 };
 
