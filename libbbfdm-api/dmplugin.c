@@ -262,8 +262,8 @@ static int plugin_obj_match(char *in_param, struct dmnode *node)
 	return FAULT_9005;
 }
 
-static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry);
-static void dm_check_dynamic_obj_entry(DMNODE *parent_node, DMOBJ *entryobj, char *parent_obj, char *full_obj, DMOBJ **root_entry)
+static void dm_check_dynamic_obj(struct list_head *mem_list, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry);
+static void dm_check_dynamic_obj_entry(struct list_head *mem_list, DMNODE *parent_node, DMOBJ *entryobj, char *parent_obj, char *full_obj, DMOBJ **root_entry)
 {
 	DMNODE node = {0};
 	node.obj = entryobj;
@@ -271,7 +271,7 @@ static void dm_check_dynamic_obj_entry(DMNODE *parent_node, DMOBJ *entryobj, cha
 	node.instance_level = parent_node->instance_level;
 	node.matched = parent_node->matched;
 
-	dmasprintf(&(node.current_object), "%s%s.", parent_obj, entryobj->obj);
+	dm_dynamic_asprintf(mem_list, &(node.current_object), "%s%s.", parent_obj, entryobj->obj);
 	if (DM_STRCMP(node.current_object, full_obj) == 0) {
 		*root_entry = entryobj;
 		return;
@@ -282,15 +282,15 @@ static void dm_check_dynamic_obj_entry(DMNODE *parent_node, DMOBJ *entryobj, cha
 		return;
 
 	if (entryobj->nextobj || entryobj->nextdynamicobj)
-		dm_check_dynamic_obj(&node, entryobj->nextobj, full_obj, root_entry);
+		dm_check_dynamic_obj(mem_list, &node, entryobj->nextobj, full_obj, root_entry);
 }
 
-static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry)
+static void dm_check_dynamic_obj(struct list_head *mem_list, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry)
 {
 	char *parent_obj = parent_node->current_object;
 
 	for (; (entryobj && entryobj->obj); entryobj++) {
-		dm_check_dynamic_obj_entry(parent_node, entryobj, parent_obj, full_obj, root_entry);
+		dm_check_dynamic_obj_entry(mem_list, parent_node, entryobj, parent_obj, full_obj, root_entry);
 		if (*root_entry != NULL)
 			return;
 	}
@@ -303,7 +303,7 @@ static void dm_check_dynamic_obj(DMNODE *parent_node, DMOBJ *entryobj, char *ful
 					for (int j = 0; next_dyn_array->nextobj[j]; j++) {
 						DMOBJ *jentryobj = next_dyn_array->nextobj[j];
 						for (; (jentryobj && jentryobj->obj); jentryobj++) {
-							dm_check_dynamic_obj_entry(parent_node, jentryobj, parent_obj, full_obj, root_entry);
+							dm_check_dynamic_obj_entry(mem_list, parent_node, jentryobj, parent_obj, full_obj, root_entry);
 							if (*root_entry != NULL)
 								return;
 						}
@@ -321,13 +321,16 @@ DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path)
 
 	DMNODE node = {.current_object = ""};
 	DMOBJ *obj = NULL;
+	LIST_HEAD(local_mem);
 
 	char in_obj[1024] = {0};
 	replace_str(obj_path, ".{i}.", ".", in_obj, sizeof(in_obj));
 	if (strlen(in_obj) == 0)
 		return NULL;
 
-	dm_check_dynamic_obj(&node, entryobj, in_obj, &obj);
+	dm_check_dynamic_obj(&local_mem, &node, entryobj, in_obj, &obj);
+
+	dm_dynamic_cleanmem(&local_mem);
 
 	return obj;
 }
@@ -456,12 +459,7 @@ int get_leaf_idx(DMLEAF **entryleaf)
 
 void load_plugins(DMOBJ *dm_entryobj, const char *plugin_path)
 {
-	int max_num_files = 256;
-
-	if (DM_STRLEN(plugin_path) == 0)
-		return;
-
-	if (!folder_exists(plugin_path))
+	if (DM_STRLEN(plugin_path) == 0 || !folder_exists(plugin_path))
 		return;
 
 	free_json_plugins();
@@ -469,7 +467,23 @@ void load_plugins(DMOBJ *dm_entryobj, const char *plugin_path)
 	free_dotso_plugins();
 	free_specific_dynamic_node(dm_entryobj, INDX_LIBRARY_MOUNT);
 
-	sysfs_foreach_file_sorted(plugin_path, max_num_files) {
+	struct dirent *ent = NULL;
+	DIR *dir = opendir(plugin_path);
+	if (dir == NULL)
+		return;
+
+	int num_files = 0;
+	char *files[256];
+
+	while ((ent = readdir(dir)) != NULL && num_files < 256) {
+		files[num_files++] = strdup(ent->d_name);
+	}
+
+	closedir(dir);
+
+	qsort(files, num_files, sizeof(char *), compare_strings);
+
+	for (int i = 0; i < num_files; i++) {
 		char buf[512] = {0};
 
 		snprintf(buf, sizeof(buf), "%s/%s", plugin_path, files[i]);
@@ -480,7 +494,7 @@ void load_plugins(DMOBJ *dm_entryobj, const char *plugin_path)
 			load_dotso_plugins(dm_entryobj, buf);
 		}
 
-		dmfree(files[i]);
+		free(files[i]);
 	}
 }
 

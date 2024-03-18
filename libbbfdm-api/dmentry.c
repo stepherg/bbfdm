@@ -46,6 +46,7 @@ void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 {
 	INIT_LIST_HEAD(&ctx->list_parameter);
 	ctx->dm_entryobj = tEntryObj;
+	bbfdm_init_mem(ctx);
 	dm_uci_init();
 }
 
@@ -55,7 +56,7 @@ void bbf_ctx_clean(struct dmctx *ctx)
 
 	dm_uci_exit();
 	dmubus_free();
-	dmcleanmem();
+	bbfdm_clean_mem(ctx);
 }
 
 void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj)
@@ -244,6 +245,7 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 
 void bbf_global_init(DMOBJ *dm_entryobj, const char *plugin_path)
 {
+	dm_dynamic_initmem(&global_memhead);
 	load_plugins(dm_entryobj, plugin_path);
 }
 

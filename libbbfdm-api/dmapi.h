@@ -158,7 +158,6 @@ typedef struct dm_map_obj {
 	struct dm_leaf_s *root_leaf;
 } DM_MAP_OBJ;
 
-
 struct dm_reference {
 	char *path;
 	char *value;
@@ -172,6 +171,7 @@ struct dmctx {
 	int (*checkobj)(DMOBJECT_ARGS);
 	int (*checkleaf)(DMOBJECT_ARGS);
 	struct list_head list_parameter;
+	struct list_head *memhead;
 	DMOBJ *dm_entryobj;
 	bool nextlevel;
 	bool iswildcard;

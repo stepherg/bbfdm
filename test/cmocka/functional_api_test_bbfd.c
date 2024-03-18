@@ -6,8 +6,11 @@
 #include <libbbfdm-api/dmcommon.h>
 #include <libbbfdm-api/dmmem.h>
 
+static struct dmctx bbf_ctx = {0};
+
 static int setup_teardown(void **state)
 {
+	bbfdm_init_mem(&bbf_ctx);
 	dm_uci_init();
 	return 0;
 }
@@ -16,7 +19,7 @@ static int group_teardown(void **state)
 {
 	dm_uci_exit();
 	dmubus_free();
-	dmcleanmem();
+	bbfdm_clean_mem(&bbf_ctx);
 	return 0;
 }
 

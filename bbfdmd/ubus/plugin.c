@@ -16,7 +16,7 @@
 
 #include "plugin/json_plugin.h"
 
-extern struct list_head global_memhead;
+static LIST_HEAD(plugin_mem);
 
 static uint8_t find_number_of_objects(DM_MAP_OBJ *dynamic_obj)
 {
@@ -43,6 +43,8 @@ int load_dotso_plugin(void **lib_handle, const char *file_path, DMOBJ **main_ent
 		return -1;
 	}
 
+	dm_dynamic_initmem(&plugin_mem);
+
 	*lib_handle = handle;
 
 	//Dynamic Object
@@ -55,14 +57,14 @@ int load_dotso_plugin(void **lib_handle, const char *file_path, DMOBJ **main_ent
 			return -1;
 		}
 
-		DMOBJ *dm_entryobj = (DMOBJ *)dm_dynamic_calloc(&global_memhead, obj_num + 1, sizeof(DMOBJ));
+		DMOBJ *dm_entryobj = (DMOBJ *)dm_dynamic_calloc(&plugin_mem, obj_num + 1, sizeof(DMOBJ));
 		if (dm_entryobj == NULL) {
 			ERR("No Memory exists\n");
 			return -1;
 		}
 
 		for (int i = 0; dynamic_obj[i].path; i++) {
-			char *node_obj = dm_dynamic_strdup(&global_memhead, dynamic_obj[i].path);
+			char *node_obj = dm_dynamic_strdup(&plugin_mem, dynamic_obj[i].path);
 			unsigned int len = strlen(node_obj);
 
 			if (strncmp(node_obj, ROOT_NODE, strlen(ROOT_NODE)) != 0 || node_obj[len-1] != '.') {
@@ -93,6 +95,7 @@ int free_dotso_plugin(void *lib_handle)
 	if (lib_handle)
 		dlclose(lib_handle);
 
+	dm_dynamic_cleanmem(&plugin_mem);
 	return 0;
 }
 
