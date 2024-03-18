@@ -3389,16 +3389,9 @@ static int operate_WiFiDataElementsNetworkDeviceMultiAPDeviceBackhaul_SteerWiFiB
 		goto end;
 	}
 
-	char *bsta = dmjson_get_value(((struct dm_data *)data)->json_object, 3, "MultiAPDevice", "Backhaul", "MACAddress");
-	if (DM_STRLEN(bsta) == 0) {
-		status = "Error_Invalid_Input";
-		goto end;
-	}
-
 	dmubus_call("map.controller", "steer_backhaul", UBUS_ARGS{{"agent", agent, String},
 															{"target_bssid", target_bbs, String},
-															{"bsta", bsta, String},
-															{"timeout", time_out, Integer}}, 4, &res);
+															{"timeout", time_out, Integer}}, 3, &res);
 
 	if (res == NULL) {
 		status = "Error_Invalid_Input";
