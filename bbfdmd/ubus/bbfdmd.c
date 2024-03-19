@@ -64,15 +64,6 @@ static void sig_handler(int sig)
 	}
 }
 
-static void service_sig_handler(int sig)
-{
-	WARNING("# Micro-service PID[%ld] received %d signal ...", getpid(), sig);
-	if (sig == SIGSEGV) {
-		ERR("# Micro-service  in PID[%ld] ...", getpid());
-	}
-	exit(-1);
-}
-
 static void signal_init(void)
 {
 	signal(SIGSEGV, sig_handler);
@@ -81,7 +72,7 @@ static void signal_init(void)
 
 static void service_signal_init(void)
 {
-	signal(SIGSEGV, service_sig_handler);
+	signal(SIGSEGV, sig_handler);
 }
 
 static void usage(char *prog)
@@ -1693,10 +1684,9 @@ void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 {
 	int err = -1;
-	char *tmp = daemon_ctx->config.in_type;
 	char *file_path = daemon_ctx->config.in_name;
 
-	if (DM_STRLEN(tmp) == 0 || DM_STRLEN(file_path) == 0) {
+	if (DM_STRLEN(file_path) == 0) {
 		ERR("Input type/name not supported or defined");
 		return -1;
 	}
@@ -1723,15 +1713,21 @@ int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 		}
 	}
 
-	if (strcasecmp(tmp, "JSON") == 0) {
+	char *ext = strrchr(file_path, '.');
+	if (ext == NULL) {
+		ERR("Input file without extension");
+	} else if (strcasecmp(ext, ".json") == 0) {
+		INFO("Loading JSON plugin %s", file_path);
 		err = load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path, &DEAMON_DM_ROOT_OBJ);
-	} else if (strcasecmp(tmp, "DotSo") == 0) {
+	} else if (strcasecmp(ext, ".so") == 0) {
+		INFO("Loading DotSo plugin %s", file_path);
 		err = load_dotso_plugin(&deamon_lib_handle, file_path, &DEAMON_DM_ROOT_OBJ);
 	} else {
-		ERR("Input type %s not supported", tmp);
+		ERR("Input type %s not supported", ext);
 	}
 
 	if (!err) {
+		INFO("Loading sub-modules %s", daemon_ctx->config.in_plugin_dir);
 		bbf_global_init(DEAMON_DM_ROOT_OBJ, daemon_ctx->config.in_plugin_dir);
 	} else {
 		ERR("Failed loading %s", file_path);

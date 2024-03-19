@@ -34,8 +34,10 @@ static uint8_t find_number_of_objects(DM_MAP_OBJ *dynamic_obj)
 
 int load_dotso_plugin(void **lib_handle, const char *file_path, DMOBJ **main_entry)
 {
-	if (!lib_handle || !file_path || !strlen(file_path) || !main_entry)
+	if (!lib_handle || !file_path || !strlen(file_path) || !main_entry) {
+		ERR("Input validation failed\n");
 		return -1;
+	}
 
 	void *handle = dlopen(file_path, RTLD_NOW|RTLD_LOCAL);
 	if (!handle) {
@@ -105,12 +107,16 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 	int json_plugin_version = JSON_VERSION_0;
 	uint8_t idx = 0;
 
-	if (!file_path || !strlen(file_path) || !main_entry)
+	if (!file_path || !strlen(file_path) || !main_entry) {
+		ERR("Entry validation failed ...");
 		return -1;
+	}
 
 	json_object *json_obj = json_object_from_file(file_path);
-	if (!json_obj)
+	if (!json_obj) {
+		ERR("Failed to parse json file (%s)", file_path);
 		return -1;
+	}
 
 	save_loaded_json_files(json_plugin, json_obj);
 

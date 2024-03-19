@@ -193,25 +193,6 @@ void get_list_of_registered_service(struct list_head *srvlist, struct blob_buf *
 	}
 }
 
-static void free_specific_dynamic_node(DMOBJ *entryobj, int indx)
-{
-	for (; (entryobj && entryobj->obj); entryobj++) {
-
-		if (entryobj->nextdynamicobj) {
-			struct dm_dynamic_obj *next_dyn_array = entryobj->nextdynamicobj + indx;
-			FREE(next_dyn_array->nextobj);
-		}
-
-		if (entryobj->dynamicleaf) {
-			struct dm_dynamic_leaf *next_dyn_array = entryobj->dynamicleaf + indx;
-			FREE(next_dyn_array->nextleaf);
-		}
-
-		if (entryobj->nextobj)
-			free_specific_dynamic_node(entryobj->nextobj, indx);
-	}
-}
-
 static void free_all_dynamic_nodes(DMOBJ *entryobj)
 {
 	for (; (entryobj && entryobj->obj); entryobj++) {
@@ -459,21 +440,23 @@ int get_leaf_idx(DMLEAF **entryleaf)
 
 void load_plugins(DMOBJ *dm_entryobj, const char *plugin_path)
 {
-	if (DM_STRLEN(plugin_path) == 0 || !folder_exists(plugin_path))
+	if (DM_STRLEN(plugin_path) == 0) // If empty, return without further action
 		return;
 
-	free_json_plugins();
-	free_specific_dynamic_node(dm_entryobj, INDX_JSON_MOUNT);
-	free_dotso_plugins();
-	free_specific_dynamic_node(dm_entryobj, INDX_LIBRARY_MOUNT);
+	if (!folder_exists(plugin_path)) {
+		BBF_ERR("(%s) doesn't exist", plugin_path);
+		return;
+	}
 
 	struct dirent *ent = NULL;
-	DIR *dir = opendir(plugin_path);
-	if (dir == NULL)
-		return;
-
 	int num_files = 0;
 	char *files[256];
+
+	DIR *dir = opendir(plugin_path);
+	if (dir == NULL) {
+		BBF_ERR("Cannot open (%s) directory", plugin_path);
+		return;
+	}
 
 	while ((ent = readdir(dir)) != NULL && num_files < 256) {
 		files[num_files++] = strdup(ent->d_name);
