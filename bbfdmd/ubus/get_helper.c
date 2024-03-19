@@ -55,6 +55,10 @@ int bbfdm_cmd_exec(struct dmctx *bbf_ctx, int cmd)
 	} else {
 		ERR("PID [%ld]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
 		fault = USP_FAULT_INTERNAL_ERROR;
+		if (is_micro_service) {
+			ERR("Micro-service PID [%ld]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
+			exit(-1);
+		}
 	}
 
 	gs_jump_called_by_bbf = false;
