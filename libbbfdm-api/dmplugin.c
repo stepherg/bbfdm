@@ -196,25 +196,6 @@ void get_list_of_registered_service(struct list_head *srvlist, struct blob_buf *
 	}
 }
 
-static void free_specific_dynamic_node(DMOBJ *entryobj, int indx)
-{
-	for (; (entryobj && entryobj->obj); entryobj++) {
-
-		if (entryobj->nextdynamicobj) {
-			struct dm_dynamic_obj *next_dyn_array = entryobj->nextdynamicobj + indx;
-			FREE(next_dyn_array->nextobj);
-		}
-
-		if (entryobj->dynamicleaf) {
-			struct dm_dynamic_leaf *next_dyn_array = entryobj->dynamicleaf + indx;
-			FREE(next_dyn_array->nextleaf);
-		}
-
-		if (entryobj->nextobj)
-			free_specific_dynamic_node(entryobj->nextobj, indx);
-	}
-}
-
 static void free_all_dynamic_nodes(DMOBJ *entryobj)
 {
 	for (; (entryobj && entryobj->obj); entryobj++) {
@@ -410,21 +391,16 @@ int load_plugins(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP
 
 #ifdef BBF_VENDOR_EXTENSION
 	// Load objects and parameters exposed via vendor extension plugin
-	free_specific_dynamic_node(dm_entryobj, INDX_VENDOR_MOUNT);
 	load_vendor_dynamic_arrays(dm_entryobj, dm_VendorExtension, dm_VendorExtensionExclude);
 #endif /* BBF_VENDOR_EXTENSION */
 
-	if (DM_STRLEN(plugin_path) == 0)
+	if (DM_STRLEN(plugin_path) == 0) // If empty, return without further action
 		return 0;
 
 	if (!folder_exists(plugin_path)) {
+		TRACE("(%s) doesn't exist", plugin_path);
 		return 0;
 	}
-
-	free_json_plugins();
-	free_specific_dynamic_node(dm_entryobj, INDX_JSON_MOUNT);
-	free_dotso_plugins();
-	free_specific_dynamic_node(dm_entryobj, INDX_LIBRARY_MOUNT);
 
 	sysfs_foreach_file_sorted(plugin_path, max_num_files) {
 		char buf[512] = {0};

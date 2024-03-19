@@ -23,8 +23,10 @@ int load_dotso_plugin(void **lib_handle, const char *file_path,
 		DM_MAP_VENDOR *main_Extension[],
 		DM_MAP_VENDOR_EXCLUDE **main_Extension_exclude)
 {
-	if (!lib_handle || !file_path || !strlen(file_path) || !main_entry || !main_Extension || !main_Extension_exclude)
+	if (!lib_handle || !file_path || !strlen(file_path) || !main_entry || !main_Extension || !main_Extension_exclude)  {
+		ERR("Input validation failed\n");
 		return -1;
+	}
 
 	void *handle = dlopen(file_path, RTLD_NOW|RTLD_LOCAL);
 	if (!handle) {

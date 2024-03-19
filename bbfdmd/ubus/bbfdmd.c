@@ -57,17 +57,8 @@ static void sig_handler(int sig)
 	if (sig == SIGSEGV) {
 		handle_pending_signal(sig);
 	} else if (sig == SIGUSR1) {
-		ERR("# Exception in PID[%ld]", getpid());
+		ERR("# SIGUSR1 handler for main process PID[%ld]", getpid());
 	}
-}
-
-static void service_sig_handler(int sig)
-{
-	WARNING("# PID[%ld] received %d signal ...", getpid(), sig);
-	if (sig == SIGSEGV) {
-		ERR("# Exception in PID[%ld] ...", getpid());
-	}
-	exit(-1);
 }
 
 static void signal_init(void)
@@ -78,7 +69,7 @@ static void signal_init(void)
 
 static void service_signal_init(void)
 {
-	signal(SIGSEGV, service_sig_handler);
+	signal(SIGSEGV, sig_handler);
 }
 
 static void usage(char *prog)
@@ -1607,10 +1598,9 @@ void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 {
 	int err = -1;
-	char *tmp = daemon_ctx->config.in_type;
 	char *file_path = daemon_ctx->config.in_name;
 
-	if (DM_STRLEN(tmp) == 0 || DM_STRLEN(file_path) == 0) {
+	if (DM_STRLEN(file_path) == 0) {
 		ERR("Input type/name not supported or defined");
 		return -1;
 	}
@@ -1629,21 +1619,28 @@ int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 			ERR("output object not defined");
 			return -1;
 		}
+
 		if (DM_STRLEN(daemon_ctx->config.out_root_obj) == 0) {
 			ERR("output root obj not defined");
 			return -1;
 		}
 	}
 
-	if (strcasecmp(tmp, "JSON") == 0) {
+	char *ext = strrchr(file_path, '.');
+	if (ext == NULL) {
+		ERR("Input file without extension");
+	} else if (strcasecmp(ext, ".json") == 0) {
+		INFO("Loading JSON plugin %s", file_path);
 		err = load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path, &DEAMON_DM_ROOT_OBJ);
-	} else if (strcasecmp(tmp, "DotSo") == 0) {
+	} else if (strcasecmp(ext, ".so") == 0) {
+		INFO("Loading DotSo plugin %s", file_path);
 		err = load_dotso_plugin(&deamon_lib_handle, file_path, &DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, &DEAMON_DM_VENDOR_EXTENSION_EXCLUDE);
 	} else {
-		ERR("Input type %s not supported", tmp);
+		ERR("Input type %s not supported", ext);
 	}
 
 	if (!err) {
+		INFO("Loading sub-modules %s", daemon_ctx->config.in_plugin_dir);
 		bbf_global_init(DEAMON_DM_ROOT_OBJ, DEAMON_DM_VENDOR_EXTENSION, DEAMON_DM_VENDOR_EXTENSION_EXCLUDE, daemon_ctx->config.in_plugin_dir);
 	} else {
 		ERR("Failed loading %s", file_path);
