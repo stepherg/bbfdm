@@ -15,6 +15,7 @@ serverselection_list() {
 	json_add_string "timeout" "str"
 	json_add_string "protocol_used" "str"
 	json_add_string "proto" "str"
+	json_add_string "cancel" "str"
 	json_close_object
 }
 
@@ -35,6 +36,7 @@ serverselection_error() {
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.MinimumResponseTime=9999
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.AverageResponseTime=0
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.MaximumResponseTime=0
+		$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.IPAddressUsed=""
 		$UCI_COMMIT_BBF_DMMAP
 	}
 }
@@ -52,6 +54,44 @@ serverselection_launch() {
 	json_get_var timeout timeout
 	json_get_var protocol_used protocol_used
 	json_get_var proto proto
+	json_get_var cancel cancel
+
+	if [ "${proto}" = "both_proto" ]; then
+		old_pid=$(cat /tmp/serverselection_pid)
+
+		[ -n "${old_pid}" ] && {
+			cmd=$(cat /proc/$old_pid/cmdline)
+		}
+
+		if [[ "${cmd}" = *serverselection* ]]; then
+			kill -9 $old_pid
+		fi
+
+		if [ "${cancel}" -eq "1" ]; then
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState="None"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.FastestHost=""
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.MinimumResponseTime=9999
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.AverageResponseTime=0
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.MaximumResponseTime=0
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.IPAddressUsed=""
+			$UCI_COMMIT_BBF_DMMAP
+
+			json_init
+			json_add_string "Status" "None"
+			json_add_string "FastestHost" ""
+			json_add_string "IPAddressUsed" ""
+			json_add_int "MinimumResponseTime" "9999"
+			json_add_int "AverageResponseTime" "0"
+			json_add_int "MaximumResponseTime" "0"
+			json_dump
+
+			return
+		else
+			echo $$ > /tmp/serverselection_pid
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.serverselection.DiagnosticState="Requested_running"
+			$UCI_COMMIT_BBF_DMMAP
+		fi
+	fi
 
 	# Assign default value
 	[ -z "${nbr_of_rep}" ] && nbr_of_rep=3

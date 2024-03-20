@@ -17,6 +17,7 @@ udpecho_list() {
 	json_add_string "dscp" "str"
 	json_add_string "inter_trans_time" "str"
 	json_add_string "proto" "str"
+	json_add_string "cancel" "str"
 	json_close_object
 }
 
@@ -58,6 +59,46 @@ udpecho_launch() {
 	json_get_var dscp dscp
 	json_get_var inter_time inter_trans_time
 	json_get_var proto proto
+	json_get_var cancel cancel
+
+	[ "${proto}" = "both_proto" ] && {
+		old_pid=$(cat /tmp/udpecho_pid)
+
+		[ -n "${old_pid}" ] && {
+			cmd=$(cat /proc/$old_pid/cmdline)
+		}
+
+		if [[ "${cmd}" = *udpecho* ]]; then
+			kill -9 $old_pid
+		fi
+
+		if [ "${cancel}" -eq "1" ]; then
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.DiagnosticState="None"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.SuccessCount="0"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.FailureCount="0"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.MinimumResponseTime="9999"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.AverageResponseTime="0"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.MaximumResponseTime="0"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.IPAddressUsed=""
+			$UCI_COMMIT_BBF_DMMAP
+
+			json_init
+			json_add_string "Status" "None"
+			json_add_string "IPAddressUsed" ""
+			json_add_int "SuccessCount" "0"
+			json_add_int "FailureCount" "0"
+			json_add_int "MinimumResponseTime" "9999"
+			json_add_int "AverageResponseTime" "0"
+			json_add_int "MaximumResponseTime" "0"
+			json_dump
+
+			return
+		else
+			echo $$ > /tmp/udpecho_pid
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.udpechodiag.DiagnosticState="Requested_running"
+			$UCI_COMMIT_BBF_DMMAP
+		fi
+	}
 
 	# Assign default value
 	[ -z "${nbr_of_rep}" ] && nbr_of_rep=1

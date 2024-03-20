@@ -7,6 +7,38 @@
 ROOT="$(dirname "${0}")"
 . "${ROOT}"/bbf_api
 
+clear_iplayercapacity_output() {
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.DiagnosticState="${1}"
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.SoftwareVersion=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.BOMTime=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.EOMTime=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TmaxUsed=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TestInterval=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TmaxRTTUsed=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TimestampResolutionUsed=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MaxIPLayerCapacity=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TimeOfMax=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MaxETHCapacityNoFCS=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MaxETHCapacityWithFCS=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MaxETHCapacityWithFCSVLAN=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.LossRatioAtMax=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.RTTRangeAtMax=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.PDVRangeAtMax=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MinOnewayDelayAtMax=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.ReorderedRatioAtMax=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.ReplicatedRatioAtMax=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.InterfaceEthMbpsAtMax=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.IPLayerCapacitySummary=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.LossRatioSummary=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.RTTRangeSummary=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.PDVRangeSummary=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MinOnewayDelaySummary=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MinRTTSummary=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.ReorderedRatioSummary=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.ReplicatedRatioSummary=""
+	$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.InterfaceEthMbpsSummary=""
+}
+
 iplayercap_error() {
 	json_init
 	json_add_string "Status" "$1"
@@ -14,35 +46,7 @@ iplayercap_error() {
 
 	# Store data in dmmap
 	[ "$2" = "both_proto" ] && {
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.DiagnosticState="${1}"
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.SoftwareVersion=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.BOMTime=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.EOMTime=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TmaxUsed=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TestInterval=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TmaxRTTUsed=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TimestampResolutionUsed=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MaxIPLayerCapacity=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.TimeOfMax=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MaxETHCapacityNoFCS=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MaxETHCapacityWithFCS=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MaxETHCapacityWithFCSVLAN=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.LossRatioAtMax=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.RTTRangeAtMax=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.PDVRangeAtMax=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MinOnewayDelayAtMax=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.ReorderedRatioAtMax=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.ReplicatedRatioAtMax=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.InterfaceEthMbpsAtMax=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.IPLayerCapacitySummary=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.LossRatioSummary=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.RTTRangeSummary=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.PDVRangeSummary=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MinOnewayDelaySummary=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.MinRTTSummary=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.ReorderedRatioSummary=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.ReplicatedRatioSummary=""
-		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.InterfaceEthMbpsSummary=""
+		clear_iplayercapacity_output "$1"
 
 		# Clear all incremental & modal result instances
 		res=$($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep -E "=modalresult$" | cut -d= -f 1)
@@ -88,6 +92,40 @@ iplayercap_launch() {
 	json_get_var algorithm algorithm
 	json_get_var slow_adj_thresh slow_adj_thresh
 	json_get_var proto proto
+
+	[ "${proto}" = "both_proto" ] && {
+		old_pid=$(cat /tmp/iplayercap_pid)
+
+		[ -n "${old_pid}" ] && {
+			cmd=$(cat /proc/$old_pid/cmdline)
+		}
+
+		if [[ "${cmd}" = *iplayercap* ]]; then
+			kill -9 $old_pid
+		fi
+
+		# Clear all incremental & modal result instances
+		res=$($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep -E "=modalresult$" | cut -d= -f 1)
+		for i in $res; do
+			$UCI_DELETE_BBF_DMMAP "${i}"
+		done
+
+		res=$($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep -E "=incrementalresult$" | cut -d= -f 1)
+		for i in $res; do
+			$UCI_DELETE_BBF_DMMAP "${i}"
+		done
+
+		if [ "${cancel}" -eq "1" ]; then
+			clear_iplayercapacity_output "None"
+			$UCI_COMMIT_BBF_DMMAP
+
+			return
+		else
+			echo $$ > /tmp/iplayercap_pid
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.DiagnosticState="Requested_running"
+			$UCI_COMMIT_BBF_DMMAP
+		fi
+	}
 
 	# Fail if host is empty
 	[ -z "${host}" ] && {
@@ -306,17 +344,6 @@ iplayercap_launch() {
 		json_get_var InterfaceEthMbps InterfaceEthMbps
 		$UCI_SET_BBF_DMMAP dmmap_diagnostics.iplayercapacity.InterfaceEthMbpsSummary="${InterfaceEthMbps}"
 		json_select ..
-
-		# Clear all existing incremental & modal result instances
-		res=$($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep -E "=modalresult$" | cut -d= -f 1)
-		for i in $res; do
-			$UCI_DELETE_BBF_DMMAP "${i}"
-		done
-
-		res=$($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep -E "=incrementalresult$" | cut -d= -f 1)
-		for i in $res; do
-			$UCI_DELETE_BBF_DMMAP "${i}"
-		done
 
 		failed=0
 		if json_is_a ModalResult array; then

@@ -47,6 +47,42 @@ packet_capture_launch() {
 	json_get_var username username
 	json_get_var password password
 	json_get_var proto proto
+	json_get_var cancel cancel
+
+	[ "$proto" = "both_proto" ] && {
+		old_pid=$(cat /tmp/packetcapture_pid)
+
+		[ -n "${old_pid}" ] && {
+			cmd=$(cat /proc/$old_pid/cmdline)
+		}
+
+		if [[ "${cmd}" = *packetcapture* ]]; then
+			kill -9 ${old_pid}
+		fi
+
+		if [ "${cancel}" -eq "1" ]; then
+			json_init
+			json_add_string "Status" "None"
+			json_add_string "FileLocation" ""
+			json_add_string "StartTime" "0"
+			json_add_string "EndTime" "0"
+			json_add_string "Count" "0"
+			json_dump
+
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.packetcapture.DiagnosticState="None"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.packetcapture.FileLocation=""
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.packetcapture.StartTime=0
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.packetcapture.EndTime=0
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.packetcapture.Count=0
+			$UCI_COMMIT_BBF_DMMAP
+
+			return
+		else
+			echo $$ > /tmp/packetcapture_pid
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.packetcapture.DiagnosticState="Requested_running"
+			$UCI_COMMIT_BBF_DMMAP
+		fi
+	}
 
 	if [ -n "${format}" ] && [ "${format}" != "libpcap" ]; then
 		# Error

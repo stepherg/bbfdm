@@ -51,7 +51,8 @@ traceroute_launch() {
 	json_get_var dscp dscp
 	json_get_var maxhop max_hop_cnt
 	json_get_var proto proto
-	
+	json_get_var cancel cancel
+
 	LOG_FILE=$(get_traceroute_log_file)
 
 	# Assign default value
@@ -64,11 +65,40 @@ traceroute_launch() {
 
 	# Clear all route hops instances
 	[ "$proto" = "both_proto" ] && {
+		old_pid=$(cat /tmp/traceroute_pid)
+
+		[ -n "${old_pid}" ] && {
+			cmd=$(cat /proc/$old_pid/cmdline)
+		}
+
+		if [[ "${cmd}" = *traceroute* ]]; then
+			kill -9 ${old_pid}
+		fi
+
 		res=$($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep -E "=RouteHops$" | cut -d= -f 1)
 		for i in $res; do
 			$UCI_DELETE_BBF_DMMAP "${i}"
 		done
-		$UCI_COMMIT_BBF_DMMAP
+
+		if [ "${cancel}" -eq "1" ]; then
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState="None"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.IPAddressUsed=""
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.NumberOfHops="0"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.ResponseTime="0"
+			$UCI_COMMIT_BBF_DMMAP
+
+			json_init
+			json_add_string "Status" "None"
+			json_add_string "IPAddressUsed" ""
+			json_add_int "ResponseTime" "0"
+			json_dump
+
+			return
+		else
+			echo $$ > /tmp/traceroute_pid
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.traceroute.DiagnosticState="Requested_running"
+			$UCI_COMMIT_BBF_DMMAP
+		fi
 	}
 
 	# Fail if host is empty
