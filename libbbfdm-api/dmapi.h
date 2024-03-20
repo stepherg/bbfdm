@@ -181,6 +181,7 @@ struct dmctx {
 	int (*checkobj)(DMOBJECT_ARGS);
 	int (*checkleaf)(DMOBJECT_ARGS);
 	struct list_head list_parameter;
+	struct list_head *memhead;
 	DMOBJ *dm_entryobj;
 	DM_MAP_VENDOR *dm_vendor_extension[2];
 	DM_MAP_VENDOR_EXCLUDE *dm_vendor_extension_exclude;

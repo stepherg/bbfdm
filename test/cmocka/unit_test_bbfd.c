@@ -592,7 +592,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
 	/*
 	 * Test of JSON Parameter Path
@@ -603,9 +603,6 @@ static void test_api_bbfdm_json_get_value(void **state)
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
 	assert_true(&first_entry->list != &ctx->list_parameter);
-
-	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 }
 
 static void test_api_bbfdm_json_add_object(void **state)
@@ -653,7 +650,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	assert_true(&first_entry->list != &ctx->list_parameter);
 
 	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
+	bbf_ctx_init_sub(ctx, TR181_ROOT_TREE, TR181_VENDOR_EXTENSION, TR181_VENDOR_EXTENSION_EXCLUDE);
 
 	ctx->in_param = "Device.WiFi.SSID.1.Enable";
 
@@ -662,8 +659,6 @@ static void test_api_bbfdm_library_get_value(void **state)
 
 	first_entry = list_first_entry(&ctx->list_parameter, struct dm_parameter, list);
 	assert_true(&first_entry->list != &ctx->list_parameter);
-
-	bbf_ctx_clean_sub(ctx);
 }
 
 static void test_api_bbfdm_library_add_object(void **state)

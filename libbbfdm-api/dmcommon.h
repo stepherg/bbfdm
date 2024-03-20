@@ -183,18 +183,6 @@ enum option_type_enum {
 	if ((dir = opendir(path)) == NULL) return 0; \
 	while ((ent = readdir(dir)) != NULL) \
 
-#define sysfs_foreach_file_sorted(path,max_num_files) \
-	struct dirent *ent = NULL; \
-	DIR *dir = NULL; \
-	if ((dir = opendir(path)) == NULL) return 0; \
-	int num_files = 0; \
-	char *files[max_num_files]; \
-	while ((ent = readdir(dir)) != NULL && num_files < max_num_files) \
-		files[num_files++] = dmstrdup(ent->d_name); \
-	closedir(dir); \
-	qsort(files, num_files, sizeof(char*), compare_strings); \
-	for (int i = 0; i < num_files; i++)
-
 struct dmmap_sect {
 	struct list_head list;
 	char *section_name;

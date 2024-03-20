@@ -51,6 +51,7 @@ void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj,
 	ctx->dm_vendor_extension[0] = tVendorExtension ? tVendorExtension[0] : NULL;
 	ctx->dm_vendor_extension[1] = tVendorExtension ? tVendorExtension[1] : NULL;
 	ctx->dm_vendor_extension_exclude = tVendorExtensionExclude;
+	bbfdm_init_mem(ctx);
 	dm_uci_init();
 }
 
@@ -60,7 +61,7 @@ void bbf_ctx_clean(struct dmctx *ctx)
 
 	dm_uci_exit();
 	dmubus_free();
-	dmcleanmem();
+	bbfdm_clean_mem(ctx);
 }
 
 void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj,
@@ -251,6 +252,7 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 
 void bbf_global_init(DMOBJ *dm_entryobj, DM_MAP_VENDOR *dm_VendorExtension[], DM_MAP_VENDOR_EXCLUDE *dm_VendorExtensionExclude, const char *plugin_path)
 {
+	dm_dynamic_initmem(&global_memhead);
 	load_plugins(dm_entryobj, dm_VendorExtension,dm_VendorExtensionExclude, plugin_path);
 }
 

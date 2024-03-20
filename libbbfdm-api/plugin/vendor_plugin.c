@@ -72,17 +72,16 @@ static void overwrite_obj(DMOBJ *entryobj, DMOBJ *dmobj)
 
 static void load_vendor_extension_arrays(DMOBJ *entryobj, DM_MAP_VENDOR *vendor_map_obj)
 {
+	char *pch = NULL, *pchr = NULL;
 	char vendor_list[512] = {0};
-	size_t length = 0;
 
 	DM_STRNCPY(vendor_list, BBF_VENDOR_LIST, sizeof(vendor_list));
-	char **tokens = strsplit(vendor_list, ",", &length);
 
-	for (int idx = length - 1; idx >= 0; idx--) {
+	for (pch = strtok_r(vendor_list, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 
 		for (int j = 0; vendor_map_obj && vendor_map_obj[j].vendor; j++) {
 
-			if (DM_STRCMP(vendor_map_obj[j].vendor, tokens[idx]) != 0)
+			if (DM_STRCMP(vendor_map_obj[j].vendor, pch) != 0)
 				continue;
 
 			DM_MAP_OBJ *vendor_obj = vendor_map_obj[j].vendor_obj;
@@ -142,17 +141,16 @@ static void load_vendor_extension_arrays(DMOBJ *entryobj, DM_MAP_VENDOR *vendor_
 
 static void load_vendor_extension_overwrite_arrays(DMOBJ *entryobj, DM_MAP_VENDOR *vendor_map_obj)
 {
+	char *pch = NULL, *pchr = NULL;
 	char vendor_list[512] = {0};
-	size_t length = 0;
 
 	DM_STRNCPY(vendor_list, BBF_VENDOR_LIST, sizeof(vendor_list));
-	char **tokens = strsplit(vendor_list, ",", &length);
 
-	for (int idx = length - 1; idx >= 0; idx--) {
+	for (pch = strtok_r(vendor_list, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 
 		for (int j = 0; vendor_map_obj && vendor_map_obj[j].vendor; j++) {
 
-			if (DM_STRCMP(vendor_map_obj[j].vendor, tokens[idx]) != 0)
+			if (DM_STRCMP(vendor_map_obj[j].vendor, pch) != 0)
 				continue;
 
 			DM_MAP_OBJ *dynamic_overwrite_obj = vendor_map_obj[j].vendor_obj;
@@ -228,17 +226,16 @@ static void exclude_param(DMOBJ *dm_entryobj, char *in_param)
 
 static void load_vendor_extension_exclude_arrays(DMOBJ *entryobj, DM_MAP_VENDOR_EXCLUDE *vendor_map_exclude_obj)
 {
+	char *pch = NULL, *pchr = NULL;
 	char vendor_list[512] = {0};
-	size_t length = 0;
 
 	DM_STRNCPY(vendor_list, BBF_VENDOR_LIST, sizeof(vendor_list));
-	char **tokens = strsplit(vendor_list, ",", &length);
 
-	for (int idx = length - 1; idx >= 0; idx--) {
+	for (pch = strtok_r(vendor_list, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 
 		for (int j = 0; vendor_map_exclude_obj && vendor_map_exclude_obj[j].vendor; j++) {
 
-			if (DM_STRCMP(vendor_map_exclude_obj[j].vendor, tokens[idx]) != 0)
+			if (DM_STRCMP(vendor_map_exclude_obj[j].vendor, pch) != 0)
 				continue;
 
 			char **dynamic_exclude_obj = vendor_map_exclude_obj[j].vendor_obj;
