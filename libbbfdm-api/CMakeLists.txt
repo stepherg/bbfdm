@@ -33,3 +33,8 @@ FILE(GLOB libbbfdm-api_include_headers include/*.h)
 INSTALL(FILES ${libbbfdm-api_include_headers}
 	DESTINATION usr/include
 )
+
+INSTALL(FILES scripts/bbf.secure
+	PERMISSIONS OWNER_EXECUTE
+	DESTINATION usr/libexec/rpcd
+)

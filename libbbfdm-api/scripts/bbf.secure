@@ -1,0 +1,73 @@
+#!/bin/sh
+
+. /usr/share/libubox/jshn.sh
+
+# Path to the private key certificate
+PRIVATE_KEY_CERT="/etc/bbfdm/certificates/private_key.pem"
+
+case "$1" in
+	list)
+
+		echo '{ "encode" : { "data": "str" }, "decode" : { "data": "str" } }'
+	;;
+	call)
+		# Read the arguments from standard input
+		read -r input
+
+		# Parse the input JSON
+		json_load "${input}"
+
+		# Get the 'data' value from the input JSON
+		json_get_var data data
+		
+		# Check if 'data' is provided
+		if [ -z "${data}" ]; then
+			echo '{ "error": "Data should be defined !!!" }'
+			return
+		fi
+
+		# Check if private key exists
+		if [ -f "${PRIVATE_KEY_CERT}" ]; then
+			case "$2" in
+				encode)
+					# Path to the public key certificate
+					PUBLIC_KEY_CERT="/etc/bbfdm/certificates/public_key.pem"
+					
+					# Generate public key if not exists
+					if [ ! -f "${PUBLIC_KEY_CERT}" ]; then
+						openssl rsa -pubout -in "${PRIVATE_KEY_CERT}" -out "${PUBLIC_KEY_CERT}" || {
+							 echo '{ "error": "Cannot generate public key !!!" }'
+							 return
+						}
+					fi
+					
+					res=$(echo -n "${data}" | openssl pkeyutl -encrypt -pubin -inkey "${PUBLIC_KEY_CERT}" | openssl base64)
+					echo "{ \"value\": \"${res}\" }"
+				;;
+				decode)
+					# Decrypt the data with private key
+					res=$(echo -n "${data}" | openssl base64 -d | openssl pkeyutl -decrypt -inkey "${PRIVATE_KEY_CERT}")
+					echo "{ \"value\": \"${res}\" }"
+				;;
+			esac
+		else
+			# Read the BBF_HASH from the secure hash file(/etc/bbfdm/.secure_hash)
+			BBF_HASH=$(cat /etc/bbfdm/.secure_hash)
+			if [ -z "${BBF_HASH}" ]; then
+				echo '{ "error": "bbf hash should not be blank !!!" }'
+				return
+			fi
+	
+			case "$2" in
+				encode)
+					res=$(echo "${data}" | openssl enc -base64 -e -aes-256-cbc -salt -pass pass:${BBF_HASH} -pbkdf2)
+					echo "{ \"value\": \"${res}\" }"
+				;;
+				decode)
+					res=$(echo "${data}" | openssl enc -base64 -d -aes-256-cbc -salt -pass pass:${BBF_HASH} -pbkdf2)
+					echo "{ \"value\": \"${res}\" }"
+				;;
+			esac
+		fi
+	;;
+esac
