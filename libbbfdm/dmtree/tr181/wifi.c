@@ -1019,12 +1019,17 @@ static int get_WiFiRadio_SupportedOperatingChannelBandwidths(char *refparam, str
 {
 	json_object *res = NULL;
 	char object[32];
+	char result[128] = {0};
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "Auto");
 
-	*value = dmjson_get_value_array_all(res, ",", 1, "supp_bw");
+	char *supp_bw = dmjson_get_value_array_all(res, ",", 1, "supp_bw");
+	replace_str(supp_bw, "320MHz", "320MHz-1,320MHz-2", result, sizeof(result));
+
+	*value = dmstrdup(result);
+
 	return 0;
 }
 
