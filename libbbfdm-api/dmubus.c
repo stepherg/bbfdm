@@ -96,31 +96,7 @@ static void receive_call_result_data(struct ubus_request *req, int type, struct 
 	free((char *)str); //MEM should be free and not dmfree
 }
 
-static int __dm_ubus_call(const char *obj, const char *method, struct blob_attr *attr)
-{
-	uint32_t id;
-	int rc = 0;
-
-	json_res = NULL;
-
-	if (ubus_ctx == NULL) {
-		ubus_ctx = dm_libubus_init();
-		if (ubus_ctx == NULL) {
-			printf("UBUS context is null\n\r");
-			return -1;
-		}
-	}
-
-	if (!ubus_lookup_id(ubus_ctx, obj, &id))
-		rc = ubus_invoke(ubus_ctx, id, method, attr,
-				receive_call_result_data, NULL, UBUS_TIMEOUT);
-	else
-		rc = -1;
-
-	return rc;
-}
-
-static int __ubus_call_blocking(const char *obj, const char *method, struct blob_attr *attr)
+static int __dm_ubus_call_internal(const char *obj, const char *method, int timeout, struct blob_attr *attr)
 {
 	uint32_t id = 0;
 	int rc = 0;
@@ -135,14 +111,23 @@ static int __ubus_call_blocking(const char *obj, const char *method, struct blob
 		}
 	}
 
-	if (ubus_lookup_id(ubus_ctx, obj, &id) != 0) {
-		return -1;
-	}
-
-	rc = ubus_invoke(ubus_ctx, id, method, attr,
-			receive_call_result_data, NULL, UBUS_MAX_BLOCK_TIME);
+	if (!ubus_lookup_id(ubus_ctx, obj, &id))
+		rc = ubus_invoke(ubus_ctx, id, method, attr,
+				receive_call_result_data, NULL, timeout);
+	else
+		rc = -1;
 
 	return rc;
+}
+
+static int __dm_ubus_call(const char *obj, const char *method, struct blob_attr *attr)
+{
+	return __dm_ubus_call_internal(obj, method, UBUS_TIMEOUT, attr);
+}
+
+static int __ubus_call_blocking(const char *obj, const char *method, struct blob_attr *attr)
+{
+	return __dm_ubus_call_internal(obj, method, UBUS_MAX_BLOCK_TIME, attr);
 }
 
 int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size)
@@ -236,14 +221,14 @@ static inline json_object *ubus_call_req(char *obj, char *method, struct blob_at
 	return json_res;
 }
 
-int dmubus_call_blob(char *obj, char *method, void *value, json_object **resp)
+static int dmubus_call_blob_internal(char *obj, char *method, void *value, int timeout, json_object **resp)
 {
 	uint32_t id;
 	struct blob_buf blob;
 	int rc = -1;
 
 	json_res = NULL;
-	*resp = NULL;
+	if (resp) *resp = NULL;
 
 	if (ubus_ctx == NULL) {
 		ubus_ctx = dm_libubus_init();
@@ -265,51 +250,33 @@ int dmubus_call_blob(char *obj, char *method, void *value, json_object **resp)
 
 	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
 		rc = ubus_invoke(ubus_ctx, id, method, blob.head,
-				 receive_call_result_data, NULL, UBUS_TIMEOUT);
+				 receive_call_result_data, NULL, timeout);
 	}
 
-	*resp = json_res;
+	if (resp) *resp = json_res;
 	blob_buf_free(&blob);
 	return rc;
 }
 
+int dmubus_call_blob(char *obj, char *method, void *value, json_object **resp)
+{
+	return dmubus_call_blob_internal(obj, method, value, UBUS_TIMEOUT, resp);	
+}
+
+int dmubus_call_blob_blocking(char *obj, char *method, void *value, json_object **resp)
+{
+	return dmubus_call_blob_internal(obj, method, value, UBUS_MAX_BLOCK_TIME, resp);
+}
+
 int dmubus_call_blob_set(char *obj, char *method, void *value)
 {
-	uint32_t id;
-	struct blob_buf blob;
-	int rc = -1;
-
-	json_res = NULL;
-
-	if (ubus_ctx == NULL) {
-		ubus_ctx = dm_libubus_init();
-		if (ubus_ctx == NULL) {
-			printf("UBUS context is null\n\r");
-			return -1;
-		}
-	}
-
-	memset(&blob, 0, sizeof(struct blob_buf));
-	blob_buf_init(&blob, 0);
-
-	if (value != NULL) {
-		if (!blobmsg_add_object(&blob, (json_object *)value)) {
-			blob_buf_free(&blob);
-			return rc;
-		}
-	}
-
-	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
-		rc = ubus_invoke(ubus_ctx, id, method, blob.head,
-				 receive_call_result_data, NULL, UBUS_TIMEOUT);
-	}
+	int rc = dmubus_call_blob_internal(obj, method, value, UBUS_TIMEOUT, NULL);
 
 	if (json_res != NULL) {
 		json_object_put(json_res);
 		json_res = NULL;
 	}
 
-	blob_buf_free(&blob);
 	return rc;
 }
 

@@ -1078,7 +1078,7 @@ static int ubus_set_operate(json_object *mapping_obj, int json_version, char *re
 		}
 	}
 
-	dmubus_call_blob(buf_object, buf_method, in_args, &res);
+	dmubus_call_blob_blocking(buf_object, buf_method, in_args, &res);
 
 	if (in_args)
 		json_object_put(in_args);

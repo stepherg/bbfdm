@@ -41,6 +41,7 @@ int dmubus_call_blocking(char *obj, char *method, struct ubus_arg u_args[], int 
 int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size);
 
 int dmubus_call_blob(char *obj, char *method, void *value, json_object **resp);
+int dmubus_call_blob_blocking(char *obj, char *method, void *value, json_object **resp);
 int dmubus_call_blob_set(char *obj, char *method, void *value);
 
 void dmubus_free();
