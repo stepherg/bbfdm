@@ -599,8 +599,8 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Internal transaction: need to commit the changes
-		register_instance_refresh_timer(ctx, 100);
 		transaction_commit(NULL, trans_id, true);
+		register_instance_refresh_timer(ctx, 100);
 	}
 
 end:
@@ -723,8 +723,8 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 		if (data.trans_id == 0) {
 			// Internal transaction: need to abort the changes
-			register_instance_refresh_timer(ctx, 0);
 			transaction_abort(NULL, trans_id);
+			register_instance_refresh_timer(ctx, 100);
 		}
 
 		goto end;
@@ -742,8 +742,8 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 			if (data.trans_id == 0) {
 				// Internal transaction: need to abort the changes
-				register_instance_refresh_timer(ctx, 0);
 				transaction_abort(NULL, trans_id);
+				register_instance_refresh_timer(ctx, 100);
 			}
 
 			free_pv_list(&pv_list);
@@ -759,8 +759,8 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Internal transaction: need to commit the changes
-		register_instance_refresh_timer(ctx, 100);
 		transaction_commit(NULL, trans_id, true);
+		register_instance_refresh_timer(ctx, 100);
 	}
 
 end:
@@ -848,8 +848,8 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Internal transaction: need to commit the changes
-		register_instance_refresh_timer(ctx, 100);
 		transaction_commit(NULL, trans_id, true);
+		register_instance_refresh_timer(ctx, 100);
 	}
 
 end:
@@ -926,12 +926,12 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 			transaction_status(&data.bb);
 		}
 	} else if (is_str_eq(trans_cmd, "commit")) {
-		register_instance_refresh_timer(ctx, 100);
 		ret = transaction_commit(&data, data.trans_id, is_service_restart);
+		register_instance_refresh_timer(ctx, 100);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "abort")) {
-		register_instance_refresh_timer(ctx, 0);
 		ret = transaction_abort(&data, data.trans_id);
+		register_instance_refresh_timer(ctx, 100);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "status")) {
 		transaction_status(&data.bb);
