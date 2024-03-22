@@ -1536,6 +1536,9 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 
 		dmctx->findparam = 1;
 
+		if (i == 0 &&  dmctx->nextlevel && (count_occurrences(node->current_object, '.') == in_path_dot_num + 1))
+			add_list_parameter(dmctx, dmstrdup(node->current_object), "0", "xsd:object", NULL);
+
 		char *path = dmjson_get_value(res_obj, 1, "path");
 		char *data = dmjson_get_value(res_obj, 1, "data");
 		char *type = dmjson_get_value(res_obj, 1, "type");
@@ -1546,9 +1549,6 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 
 			if ((path[len - 1] == '.' && path_dot_num > in_path_dot_num + 1) ||
 				(path[len - 1] != '.' && path_dot_num > in_path_dot_num))
-				continue;
-		} else {
-			if (i == 0 && (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0))
 				continue;
 		}
 
