@@ -137,14 +137,46 @@ static int dm_strcmp_wildcard(char *str1, char *str2)
 			return -1;
 
 		if ((*str2 == *str1) ||
-			(sp2 != str2 && *str2 == '*' && is_instance_number_alias(&str1)) ||
-			(sp1 != str1 && *str1 == '*' && is_instance_number_alias(&str2))) {
+				(sp2 != str2 && *str2 == '*' && is_instance_number_alias(&str1)) ||
+				(sp1 != str1 && *str1 == '*' && is_instance_number_alias(&str2))) {
 			str1++;
 			str2++;
 		} else {
 			return -1;
 		}
 	}
+
+	if (*str1)
+		return -1;
+
+	return 0;
+}
+
+static int dm_strncmp_wildcard(char *str1, char *str2, size_t n)
+{
+	char *sp1 = str1, *sp2 = str2;
+	size_t i = 0;
+
+	if (str1 == NULL || str2 == NULL)
+		return -1;
+
+	while (*str2 && i < n) {
+		if (*str1 == '\0')
+			return -1;
+
+		if ((*str2 == *str1) ||
+				(sp2 != str2 && *str2 == '*' && is_instance_number_alias(&str1)) ||
+				(sp1 != str1 && *str1 == '*' && is_instance_number_alias(&str2))) {
+			str1++;
+			str2++;
+			i++;
+		} else {
+			return -1;
+		}
+	}
+
+	if (i == n)
+		return 0;
 
 	if (*str1)
 		return -1;
@@ -839,7 +871,7 @@ static int is64digit(char c)
 	return 0;
 }
 
-static char *get_value_by_reference(struct dmctx *ctx, char *value)
+char *get_value_by_reference(struct dmctx *ctx, char *value)
 {
 	char *pch = NULL, *spch = NULL, *val = NULL;
 	char buf[MAX_DM_PATH * 4] = {0};
@@ -901,31 +933,40 @@ end:
 static bool has_same_reference(char *curr_value, char *new_value)
 {
 	struct dm_reference reference = {0};
-	char key_name[256], key_value[256];
+	char buf[MAX_DM_PATH * 4] = {0};
 	char param_value[2048] = {0};
-	regmatch_t pmatch[2];
+	char *pch = NULL, *spch = NULL;
 
 	snprintf(param_value, sizeof(param_value), "%s", new_value);
-
 	bbf_get_reference_args(param_value, &reference);
 
-	bool res = match(curr_value, "\\[(.*?)\\]", 2, pmatch);
-	if (!res)
-		return (DM_STRCMP(curr_value, reference.path) == 0);
+	DM_STRNCPY(buf, curr_value, sizeof(buf));
 
-	int len = pmatch[0].rm_so;
-	if (len <= 0)
-		return false;
+	for (pch = strtok_r(buf, ",", &spch); pch; pch = strtok_r(NULL, ",", &spch)) {
+		char key_name[256] = {0}, key_value[256] = {0};
+		regmatch_t pmatch[2];
 
-	char *match_str = curr_value + pmatch[1].rm_so;
-	if (DM_STRLEN(match_str) == 0)
-		return false;
+		bool res = match(pch, "\\[(.*?)\\]", 2, pmatch);
+		if (!res && DM_STRCMP(pch, reference.path) == 0)
+			return true;
 
-	int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
-	if (n != 2)
-		return false;
+		int len = pmatch[0].rm_so;
+		if (len <= 0)
+			continue;
 
-	return (DM_STRNCMP(curr_value, reference.path, len) == 0 && DM_STRCMP(key_value, reference.value) == 0);
+		char *match_str = pch + pmatch[1].rm_so;
+		if (DM_STRLEN(match_str) == 0)
+			continue;
+
+		int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
+		if (n != 2)
+			continue;
+
+		if (dm_strncmp_wildcard(pch, reference.path, len) == 0 && DM_STRCMP(key_value, reference.value) == 0)
+			return true;
+	}
+
+	return false;
 }
 
 static char *check_value_by_type(char *value, int type)
@@ -2635,12 +2676,22 @@ int dm_entry_get_reference_value(struct dmctx *dmctx)
  *****************/
 static int object_exists_check_obj(DMOBJECT_ARGS)
 {
-	if (DM_STRCMP(node->current_object, dmctx->in_param) == 0) {
+	if (node->is_ubus_service) {
+		int fault =  get_ubus_instances(dmctx, node);
+		if (fault)
+			return fault;
+
 		dmctx->match = true;
 		dmctx->stop = true;
 		return 0;
+	} else {
+		if (DM_STRCMP(node->current_object, dmctx->in_param) == 0) {
+			dmctx->match = true;
+			dmctx->stop = true;
+			return 0;
+		}
+		return FAULT_9005;
 	}
-	return FAULT_9005;
 }
 
 static int object_exists_check_param(DMPARAM_ARGS)

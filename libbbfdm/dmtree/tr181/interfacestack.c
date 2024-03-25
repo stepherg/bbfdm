@@ -101,6 +101,7 @@ static int create_interface_stack_instance(struct dmctx *dmctx, DMNODE *parent_n
 		char *path, char *inst_number, char *inst_alias, int *curr_inst)
 {
 	char *instance = NULL, *inst = NULL;
+	char *LowerLayer = NULL;
 
 	if (!s || !data || !path || !inst_number || !inst_alias)
 		goto end;
@@ -111,7 +112,9 @@ static int create_interface_stack_instance(struct dmctx *dmctx, DMNODE *parent_n
 
 	dmasprintf(&data->HigherLayer, "%s%s", path, instance);
 	dmuci_get_value_by_section_string(s, inst_alias, &data->HigherAlias);
-	dmuci_get_value_by_section_string(s, "LowerLayers", &data->LowerLayer);
+	dmuci_get_value_by_section_string(s, "LowerLayers", &LowerLayer);
+
+	data->LowerLayer = get_value_by_reference(dmctx, LowerLayer);
 	data->LowerAlias = get_lower_alias_value(data->LowerLayer);
 
 	inst = handle_instance_without_section(dmctx, parent_node, ++(*curr_inst));

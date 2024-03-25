@@ -34,6 +34,7 @@ int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, cha
 void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *additional_data);
 void free_all_list_parameter(struct dmctx *ctx);
 int string_to_bool(char *v, bool *b);
+char *get_value_by_reference(struct dmctx *ctx, char *value);
 void dmentry_instance_lookup_inparam(struct dmctx *ctx);
 int dm_entry_get_value(struct dmctx *dmctx);
 int dm_entry_get_name(struct dmctx *ctx);
