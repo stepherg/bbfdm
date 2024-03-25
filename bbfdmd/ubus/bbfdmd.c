@@ -50,7 +50,6 @@ LIST_HEAD(head_registered_service);
 static void cancel_periodic_timers(struct ubus_context *ctx);
 static void run_schema_updater(struct bbfdm_context *u);
 static void periodic_instance_updater(struct uloop_timeout *t);
-static void register_instance_refresh_timer(struct ubus_context *ctx, int start_sec);
 
 // Global variables
 static void *deamon_lib_handle = NULL;
@@ -1648,7 +1647,7 @@ static void cancel_periodic_timers(struct ubus_context *ctx)
 	}
 }
 
-static void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
+void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
 {
 	struct bbfdm_context *u;
 	unsigned refresh_time = 0;

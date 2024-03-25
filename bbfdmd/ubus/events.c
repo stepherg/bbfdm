@@ -92,6 +92,8 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	blob_buf_free(&bb);
 	blob_buf_free(&b);
 
+	register_instance_refresh_timer(ctx, 2000);
+
 end:
 	bbf_cleanup(&bbf_ctx);
 }
