@@ -5,10 +5,10 @@ BBF_SCRIPTS="/usr/share/bbfdm"
 
 case "$1" in
 	list)
-		echo '{ "ipping" : { "host": "str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "proto": "str" },
-				"nslookup" : { "host": "str", "dns_serevr": "str", "iface": "str", "nbr_of_rep": "str", "timeout": "str", "proto": "str" },
-				"udpecho" : { "host": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "inter_trans_time":"str", "proto": "str" },
-				"serverselection" : { "hostlist": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "protocol_used": "str", "proto": "str" },
+		echo '{ "ipping" : { "host": "str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "proto": "str", "cancel": "str" },
+				"nslookup" : { "host": "str", "dns_serevr": "str", "iface": "str", "nbr_of_rep": "str", "timeout": "str", "proto": "str", "cancel": "str" },
+				"udpecho" : { "host": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "data_size": "str", "dscp": "str", "inter_trans_time":"str", "proto": "str", "cancel": "str" },
+				"serverselection" : { "hostlist": "str", "port":"str", "iface": "str", "ip_proto": "str", "nbr_of_rep": "str", "timeout": "str", "protocol_used": "str", "proto": "str", "cancel": "str" },
 			  }'
 	;;
 	call)

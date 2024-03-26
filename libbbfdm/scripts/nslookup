@@ -43,6 +43,7 @@ nslookup_launch() {
 	json_get_var iface iface
 	json_get_var cnt nbr_of_rep
 	json_get_var proto proto
+	json_get_var cancel cancel
 	
 	LOG_FILE=$(get_nslookup_log_file)
 
@@ -51,11 +52,34 @@ nslookup_launch() {
 
 	# Clear all nslookup result instances
 	[ "$proto" = "both_proto" ] && {
+		old_pid=$(cat /tmp/nslookup_pid)
+		[ -n "${old_pid}" ] && {
+			cmd=$(cat /proc/$old_pid/cmdline)
+		}
+
+		if [[ "${cmd}" = *nslookup* ]]; then
+			kill -9 $old_pid
+		fi
+
 		res=$($UCI_SHOW_BBF_DMMAP dmmap_diagnostics | grep -E "=NSLookupResult$" | cut -d= -f 1)
 		for i in $res; do
 			$UCI_DELETE_BBF_DMMAP "${i}"
 		done
-		$UCI_COMMIT_BBF_DMMAP
+
+		if [ "${cancel}" -eq "1" ]; then
+			json_init
+			json_add_string "Status" "None"
+			json_add_int "SuccessCount" "0"
+			json_dump
+
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.DiagnosticState="None"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.SuccessCount=0
+			$UCI_COMMIT_BBF_DMMAP
+		else
+			echo $$ > /tmp/nslookup_pid
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.nslookup.DiagnosticState="Requested_running"
+			$UCI_COMMIT_BBF_DMMAP
+		fi
 	}
 
 	# Fail if hostname is empty

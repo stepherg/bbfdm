@@ -14,6 +14,15 @@
 
 #define IPLAYER_CAP_DIAGNOSTIC_PATH "/usr/share/bbfdm/iplayercap"
 
+
+static void stop_iplayercap_diagnostics()
+{
+	char cmd[256] = {0};
+	
+	snprintf(cmd, sizeof(cmd), "sh %s '{\"proto\":\"both_proto\",\"cancel\":\"1\"}'", IPLAYER_CAP_DIAGNOSTIC_PATH);
+	system(cmd);
+}
+
 /*
  * *** Device.IP.Diagnostics.IPLayerCapacityMetrics. ***
  */
@@ -46,7 +55,12 @@ static int browseIPLayerCapacityIncrementalResultInst(struct dmctx *dmctx, DMNOD
 
 static int get_IPDiagnosticsIPLayerCapacity_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("iplayercapacity", "DiagnosticState", "None");
+	char *val = get_diagnostics_option_fallback_def("iplayercapacity", "DiagnosticState", "None");
+	if (DM_STRSTR(val, "Requested") != NULL)
+		*value = dmstrdup("Requested");
+	else
+		*value = dmstrdup(val);
+
 	return 0;
 }
 
@@ -58,8 +72,12 @@ static int set_IPDiagnosticsIPLayerCapacity_DiagnosticsState(char *refparam, str
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_LSTRCMP(value, "Requested") == 0)
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				set_diagnostics_option("iplayercapacity", "DiagnosticState", value);
+			} else if (DM_LSTRCMP(value, "Canceled") == 0) {
+				set_diagnostics_option("iplayercapacity", "DiagnosticState", "None");
+				stop_iplayercap_diagnostics();
+			}
 			return 0;
 	}
 	return 0;
@@ -120,6 +138,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Interface(char *refparam, struct dmc
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "interface", reference.value);
 			return 0;
 	}
@@ -142,6 +161,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Role(char *refparam, struct dmctx *c
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "Role", value);
 			return 0;
 	}
@@ -163,6 +183,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Host(char *refparam, struct dmctx *c
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "Host", value);
 			return 0;
 	}
@@ -184,6 +205,7 @@ static int set_IPDiagnosticsIPLayerCapacity_Port(char *refparam, struct dmctx *c
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "Port", value);
 			return 0;
 	}
@@ -207,6 +229,7 @@ static int set_IPDiagnosticsIPLayerCapacity_JumboFramesPermitted(char *refparam,
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			string_to_bool(value, &b);
 			set_diagnostics_option("iplayercapacity", "JumboFramesPermitted", b ? "1" : "0");
 			return 0;
@@ -229,6 +252,7 @@ static int set_IPDiagnosticsIPLayerCapacity_DSCP(char *refparam, struct dmctx *c
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "DSCP", value);
 			return 0;
 	}
@@ -250,6 +274,7 @@ static int set_IPDiagnosticsIPLayerCapacity_ProtocolVersion(char *refparam, stru
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "ProtocolVersion", value);
 			return 0;
 	}
@@ -271,6 +296,7 @@ static int set_IPDiagnosticsIPLayerCapacity_UDPPayloadContent(char *refparam, st
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "UDPPayloadContent", value);
 			return 0;
 	}
@@ -292,6 +318,7 @@ static int set_IPDiagnosticsIPLayerCapacity_TestType(char *refparam, struct dmct
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "TestType", value);
 			return 0;
 	}
@@ -315,6 +342,7 @@ static int set_IPDiagnosticsIPLayerCapacity_IPDVEnable(char *refparam, struct dm
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			string_to_bool(value, &b);
 			set_diagnostics_option("iplayercapacity", "IPDVEnable", b ? "1" : "0");
 			return 0;
@@ -338,6 +366,7 @@ static int set_IPDiagnosticsIPLayerCapacity_StartSendingRateIndex(char *refparam
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "StartSendingRateIndex", value);
 			return 0;
 	}
@@ -359,6 +388,7 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberFirstModeTestSubIntervals(char
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "NumberFirstModeTestSubIntervals", value);
 			return 0;
 	}
@@ -384,6 +414,7 @@ static int set_IPDiagnosticsIPLayerCapacity_NumberTestSubIntervals(char *refpara
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "NumberTestSubIntervals", value);
 			return 0;
 	}
@@ -406,6 +437,7 @@ static int set_IPDiagnosticsIPLayerCapacity_TestSubInterval(char *refparam, stru
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "TestSubInterval", value);
 			return 0;
 	}
@@ -427,6 +459,7 @@ static int set_IPDiagnosticsIPLayerCapacity_StatusFeedbackInterval(char *refpara
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "StatusFeedbackInterval", value);
 			return 0;
 	}
@@ -448,6 +481,7 @@ static int set_IPDiagnosticsIPLayerCapacity_SeqErrThresh(char *refparam, struct 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "SeqErrThresh", value);
 			return 0;
 	}
@@ -471,6 +505,7 @@ static int set_IPDiagnosticsIPLayerCapacity_ReordDupIgnoreEnable(char *refparam,
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			string_to_bool(value, &b);
 			set_diagnostics_option("iplayercapacity", "ReordDupIgnoreEnable", b ? "1" : "0");
 			return 0;
@@ -493,6 +528,7 @@ static int set_IPDiagnosticsIPLayerCapacity_LowerThresh(char *refparam, struct d
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "LowerThresh", value);
 			return 0;
 	}
@@ -514,6 +550,7 @@ static int set_IPDiagnosticsIPLayerCapacity_UpperThresh(char *refparam, struct d
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "UpperThresh", value);
 			return 0;
 	}
@@ -535,6 +572,7 @@ static int set_IPDiagnosticsIPLayerCapacity_HighSpeedDelta(char *refparam, struc
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "HighSpeedDelta", value);
 			return 0;
 	}
@@ -556,6 +594,7 @@ static int set_IPDiagnosticsIPLayerCapacity_RateAdjAlgorithm(char *refparam, str
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "RateAdjAlgorithm", value);
 			return 0;
 	}
@@ -571,6 +610,7 @@ static int set_IPDiagnosticsIPLayerCapacity_SlowAdjThresh(char *refparam, struct
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("iplayercapacity");
+			stop_iplayercap_diagnostics();
 			set_diagnostics_option("iplayercapacity", "SlowAdjThresh", value);
 			return 0;
 	}

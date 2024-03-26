@@ -421,7 +421,12 @@ static int get_forwarding_dns_server(char *refparam, struct dmctx *ctx, void *da
 
 static int get_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("nslookup", "DiagnosticState", "None");
+	char *val = get_diagnostics_option_fallback_def("nslookup", "DiagnosticState", "None");
+	if (DM_STRSTR(val, "Requested") != NULL)
+		*value = dmstrdup("Requested");
+	else
+		*value = dmstrdup(val);
+
 	return 0;
 }
 
@@ -692,8 +697,12 @@ static int set_nslookupdiagnostics_diagnostics_state(char *refparam, struct dmct
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_LSTRCMP(value, "Requested") == 0)
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				set_diagnostics_option("nslookup", "DiagnosticState", value);
+			} else if (DM_LSTRCMP(value, "Canceled") == 0) {
+				set_diagnostics_option("nslookup", "DiagnosticState", "None");
+				dmubus_call_set("bbf.diag", "nslookup", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
+			}
 			return 0;
 	}
 	return 0;
@@ -717,6 +726,7 @@ static int set_nslookupdiagnostics_interface(char *refparam, struct dmctx *ctx, 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("nslookup");
+			dmubus_call_set("bbf.diag", "nslookup", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("nslookup", "interface", reference.value);
 			return 0;
 	}
@@ -732,6 +742,7 @@ static int set_nslookupdiagnostics_host_name(char *refparam, struct dmctx *ctx, 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("nslookup");
+			dmubus_call_set("bbf.diag", "nslookup", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("nslookup", "HostName", value);
 			return 0;
 	}
@@ -747,6 +758,7 @@ static int set_nslookupdiagnostics_d_n_s_server(char *refparam, struct dmctx *ct
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("nslookup");
+			dmubus_call_set("bbf.diag", "nslookup", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("nslookup", "DNSServer", value);
 			return 0;
 	}
@@ -762,6 +774,7 @@ static int set_nslookupdiagnostics_timeout(char *refparam, struct dmctx *ctx, vo
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("nslookup");
+			dmubus_call_set("bbf.diag", "nslookup", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("nslookup", "Timeout", value);
 			return 0;
 	}
@@ -777,6 +790,7 @@ static int set_nslookupdiagnostics_number_of_repetitions(char *refparam, struct 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("nslookup");
+			dmubus_call_set("bbf.diag", "nslookup", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("nslookup", "NumberOfRepetitions", value);
 			return 0;
 	}

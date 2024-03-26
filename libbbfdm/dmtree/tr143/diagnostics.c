@@ -30,6 +30,14 @@ static int get_diag_enable_true(char *refparam, struct dmctx *ctx, void *data, c
 	return 0;
 }
 
+static void stop_traceroute_diagnostics(void)
+{
+	char cmd[256] = {0};
+
+	snprintf(cmd, sizeof(cmd), "sh %s '{\"proto\":\"both_proto\",\"cancel\":\"1\"}'", TRACEROUTE_DIAGNOSTIC_PATH);
+	system(cmd);
+}
+
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
@@ -40,7 +48,12 @@ static int get_diag_enable_true(char *refparam, struct dmctx *ctx, void *data, c
 
 static int get_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("ipping", "DiagnosticState", "None");
+	char *val = get_diagnostics_option_fallback_def("ipping", "DiagnosticState", "None");
+	if (DM_STRSTR(val, "Requested") != NULL)
+		*value = dmstrdup("Requested");
+	else
+		*value = dmstrdup(val);
+
 	return 0;
 }
 
@@ -52,8 +65,12 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_LSTRCMP(value, "Requested") == 0)
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				set_diagnostics_option("ipping", "DiagnosticState", value);
+			} else if (DM_LSTRCMP(value, "Canceled") == 0) {
+				set_diagnostics_option("ipping", "DiagnosticState", "None");
+				dmubus_call_set("bbf.diag", "ipping", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
+			}
 			return 0;
 	}
 	return 0;
@@ -84,6 +101,7 @@ static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("ipping");
+			dmubus_call_set("bbf.diag", "ipping", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("ipping", "interface", reference.value);
 			return 0;
 	}
@@ -105,6 +123,7 @@ static int set_ip_ping_protocolversion(char *refparam, struct dmctx *ctx, void *
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("ipping");
+			dmubus_call_set("bbf.diag", "ipping", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("ipping", "ProtocolVersion", value);
 			return 0;
 	}
@@ -126,6 +145,7 @@ static int set_ip_ping_host(char *refparam, struct dmctx *ctx, void *data, char 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("ipping");
+			dmubus_call_set("bbf.diag", "ipping", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("ipping", "Host", value);
 			return 0;
 	}
@@ -147,6 +167,7 @@ static int set_ip_ping_repetition_number(char *refparam, struct dmctx *ctx, void
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("ipping");
+			dmubus_call_set("bbf.diag", "ipping", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("ipping", "NumberOfRepetitions", value);
 			return 0;
 	}
@@ -168,6 +189,7 @@ static int set_ip_ping_timeout(char *refparam, struct dmctx *ctx, void *data, ch
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("ipping");
+			dmubus_call_set("bbf.diag", "ipping", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("ipping", "Timeout", value);
 			return 0;
 	}
@@ -189,6 +211,7 @@ static int set_ip_ping_block_size(char *refparam, struct dmctx *ctx, void *data,
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("ipping");
+			dmubus_call_set("bbf.diag", "ipping", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("ipping", "DataBlockSize", value);
 			return 0;
 	}
@@ -210,6 +233,7 @@ static int set_ip_ping_DSCP(char *refparam, struct dmctx *ctx, void *data, char 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("ipping");
+			dmubus_call_set("bbf.diag", "ipping", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("ipping", "DSCP", value);
 			return 0;
 	}
@@ -276,7 +300,12 @@ static int get_ip_ping_MaximumResponseTimeDetailed(char *refparam, struct dmctx 
 
 static int get_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("traceroute", "DiagnosticState", "None");
+	char *val = get_diagnostics_option_fallback_def("traceroute", "DiagnosticState", "None");
+	if (DM_STRSTR(val, "Requested") != NULL)
+		*value = dmstrdup("Requested");
+	else
+		*value = dmstrdup(val);
+
 	return 0;
 }
 
@@ -288,8 +317,12 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_LSTRCMP(value, "Requested") == 0)
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				set_diagnostics_option("traceroute", "DiagnosticState", value);
+			} else if (DM_LSTRCMP(value, "Canceled") == 0) {
+				set_diagnostics_option("traceroute", "DiagnosticState", "None");
+				stop_traceroute_diagnostics();
+			}
 			return 0;
 	}
 	return 0;
@@ -320,6 +353,7 @@ static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("traceroute");
+			stop_traceroute_diagnostics();
 			set_diagnostics_option("traceroute", "interface", reference.value);
 			return 0;
 	}
@@ -341,6 +375,7 @@ static int set_IPDiagnosticsTraceRoute_ProtocolVersion(char *refparam, struct dm
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("traceroute");
+			stop_traceroute_diagnostics();
 			set_diagnostics_option("traceroute", "ProtocolVersion", value);
 			return 0;
 	}
@@ -362,6 +397,7 @@ static int set_IPDiagnosticsTraceRoute_Host(char *refparam, struct dmctx *ctx, v
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("traceroute");
+			stop_traceroute_diagnostics();
 			set_diagnostics_option("traceroute", "Host", value);
 			return 0;
 	}
@@ -383,6 +419,7 @@ static int set_IPDiagnosticsTraceRoute_NumberOfTries(char *refparam, struct dmct
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("traceroute");
+			stop_traceroute_diagnostics();
 			set_diagnostics_option("traceroute", "NumberOfTries", value);
 			return 0;
 	}
@@ -404,6 +441,7 @@ static int set_IPDiagnosticsTraceRoute_Timeout(char *refparam, struct dmctx *ctx
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("traceroute");
+			stop_traceroute_diagnostics();
 			set_diagnostics_option("traceroute", "Timeout", value);
 			return 0;
 	}
@@ -425,6 +463,7 @@ static int set_IPDiagnosticsTraceRoute_DataBlockSize(char *refparam, struct dmct
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("traceroute");
+			stop_traceroute_diagnostics();
 			set_diagnostics_option("traceroute", "DataBlockSize", value);
 			return 0;
 	}
@@ -446,6 +485,7 @@ static int set_IPDiagnosticsTraceRoute_DSCP(char *refparam, struct dmctx *ctx, v
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("traceroute");
+			stop_traceroute_diagnostics();
 			set_diagnostics_option("traceroute", "DSCP", value);
 			return 0;
 	}
@@ -467,6 +507,7 @@ static int set_IPDiagnosticsTraceRoute_MaxHopCount(char *refparam, struct dmctx 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("traceroute");
+			stop_traceroute_diagnostics();
 			set_diagnostics_option("traceroute", "MaxHops", value);
 			return 0;
 	}
@@ -1195,7 +1236,12 @@ static int get_IPDiagnosticsUploadDiagnosticsPerConnectionResult_TCPOpenResponse
 
 static int get_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("udpechodiag", "DiagnosticState", "None");
+	char *val = get_diagnostics_option_fallback_def("udpechodiag", "DiagnosticState", "None");
+	if (DM_STRSTR(val, "Requested") != NULL)
+		*value = dmstrdup("Requested");
+	else
+		*value = dmstrdup(val);
+
 	return 0;
 }
 
@@ -1207,8 +1253,12 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_LSTRCMP(value, "Requested") == 0)
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				set_diagnostics_option("udpechodiag", "DiagnosticState", value);
+			} else if (DM_LSTRCMP(value, "Canceled") == 0) {
+				set_diagnostics_option("udpechodiag", "DiagnosticState", "None");
+				dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
+			}
 			return 0;
 	}
 	return 0;
@@ -1239,6 +1289,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
+			dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("udpechodiag", "interface", reference.value);
 			return 0;
 	}
@@ -1260,6 +1311,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Host(char *refparam, struct dmctx
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
+			dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("udpechodiag", "Host", value);
 			return 0;
 	}
@@ -1281,6 +1333,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Port(char *refparam, struct dmctx
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
+			dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("udpechodiag", "port", value);
 			return 0;
 	}
@@ -1302,6 +1355,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_NumberOfRepetitions(char *refpara
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
+			dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("udpechodiag", "NumberOfRepetitions", value);
 			return 0;
 	}
@@ -1323,6 +1377,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Timeout(char *refparam, struct dm
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
+			dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("udpechodiag", "Timeout", value);
 			return 0;
 	}
@@ -1344,6 +1399,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DataBlockSize(char *refparam, str
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
+			dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("udpechodiag", "DataBlockSize", value);
 			return 0;
 	}
@@ -1365,6 +1421,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DSCP(char *refparam, struct dmctx
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
+			dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("udpechodiag", "DSCP", value);
 			return 0;
 	}
@@ -1386,6 +1443,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_InterTransmissionTime(char *refpa
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
+			dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("udpechodiag", "InterTransmissionTime", value);
 			return 0;
 	}
@@ -1407,6 +1465,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_ProtocolVersion(char *refparam, s
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("udpechodiag");
+			dmubus_call_set("bbf.diag", "udpecho", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("udpechodiag", "ProtocolVersion", value);
 			return 0;
 	}
@@ -1455,7 +1514,12 @@ static int get_IPDiagnosticsUDPEchoDiagnostics_MaximumResponseTime(char *refpara
 
 static int get_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = get_diagnostics_option_fallback_def("serverselection", "DiagnosticState", "None");
+	char *val = get_diagnostics_option_fallback_def("serverselection", "DiagnosticState", "None");
+	if (DM_STRSTR(val, "Requested") != NULL)
+		*value = dmstrdup("Requested");
+	else
+		*value = dmstrdup(val);
+
 	return 0;
 }
 
@@ -1467,8 +1531,12 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			if (DM_LSTRCMP(value, "Requested") == 0)
+			if (DM_LSTRCMP(value, "Requested") == 0) {
 				set_diagnostics_option("serverselection", "DiagnosticState", value);
+			} else if (DM_LSTRCMP(value, "Canceled") == 0) {
+				set_diagnostics_option("serverselection", "DiagnosticState", "None");
+				dmubus_call_set("bbf.diag", "serverselection", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
+			}
 			return 0;
 	}
 	return 0;
@@ -1499,6 +1567,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("serverselection");
+			dmubus_call_set("bbf.diag", "serverselection", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("serverselection", "interface", reference.value);
 			return 0;
 	}
@@ -1520,6 +1589,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_ProtocolVersion(char *ref
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("serverselection");
+			dmubus_call_set("bbf.diag", "serverselection", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("serverselection", "ProtocolVersion", value);
 			return 0;
 	}
@@ -1541,6 +1611,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Protocol(char *refparam, 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("serverselection");
+			dmubus_call_set("bbf.diag", "serverselection", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("serverselection", "Protocol", value);
 			return 0;
 	}
@@ -1562,6 +1633,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_HostList(char *refparam, 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("serverselection");
+			dmubus_call_set("bbf.diag", "serverselection", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("serverselection", "HostList", value);
 			return 0;
 	}
@@ -1583,6 +1655,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_NumberOfRepetitions(char 
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("serverselection");
+			dmubus_call_set("bbf.diag", "serverselection", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("serverselection", "NumberOfRepetitions", value);
 			return 0;
 	}
@@ -1604,6 +1677,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Timeout(char *refparam, s
 			return 0;
 		case VALUESET:
 			reset_diagnostic_state("serverselection");
+			dmubus_call_set("bbf.diag", "serverselection", UBUS_ARGS{{"cancel", "1", String},{"proto", "both_proto", String}}, 2);
 			set_diagnostics_option("serverselection", "Timeout", value);
 			return 0;
 	}

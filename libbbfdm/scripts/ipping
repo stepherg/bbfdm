@@ -51,6 +51,51 @@ ipping_launch() {
 	json_get_var dsize data_size
 	json_get_var dscp dscp
 	json_get_var proto proto
+	json_get_var cancel cancel
+
+	if [ "${proto}" = "both_proto" ]; then
+		old_pid=$(cat /tmp/ipping_pid)
+		[ -n "${old_pid}" ] && {
+			cmd=$(cat /proc/$old_pid/cmdline)
+		}
+
+		if [[ "${cmd}" = *ipping* ]]; then
+			kill -9 $old_pid
+		fi
+
+		if [ "${cancel}" -eq "1" ]; then
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState="None"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.IPAddressUsed=""
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.SuccessCount=0
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.FailureCount="0"
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTime=0
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTime=9999
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTime=0
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.AverageResponseTimeDetailed=0
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MinimumResponseTimeDetailed=999999999
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.MaximumResponseTimeDetailed=0
+			$UCI_COMMIT_BBF_DMMAP
+
+			json_init
+			json_add_string "Status" "None"
+			json_add_string "IPAddressUsed" ""
+			json_add_int "MinimumResponseTime" "9999"
+			json_add_int "AverageResponseTime" "0"
+			json_add_int "MaximumResponseTime" "0"
+			json_add_int "MinimumResponseTimeDetailed" "999999999"
+			json_add_int "AverageResponseTimeDetailed" "0"
+			json_add_int "MaximumResponseTimeDetailed" "0"
+			json_add_int "SuccessCount" "0"
+			json_add_int "FailureCount" "0"
+			json_dump
+
+			return
+		else
+			echo $$ > /tmp/ipping_pid
+			$UCI_SET_BBF_DMMAP dmmap_diagnostics.ipping.DiagnosticState="Requested_running"
+			$UCI_COMMIT_BBF_DMMAP
+		fi
+	fi
 
 	# Assign default value
 	[ -z "${nbr_of_rep}" ] && nbr_of_rep=3
