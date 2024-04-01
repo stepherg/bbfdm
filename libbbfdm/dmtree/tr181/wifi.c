@@ -141,21 +141,61 @@ static char *get_data_model_standard(char *standard)
 	return standard;
 }
 
+static int get_sub_band(const char *cc)
+{
+	int sub_band = 0;
+
+	if (cc == NULL)
+		return 0;
+
+	switch (DM_STRTOL(cc)) {
+		case 31:
+		case 95:
+		case 159:
+			sub_band = 1;
+			break;
+		case 63:
+		case 127:
+		case 191:
+			sub_band = 2;
+			break;
+		default:
+			break;
+	}
+
+	return sub_band;
+}
+
 // Use 20MHz as default value, in case of null or 0
-static char *get_data_model_band(const char *bandwidth)
+static char *get_data_model_band(const char *bandwidth, const char *ccfs0, const char *ccfs1)
 {
 	char *band = NULL;
+	int sub_band = 0;
 	const char *tmp = "20";
 
 	if (DM_STRLEN(bandwidth) == 0) {
 		tmp = "20";
-	} else if (bandwidth[0] == '0') {
-		tmp = "20";
 	} else {
-		tmp = bandwidth;
+		if (DM_LSTRCMP(bandwidth, "320") != 0) {
+			tmp = bandwidth;
+		} else {
+			sub_band = get_sub_band(ccfs0);
+			if (!sub_band) {
+				sub_band = get_sub_band(ccfs1);
+			}
+
+			if (!sub_band) { // failed to get sub-band
+				tmp = bandwidth;
+			}
+		}
 	}
 
-	dmasprintf(&band, "%sMHz", tmp);
+	if (sub_band) {
+		dmasprintf(&band, "320MHz-%d", sub_band);
+	} else {
+		dmasprintf(&band, "%sMHz", tmp);
+	}
+
 	return band;
 }
 
@@ -3450,11 +3490,17 @@ static int get_WiFiRadio_CurrentOperatingChannelBandwidth(char *refparam, struct
 {
 	json_object *res = NULL;
 	char object[32];
+	char *ccfs0 = NULL, *ccfs1 = NULL, *band = NULL;
 
 	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
 	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
 	DM_ASSERT(res, *value = "20MHz");
-	*value = get_data_model_band(dmjson_get_value(res, 1, "bandwidth"));
+
+	band = dmjson_get_value(res, 1, "bandwidth");
+	ccfs0 = dmjson_get_value(res, 1, "ccfs0");
+	ccfs1 = dmjson_get_value(res, 1, "ccfs1");
+
+	*value = get_data_model_band(band, ccfs0, ccfs1);
 	return 0;
 }
 
@@ -3845,7 +3891,10 @@ static int operate_WiFi_NeighboringWiFiDiagnostic(char *refparam, struct dmctx *
 			frequency[1] = dmjson_get_value(array_obj, 1, "band");
 			signal_strength[1] = dmjson_get_value(array_obj, 1, "rssi");
 			noise[1] = dmjson_get_value(array_obj, 1, "noise");
-			bandwidth[1] = get_data_model_band(dmjson_get_value(array_obj, 1, "bandwidth"));
+			char *band = dmjson_get_value(array_obj, 1, "bandwidth");
+			char *ccfs0 = dmjson_get_value(array_obj, 1, "ccfs0");
+			char *ccfs1 = dmjson_get_value(array_obj, 1, "ccfs1");
+			bandwidth[1] = get_data_model_band(band, ccfs0, ccfs1);
 			standard[1] = get_data_model_standard(dmjson_get_value(array_obj, 1, "standard"));
 			encryption[1] = get_data_model_mode(dmjson_get_value(array_obj, 1, "encryption"));
 			ciphers[1] = dmjson_get_value(array_obj, 1, "ciphers");
