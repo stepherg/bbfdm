@@ -1275,6 +1275,32 @@ static int set_WiFiRadio_RegulatoryDomain(char *refparam, struct dmctx *ctx, voi
 	return 0;
 }
 
+static int get_radio_ccfs0(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+	char object[UBUS_OBJ_LEN] = {0};
+
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
+	DM_ASSERT(res, *value = "");
+
+	*value = dmjson_get_value(res, 1, "ccfs0");
+	return 0;
+}
+
+static int get_radio_ccfs1(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	json_object *res = NULL;
+	char object[UBUS_OBJ_LEN] = {0};
+
+	snprintf(object, sizeof(object), "wifi.radio.%s", section_name(((struct dm_data *)data)->config_section));
+	dmubus_call(object, "status", UBUS_ARGS{0}, 0, &res);
+	DM_ASSERT(res, *value = "");
+
+	*value = dmjson_get_value(res, 1, "ccfs1");
+	return 0;
+}
+
 /*#Device.WiFi.Radio.{i}.PossibleChannels!UBUS:wifi.radio.@Name/status//supp_channels[0].channels*/
 static int get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -3953,6 +3979,8 @@ DMLEAF tWiFiRadioParams[] = {
 {"TransmitPowerSupported", &DMREAD, DMT_STRING, get_WiFiRadio_TransmitPowerSupported, NULL, BBFDM_BOTH},
 {"TransmitPower", &DMWRITE, DMT_INT, get_WiFiRadio_TransmitPower, set_WiFiRadio_TransmitPower, BBFDM_BOTH},
 {"RegulatoryDomain", &DMWRITE, DMT_STRING, get_WiFiRadio_RegulatoryDomain, set_WiFiRadio_RegulatoryDomain, BBFDM_BOTH},
+{"CenterFrequencySegment0", &DMREAD, DMT_UNINT, get_radio_ccfs0, NULL, BBFDM_BOTH},
+{"CenterFrequencySegment1", &DMREAD, DMT_UNINT, get_radio_ccfs1, NULL, BBFDM_BOTH},
 {0}
 };
 
