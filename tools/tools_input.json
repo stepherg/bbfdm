@@ -140,6 +140,14 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/hal/qosmngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "bbf_plugin/qos_bbf.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/network/sshmngr.git",
       "proto": "git",
       "version": "devel",
