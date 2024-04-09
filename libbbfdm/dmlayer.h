@@ -14,6 +14,9 @@
 
 #include "libbbfdm-api/dmcommon.h"
 
+void gre___get_tunnel_system_name(struct uci_section *iface_section, char *device_str, size_t device_str_size);
+
+bool ip___is_gre_protocols(const char *proto);
 bool ip___is_ip_interface_instance_exists(const char *sec_name, const char *device);
 void ip___update_child_interfaces(char *device, char *option_name, char *option_value);
 

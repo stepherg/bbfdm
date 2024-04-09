@@ -57,22 +57,33 @@ static char *get_lower_alias_value(const char *path)
 	} else if (DM_STRNCMP(path, "Device.Ethernet.Interface.", strlen("Device.Ethernet.Interface.")) == 0) {
 		get_dmmap_section_of_config_section_eq("dmmap_ethernet", "device", "eth_iface_instance", instance + 1, &s);
 		dmuci_get_value_by_section_string(s, "eth_iface_alias", &alias_value);
-	} else if (DM_STRNCMP(path, "Device.Bridging.Bridge.", strlen("Device.Bridging.Bridge.")) == 0) {
+	} else if (DM_STRNCMP(path, "Device.Bridging.Bridge.", strlen("Device.Bridging.Bridge.")) == 0 ||
+			DM_STRNCMP(path, "Device.GRE.Tunnel.", strlen("Device.GRE.Tunnel.")) == 0) {
 		regmatch_t pmatch[1] = {0};
-		char *port_inst = NULL;
-		char br_inst[8] = {0};
+		char first_inst[8] = {0};
+		char *second_inst = NULL;
 
 		bool res = match(path, "([0-9]+)", 1, pmatch);
 		if (res) {
-			DM_STRNCPY(br_inst, &path[pmatch[0].rm_so], pmatch[0].rm_eo - pmatch[0].rm_so + 1);
-			if (DM_STRLEN(br_inst) == 0)
+			DM_STRNCPY(first_inst, &path[pmatch[0].rm_so], pmatch[0].rm_eo - pmatch[0].rm_so + 1);
+			if (DM_STRLEN(first_inst) == 0)
 				return "";
 
-			uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_inst, s) {
-				dmuci_get_value_by_section_string(s, "bridge_port_instance", &port_inst);
-				if (DM_STRCMP(port_inst, instance + 1) == 0) {
-					dmuci_get_value_by_section_string(s, "bridge_port_alias", &alias_value);
-					break;
+			if (DM_STRNCMP(path, "Device.Bridging.Bridge.", strlen("Device.Bridging.Bridge.")) == 0) {
+				uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", first_inst, s) {
+					dmuci_get_value_by_section_string(s, "bridge_port_instance", &second_inst);
+					if (DM_STRCMP(second_inst, instance + 1) == 0) {
+						dmuci_get_value_by_section_string(s, "bridge_port_alias", &alias_value);
+						break;
+					}
+				}
+			} else if (DM_STRNCMP(path, "Device.GRE.Tunnel.", strlen("Device.GRE.Tunnel.")) == 0) {
+				uci_path_foreach_option_eq(bbfdm, "dmmap_gre", "interface", "tunnel_instance", first_inst, s) {
+					dmuci_get_value_by_section_string(s, "gre_iface_instance", &second_inst);
+					if (DM_STRCMP(second_inst, instance + 1) == 0) {
+						dmuci_get_value_by_section_string(s, "gre_iface_alias", &alias_value);
+						break;
+					}
 				}
 			}
 		}
@@ -139,6 +150,20 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 
 		if (create_interface_stack_instance(dmctx, parent_node, &curr_interfacestack_data, s,
 				"Device.IP.Interface.", "ip_int_instance", "ip_int_alias", &idx))
+			goto end;
+	}
+
+	/* Higher Layer is Device.GRE.Tunnel.{i}.Interface.{i}. */
+	uci_path_foreach_sections(bbfdm, "dmmap_gre", "interface", s) {
+		char *tunnel_inst = NULL;
+		char path[128] = {0};
+
+		dmuci_get_value_by_section_string(s, "tunnel_instance", &tunnel_inst);
+
+		snprintf(path, sizeof(path), "Device.GRE.Tunnel.%s.Interface.", tunnel_inst);
+
+		if (create_interface_stack_instance(dmctx, parent_node, &curr_interfacestack_data, s,
+				path, "gre_iface_instance", "gre_iface_alias", &idx))
 			goto end;
 	}
 

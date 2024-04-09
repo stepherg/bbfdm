@@ -553,7 +553,8 @@ static int browseIPInterfaceInst(struct dmctx *dmctx, DMNODE *parent_node, void 
 		dmuci_get_value_by_section_string(curr_data->config_section, "device", &device);
 
 		if (strcmp(section_name(curr_data->config_section), "loopback") == 0 ||
-			*proto == '\0' ||
+			DM_STRLEN(proto) == 0 ||
+			ip___is_gre_protocols(proto) ||
 			DM_STRCHR(device, '@') ||
 			ip___is_ip_interface_instance_exists(section_name(curr_data->config_section), device))
 			continue;
@@ -848,7 +849,8 @@ static int delObjIPInterface(char *refparam, struct dmctx *ctx, void *data, char
 				dmuci_get_value_by_section_string(s, "device", &device);
 
 				if (strcmp(section_name(s), "loopback") == 0 ||
-					*proto == '\0' ||
+					DM_STRLEN(proto) == 0 ||
+					ip___is_gre_protocols(proto) ||
 					DM_STRCHR(device, '@') ||
 					ip___is_ip_interface_instance_exists(section_name(s), device))
 					continue;
@@ -1253,6 +1255,13 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			goto end;
 
 		adm_entry_get_reference_param(ctx, "Device.Ethernet.Link.*.Name", device, value);
+		if (DM_STRLEN(*value))
+			goto end;
+
+		if ((DM_STRLEN(device) > 5) && DM_LSTRNCMP(device, "gre", 3) == 0) {
+			// gre device name is of the form gre4-<iface> or gre6-<iface>
+			adm_entry_get_reference_param(ctx, "Device.GRE.Tunnel.*.Interface.*.Name", device + 5, value);
+		}
 
 end:
 		// Store LowerLayers value
@@ -1274,6 +1283,7 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 			eth_mac_vlan,
 			"Device.Ethernet.VLANTermination.",
 			"Device.Ethernet.Link.",
+			"Device.GRE.Tunnel.*.Interface.",
 			NULL};
 	char *curr_device = NULL;
 	struct dm_reference reference = {0};
@@ -1326,6 +1336,16 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 
 					dmuci_set_value_by_section_bbfdm(ppp_s, "iface_name", section_name((struct uci_section *)data));
 					ppp___update_sections(ppp_s, (struct uci_section *)data);
+				}
+			} else if (DM_STRNCMP(reference.path, "Device.GRE.Tunnel.", strlen("Device.GRE.Tunnel.")) == 0) {
+				// get gre device name for provided interface in gre_device
+				struct uci_section *iface_s = get_origin_section_from_config("network", "interface", reference.value);
+				char gre_device[32] = {0};
+
+				gre___get_tunnel_system_name(iface_s, &gre_device[0], sizeof(gre_device));
+
+				if (DM_STRLEN(gre_device) > 0) {
+					ip___update_child_interfaces(curr_device, "device", gre_device);
 				}
 			} else {
 				ip___update_child_interfaces(curr_device, "device", reference.value);

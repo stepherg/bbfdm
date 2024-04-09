@@ -69,6 +69,41 @@ void firewall__create_zone_section(char *s_name)
 	dmuci_add_list_value_by_section(s, "network", s_name);
 }
 
+/* get the name that linux generates based on ifname of tunnel */
+void gre___get_tunnel_system_name(struct uci_section *iface_section, char *device_str, size_t device_str_size)
+{
+	char *proto = NULL;
+
+	if (!iface_section || !device_str_size || !device_str_size)
+		return;
+
+	dmuci_get_value_by_section_string(iface_section, "proto", &proto);
+
+	// to generate appropriate device name
+	if (proto && !DM_LSTRCMP(proto, "grev6")) {
+		snprintf(device_str, device_str_size, "gre6-%s", section_name(iface_section));
+	} else {
+		snprintf(device_str, device_str_size, "gre4-%s", section_name(iface_section));
+	}
+}
+
+bool ip___is_gre_protocols(const char *proto)
+{
+	if (!DM_LSTRCMP(proto, "gre"))
+		return true;
+
+	if (!DM_LSTRCMP(proto, "grev6"))
+		return true;
+
+	if (!DM_LSTRCMP(proto, "gretap"))
+		return true;
+
+	if (!DM_LSTRCMP(proto, "grev6tap"))
+		return true;
+
+	return false;
+}
+
 bool ip___is_ip_interface_instance_exists(const char *sec_name, const char *device)
 {
 	struct uci_section *s = NULL;

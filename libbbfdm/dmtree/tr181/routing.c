@@ -368,7 +368,8 @@ static int browseRouterInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev
 		dmuci_get_value_by_section_string(s, "ip4table", &idx);
 
 		if (strcmp(section_name(s), "loopback") == 0 ||
-			*proto == '\0' ||
+			DM_STRLEN(proto) == 0 ||
+			ip___is_gre_protocols(proto) ||
 			DM_STRCHR(device, '@') ||
 			ip___is_ip_interface_instance_exists(section_name(s), device))
 			continue;
