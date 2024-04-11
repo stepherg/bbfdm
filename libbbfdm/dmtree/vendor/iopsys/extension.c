@@ -19,7 +19,6 @@
 
 DM_MAP_OBJ tDynamicObj[] = {
 /* parentobj, nextobject, parameter */
-{"Device.", tIOPSYS_DeviceObj, NULL},
 {"Device.DeviceInfo.", NULL, tIOPSYS_DeviceInfoParams},
 {"Device.Time.", NULL, tIOPSYS_TimeParams},
 {"Device.Bridging.Bridge.{i}.Port.{i}.", NULL, tIOPSYS_BridgingBridgePortParams},

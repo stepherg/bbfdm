@@ -106,3 +106,5 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | Device.PTM.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
 | Device.Ethernet.                         | ethmngr        | https://dev.iopsys.eu/hal/ethmngr.git        |
 | Device.QoS.                              | qosmngr        | https://dev.iopsys.eu/hal/qosmngr.git        |
+| Device.X_IOPSYS_EU_IGMP.                 | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |
+| Device.X_IOPSYS_EU_MLD.                  | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |
