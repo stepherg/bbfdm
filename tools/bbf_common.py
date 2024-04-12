@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2021 iopsys Software Solutions AB
-# Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+# Copyright (C) 2024 iopsys Software Solutions AB
+# Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
 
 import sys
 import os
@@ -13,10 +13,7 @@ import glob
 # Constants
 BBF_ERROR_CODE = 0
 CURRENT_PATH = os.getcwd()
-BBF_DMTREE_PATH = os.path.join(CURRENT_PATH, "libbbfdm", "dmtree")
-BBF_DMTREE_PATH_TR181_JSON = os.path.join(BBF_DMTREE_PATH, "json", "tr181.json")
-BBF_DMTREE_PATH_TR104_JSON = os.path.join(BBF_DMTREE_PATH, "json", "tr104.json")
-ARRAY_JSON_FILES = {"tr181": BBF_DMTREE_PATH_TR181_JSON, "tr104": BBF_DMTREE_PATH_TR104_JSON}
+DM_JSON_FILE = os.path.join(CURRENT_PATH, "libbbfdm", "dmtree", "json", "datamodel.json")
 
 LIST_SUPPORTED_USP_DM = []
 LIST_SUPPORTED_CWMP_DM = []

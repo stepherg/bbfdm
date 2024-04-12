@@ -9,3 +9,4 @@ bbfdmd/ubus/bbfdmd
 docs/index.md
 __pycache__
 out
+/datamodel

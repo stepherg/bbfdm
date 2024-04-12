@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2021 iopsys Software Solutions AB
-# Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+# Copyright (C) 2024 iopsys Software Solutions AB
+# Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
 
 from collections import OrderedDict
 
@@ -66,39 +66,27 @@ def parse_vendor_object(list_read, list_write):
         add_data_to_list_dm(list_write, param, "Yes", "No")
     
 
-def load_json_data(dm_name):
-    JSON_FILE = bbf.ARRAY_JSON_FILES.get(dm_name, None)
-    if JSON_FILE is None:
-        print(f"!!!! {dm_name} : Data Model doesn't exist")
-        return None
-
-    with open(JSON_FILE, "r", encoding='utf-8') as file:
-        return json.load(file, object_pairs_hook=OrderedDict)
-
-def parse_object(dm_name_list, list_read, list_write, proto):
-    for dm in dm_name_list:
-        data = load_json_data(dm)
+def parse_object(list_read, list_write, proto):
+    with open(bbf.DM_JSON_FILE, "r", encoding='utf-8') as file:
+        data = json.load(file, object_pairs_hook=OrderedDict)
         if data is not None:
             for obj, value in data.items():
                 if obj is None:
-                    print(f'!!!! {dm} : Wrong JSON Data model format!')
+                    print(f'!!!! {bbf.DM_JSON_FILE} : Wrong JSON Data model format!')
                 else:
                     parse_standard_object(list_read, list_write, obj, value, proto)
 
     parse_vendor_object(list_read, list_write)
 
 
-def parse_object_tree(dm_name_list):
-    if isinstance(dm_name_list, list) is False:
-        return None
-
+def parse_object_tree():
     # Usage for USP Data Model
     LIST_SUPPORTED_USP_DM = bbf.LIST_SUPPORTED_USP_DM
-    parse_object(dm_name_list, LIST_SUPPORTED_USP_DM, LIST_USP_DM, "usp")
+    parse_object(LIST_SUPPORTED_USP_DM, LIST_USP_DM, "usp")
     
     # Usage for CWMP Data Model
     LIST_SUPPORTED_CWMP_DM = bbf.LIST_SUPPORTED_CWMP_DM[:]
-    parse_object(dm_name_list, LIST_SUPPORTED_CWMP_DM, LIST_CWMP_DM, "cwmp")
+    parse_object(LIST_SUPPORTED_CWMP_DM, LIST_CWMP_DM, "cwmp")
 
 def generate_excel_sheet(sheet, title, data, style_mapping):
     style_title = style_mapping["title"]
@@ -182,10 +170,10 @@ def generate_excel_file(output_file):
     wb.save(output_file)
 
 
-def generate_excel(dm_name_list, output_file="datamodel.xml"):
+def generate_excel(output_file="datamodel.xml"):
     print("Generating BBF Data Models in Excel format...")
 
-    parse_object_tree(dm_name_list)
+    parse_object_tree()
     generate_excel_file(output_file)
 
     if os.path.isfile(output_file):
@@ -199,14 +187,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Script to generate list of supported and non-supported parameter in xls format',
         epilog='Part of BBF-tools, refer Readme for more examples'
-    )
-
-    parser.add_argument(
-        '-d', '--datamodel',
-        action = 'append',
-        metavar='tr181',
-        choices= ['tr181', 'tr104'],
-        required= True,
     )
 
     parser.add_argument(
@@ -253,6 +233,6 @@ if __name__ == '__main__':
             plugins.append(r)
 
     bbf.generate_supported_dm(args.vendor_prefix, args.vendor_list, plugins)
-    generate_excel(args.datamodel, args.output)
+    generate_excel(args.output)
     print(f'Datamodel generation completed, aritifacts available in {args.output}')
     sys.exit(bbf.BBF_ERROR_CODE)

@@ -1,19 +1,17 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2020 iopsys Software Solutions AB
-# Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+# Copyright (C) 2024 iopsys Software Solutions AB
+# Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
 
 import os
 import sys
-import time
-import re
-import json
 import xml.etree.ElementTree as xml
-from collections import OrderedDict
-from shutil import copyfile
-import bbf_common as bbf
+import json
+import re
 
+LIST_DATA_MODEL = []
 desc_dict = {}
+XML_ROOT = None
 
 listTypes = ["string",
              "unsignedInt",
@@ -49,24 +47,18 @@ listdataTypes = ["string",
                  "IoTEnumControlType"]
 
 
-def getname(objname):
-    global model_root_name
-    OBJSname = objname
-    if (objname.count('.') > 1 and (objname.count('.') != 2 or objname.count('{i}') != 1)):
-        OBJSname = objname.replace(dmroot1.get('name'), "", 1)
-    OBJSname = OBJSname.replace("{i}", "")
-    OBJSname = OBJSname.replace(".", "")
-    if objname.count('.') == 1:
-        model_root_name = OBJSname
-        OBJSname = "Root" + OBJSname
-        return OBJSname
-    if (objname.count('.') == 2 and objname.count('{i}') == 1):
-        model_root_name = OBJSname
-        OBJSname = "Services" + OBJSname
-        return OBJSname
-    return OBJSname
-
-
+def getuniquekeys(dmobject):
+    uniquekeys = None
+    for c in dmobject:
+        if c.tag == "uniqueKey":
+            for s in c:
+                if s.tag == "parameter":
+                    if uniquekeys is None:
+                        uniquekeys = "\"%s\"" % s.get('ref')
+                    else:
+                        uniquekeys = uniquekeys + "," + "\"%s\"" % s.get('ref')
+    return uniquekeys
+    
 def getparamtype(dmparam):
     ptype = None
     for s in dmparam:
@@ -109,6 +101,83 @@ def getParamDefault(dmparam):
     return default
 
 
+def process_datatypes(datatype):
+    key = None
+    enum = None
+    des = None
+    if datatype.tag == "dataType":
+        key = datatype.get("name")
+        if not key:
+            return
+
+        if key in desc_dict:
+            return
+
+        for dt in datatype:
+            if dt.tag == "description":
+                des = dt.text
+                break
+
+        if des is None:
+            desc_dict[key] = ""
+            return
+        elif '{{enum}}' in des:
+            for c in datatype:
+                if c.tag == "string":
+                    for e in c:
+                        if e.tag == "enumeration":
+                            if enum is None:
+                                enum = "Enumeration of: " + e.get("value")
+                            else:
+                                enum += ", " + e.get("value")
+
+            if enum is not None:
+                enum += "."
+                des = re.sub('{{enum}}', enum, des)
+
+        des = des.replace("{", "<").replace("}", ">").replace("'", "").replace("\"", "")
+        desc_dict[key] = des
+
+
+def get_param_desc(dmparam, key):
+    text = None
+    enum = None
+    for s in dmparam:
+        if s.tag == "description":
+            text = s.text
+
+    if not text:
+        return ""
+
+    if '{{enum}}' in text:
+        for s in dmparam:
+            if s.tag != "syntax":
+                continue
+
+            for c in s:
+                if c.tag != "string":
+                    continue
+
+                for e in c:
+                    if e.tag == "enumeration":
+                        if enum is None:
+                            enum = "Enumeration of: " + e.get("value")
+                        else:
+                            enum += ", " + e.get("value")
+
+        if enum is not None:
+            enum += "."
+            text = re.sub('{{enum}}', enum, text)
+
+    if '{{datatype|expand}}' in text and key is not None:
+        detail = desc_dict.get(key)
+        if detail is not None:
+            text = re.sub('{{datatype|expand}}', detail, text)
+
+    text = text.replace("{", "<").replace("}", ">").replace("'", "").replace("\"", "").replace("\n", "")
+    return ' '.join(text.split())
+
+
 def getMinMaxEnumerationUnitPatternparam(paramtype, c):
     paramvalrange = None
     paramenum = None
@@ -117,10 +186,10 @@ def getMinMaxEnumerationUnitPatternparam(paramtype, c):
     if paramtype == "string" or paramtype == "hexBinary" or paramtype == "base64":
         for cc in c:
             if cc.tag == "size":
-                if paramvalrange is None:
+                if paramvalrange is None and (cc.get("minLength") is not None or cc.get("maxLength") is not None):
                     paramvalrange = "%s,%s" % (
                         cc.get("minLength"), cc.get("maxLength"))
-                else:
+                elif cc.get("minLength") is  not None or cc.get("maxLength") is not None:
                     paramvalrange = "%s;%s,%s" % (
                         paramvalrange, cc.get("minLength"), cc.get("maxLength"))
             if cc.tag == "enumeration":
@@ -155,11 +224,10 @@ def getparamdatatyperef(datatyperef):
     paramenum = None
     paramunit = None
     parampattern = None
-    for d in xmlroot1:
+    for d in XML_ROOT:
         if d.tag == "dataType" and d.get("name") == datatyperef:
             if d.get("base") != "" and d.get("base") is not None and d.get("name") == "Alias":
-                paramvalrange, paramenum, paramunit, parampattern = getparamdatatyperef(
-                    d.get("base"))
+                paramvalrange, paramenum, paramunit, parampattern = getparamdatatyperef(d.get("base"))
             else:
                 for dd in d:
                     if dd.tag in listTypes:
@@ -212,772 +280,522 @@ def getparamoption(dmparam):
     listminItem = None
     listmaxItem = None
     listmaxsize = None
-    islist = 0
+    islist = False
+
     for s in dmparam:
         if s.tag == "syntax":
             for c in s:
                 if c.tag == "list":
-                    islist = 1
+                    islist = True
                     listminItem, listmaxItem, listmaxsize = getparamlist(c)
                     for c1 in s:
                         datatype = c1.tag if c1.tag in listdataTypes else None
                         if datatype is not None:
-                            paramvalrange, paramenum, paramunit, parampattern = getMinMaxEnumerationUnitPatternparam(
-                                datatype, c1)
+                            paramvalrange, paramenum, paramunit, parampattern = getMinMaxEnumerationUnitPatternparam(datatype, c1)
                             break
                         if c1.tag == "dataType":
                             datatype = c1.get("ref")
-                            paramvalrange, paramenum, paramunit, parampattern = getparamdatatyperef(
-                                c1.get("ref"))
+                            paramvalrange, paramenum, paramunit, parampattern = getparamdatatyperef(c1.get("ref"))
                             break
 
-                if islist == 0:
+                if islist is False:
                     datatype = c.tag if c.tag in listdataTypes else None
                     if datatype is not None:
-                        paramvalrange, paramenum, paramunit, parampattern = getMinMaxEnumerationUnitPatternparam(
-                            datatype, c)
+                        paramvalrange, paramenum, paramunit, parampattern = getMinMaxEnumerationUnitPatternparam(datatype, c)
                         break
                     if c.tag == "dataType":
                         datatype = c.get("ref")
-                        paramvalrange, paramenum, paramunit, parampattern = getparamdatatyperef(
-                            datatype)
+                        paramvalrange, paramenum, paramunit, parampattern = getparamdatatyperef(datatype)
                         break
             break
 
     return islist, datatype, paramvalrange, paramenum, paramunit, parampattern, listminItem, listmaxItem, listmaxsize
 
 
-listmapping = []
+def get_range_array(val_range):
+    range_array = []
+    valranges = val_range.split(";")
+    for eachvalrange in valranges:
+        range_obj = {}
 
+        valrange = eachvalrange.split(",")
+        if valrange[0] != "None" and valrange[1] != "None":
+            range_obj["min"] = int(valrange[0])
+            range_obj["max"] = int(valrange[1])
+        elif valrange[0] != "None" and valrange[1] == "None":
+            range_obj["min"] = int(valrange[0])
+        elif valrange[0] == "None" and valrange[1] != "None":
+            range_obj["max"] = int(valrange[1])
 
-def generatelistfromfile(dmobject):
-    obj = dmobject.get('name').split(".")
-    if "tr-104" in sys.argv[1]:
-        pathfilename = "../libbbfdm/dmtree/tr104/" + obj[1].lower() + ".c"
-        pathiopsyswrtfilename = "../libbbfdm/dmtree/tr104/" + \
-            obj[1].lower() + "-iopsyswrt.c"
-    else:
-        pathfilename = "../libbbfdm/dmtree/tr181/" + obj[1].lower() + ".c"
-        pathiopsyswrtfilename = "../libbbfdm/dmtree/tr181/" + \
-            obj[1].lower() + "-iopsyswrt.c"
+        range_array.append(range_obj)
 
-    for x in range(0, 2):
-        pathfile = pathfilename if x == 0 else pathiopsyswrtfilename
-        exists = os.path.isfile(pathfile)
-        if exists:
-            filec = open(pathfile, "r", encoding='utf-8')
-            for linec in filec:
-                if "/*#" in linec:
-                    listmapping.append(linec)
+    return range_array
+
+      
+def add_entry_to_list(e):
+    existing_entry_index = None
+
+    # Check if the entry already exists in the list
+    for i, existing_entry in enumerate(LIST_DATA_MODEL):
+        if existing_entry['name'] == e['name']:
+            existing_entry_index = i
+            break
+    
+    if existing_entry_index is not None:
+        # Entry already exists, update 'protocol' field
+        existing_protocols = LIST_DATA_MODEL[existing_entry_index]['protocol']
+        if isinstance(existing_protocols, list):
+            if e['protocol'] not in existing_protocols:
+                existing_protocols.append(e['protocol'])
         else:
-            pass
-
-
-def objhaschild(parentname, level, check_obj):
-    hasobj = 0
-    model = model2 if check_obj == 0 else model1
-    for c in model:
-        objname = c.get('name')
-        if c.tag == "object" and parentname in objname and (objname.count('.') - objname.count('{i}')) == level:
-            hasobj = 1
-            break
-
-    return hasobj
-
-
-def objhasparam(dmobject):
-    hasparam = 0
-    for c in dmobject:
-        if c.tag == "parameter":
-            hasparam = 1
-            break
-
-    return hasparam
-
-
-def getuniquekeys(dmobject):
-    uniquekeys = None
-    for c in dmobject:
-        if c.tag == "uniqueKey":
-            for s in c:
-                if s.tag == "parameter":
-                    if uniquekeys is None:
-                        uniquekeys = "\"%s\"" % s.get('ref')
-                    else:
-                        uniquekeys = uniquekeys + "," + "\"%s\"" % s.get('ref')
-    return uniquekeys
-
-
-def printopenobject(obj):
-    fp = open('./.json_tmp', 'a', encoding='utf-8')
-    if "tr-104" in sys.argv[1] or "tr-135" in sys.argv[1]:
-        print("\"Device.Services.%s\" : {" % obj.get(
-            'name').replace(" ", ""), file=fp)
+            LIST_DATA_MODEL[existing_entry_index]['protocol'] = [existing_protocols, e['protocol']]
     else:
-        print("\"%s\" : {" % obj.get('name').replace(" ", ""), file=fp)
-    fp.close()
+        proto_list = e['protocol']
+        e['protocol'] = [proto_list]
+        if e['name'].endswith('.'):
+            # Insert the new entry at the end of the list
+            LIST_DATA_MODEL.append(e)
+        else:
+            last_dot_index = e['name'].rfind('.')
+            entry_obj = e['name'][:last_dot_index + 1]
+            insert_index = 0
+            entry_obj_found = False
+            for i, existing_entry in enumerate(LIST_DATA_MODEL):
+                if entry_obj == existing_entry['name']:
+                    entry_obj_found = True
+                    continue
+                    
+                if entry_obj_found is True and existing_entry['name'].endswith('.'):
+                    insert_index = i
+                    break
+                    
+            if insert_index != 0:
+                # Insert the new entry at the appropriate index
+                LIST_DATA_MODEL.insert(insert_index, e)
+            else:
+                # Insert the new entry at the end of the list
+                LIST_DATA_MODEL.append(e)
+    
+
+def add_obj_to_list(main_obj, dmobject, proto):
+    array = dmobject.get('name').endswith('.{i}.')
+    access = dmobject.get('access') != "readOnly"
+    description = get_param_desc(dmobject, None)
+    obsolete = dmobject.get('status') in {"deprecated", "obsoleted", "deleted"}
+    uniqueKeys = getuniquekeys(dmobject)
+
+    entry_obj = {
+        "name": main_obj + dmobject.get('name'),
+        "type": "object",
+        "array": array,
+        "access": access,
+        "protocol": proto,
+        "description": description,
+        "obsolete": obsolete,
+    }
+    
+    if uniqueKeys is not None:
+        entry_obj['uniqueKeys'] = re.findall(r'"(.*?)"', uniqueKeys)
+        
+    add_entry_to_list(entry_obj)
 
 
-def printopenfile():
-    fp = open('./.json_tmp', 'a', encoding='utf-8')
-    print("{", file=fp)
-    fp.close()
-
-
-def printclosefile():
-    fp = open('./.json_tmp', 'a', encoding='utf-8')
-    print("}", file=fp)
-    fp.close()
-
-
-def printOBJMaPPING(mapping):
-    fp = open('./.json_tmp', 'a', encoding='utf-8')
-    config_type = mapping.split(":")
-    config = config_type[1].split("/")
-    print("\"mapping\": {", file=fp)
-    print("\"type\": \"%s\"," % config_type[0].lower(), file=fp)
-    print("\"%s\": {" % config_type[0].lower(), file=fp)
-
-    # UCI
-    if config_type[0] == "UCI":
-        print("\"file\": \"%s\"," % config[0], file=fp)
-        print("\"section\": {", file=fp)
-        print("\"type\": \"%s\"" % config[1], file=fp)
-        print("},", file=fp)
-        print("\"dmmapfile\": \"%s\"" % config[2], file=fp)
-
-    # UBUS
-    elif config_type[0] == "UBUS":
-        print("\"object\": \"%s\"," % config[0], file=fp)
-        print("\"method\": \"%s\"," % config[1], file=fp)
-        print("\"args\": {", file=fp)
-        if config[2] != "":
-            args = config[2].split(",")
-            print("\"%s\": \"%s\"" % (args[0], args[1]), file=fp)
-        print("}", file=fp)
-        print("\"key\": \"%s\"" % config[3], file=fp)
-
-    print("}\n}", file=fp)
-    fp.close()
-
-def removelastline():
-    file = open("./.json_tmp", encoding='utf-8')
-    lines = file.readlines()
-    lines = lines[:-1]
-    file.close()
-    w = open("./.json_tmp", 'w', encoding='utf-8')
-    w.writelines(lines)
-    w.close()
-    printclosefile()
-
-
-def replace_data_in_file(data_in, data_out):
-    file_r = open("./.json_tmp", "rt", encoding='utf-8')
-    file_w = open("./.json_tmp_1", "wt", encoding='utf-8')
-    text = ''.join(file_r).replace(data_in, data_out)
-    file_w.write(text)
-    file_r.close()
-    file_w.close()
-    copyfile("./.json_tmp_1", "./.json_tmp")
-    bbf.remove_file("./.json_tmp_1")
-
-
-def updatejsontmpfile():
-    replace_data_in_file("}\n", "},\n")
-    replace_data_in_file("},\n},", "}\n},")
-    replace_data_in_file("}\n},\n},", "}\n}\n},")
-    replace_data_in_file("}\n},\n}\n},", "}\n}\n}\n},")
-    replace_data_in_file("}\n},\n}\n}\n},", "}\n}\n}\n}\n},")
-    replace_data_in_file("}\n}\n}\n},\n}\n},", "}\n}\n}\n}\n}\n},")
-    replace_data_in_file("}\n}\n}\n}\n}\n}\n},", "}\n}\n}\n}\n}\n}\n},")
-    replace_data_in_file("}\n}\n}\n},\n}\n}\n}\n},", "}\n}\n}\n}\n}\n}\n}\n},")
-    replace_data_in_file("},\n]", "}\n]")
-
-
-def removetmpfiles():
-    bbf.remove_file("./.json_tmp")
-    bbf.remove_file("./.json_tmp_1")
-
-
-def printOBJ(dmobject, hasobj, hasparam, bbfdm_type):
-    uniquekeys = getuniquekeys(dmobject)
-    if (dmobject.get('name')).endswith(".{i}."):
-        fbrowse = "true"
-    else:
-        fbrowse = "false"
-
-    fp = open('./.json_tmp', 'a', encoding='utf-8')
-    print("\"type\" : \"object\",", file=fp)
-
-    status = dmobject.get('status')
-    if status in {"deprecated", "obsoleted", "deleted"}:
-        print("\"obsolete\" : true,", file=fp)
-
-    print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
-    print("\"description\" : \"%s\"," % getParamDesc(dmobject, None), file=fp)
-    if uniquekeys is not None:
-        print("\"uniqueKeys\" : [%s]," % uniquekeys, file=fp)
-    if dmobject.get('access') == "readOnly":
-        print("\"access\" : false,", file=fp)
-    else:
-        print("\"access\" : true,", file=fp)
-    if hasparam or hasobj:
-        print("\"array\" : %s," % fbrowse, file=fp)
-    else:
-        print("\"array\" : %s" % fbrowse, file=fp)
-    fp.close()
-
-
-def printPARAM(dmparam, dmobject, bbfdm_type):
+def add_param_to_list(main_obj, dmobject, dmparam, proto):
     islist, datatype, paramvalrange, paramenum, paramunit, parampattern, listminItem, listmaxItem, listmaxsize = getparamoption(dmparam)
 
-    fp = open('./.json_tmp', 'a', encoding='utf-8')
-    print("\"%s\" : {" % dmparam.get('name').replace(" ", ""), file=fp)
-    print("\"type\" : \"%s\"," % getparamtype(dmparam), file=fp)
-    print("\"read\" : true,", file=fp)
-    print("\"write\" : %s," % ("false" if dmparam.get(
-        'access') == "readOnly" else "true"), file=fp)
-
-    if dmparam.get('mandatory') == "true":
-        print("\"mandatory\" : true,", file=fp)
-
-    status = dmobject.get('status') or dmparam.get('status')
-    if status in {"deprecated", "obsoleted", "deleted"}:
-        print("\"obsolete\" : true,", file=fp)
-
-    print("\"protocols\" : [%s]," % bbfdm_type, file=fp)
-    print("\"description\" : \"%s\"," % getParamDesc(dmparam, datatype), file=fp)
-
+    access = dmparam.get('access') != "readOnly"
+    description = get_param_desc(dmparam, datatype)
+    obsolete = dmobject.get('status') in {"deprecated", "obsoleted", "deleted"}
+    if obsolete is False:
+        obsolete = dmparam.get('status') in {"deprecated", "obsoleted", "deleted"}
+    ptype = getparamtype(dmparam)
     default = getParamDefault(dmparam)
-    if default is not None and len(default) != 0 and default != "\"":
-        print("\"default\" : \"%s\"," % default, file=fp)
 
-    # create list
-    if islist == 1:
-        print("\"list\" : {", file=fp)
+    entry_param = {
+        "name": main_obj + dmparam.get('name'),
+        "type": ptype,
+        "read": True,
+        "write": access,
+        "protocol": proto,
+        "description": description,
+        "obsolete": obsolete,
+        "list": islist
+    }
 
-    # add datatype
-    print(("\"datatype\" : \"%s\"," % datatype) if (listmaxsize is not None or listminItem is not None or listmaxItem is not None or paramvalrange is not None or paramunit is not
-          None or paramenum is not None or parampattern is not None) else ("\"datatype\" : \"%s\"" % datatype), file=fp)
+    if default is not None:
+        entry_param['default'] = default
+    
+    if datatype is not None:
+        entry_param['datatype'] = datatype
 
-    if islist == 1:
-        # add maximum size of list
-        if listmaxsize is not None:
-            print(("\"maxsize\" : %s," % listmaxsize) if (listminItem is not None or listmaxItem is not None or paramvalrange is not None
-                  or paramunit is not None or paramenum is not None or parampattern is not None) else ("\"maxsize\" : %s" % listmaxsize), file=fp)
-
-        # add minimun and maximum item values
-        if listminItem is not None and listmaxItem is not None:
-            print("\"item\" : {", file=fp)
-            print("\"min\" : %s," % listminItem, file=fp)
-            print("\"max\" : %s" % listmaxItem, file=fp)
-            print(("},") if (paramvalrange is not None or paramunit is not None
-                  or paramenum is not None or parampattern is not None) else ("}"), file=fp)
-        elif listminItem is not None and listmaxItem is None:
-            print("\"item\" : {", file=fp)
-            print("\"min\" : %s" % listminItem, file=fp)
-            print(("},") if (paramvalrange is not None or paramunit is not None
-                  or paramenum is not None or parampattern is not None) else ("}"), file=fp)
-        elif listminItem is None and listmaxItem is not None:
-            print("\"item\" : {", file=fp)
-            print("\"max\" : %s" % listmaxItem, file=fp)
-            print(("},") if (paramvalrange is not None or paramunit is not None
-                  or paramenum is not None or parampattern is not None) else ("}"), file=fp)
-
-    # add minimun and maximum values
     if paramvalrange is not None:
-        valranges = paramvalrange.split(";")
-        print("\"range\" : [", file=fp)
-        for eachvalrange in valranges:
-            valrange = eachvalrange.split(",")
-            if valrange[0] != "None" and valrange[1] != "None":
-                print("{", file=fp)
-                print("\"min\" : %s," % valrange[0], file=fp)
-                print("\"max\" : %s" % valrange[1], file=fp)
-                print(("},") if (eachvalrange ==
-                      valranges[len(valranges)-1]) else ("}"), file=fp)
-            elif valrange[0] != "None" and valrange[1] == "None":
-                print("{", file=fp)
-                print("\"min\" : %s" % valrange[0], file=fp)
-                print(("},") if (eachvalrange ==
-                      valranges[len(valranges)-1]) else ("}"), file=fp)
-            elif valrange[0] == "None" and valrange[1] != "None":
-                print("{", file=fp)
-                print("\"max\" : %s" % valrange[1], file=fp)
-                print(("},") if (eachvalrange ==
-                      valranges[len(valranges)-1]) else ("}"), file=fp)
-        print(("],") if (paramunit is not None or paramenum is not None or parampattern is not None) else ("]"), file=fp)
+        entry_param['range'] = get_range_array(paramvalrange)
 
-    # add unit
     if paramunit is not None:
-        print(("\"unit\" : \"%s\"," % paramunit) if (paramenum is not None or parampattern is not None) else ("\"unit\" : \"%s\"" % paramunit), file=fp)
+        entry_param['unit'] = paramunit
 
-    # add enumaration
     if paramenum is not None:
-        print(("\"enumerations\" : [%s]," % paramenum) if (parampattern is not None) else ("\"enumerations\" : [%s]" % paramenum), file=fp)
+        entry_param['enumerations'] = re.findall(r'"(.*?)"', paramenum)
 
-    # add pattern
     if parampattern is not None:
-        print(("\"pattern\" : [%s]" % parampattern.replace("\\", "\\\\")), file=fp)
+        entry_param['pattern'] = re.findall(r'"(.*?)"', parampattern)
+        
+    if listminItem is not None:
+        entry_param['min_item'] = int(listminItem)
+        
+    if listmaxItem is not None:
+        entry_param['max_item'] = int(listmaxItem)
+        
+    if listmaxsize is not None:
+        entry_param['max_size'] = int(listmaxsize)
+        
+    add_entry_to_list(entry_param)
 
-    # close list
-    if islist == 1:
-        print("}", file=fp)
 
-    print("}", file=fp)
-    fp.close()
+def add_command_to_list(main_obj, dmparam, proto):
+    is_async = dmparam.get('async') is not None
 
-
-def printCOMMAND(dmparam, dmobject, _bbfdm_type):
-    fp = open('./.json_tmp', 'a', encoding='utf-8')
-    print("\"%s\" : {" % dmparam.get('name'), file=fp)
-    print("\"type\" : \"command\",", file=fp)
-    print("\"async\" : %s," %
-          ("true" if dmparam.get('async') is not None else "false"), file=fp)
-
-    inputfound = 0
-    outputfound = 0
+    entry_command = {
+        "name": main_obj + dmparam.get('name'),
+        "type": "command",
+        "async": is_async,
+        "protocol": proto
+    }
+    
     for c in dmparam:
         if c.tag == "input":
-            inputfound = 1
+            entry_command['input'] = c
         elif c.tag == "output":
-            outputfound = 1
-
-    print(("\"protocols\" : [\"usp\"],") if (inputfound or outputfound) else (
-        "\"protocols\" : [\"usp\"]"), file=fp)
-
-    for c in dmparam:
-        if c.tag == "input":
-            print("\"input\" : {", file=fp)
-            for param in c:
-                if param.tag == "parameter":
-                    fp.close()
-                    printPARAM(param, dmobject, "\"usp\"")
-            fp = open('./.json_tmp', 'a', encoding='utf-8')
-            print("}" if outputfound else "},", file=fp)
-
-        if c.tag == "output":
-            print("\"output\" : {", file=fp)
-            for param in c:
-                if param.tag == "parameter":
-                    fp.close()
-                    printPARAM(param, dmobject, "\"usp\"")
-            fp = open('./.json_tmp', 'a', encoding='utf-8')
-            print("}", file=fp)
-
-    print("}", file=fp)
-    fp.close()
+            entry_command['output'] = c
+            
+    add_entry_to_list(entry_command)
 
 
-def printEVENT(dmparam, dmobject, _bbfdm_type):
-    fp = open('./.json_tmp', 'a', encoding='utf-8')
-    print("\"%s\" : {" % dmparam.get('name'), file=fp)
-    print("\"type\" : \"event\",", file=fp)
+def add_event_to_list(main_obj, dmparam, proto):
 
-    has_param = 0
+    entry_event = {
+        "name": main_obj + dmparam.get('name'),
+        "type": "event",
+        "protocol": proto
+    }
+    
     for c in dmparam:
         if c.tag == "parameter":
-            has_param = 1
+            entry_event['output'] = dmparam
+            break
+    
+    add_entry_to_list(entry_event)
 
-    print(("\"protocols\" : [\"usp\"],") if (has_param) else (
-        "\"protocols\" : [\"usp\"]"), file=fp)
-
-    if has_param:
-        print("\"output\" : {", file=fp)
-        fp.close()
-
-    for param in dmparam:
+def get_argument(input_args, proto):
+    input_dict = {}
+    for param in input_args:
         if param.tag == "parameter":
-            printPARAM(param, dmobject, "\"usp\"")
+            param_in_dict = {}
+           
+            islist, datatype, paramvalrange, paramenum, paramunit, parampattern, listminItem, listmaxItem, listmaxsize = getparamoption(param)
+            description = get_param_desc(param, datatype)
+            default = getParamDefault(param)
+           
+            param_in_dict['type'] = getparamtype(param)
+            param_in_dict['read'] = True
+            param_in_dict['write'] = param.get('access') != "readOnly"
+            
+            if param.get('status') in {"deprecated", "obsoleted", "deleted"}:
+                param_in_dict['obsolete'] = True
 
-    if has_param:
-        fp = open('./.json_tmp', 'a', encoding='utf-8')
-        print("}", file=fp)
+            if param.get('mandatory') == "true":
+                param_in_dict['mandatory'] = True
 
-    print("}", file=fp)
-    fp.close()
+            param_in_dict['protocols'] = proto
 
+            if description is not None:
+                param_in_dict['description'] = description
 
-def printusage():
-    print("Usage: " +
-          sys.argv[0] + " <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]")
-    print("Examples:")
-    print("  - " + sys.argv[0] +
-          " test/tools/tr-181-2-*-cwmp-full.xml test/tools/tr-181-2-*-usp-full.xml Device.")
-    print("    ==> Generate the json file of the sub tree Device. in tr181.json")
-    print("  - " + sys.argv[0] +
-          " test/tools/tr-104-2-0-2-cwmp-full.xml test/tools/tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.")
-    print("    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json")
-    print("  - " + sys.argv[0] + " test/tools/tr-106-1-2-0-full.xml Device.")
-    print("    ==> Generate the json file of the sub tree Device. in tr106.json")
-    print("")
-    print("Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-*-cwmp-full.xml")
-    exit(1)
+            if default is not None and len(default):
+                param_in_dict['default'] = default
+               
+            if islist is True:
+                list_dict = {}
+                item_dict = {}
+    
+                if datatype is not None:
+                    list_dict['datatype'] = datatype
+                    
+                if listmaxsize is not None:
+                    list_dict['maxsize'] = int(listmaxsize)
+                    
+                if listminItem is not None:
+                    item_dict['min'] = int(listminItem)
+                    
+                if listmaxItem is not None:
+                    item_dict['max'] = int(listmaxItem)
+                
+                if listminItem is not None or listmaxItem is not None:
+                    list_dict['item'] = item_dict
+                
+                if paramvalrange is not None:
+                    list_dict['range'] = get_range_array(paramvalrange)
+                
+                if paramunit is not None:
+                    list_dict['unit'] = paramunit
+                
+                if paramenum is not None:
+                    list_dict['enumerations'] = re.findall(r'"(.*?)"', paramenum)
+                
+                if parampattern is not None:
+                    list_dict['pattern'] = re.findall(r'"(.*?)"', parampattern)
+                
+                param_in_dict['list'] = list_dict
+            else:
+                if datatype is not None:
+                    param_in_dict['datatype'] = datatype
+                
+                if paramvalrange is not None:
+                    param_in_dict['range'] = get_range_array(paramvalrange)
+                
+                if paramunit is not None:
+                    param_in_dict['unit'] = paramunit
+                
+                if paramenum is not None:
+                    param_in_dict['enumerations'] = re.findall(r'"(.*?)"', paramenum)
+                
+                if parampattern is not None:
+                    param_in_dict['pattern'] = re.findall(r'"(.*?)"', parampattern)
+                    
+            input_dict[param.get('name')] = param_in_dict
 
-
-def getobjectpointer(objname):
-    obj = None
-    for c in model1:
-        if c.tag == "object" and (c.get('name') == objname or c.get('name') == (objname + "{i}.")):
-            obj = c
-            break
-    return obj
-
-
-def chech_each_obj_with_other_obj(m1, m2):
-    for c in m2:
-        if c.tag == "object":
-            found = 0
-            for obj in m1:
-                if obj.tag == "object" and (obj.get('name') == c.get('name')):
-                    found = 1
-                    break
-            if found == 0:
-                if c.get('name').count(".") - (c.get('name')).count("{i}.") != 2:
-                    continue
-                dmlevel = (c.get('name')).count(".") - \
-                    (c.get('name')).count("{i}.") + 1
-                printopenobject(c)
-                object_parse_childs(c, dmlevel, 0, 0)
-                printclosefile()
-
-
-def check_if_obj_exist_in_other_xml_file(objname):
-    obj = None
-    found = 0
-    for c in model2:
-        if c.tag == "object" and (c.get('name') == objname.get('name')):
-            obj = c
-            found = 1
-            break
-    return obj, found
-
-
-def chech_current_param_exist_in_other_obj(obj, c):
-    bbfdm_type = ""
-    for param in obj:
-        if param.tag == "parameter" and param.get('name') == c.get('name'):
-            bbfdm_type = "\"cwmp\", \"usp\""
-            break
-    if bbfdm_type == "" and "cwmp" in sys.argv[1]:
-        bbfdm_type = "\"cwmp\""
-    elif bbfdm_type == "" and "usp" in sys.argv[1]:
-        bbfdm_type = "\"usp\""
-    return bbfdm_type
+    return input_dict
 
 
-def chech_obj_with_other_obj(obj, dmobject):
-    for c in obj:
-        exist = 0
+def add_to_dict(obj, e):
+    name = e['name']
+    components = name.split('.')
+    current_dict = obj
+    full_path = ""
+    is_param = False
+
+    for i, component in enumerate(components):
+
+        if component == '' or component == '{i}':
+            continue
+
+        if i == len(components) - 1:
+            full_path = component
+            is_param = True
+        else:
+            if i + 1 < len(components) and components[i + 1] != '{i}':
+                str_suffix = "."
+            else:
+                str_suffix = ".{i}."
+
+            full_path += component + str_suffix
+            is_param = False
+            
+        current_dict = current_dict.setdefault(full_path, {})
+
+    if is_param is False:
+        obj_dict = {}
+        
+        obj_dict['type'] = e['type']
+        
+        if 'obsolete' in e and e['obsolete'] is True:
+            obj_dict['obsolete'] = e['obsolete']
+        
+        if 'protocol' in e:
+            obj_dict['protocols'] = e['protocol']
+        
+        if 'description' in e:
+            obj_dict['description'] = e['description']
+        
+        if 'uniqueKeys' in e:
+            obj_dict['uniqueKeys'] = e['uniqueKeys']
+          
+        if 'access' in e:
+            obj_dict['access'] = e['access']
+        
+        if 'array' in e:
+            obj_dict['array'] = e['array']
+
+        current_dict.update(obj_dict)
+    else:
+        param_dict = {}
+        
+        param_dict['type'] = e['type']
+
+        if 'async' in e:
+            param_dict['async'] = e['async']
+        
+        if 'read' in e:
+            param_dict['read'] = e['read']
+        
+        if 'write' in e:
+            param_dict['write'] = e['write']
+        
+        if 'obsolete' in e and e['obsolete'] is True:
+            param_dict['obsolete'] = e['obsolete']
+        
+        if 'protocol' in e:
+            param_dict['protocols'] = e['protocol']
+            
+        if 'input' in e:
+            param_dict['input'] = get_argument(e['input'], e['protocol'])    
+            
+        if 'output' in e:
+            param_dict['output'] = get_argument(e['output'], e['protocol'])
+        
+        if 'description' in e:
+            param_dict['description'] = e['description']
+        
+        if 'default' in e and len(e['default']):
+            param_dict['default'] = e['default']
+        
+        if 'list' in e and e['list'] is True:
+            list_dict = {}
+            item_dict = {}
+
+            if 'datatype' in e:
+                list_dict['datatype'] = e['datatype']
+                
+            if 'max_size' in e:
+                list_dict['maxsize'] = e['max_size']
+                
+            if 'min_item' in e:
+                item_dict['min'] = e['min_item']
+                
+            if 'max_item' in e:
+                item_dict['max'] = e['max_item']
+            
+            if 'min_item' in e or 'max_item' in e:
+                list_dict['item'] = item_dict
+            
+            if 'range' in e:
+                list_dict['range'] = e['range']
+            
+            if 'unit' in e:
+                list_dict['unit'] = e['unit']
+            
+            if 'enumerations' in e:
+                list_dict['enumerations'] = e['enumerations']
+            
+            if 'pattern' in e:
+                list_dict['pattern'] = e['pattern']
+            
+            param_dict['list'] = list_dict
+        else:
+            if 'datatype' in e:
+                param_dict['datatype'] = e['datatype']
+            
+            if 'range' in e:
+                param_dict['range'] = e['range']
+            
+            if 'unit' in e:
+                param_dict['unit'] = e['unit']
+            
+            if 'enumerations' in e:
+                param_dict['enumerations'] = e['enumerations']
+            
+            if 'pattern' in e:
+                param_dict['pattern'] = e['pattern']
+
+        current_dict.update(param_dict)
+
+
+def object_parse_childs(main_obj, dmobject, proto):
+    
+    add_obj_to_list(main_obj, dmobject, proto)
+
+    for c in dmobject:
         if c.tag == "parameter":
-            for param in dmobject:
-                if param.tag == "parameter" and c.get('name') == param.get('name'):
-                    exist = 1
-                    break
-            if exist == 0 and "cwmp" in sys.argv[1]:
-                printPARAM(c, obj, "\"usp\"")
-            elif exist == 0 and "usp" in sys.argv[1]:
-                printPARAM(c, obj, "\"cwmp\"")
-        if c.tag == "command":
-            printCOMMAND(c, obj, "\"usp\"")
-        if c.tag == "event":
-            printEVENT(c, obj, "\"usp\"")
+            add_param_to_list(main_obj + dmobject.get('name'), dmobject, c, proto)
+        elif c.tag == "command":
+            add_command_to_list(main_obj + dmobject.get('name'), c, proto)
+        elif c.tag == "event":
+            add_event_to_list(main_obj + dmobject.get('name'), c, proto)
+        elif c.tag == "object":
+            object_parse_childs(main_obj + dmobject.get('name'), c, proto)
 
 
-def object_parse_childs(dmobject, level, generatelist, check_obj):
-    if generatelist == 0 and (dmobject.get('name')).count(".") == 2:
-        generatelistfromfile(dmobject)
-    if check_obj == 1 and ("tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]):
-        obj, exist = check_if_obj_exist_in_other_xml_file(dmobject)
+def parse_xml_model(model, proto):
+    is_service = model.get("isService")
+    main_obj = "Device.Services." if is_service == "true" else ""
 
-    hasobj = objhaschild(dmobject.get('name'), level, check_obj)
-    hasparam = objhasparam(dmobject)
-
-    if check_obj == 1 and "tr-181" in sys.argv[1] and exist == 0:
-        printOBJ(dmobject, hasobj, hasparam, "\"cwmp\"")
-    elif check_obj == 0 and "tr-181" in sys.argv[1]:
-        printOBJ(dmobject, hasobj, hasparam, "\"usp\"")
-    else:
-        printOBJ(dmobject, hasobj, hasparam, "\"cwmp\", \"usp\"")
-
-    if hasparam:
-        for c in dmobject:
-            if c.tag == "parameter":
-                if check_obj == 1 and "tr-181" in sys.argv[1] and exist == 1:
-                    bbfdm_type = chech_current_param_exist_in_other_obj(obj, c)
-                elif check_obj == 1 and "tr-181" in sys.argv[1] and exist == 0:
-                    bbfdm_type = "\"cwmp\""
-                elif check_obj == 0:
-                    bbfdm_type = "\"usp\""
-                else:
-                    bbfdm_type = "\"cwmp\", \"usp\""
-                printPARAM(c, dmobject, bbfdm_type)
-            if c.tag == "command":
-                printCOMMAND(c, dmobject, "\"usp\"")
-            if c.tag == "event":
-                printEVENT(c, dmobject, "\"usp\"")
-
-    if check_obj == 1 and "tr-181" in sys.argv[1] and exist == 1:
-        chech_obj_with_other_obj(obj, dmobject)
-
-    if hasobj and check_obj:
-        for c in model1:
-            objname = c.get('name')
-            if c.tag == "object" and dmobject.get('name') in objname and (objname.count('.') - objname.count('{i}')) == level:
-                printopenobject(c)
-                object_parse_childs(c, level+1, 0, 1)
-                printclosefile()
-
-    if hasobj and check_obj == 0:
-        for c in model2:
-            objname = c.get('name')
-            if c.tag == "object" and dmobject.get('name') in objname and (objname.count('.') - objname.count('{i}')) == level:
-                printopenobject(c)
-                object_parse_childs(c, level+1, 0, 0)
-                printclosefile()
-
-    return
+    for child in model:
+        if child.tag == "object":
+            object_parse_childs(main_obj, child, proto)
 
 
-def generatejsonfromobj(pobj, pdir):
-    generatelist = 0
-    bbf.create_folder(pdir)
-    removetmpfiles()
-    dmlevel = (pobj.get('name')).count(".") - \
-        (pobj.get('name')).count("{i}.") + 1
-    if (pobj.get('name')).count(".") == 1:
-        generatelist = 0
-    else:
-        generatelistfromfile(pobj)
-        generatelist = 1
-    printopenfile()
-    printopenobject(pobj)
-    object_parse_childs(pobj, dmlevel, generatelist, 1)
-    if "tr-181" in sys.argv[1] and Root.count(".") == 1:
-        chech_each_obj_with_other_obj(model1, model2)
+def print_usage():
+    print("Usage: python convert_dm_xml_to_json -d <directory>")
+    print("Options:")
+    print("  -d, --directory <directory>: Directory containing XML files in pre-defined order to convert to JSON")
+    print("Example:")
+    print("  ./tools/convert_dm_xml_to_json.py -d test/tools/")
 
-    if "tr-181" in sys.argv[1] and pobj.get("name").count(".") == 1:
-        dmfp = open(pdir + "/tr181.json", "a", encoding='utf-8')
-    elif "tr-104" in sys.argv[1] and pobj.get("name").count(".") == 2:
-        dmfp = open(pdir + "/tr104.json", "a", encoding='utf-8')
-    elif "tr-135" in sys.argv[1] and pobj.get("name").count(".") == 2:
-        dmfp = open(pdir + "/tr135.json", "a", encoding='utf-8')
-    elif "tr-106" in sys.argv[1] and pobj.get("name").count(".") == 1:
-        dmfp = open(pdir + "/tr106.json", "a", encoding='utf-8')
-    else:
-        dmfp = open(pdir + "/" + (getname(pobj.get('name'))
-                                  ).lower() + ".json", "a", encoding='utf-8')
 
-    printclosefile()
-    printclosefile()
-    updatejsontmpfile()
-    removelastline()
-
-    f = open("./.json_tmp", "r", encoding='utf-8')
-    obj = json.load(f, object_pairs_hook=OrderedDict)
-    dump = json.dumps(obj, indent=4)
-    tabs = re.sub('\n +', lambda match: '\n' + '\t' *
-                  int(len(match.group().strip('\n')) / 4), dump)
+def convert_xml_to_json(file_path):
+    #print("Converting XML to JSON:", file_path)
+    global XML_ROOT
 
     try:
-        print("%s" % tabs, file=dmfp)
-        dmfp.close()
-    except IOError:
-        pass
+        tree = xml.parse(file_path)
+        XML_ROOT = tree.getroot()
+        spec = XML_ROOT.get("spec")
+        if spec.endswith("cwmp"):
+            proto = "cwmp"
+        elif spec.endswith("usp"):
+            proto = "usp"
+        else:
+            proto = "both"
 
-    removetmpfiles()
-    return dmfp.name
+        for child in XML_ROOT:
+            if child.tag == "dataType":
+                process_datatypes(child)
 
+            if child.tag == "model":
+                model = child
 
-def processDatatypes(datatype):
-    key = None
-    enum = None
-    des = None
-    if datatype.tag == "dataType":
-        key = datatype.get("name")
-        if key is None or len(key) == 0:
+        if model.tag != "model":
+            print("Wrong {} XML Data model format!".format(file_path))
             return
 
-        if key in desc_dict.keys():
-            return
-
-        for dt in datatype:
-            if dt.tag == "description":
-                des = dt.text
-                break
-
-        if des is None:
-            desc_dict[key] = ""
-            return
-        elif des.find('{{enum}}') != -1:
-            for c in datatype:
-                if c.tag == "string":
-                    for e in c:
-                        if e.tag == "enumeration":
-                            if enum is None:
-                                enum = "Enumeration of: " + e.get("value")
-                            else:
-                                enum = enum + ", " + e.get("value")
-
-            if enum is not None:
-                enum = enum + "."
-                des = re.sub('{{enum}}', enum, des)
-
-        des = des.replace("{", "<")
-        des = des.replace("}", ">")
-        des = des.replace("\'", "")
-        des = des.replace("\"", "")
-        desc_dict[key] = des
+        parse_xml_model(model, proto)
+    except xml.ParseError as e:
+        print("Error parsing XML file {}: {}".format(file_path, e))
 
 
-def getParamDesc(dmparam, key):
-    text = None
-    detail = None
-    enum = None
-    for s in dmparam:
-        if s.tag == "description":
-            text = s.text
+if __name__ == "__main__":
+    # Check if the script is run with proper arguments
+    if len(sys.argv) != 3 or sys.argv[1] not in ("-d", "--directory"):
+        print_usage()
+        sys.exit(1)
 
-    if text is None or len(text) == 0:
-        return ""
+    # Check if the directory exists
+    directory = sys.argv[2]
+    if not os.path.isdir(directory):
+        print("Directory '{}' not found or not specified correctly.".format(directory))
+        print_usage()
+        sys.exit(1)
 
-    if text.find('{{enum}}') != -1:
-        for s in dmparam:
-            if s.tag != "syntax":
-                continue
+    # Get a list of all files ending with ".xml" in the directory
+    xml_files = [file for file in os.listdir(directory) if file.endswith('.xml')]
 
-            for c in s:
-                if c.tag != "string":
-                    continue
+    # Sort the list of filenames based on their prefixes
+    sorted_files = sorted(xml_files, key=lambda x: int(x.split('-')[0]))
 
-                for e in c:
-                    if e.tag == "enumeration":
-                        if enum is None:
-                            enum = "Enumeration of: " + e.get("value")
-                        else:
-                            enum = enum + ", " + e.get("value")
+    # Process each XML file in the directory
+    for filename in sorted_files:
+        f_path = os.path.join(directory, filename)
+        convert_xml_to_json(f_path)
 
-        if enum is not None:
-            enum = enum + "."
-            text = re.sub('{{enum}}', enum, text)
+    json_object = {}
+    for entry_list in LIST_DATA_MODEL:
+        add_to_dict(json_object, entry_list)
 
-    if text.find('{{datatype|expand}}') != -1 and key is not None:
-        try:
-            detail = desc_dict[key]
-        except KeyError:
-            detail = None
+    # Convert JSON object to JSON string with indentation
+    json_str = json.dumps(json_object, indent="\t")
 
-        if detail is not None:
-            text = re.sub('{{datatype|expand}}', detail, text)
-
-    text = text.replace("{", "<")
-    text = text.replace("}", ">")
-    text = text.replace("\'", "")
-    text = text.replace("\"", "")
-    text = text.replace("\n", "")
-    text = text.replace("\\d", "\\\\d")
-    text = text.replace("\\.", "\\\\.")
-    desc = ' '.join(text.split())
-    return desc
-
-
-### main ###
-if len(sys.argv) < 4:
-    printusage()
-
-if (sys.argv[1]).lower() == "-h" or (sys.argv[1]).lower() == "--help":
-    printusage()
-
-is_service_model = 0
-model_root_name = "Root"
-
-tree1 = xml.parse(sys.argv[1])
-xmlroot1 = tree1.getroot()
-model1 = xmlroot1
-
-for child in model1:
-    if child.tag == "dataType":
-        processDatatypes(child)
-
-    if child.tag == "model":
-        model1 = child
-
-if model1.tag != "model":
-    print("Wrong %s XML Data model format!" % sys.argv[1])
-    exit(1)
-
-dmroot1 = None
-for dr in model1:
-    if dr.tag == "object" and dr.get("name").count(".") == 1:
-        dmroot1 = dr
-        break
-
-# If it is service data model
-if dmroot1 is None:
-    is_service_model = 1
-    for dr in model1:
-        if dr.tag == "object" and dr.get("name").count(".") == 2:
-            dmroot1 = dr
-            break
-
-if dmroot1 is None:
-    print("Wrong %s XML Data model format!" % sys.argv[1])
-    exit(1)
-
-if "tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]:
-    tree2 = xml.parse(sys.argv[2])
-    xmlroot2 = tree2.getroot()
-    model2 = xmlroot2
-
-    for child in model2:
-        if child.tag == "dataType":
-            processDatatypes(child)
-
-        if child.tag == "model":
-            model2 = child
-
-    if model2.tag != "model":
-        print("Wrong %s XML Data model format!" % sys.argv[2])
-        exit(1)
-
-    dmroot2 = None
-    for dr in model2:
-        if dr.tag == "object" and dr.get("name").count(".") == 1:
-            dmroot2 = dr
-            break
-
-    # If it is service data model
-    if dmroot2 is None:
-        for dr in model2:
-            if dr.tag == "object" and dr.get("name").count(".") == 2:
-                dmroot2 = dr
-                break
-
-    if dmroot2 is None:
-        print("Wrong %s XML Data model format!" % sys.argv[2])
-        exit(1)
-
-Root = sys.argv[3]
-
-if "tr-181" in sys.argv[1]:
-    gendir = "tr181_" + time.strftime("%Y-%m-%d_%H-%M-%S")
-elif "tr-104" in sys.argv[1]:
-    gendir = "tr104_" + time.strftime("%Y-%m-%d_%H-%M-%S")
-    Root = (sys.argv[3])[len("Device.Services."):]
-elif "tr-135" in sys.argv[1]:
-    gendir = "tr135_" + time.strftime("%Y-%m-%d_%H-%M-%S")
-    Root = (sys.argv[3])[len("Device.Services."):]
-elif "tr-106" in sys.argv[1]:
-    gendir = "tr106_" + time.strftime("%Y-%m-%d_%H-%M-%S")
-else:
-    gendir = "source_" + time.strftime("%Y-%m-%d_%H-%M-%S")
-
-objstart = getobjectpointer(Root)
-
-if objstart is None:
-    print("Wrong Object Name! %s" % Root)
-    exit(1)
-
-filename = generatejsonfromobj(objstart, gendir)
-
-print(filename)
+    # Write JSON string to a file named datamodel.json
+    with open("datamodel.json", "w", encoding="utf-8") as json_file:
+        json_file.write(json_str)
+        
+    print("datamodel.json")

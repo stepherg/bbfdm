@@ -2,7 +2,7 @@
 
 It is often required to extend datamodel parameters of the device, extending the datamodel parameters using json plugin is the simplest way for the same.
 
-To extend the datamodel using json plugin, its required to be defined it, as it is defined in `TR181.json` file and then place that json in '/etc/bbfdm/json/' directory of device.
+To extend the datamodel using json plugin, its required to be defined it, as it is defined in `datamodel.json` file and then place that json in '/etc/bbfdm/json/' directory of device.
 
 It is often the case, that the supported mapping might not handle all the scenarios, and required some structural changes to fulfill the new requirements, to make these plugins backward compatible with the older mappings some kind of check was required, which is can be solved with having a "version" field in the plugin, which describes the list of supported mappings with that specific version. This can be added as below:
 ```json
@@ -130,7 +130,7 @@ And on these tree components, we can do:
 - Del
 - Operate/commands
 
-If we skip multi-instance objects for some time, everything else is stand-along entity, I mean, one parameter is having one specific information, so for those parameters information could be fetched from `uci/ubus` or some external `cli` command. The `TR181.json` has all the required the information about the parameters except how to get it from the device. In json plugin, we solve that by introducing a new element in the tree called mapping, which describes how to process the operations on that specific datamodel parameter.
+If we skip multi-instance objects for some time, everything else is stand-along entity, I mean, one parameter is having one specific information, so for those parameters information could be fetched from `uci/ubus` or some external `cli` command. The `datamodel.json` has all the required the information about the parameters except how to get it from the device. In json plugin, we solve that by introducing a new element in the tree called mapping, which describes how to process the operations on that specific datamodel parameter.
 
 ```json
 mapping: [

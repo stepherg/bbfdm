@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2021 iopsys Software Solutions AB
-# Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+# Copyright (C) 2024 iopsys Software Solutions AB
+# Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
 
 import os
 import sys

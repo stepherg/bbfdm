@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2021 iopsys Software Solutions AB
-# Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+# Copyright (C) 2024 iopsys Software Solutions AB
+# Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
 
 import sys
 import json
@@ -114,7 +114,7 @@ else:
     
             if _format == "xls":
                 output_file_name = output_dir + '/' + output_file_prefix + '.xls'
-                bbf_excel.generate_excel(['tr181', 'tr104'], output_file_name)
+                bbf_excel.generate_excel(output_file_name)
     
     print("Datamodel generation completed, aritifacts shall be available in out directory or as per input json configuration")
 

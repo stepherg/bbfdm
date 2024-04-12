@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2021 iopsys Software Solutions AB
-# Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+# Copyright (C) 2024 iopsys Software Solutions AB
+# Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
 
 import sys
 import json
@@ -276,7 +276,7 @@ command_schema = {
 def print_validate_json_usage():
     print("Usage: " + sys.argv[0] + " <dm json file>")
     print("Examples:")
-    print("  - " + sys.argv[0] + " tr181.json")
+    print("  - " + sys.argv[0] + " datamodel.json")
     print("    ==> Validate the json file")
     print("")
     exit(1)

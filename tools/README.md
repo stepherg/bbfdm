@@ -60,12 +60,12 @@ This tools can be used as shown below
 
 ```bash
 $ ./tools/convert_dm_xml_to_json.py
-Usage: ./tools/convert_dm_xml_to_json.py <tr-xxx cwmp xml data model> <tr-xxx usp xml data model> [Object path]
-Examples:
-  - ./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-*-cwmp-full.xml test/tools/tr-181-2-*-usp-full.xml Device.
-    ==> Generate the json file of the sub tree Device. in tr181.json
-  - ./tools/convert_dm_xml_to_json.py test/tools/tr-104-2-0-2-cwmp-full.xml test/tools/tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.
-    ==> Generate the json file of the sub tree Device.Services.VoiceService. in tr104.json
+Usage: python convert_dm_xml_to_json -d <directory>
+Options:
+  -d, --directory <directory>: Directory containing XML files to convert to JSON
+Example:
+  ./tools/convert_dm_xml_to_json.py -d test/tools/
+    ==> Generate the JSON file containing of all XML files defined under test/tools/ directory in datamodel.json
 
 Example of xml data model file: https://www.broadband-forum.org/cwmp/tr-181-2-*-cwmp-full.xml
 ```
@@ -78,19 +78,12 @@ This tool can generate template "C" code from JSON datamodel definitions.
 
 ```bash
 $ ./tools/convert_dm_json_to_c.py
-Usage: ./tools/convert_dm_json_to_c.py <data model name> [Object path]
-data model name:   The data model(s) to be used, for ex: tr181 or tr181,tr104
+Usage: ./tools/convert_dm_json_to_c.py [Object path]
 Examples:
-  - ./tools/convert_dm_json_to_c.py tr181
-    ==> Generate the C code of tr181 data model in datamodel/ folder
-  - ./tools/convert_dm_json_to_c.py tr104
-    ==> Generate the C code of tr104 data model in datamodel/ folder
-  - ./tools/convert_dm_json_to_c.py tr181,tr104
-    ==> Generate the C code of tr181 and tr104 data model in datamodel/ folder
-  - ./tools/convert_dm_json_to_c.py tr181 Device.DeviceInfo.
+  - ./tools/convert_dm_json_to_c.py
+    ==> Generate the C code of full data model in datamodel/ folder
+  - ./tools/convert_dm_json_to_c.py Device.DeviceInfo.
     ==> Generate the C code of Device.DeviceInfo object in datamodel/ folder
-  - ./tools/convert_dm_json_to_c.py tr104 Device.Services.VoiceService.{i}.Capabilities.
-    ==> Generate the C code of Device.Services.VoiceService.{i}.Capabilities. object in datamodel/ folder
 ```
 
 
@@ -101,7 +94,7 @@ This tool helps in validating the json schema, which is very helpful in the deve
 ```bash
 $ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
 $ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
-$ ./tools/validate_json_plugin.py dmtree/json/tr181.json
+$ ./tools/validate_json_plugin.py dmtree/json/datamodel.json
 ```
 
 More examples available in [this path](https://dev.iopsys.eu/bbf/bbfdm/-/tree/devel/test/files/etc/bbfdm/plugins).
@@ -161,7 +154,7 @@ The parameters/keys used in tools_input.json file are mostly self-explanatory bu
 
 
 > Note:
-> To add more description about the vendor extended DM objects/parameters, it is required to add the definition of the required/related DM objects/parameters in a json file (The json structure should follow same format as given in [tr181.json](../libbbfdm/dmtree/json/tr181.json)), The same json file need to be defined in dm_json_files list.
+> To add more description about the vendor extended DM objects/parameters, it is required to add the definition of the required/related DM objects/parameters in a json file (The json structure should follow same format as given in [datamodel.json](../libbbfdm/dmtree/json/datamodel.json)), The same json file need to be defined in dm_json_files list.
 
 
 The input json file should be defined as follow:
@@ -179,8 +172,7 @@ The input json file should be defined as follow:
 		"test"
 	],
 	"dm_json_files": [
-		"../libbbfdm/dmtree/json/tr181.json",
-		"../libbbfdm/dmtree/json/tr104.json"
+		"../libbbfdm/dmtree/json/datamodel.json"
 	]
 	"vendor_prefix": "X_IOPSYS_EU_",
 	"plugins": [
@@ -206,7 +198,7 @@ The input json file should be defined as follow:
 			"proto": "git",
 			"version": "tag/hash/branch",
 			"dm_files": [
-				"src/plugin/datamodel.json"
+				"src/plugin/testdm.json"
 			]
 		},
 		{

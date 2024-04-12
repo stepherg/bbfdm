@@ -14,12 +14,8 @@ exec_cmd_verbose pylint -d R,C,W0603 tools/*.py
 
 echo "********* Validate JSON Plugin *********"
 
-echo "Validate BBF TR-181 JSON Plugin"
-./tools/validate_json_plugin.py libbbfdm/dmtree/json/tr181.json
-check_ret $?
-
-echo "Validate BBF TR-104 JSON Plugin"
-./tools/validate_json_plugin.py libbbfdm/dmtree/json/tr104.json
+echo "Validate BBF Data Model JSON Plugin"
+./tools/validate_json_plugin.py libbbfdm/dmtree/json/datamodel.json
 check_ret $?
 
 echo "Validate X_IOPSYS_EU_Dropbear JSON Plugin"
@@ -50,18 +46,8 @@ echo "Validate test overwrite Plugin"
 ./tools/validate_json_plugin.py test/vendor_test/test_overwrite.json 
 check_ret $?
 
-echo "Validate TR-181 JSON Plugin after generating from XML"
-json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-181-2-*-cwmp-full.xml test/tools/tr-181-2-*-usp-full.xml Device.)
-./tools/validate_json_plugin.py $json_path
-check_ret $?
-
-echo "Validate TR-104 JSON Plugin after generating from XML"
-json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-104-2-0-2-cwmp-full.xml test/tools/tr-104-2-0-2-usp-full.xml Device.Services.VoiceService.)
-./tools/validate_json_plugin.py $json_path
-check_ret $?
-
-echo "Validate TR-135 JSON Plugin after generating from XML"
-json_path=$(./tools/convert_dm_xml_to_json.py test/tools/tr-135-1-4-1-cwmp-full.xml test/tools/tr-135-1-4-1-usp-full.xml Device.Services.STBService.)
+echo "Validate Data Model JSON Plugin after generating from TR-181, TR-104 and TR-135 XML Files"
+json_path=$(./tools/convert_dm_xml_to_json.py -d test/tools/)
 ./tools/validate_json_plugin.py $json_path
 check_ret $?
 

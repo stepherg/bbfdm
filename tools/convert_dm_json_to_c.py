@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2021 iopsys Software Solutions AB
-# Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+# Copyright (C) 2024 iopsys Software Solutions AB
+# Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
 
 from __future__ import print_function
 
@@ -657,22 +657,14 @@ def printOBJline(dmobject, value):
 
 
 def print_dmc_usage():
-    print("Usage: " + sys.argv[0] + " <data model name>" + " [Object path]")
-    print("data model name:   The data model(s) to be used, for ex: tr181 or tr181,tr104")
+    print("Usage: " + sys.argv[0] + " [Object path]")
     print("Examples:")
-    print("  - " + sys.argv[0] + " tr181")
-    print("    ==> Generate the C code of tr181 data model in datamodel/ folder")
-    print("  - " + sys.argv[0] + " tr104")
-    print("    ==> Generate the C code of tr104 data model in datamodel/ folder")
-    print("  - " + sys.argv[0] + " tr181,tr104")
-    print("    ==> Generate the C code of tr181 and tr104 data model in datamodel/ folder")
-    print("  - " + sys.argv[0] + " tr181" + " Device.DeviceInfo.")
+    print("  - " + sys.argv[0])
+    print("    ==> Generate the C code of full data model in datamodel/ folder")
+    print("  - " + sys.argv[0] + " Device.DeviceInfo.")
     print("    ==> Generate the C code of Device.DeviceInfo object in datamodel/ folder")
-    print("  - " + sys.argv[0] + " tr104" +
-          " Device.Services.VoiceService.{i}.Capabilities.")
-    print(
-        "    ==> Generate the C code of Device.Services.VoiceService.{i}.Capabilities. object in datamodel/ folder")
-
+    print("  - " + sys.argv[0] + " Device.Services.VoiceService.{i}.DECT.Base.{i}.")
+    print("    ==> Generate the C code for a specific multi-instance object in datamodel/ folder")
 
 def object_parse_childs(dmobject, value, nextlevel):
     hasobj = bbf.obj_has_child(value)
@@ -842,57 +834,44 @@ def removetmpfiles():
     bbf.remove_file("./.events.c")
 
 
-### main ###
-if len(sys.argv) < 2:
-    print_dmc_usage()
-    exit(1)
+def generatecfromspecificobj(passed_data, obj_to_find):
+    for _obj, _value in passed_data.items():
+        if isinstance(_value, dict) and 'type' in _value and _value['type'] == "object":
+            if _obj != obj_to_find:
+                generatecfromspecificobj(_value, obj_to_find)
+            else:
+                return generatecfromobj(_obj, _value, DMC_DIR, 0)
 
-if (sys.argv[1]).lower() == "-h" or (sys.argv[1]).lower() == "--help":
+
+### main ###
+if len(sys.argv) > 1 and (sys.argv[1]).lower() in ["-h", "--help"]:
     print_dmc_usage()
     exit(1)
 
 bbf.remove_folder(DMC_DIR)
-dm_name = sys.argv[1].split(",")
-for index in range(sys.argv[1].count(',') + 1):
 
-    JSON_FILE = bbf.ARRAY_JSON_FILES.get(dm_name[index], None)
+json_file = open(bbf.DM_JSON_FILE, "r", encoding='utf-8')
+data = json.loads(json_file.read(), object_pairs_hook=OrderedDict)
 
-    if JSON_FILE is not None:
-        j_file = open(JSON_FILE, "r", encoding='utf-8')
-        data = json.loads(j_file.read(), object_pairs_hook=OrderedDict)
+for dm_obj, dm_value in data.items():
 
-        for dm_obj, dm_value in data.items():
-            if dm_obj is None:
-                print("Wrong JSON Data model format!")
-                continue
+    if dm_obj is None or not isinstance(dm_value, dict):
+        print("Wrong JSON Data model format!")
+        exit(0)
 
-            # Generate the object file if it is defined by "sys.argv[2]" argument
-            if len(sys.argv) > 2:
-                if sys.argv[2] != dm_obj:
-                    if isinstance(dm_value, dict):
-                        for obj1, value1 in dm_value.items():
-                            if obj1 == sys.argv[2]:
-                                if isinstance(value1, dict):
-                                    for obj2, value2 in value1.items():
-                                        if obj2 == "type" and value2 == "object":
-                                            generatecfromobj(
-                                                obj1, value1, DMC_DIR, 0)
-                                            break
-                                break
-                    break
+    # Generate the object file if it is defined by "sys.argv[1]" argument
+    if len(sys.argv) > 1 and sys.argv[1] != dm_obj:
+        generatecfromspecificobj(dm_value, sys.argv[1])
+        break
 
-            # Generate the root object tree file if amin does not exist
-            generatecfromobj(dm_obj, dm_value, DMC_DIR, 1)
+    # Generate the root object tree file
+    generatecfromobj(dm_obj, dm_value, DMC_DIR, 1)
 
-            # Generate the sub object tree file if amin does not exist
-            if isinstance(dm_value, dict):
-                for obj1, value1 in dm_value.items():
-                    if isinstance(value1, dict):
-                        for obj2, value2 in value1.items():
-                            if obj2 == "type" and value2 == "object":
-                                generatecfromobj(obj1, value1, DMC_DIR, 0)
-    else:
-        print("!!!! %s : Data Model doesn't exist" % dm_name[index])
+    # Generate the sub object tree file
+    for obj1, value1 in dm_value.items():
+        if isinstance(value1, dict) and 'type' in value1 and value1['type'] == "object":
+            generatecfromobj(obj1, value1, DMC_DIR, 0)
+
 
 if os.path.isdir(DMC_DIR):
     print("Source code generated under \"%s\" folder" % DMC_DIR)

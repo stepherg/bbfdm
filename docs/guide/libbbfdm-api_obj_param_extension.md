@@ -2,23 +2,16 @@
 
 As mentioned in README, all Data Models are stored in the **'dmtree'** folder. In order to implement a new object/parameter, you need to expand its get/set/add/delete functions and then save them in the right folder.
 
-`bbfdm` library offers a tool to generate templates of the source code from json files placed under **'dmtree/json'**. So, any developer can fill these json files ([tr181](../../libbbfdm/dmtree/json/tr181.json) or [tr104](../../libbbfdm/dmtree/json/tr104.json)) with mapping field according to UCI, UBUS or CLI commands then generate the source code in C.
+`bbfdm` library offers a tool to generate templates of the source code from json files placed under **'dmtree/json'**. So, any developer can fill the data model json file [data_model](../../libbbfdm/dmtree/json/datamodel.json) with mapping field according to UCI, UBUS or CLI commands then generate the source code in C.
 
 ```bash
-$ ./convert_dm_json_to_c.py
-Usage: convert_dm_json_to_c.py <data model name> [Object path]
-data model name:   The data model(s) to be used, for ex: tr181 or tr181,tr104
+$ ./convert_dm_json_to_c.py    
+Usage: ./tools/convert_dm_json_to_c.py [Object path]
 Examples:
-  - convert_dm_json_to_c.py tr181
-    ==> Generate the C code of tr181 data model in datamodel/ folder
-  - convert_dm_json_to_c.py tr104
-    ==> Generate the C code of tr104 data model in datamodel/ folder
-  - convert_dm_json_to_c.py tr181,tr104
-    ==> Generate the C code of tr181 and tr104 data model in datamodel/ folder
-  - convert_dm_json_to_c.py tr181 Device.DeviceInfo.
+  - ./tools/convert_dm_json_to_c.py
+    ==> Generate the C code of full data model in datamodel/ folder
+  - ./tools/convert_dm_json_to_c.py Device.DeviceInfo.
     ==> Generate the C code of Device.DeviceInfo object in datamodel/ folder
-  - convert_dm_json_to_c.py tr104 Device.Services.VoiceService.{i}.Capabilities.
-    ==> Generate the C code of Device.Services.VoiceService.{i}.Capabilities. object in datamodel/ folder
 ```
 
 Below some examples of **UCI**, **UBUS** or **CLI** mappings:
