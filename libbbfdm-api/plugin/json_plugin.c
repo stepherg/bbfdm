@@ -162,7 +162,7 @@ void json_plugin_find_prefix_obj(const char *full_obj, char *prefix_obj, size_t 
 	snprintf(prefix_obj, len, "%s", full_object);
 }
 
-static void json_plugin_find_current_obj(const char *full_obj, char *curr_obj, size_t len)
+void json_plugin_find_current_obj(const char *full_obj, char *curr_obj, size_t len)
 {
 	int last_occurent = 0, occur = 0;
 	char full_object[MAX_DM_LENGTH] = {0};

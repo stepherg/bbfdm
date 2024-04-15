@@ -142,6 +142,7 @@ extern char *RateAdjAlgorithm[]; // To be removed later!!!!!!!!!!!!
 #define FILE_URI "file://"
 #define FILE_LOCALHOST_URI "file://localhost"
 #define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
+#define BBFDM_SCRIPTS_PATH "/usr/share/bbfdm/scripts"
 
 #define DM_ASSERT(X, Y) \
 do { \

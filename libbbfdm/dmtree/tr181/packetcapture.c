@@ -11,7 +11,7 @@
 
 #include "packetcapture.h"
 
-#define PACKET_CAPTURE_DIAGNOSTIC_PATH "/usr/share/bbfdm/packetcapture"
+#define PACKET_CAPTURE_DIAGNOSTIC_PATH BBFDM_SCRIPTS_PATH"/packetcapture"
 
 /*************************************************************
  * ENTRY METHODS

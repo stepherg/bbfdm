@@ -36,6 +36,13 @@
 #define BBFDM_JSON_INPUT DAEMON_JSON_INPUT
 #endif
 
+#define BBFDM_DEFAULT_MODULES_PATH "/usr/share/bbfdm"
+#define BBFDM_DEFAULT_PLUGINS_PATH BBFDM_DEFAULT_MODULES_PATH"/plugins"
+#define BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH BBFDM_DEFAULT_MODULES_PATH"/micro_services"
+#define BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH "/etc/bbfdm/micro_services"
+#define BBFDM_DEFAULT_UBUS_OBJ "bbfdm"
+#define BBFDM_DEFAULT_DEBUG_LEVEL LOG_ERR
+
 extern struct list_head loaded_json_files;
 extern struct list_head json_list;
 extern struct list_head json_memhead;
@@ -58,18 +65,10 @@ static void sig_handler(int sig)
 {
 	if (sig == SIGSEGV) {
 		handle_pending_signal(sig);
-	} else if (sig == SIGUSR1) {
-		ERR("# SIGUSR1 handler for main process PID[%ld]", getpid());
 	}
 }
 
 static void signal_init(void)
-{
-	signal(SIGSEGV, sig_handler);
-	signal(SIGUSR1, sig_handler);
-}
-
-static void service_signal_init(void)
 {
 	signal(SIGSEGV, sig_handler);
 }
@@ -949,8 +948,7 @@ enum {
 	BBF_SERVICE_CMD,
 	BBF_SERVICE_NAME,
 	BBF_SERVICE_PARENT_DM,
-	BBF_SERVICE_OBJECT,
-	BBF_SERVICE_MULTI_OBJECTS,
+	BBF_SERVICE_OBJECTS,
 	__BBF_SERVICE_MAX,
 };
 
@@ -958,8 +956,7 @@ static const struct blobmsg_policy service_policy[] = {
 	[BBF_SERVICE_CMD] = { .name = "cmd", .type = BLOBMSG_TYPE_STRING },
 	[BBF_SERVICE_NAME] = { .name = "name", .type = BLOBMSG_TYPE_STRING },
 	[BBF_SERVICE_PARENT_DM] = { .name = "parent_dm", .type = BLOBMSG_TYPE_STRING },
-	[BBF_SERVICE_OBJECT] = { .name = "object", .type = BLOBMSG_TYPE_STRING },
-	[BBF_SERVICE_MULTI_OBJECTS] = { .name = "multiple_objects", .type = BLOBMSG_TYPE_ARRAY },
+	[BBF_SERVICE_OBJECTS] = { .name = "objects", .type = BLOBMSG_TYPE_ARRAY },
 };
 
 static void service_list(struct blob_buf *bb)
@@ -1024,28 +1021,24 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 			goto end;
 		}
 
-		if (!tb[BBF_SERVICE_OBJECT] && !tb[BBF_SERVICE_MULTI_OBJECTS]) {
-			blobmsg_add_string(&bb, "error", "service object/multiple_objects should be defined!!");
+		if (!tb[BBF_SERVICE_OBJECTS]) {
+			blobmsg_add_string(&bb, "error", "service objects should be defined!!");
 			goto end;
 		}
 
 		char *srv_name = blobmsg_get_string(tb[BBF_SERVICE_NAME]);
 		char *srv_parent_dm = blobmsg_get_string(tb[BBF_SERVICE_PARENT_DM]);
-		char *srv_obj = NULL;
 		bool res = true;
 
-		if (tb[BBF_SERVICE_MULTI_OBJECTS]) {
-			struct blob_attr *objs = tb[BBF_SERVICE_MULTI_OBJECTS];
+		if (tb[BBF_SERVICE_OBJECTS]) {
+			struct blob_attr *objs = tb[BBF_SERVICE_OBJECTS];
 			struct blob_attr *obj = NULL;
 			size_t rem;
 
 			blobmsg_for_each_attr(obj, objs, rem) {
-				srv_obj = blobmsg_get_string(obj);
+				char *srv_obj = blobmsg_get_string(obj);
 				res |= load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, srv_name, srv_parent_dm, srv_obj);
 			}
-		} else if (tb[BBF_SERVICE_OBJECT]) {
-			srv_obj = blobmsg_get_string(tb[BBF_SERVICE_OBJECT]);
-			res = load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, srv_name, srv_parent_dm, srv_obj);
 		} else {
 			res = false;
 		}
@@ -1275,8 +1268,11 @@ static int fork_instance_checker(struct bbfdm_context *u)
 	}
 	child = fork();
 	if (child == 0) {
-		INFO("{fork} Instances checker entry");
-		prctl(PR_SET_NAME, (unsigned long) "bbfdm_instance");
+		char inst_ser[32] = {0};
+
+		snprintf(inst_ser, sizeof(inst_ser), "dm_%s_in", u->config.service_name);
+		INFO("{%s::fork} Instances checker entry", inst_ser);
+		prctl(PR_SET_NAME, inst_ser, NULL, NULL, NULL);
 		// child initialise signal to prevent segfaults
 		signal_init();
 		/* free fd's and memory inherited from parent */
@@ -1382,14 +1378,10 @@ static bool register_service(struct ubus_context *ctx)
 	blobmsg_add_string(&bb, "name", u->config.out_name);
 	blobmsg_add_string(&bb, "parent_dm", u->config.out_parent_dm);
 
-	if (DM_STRLEN(u->config.out_multi_objects[0]) != 0) {
-		void *arr = blobmsg_open_array(&bb, "multiple_objects");
-		for (int i = 0; i < MAX_MULTI_OBJS && DM_STRLEN(u->config.out_multi_objects[i]) != 0; i++)
-			blobmsg_add_string(&bb, NULL, u->config.out_multi_objects[i]);
-		blobmsg_close_array(&bb, arr);
-	} else {
-		blobmsg_add_string(&bb, "object", u->config.out_object);
-	}
+	void *arr = blobmsg_open_array(&bb, "objects");
+	for (int i = 0; i < MAX_OBJS && DM_STRLEN(u->config.out_objects[i]) != 0; i++)
+		blobmsg_add_string(&bb, NULL, u->config.out_objects[i]);
+	blobmsg_close_array(&bb, arr);
 
 	ubus_invoke(ctx, ubus_id, "service", bb.head, NULL, NULL, 5000);
 	blob_buf_free(&bb);
@@ -1397,118 +1389,161 @@ static bool register_service(struct ubus_context *ctx)
 	return true;
 }
 
-static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_path)
+bool file_exists(const char *path)
+{
+	struct stat buffer;
+
+	return stat(path, &buffer) == 0;
+}
+
+bool dir_exists(const char *path)
+{
+	struct stat buffer;
+
+	return (stat(path, &buffer) == 0 && S_ISDIR(buffer.st_mode));
+}
+
+static int _parse_daemon_config_options(bbfdm_config_t *config, json_object *daemon_obj)
 {
 	char *opt_val = NULL;
-	int err = 0;
-	json_object *json_obj = NULL;
 
-	if (!json_path || !strlen(json_path))
+	if (!config || !daemon_obj) {
+		fprintf(stderr, "Invalid input options \n");
 		return -1;
-
-	json_obj = json_object_from_file(json_path);
-	if (!json_obj) {
-		ERR("Failed to read input %s file", json_path);
-		goto exit;
 	}
 
-	json_object *deamon_obj = dmjson_get_obj(json_obj, 1, "daemon");
-	if (!deamon_obj) {
-		err = -1;
-		goto exit;
-	}
-
-	opt_val = dmjson_get_value(deamon_obj, 2, "config", "loglevel");
+	opt_val = dmjson_get_value(daemon_obj, 2, "config", "loglevel");
 	if (DM_STRLEN(opt_val)) {
 		config->log_level = (uint8_t) strtoul(opt_val, NULL, 10);
 		set_debug_level(config->log_level);
+	} else {
+		set_debug_level(BBFDM_DEFAULT_DEBUG_LEVEL);
 	}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "config", "refresh_time");
+	opt_val = dmjson_get_value(daemon_obj, 2, "config", "refresh_time");
 	if (DM_STRLEN(opt_val)) {
 		config->refresh_time = (unsigned int) strtoul(opt_val, NULL, 10) * 1000;
 	} else {
 		config->refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
 	}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "config", "transaction_timeout");
+	opt_val = dmjson_get_value(daemon_obj, 2, "config", "transaction_timeout");
 	if (DM_STRLEN(opt_val)) {
 		config->transaction_timeout = (int) strtol(opt_val, NULL, 10);
 		configure_transaction_timeout(config->transaction_timeout);
+	} else {
+		config->transaction_timeout = 30;
+		configure_transaction_timeout(30*1000);
 	}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "config", "subprocess_level");
+	opt_val = dmjson_get_value(daemon_obj, 2, "config", "subprocess_level");
 	if (DM_STRLEN(opt_val)) {
 		config->subprocess_level = (unsigned int) strtoul(opt_val, NULL, 10);
 	} else {
 		config->subprocess_level = BBF_SUBPROCESS_DEPTH;
 	}
+	return 0;
+}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "output", "parent_dm");
-	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->out_parent_dm, opt_val, sizeof(config->out_parent_dm));
+static int _parse_daemon_input_options(bbfdm_config_t *config, json_object *daemon_obj)
+{
+	char *opt_val = NULL;
+
+	if (!config || !daemon_obj) {
+		fprintf(stderr, "Invalid input options \n");
+		return -1;
 	}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "output", "object");
+	opt_val = dmjson_get_value(daemon_obj, 2, "input", "plugin_dir");
 	if (DM_STRLEN(opt_val)) {
-		replace_str(opt_val, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, config->out_object, sizeof(config->out_object));
+		strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
+	} else if(is_micro_service == false) {
+		strncpyt(config->in_plugin_dir, BBFDM_DEFAULT_PLUGINS_PATH, sizeof(config->in_plugin_dir));
 	}
 
-	json_object *arr_obj = NULL;
-	char *mem_obj = NULL;
-	int i = 0;
+	opt_val = dmjson_get_value(daemon_obj, 2, "input", "name");
+	if (DM_STRLEN(opt_val)) {
+		strncpyt(config->in_name, opt_val, sizeof(config->in_name));
 
-	dmjson_foreach_value_in_array(deamon_obj, arr_obj, mem_obj, i, 2, "output", "multiple_objects") {
-		if (i < MAX_MULTI_OBJS) {
-			replace_str(mem_obj, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, config->out_multi_objects[i], sizeof(config->out_multi_objects[i]));
-		} else {
-			WARNING("More multiple_object defined, can handle only %d ...", MAX_MULTI_OBJS);
-			break;
+		opt_val = strrchr(opt_val, '/');
+		if (opt_val) {
+			strncpyt(config->service_name, opt_val + 1, sizeof(config->service_name));
 		}
+	} else if (is_micro_service == false) { // default value for main process
+		snprintf(config->in_name, sizeof(config->in_name), "%s/libbbfdm.so", BBFDM_DEFAULT_MODULES_PATH);
+		strncpyt(config->service_name, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->service_name));
+	}
+	return 0;
+}
+
+static int _fill_daemon_input_option(bbfdm_config_t *config, char *sname)
+{
+	char opt_val[MAX_DM_PATH] = {0};
+
+	if (!config || !sname || strlen(sname) == 0) {
+		fprintf(stderr, "Invalid input options for service name \n");
+		return -1;
 	}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "output", "root_obj");
-	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->out_root_obj, opt_val, sizeof(config->out_root_obj));
+	strncpyt(config->service_name, sname, sizeof(config->service_name));
+
+	// check if the service plugin is DotSO plugin
+	snprintf(opt_val, MAX_DM_PATH, "%s/%s.so", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, sname);
+	if (!file_exists(opt_val)) {
+		snprintf(opt_val, MAX_DM_PATH, "%s/%s.json", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, sname);
 	}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "output", "name");
-	if (is_micro_service == false) {
-		strncpyt(config->out_name, opt_val, sizeof(config->out_name));
-	} else {
-		char val[256] = {0};
-
-		if (DM_STRLEN(config->out_object)) {
-			snprintf(val, sizeof(val), "%s.%s", config->out_root_obj, config->out_object);
-		} else { //out_multi_objects present
-			snprintf(val, sizeof(val), "%s", config->out_root_obj);
-			for (i = 0; i < MAX_MULTI_OBJS; i++) {
-				if (DM_STRLEN(config->out_multi_objects[i]) == 0) {
-					break;
-				}
-				if (i == 0) {
-					snprintf(val, sizeof(val), "%s.%s", config->out_root_obj, config->out_multi_objects[0]);
-				} else {
-					int len = DM_STRLEN(val);
-					snprintf(val+len, sizeof(val) - len, "_%s", config->out_multi_objects[i]);
-				}
-			}
-		}
-		strncpyt(config->out_name, val, sizeof(config->out_name));
+	if (!file_exists(opt_val)) {
+		fprintf(stderr, "Failed to load service plugin %s \n", sname);
+		return -1;
 	}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "input", "plugin_dir");
-	if (DM_STRLEN(opt_val)) {
+	strncpyt(config->in_name, opt_val, sizeof(config->in_name));
+
+	snprintf(opt_val, MAX_DM_PATH, "%s/%s", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, sname);
+	if (dir_exists(opt_val)) {
 		strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
 	}
 
-	opt_val = dmjson_get_value(deamon_obj, 2, "input", "type");
-	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->in_type, opt_val, sizeof(config->in_type));
+	return 0;
+}
+
+static int _parse_daemon_output_options(bbfdm_config_t *config, json_object *daemon_obj)
+{
+	char *opt_val = NULL;
+
+	if (!config || !daemon_obj) {
+		fprintf(stderr, "Invalid input options \n");
+		return -1;
 	}
-	opt_val = dmjson_get_value(deamon_obj, 2, "input", "name");
+
+	opt_val = dmjson_get_value(daemon_obj, 2, "output", "root_obj");
 	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->in_name, opt_val, sizeof(config->in_name));
+		strncpyt(config->out_root_obj, opt_val, sizeof(config->out_root_obj));
+	} else if (is_micro_service == true) { // for main process, there is no root obj
+		strncpyt(config->out_root_obj, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_root_obj));
+	}
+
+	// for main process ubus object name
+	if (is_micro_service == false) {
+		opt_val = dmjson_get_value(daemon_obj, 2, "output", "name");
+		if (strlen(opt_val)) {
+			strncpyt(config->out_name, opt_val, sizeof(config->out_name));
+		} else {
+			strncpyt(config->out_name, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_name));
+		}
+	}
+
+	return 0;
+}
+
+static int _parse_input_cli_options(bbfdm_config_t *config, json_object *json_obj)
+{
+	char *opt_val = NULL;
+
+	if (!config || !json_obj) {
+		fprintf(stderr, "Invalid input options \n");
+		return -1;
 	}
 
 	opt_val = dmjson_get_value(json_obj, 3, "cli", "config", "proto");
@@ -1544,33 +1579,59 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *json_pat
 	if (DM_STRLEN(opt_val)) {
 		snprintf(config->cli_out_type, sizeof(config->cli_out_type), "%s", opt_val);
 	}
+	return 0;
+}
+
+static int bbfdm_load_deamon_config(bbfdm_config_t *config, const char *module)
+{
+	char *opt_val = NULL;
+	int err = 0;
+	json_object *json_obj = NULL;
+	char json_path[MAX_DM_PATH] = {0};
+
+	if (!module || !strlen(module))
+		return -1;
+
+	if (strchr(module, '/')) { // absolute path
+		strncpyt(json_path, module, MAX_DM_PATH);
+	} else {
+		snprintf(json_path, MAX_DM_PATH, "%s/%s.json", BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH, module);
+	}
+
+	json_obj = json_object_from_file(json_path);
+	if (!json_obj) {
+		fprintf(stderr, "Failed to read input %s file \n", json_path);
+		goto exit;
+	}
+
+	_parse_input_cli_options(config, json_obj);
+
+	json_object *daemon_obj = dmjson_get_obj(json_obj, 1, "daemon");
+	if (!daemon_obj) {
+		err = -1;
+		goto exit;
+	}
+
+	_parse_daemon_config_options(config, daemon_obj);
+
+	opt_val = dmjson_get_value(daemon_obj, 1, "service_name");
+	if (strlen(opt_val)) {
+		err = _fill_daemon_input_option(config, opt_val);
+	} else {
+		err = _parse_daemon_input_options(config, daemon_obj);
+	}
+
+	if (err == -1) {
+		goto exit;
+	}
+
+	_parse_daemon_output_options(config, daemon_obj);
 
 	json_object_put(json_obj);
 	return err;
 exit:
 	if (json_obj) {
 		json_object_put(json_obj);
-	}
-
-	if (is_micro_service == false) {
-		ERR("Switching to internal defaults");
-		config->transaction_timeout = 30;
-		config->refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
-		config->subprocess_level = BBF_SUBPROCESS_DEPTH;
-		strncpyt(config->out_name, "bbfdm", 6);
-		strncpyt(config->in_plugin_dir, "/etc/bbfdm/plugins", 19);
-		strncpyt(config->in_type, "DotSo", 6);
-		strncpyt(config->in_name, "/lib/libbbfdm.so", 17);
-		config->proto = BBFDM_BOTH;
-		config->instance_mode = INSTANCE_MODE_NUMBER;
-		snprintf(config->cli_in_type, sizeof(config->cli_in_type), "%s", "UBUS");
-		snprintf(config->cli_in_name, sizeof(config->cli_in_name), "%s", "bbfdm");
-		snprintf(config->cli_out_type, sizeof(config->cli_out_type), "%s", "CLI");
-
-		set_debug_level(config->log_level);
-		configure_transaction_timeout(config->transaction_timeout);
-
-		err = 0;
 	}
 
 	return err;
@@ -1671,7 +1732,7 @@ void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
 	}
 }
 
-void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
+static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 {
 	memset(bbfdm_ctx, 0, sizeof(struct bbfdm_context));
 	blob_buf_init(&bbfdm_ctx->dm_schema, 0);
@@ -1680,7 +1741,7 @@ void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 	INIT_LIST_HEAD(&bbfdm_ctx->event_handlers);
 }
 
-int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
+static int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 {
 	int err = -1;
 	char *file_path = daemon_ctx->config.in_name;
@@ -1688,6 +1749,26 @@ int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 	if (DM_STRLEN(file_path) == 0) {
 		ERR("Input type/name not supported or defined");
 		return -1;
+	}
+
+	char *ext = strrchr(file_path, '.');
+	if (ext == NULL) {
+		ERR("Input file without extension");
+	} else if (strcasecmp(ext, ".json") == 0) {
+		INFO("Loading JSON plugin %s", file_path);
+		err = load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
+	} else if (strcasecmp(ext, ".so") == 0) {
+		INFO("Loading DotSo plugin %s", file_path);
+		err = load_dotso_plugin(&deamon_lib_handle, file_path, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
+	} else {
+		ERR("Input type %s not supported", ext);
+	}
+
+	if (!err) {
+		INFO("Loading sub-modules %s", daemon_ctx->config.in_plugin_dir);
+		bbf_global_init(DEAMON_DM_ROOT_OBJ, daemon_ctx->config.in_plugin_dir);
+	} else {
+		ERR("Failed loading %s", file_path);
 	}
 
 	if (DM_STRLEN(daemon_ctx->config.out_name) == 0) {
@@ -1701,8 +1782,8 @@ int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 			return -1;
 		}
 
-		if (DM_STRLEN(daemon_ctx->config.out_object) == 0 && DM_STRLEN(daemon_ctx->config.out_multi_objects[0]) == 0) {
-			ERR("output object and multiple_objects both are not defined");
+		if (DM_STRLEN(daemon_ctx->config.out_objects[0]) == 0) {
+			ERR("output objects is not defined");
 			return -1;
 		}
 
@@ -1710,26 +1791,6 @@ int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 			ERR("output root obj not defined");
 			return -1;
 		}
-	}
-
-	char *ext = strrchr(file_path, '.');
-	if (ext == NULL) {
-		ERR("Input file without extension");
-	} else if (strcasecmp(ext, ".json") == 0) {
-		INFO("Loading JSON plugin %s", file_path);
-		err = load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path, &DEAMON_DM_ROOT_OBJ);
-	} else if (strcasecmp(ext, ".so") == 0) {
-		INFO("Loading DotSo plugin %s", file_path);
-		err = load_dotso_plugin(&deamon_lib_handle, file_path, &DEAMON_DM_ROOT_OBJ);
-	} else {
-		ERR("Input type %s not supported", ext);
-	}
-
-	if (!err) {
-		INFO("Loading sub-modules %s", daemon_ctx->config.in_plugin_dir);
-		bbf_global_init(DEAMON_DM_ROOT_OBJ, daemon_ctx->config.in_plugin_dir);
-	} else {
-		ERR("Failed loading %s", file_path);
 	}
 
 	return err;
@@ -1742,6 +1803,9 @@ int main(int argc, char **argv)
 	char *cli_argv[4] = {0};
 	int err = 0, ch, cli_argc = 0, i;
 	bool ubus_init_done = false;
+	char log_level[32] = {0};
+
+	bbfdm_ctx_init(&bbfdm_ctx);
 
 	while ((ch = getopt(argc, argv, "hs:m:c:")) != -1) {
 		switch (ch) {
@@ -1766,20 +1830,16 @@ int main(int argc, char **argv)
 		}
 	}
 
-	bbfdm_ctx_init(&bbfdm_ctx);
-	if (is_micro_service == false) { // It's not a micro-service instance
-		signal_init();
-	} else {
-		service_signal_init();
-	}
+	signal_init();
 
 	err = bbfdm_load_deamon_config(&bbfdm_ctx.config, input_file);
 	if (err) {
-		fprintf(stderr, "Failed to load %s config from json file (%s)\n", bbfdm_ctx.config.out_name, input_file);
+		fprintf(stderr, "Failed to load %s config from json file (%s)\n", bbfdm_ctx.config.service_name, input_file);
 		goto exit;
 	}
 
-	openlog(bbfdm_ctx.config.out_name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	snprintf(log_level, sizeof(log_level), "bbfdm.%s", bbfdm_ctx.config.service_name);
+	openlog(log_level, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
 	if (cli_argc) {
 		err = bbfdm_cli_exec_command(&bbfdm_ctx.config, cli_argc, cli_argv);
@@ -1814,6 +1874,12 @@ int main(int argc, char **argv)
 		goto exit;
 
 	if (is_micro_service == true) { // It's a micro-service instance
+		char proc_name[32] = {0};
+
+		snprintf(proc_name, sizeof(proc_name), "dm_%s", bbfdm_ctx.config.service_name);
+		// Set process name based on microservice
+		prctl(PR_SET_NAME, proc_name, NULL, NULL, NULL);
+
 		bool is_registred = register_service(&bbfdm_ctx.ubus_ctx);
 		if (is_registred == false) {
 			// register for add event
@@ -1824,6 +1890,7 @@ int main(int argc, char **argv)
 			ubus_register_event_handler(&bbfdm_ctx.ubus_ctx, &add_event, "ubus.object.add");
 		}
 	}
+
 	INFO("Waiting on uloop....");
 	uloop_run();
 

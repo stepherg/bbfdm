@@ -10,10 +10,11 @@
 
 #ifndef PLUGIN_H
 
-int load_dotso_plugin(void **lib_handle, const char *file_path, DMOBJ **main_entry);
+int load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry);
 int free_dotso_plugin(void *lib_handle);
 
-int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list, struct list_head *json_memhead, const char *file_path, DMOBJ **main_entry);
+int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list, struct list_head *json_memhead,
+		const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry);
 int free_json_plugin(void);
 
 #endif /* PLUGIN_H */

@@ -4,7 +4,7 @@
 # Author: AMIN Ben Ramdhane <amin.benramdhane@pivasoftware.com>
 
 . /usr/share/libubox/jshn.sh
-. /usr/share/bbfdm/bbf_api
+. /usr/share/bbfdm/scripts/bbf_api
 
 ipping_list() {
 	json_add_object "ipping"

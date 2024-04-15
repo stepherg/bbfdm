@@ -18,33 +18,19 @@ echo "Validate BBF Data Model JSON Plugin"
 ./tools/validate_json_plugin.py libbbfdm/dmtree/json/datamodel.json
 check_ret $?
 
-echo "Validate X_IOPSYS_EU_Dropbear JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/X_IOPSYS_EU_Dropbear.json
-check_ret $?
+echo "Validating plugins"
+for plugin in $(ls -1 test/files/usr/share/bbfdm/plugins/*); do
+	echo "Validating ${plugin} JSON Plugin"
+	./tools/validate_json_plugin.py ${plugin}
+	check_ret $?
+done
 
-echo "Validate X_IOPSYS_EU_TEST JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/X_IOPSYS_EU_TEST.json
-check_ret $?
-
-echo "Validate X_IOPSYS_EU_WiFi JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/X_IOPSYS_EU_WiFi.json
-check_ret $?
-
-echo "Validate UCI_TEST_V1 JSON Plugin"
-./tools/validate_json_plugin.py test/files/etc/bbfdm/plugins/X_IOPSYS_EU_JSON_TEST_V1.json
-check_ret $?
-
-echo "Validate test extend Plugin"
-./tools/validate_json_plugin.py test/vendor_test/test_extend.json 
-check_ret $?
-
-echo "Validate test exclude Plugin"
-./tools/validate_json_plugin.py test/vendor_test/test_exclude.json 
-check_ret $?
-
-echo "Validate test overwrite Plugin"
-./tools/validate_json_plugin.py test/vendor_test/test_overwrite.json 
-check_ret $?
+echo "Validate test Plugin"
+for plugin in $(ls -1 test/vendor_test/*); do
+	echo "Validating ${plugin} JSON Plugin"
+	./tools/validate_json_plugin.py test/vendor_test/test_extend.json 
+	check_ret $?
+done
 
 echo "Validate Data Model JSON Plugin after generating from TR-181, TR-104 and TR-135 XML Files"
 json_path=$(./tools/convert_dm_xml_to_json.py -d test/tools/)

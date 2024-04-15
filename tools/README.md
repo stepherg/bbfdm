@@ -97,7 +97,7 @@ $ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.jso
 $ ./tools/validate_json_plugin.py dmtree/json/datamodel.json
 ```
 
-More examples available in [this path](https://dev.iopsys.eu/bbf/bbfdm/-/tree/devel/test/files/etc/bbfdm/plugins).
+More examples available in [this path](../test/files/usr/share/bbfdm/plugins).
 
 ### generate_dm.sh
 

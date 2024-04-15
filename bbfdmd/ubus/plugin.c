@@ -31,8 +31,30 @@ static uint8_t find_number_of_objects(DM_MAP_OBJ *dynamic_obj)
 	return len;
 }
 
+static void fill_dotso_micro_service_out_args(bbfdm_config_t *config, DMOBJ *entryobj, char *parent_dm, int *idx)
+{
+	if (!config || !entryobj || !parent_dm || !idx || *idx >= MAX_OBJS)
+		return;
 
-int load_dotso_plugin(void **lib_handle, const char *file_path, DMOBJ **main_entry)
+	strncpyt(config->out_parent_dm, parent_dm, sizeof(config->out_parent_dm));
+
+	for (; (entryobj && entryobj->obj); entryobj++) {
+
+		if (*idx >= MAX_OBJS)
+			break;
+
+		strncpyt(config->out_objects[(*idx)++], entryobj->obj, sizeof(config->out_objects[0]));
+
+		int len = DM_STRLEN(config->out_name);
+		if (len == 0) {
+			snprintf(config->out_name, sizeof(config->out_name), "%s.%s", config->out_root_obj, entryobj->obj);
+		} else {
+			snprintf(config->out_name + len, sizeof(config->out_name) - len, "_%s", entryobj->obj);
+		}
+	}
+}
+
+int load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
 {
 	if (!lib_handle || !file_path || !strlen(file_path) || !main_entry) {
 		ERR("Input validation failed\n");
@@ -65,6 +87,8 @@ int load_dotso_plugin(void **lib_handle, const char *file_path, DMOBJ **main_ent
 			return -1;
 		}
 
+		int out_obj_idx = 0;
+
 		for (int i = 0; dynamic_obj[i].path; i++) {
 			char *node_obj = dm_dynamic_strdup(&plugin_mem, dynamic_obj[i].path);
 			unsigned int len = strlen(node_obj);
@@ -73,6 +97,10 @@ int load_dotso_plugin(void **lib_handle, const char *file_path, DMOBJ **main_ent
 				ERR("Object (%s) not valid\n", node_obj);
 				return -1;
 			}
+
+			// Fill out arguments if it is running as micro-service
+			if (is_micro_service == true)
+				fill_dotso_micro_service_out_args(config, dynamic_obj[i].root_obj, node_obj, &out_obj_idx);
 
 			node_obj[len-1] = 0;
 
@@ -101,7 +129,24 @@ int free_dotso_plugin(void *lib_handle)
 	return 0;
 }
 
-int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list, struct list_head *json_memhead, const char *file_path, DMOBJ **main_entry)
+static void fill_json_micro_service_out_args(bbfdm_config_t *config, char *parent_dm, char *obj, int idx)
+{
+	if (!config || !obj || idx >= MAX_OBJS)
+		return;
+
+	strncpyt(config->out_parent_dm, parent_dm, sizeof(config->out_parent_dm));
+	strncpyt(config->out_objects[idx], obj, sizeof(config->out_objects[idx]));
+
+	int len = DM_STRLEN(config->out_name);
+	if (len == 0) {
+		snprintf(config->out_name, sizeof(config->out_name), "%s.%s", config->out_root_obj, obj);
+	} else {
+		snprintf(config->out_name + len, sizeof(config->out_name) - len, "_%s", obj);
+	}
+}
+
+int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list, struct list_head *json_memhead,
+		const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
 {
 	DMOBJ *dm_entryobj = NULL;
 	int json_plugin_version = JSON_VERSION_0;
@@ -147,6 +192,17 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 			ERR("ERROR: Obj prefix is empty for (%s) Object\n", node_obj);
 			return -1;
 		}
+
+		char obj_name[64] = {0};
+		json_plugin_find_current_obj(node_obj, obj_name, sizeof(obj_name));
+		if (strlen(obj_name) == 0) {
+			ERR("ERROR: Obj name is empty for (%s) Object\n", node_obj);
+			return -1;
+		}
+
+		// Fill out arguments if it is running as micro-service
+		if (is_micro_service == true)
+			fill_json_micro_service_out_args(config, obj_prefix, obj_name, idx);
 
 		// Remove '.' from object prefix
 		if (obj_prefix[obj_prefix_len - 1] == '.')

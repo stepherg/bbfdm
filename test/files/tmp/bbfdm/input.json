@@ -1,11 +1,12 @@
 {
 	"daemon": {
 		"config": {
+			"loglevel": "1"
 		},
 		"input": {
 			"type": "DotSo",
-			"name": "/lib/libbbfdm.so",
-			"plugin_dir": "/etc/bbfdm/plugins"
+			"name": "/usr/share/bbfdm/libbbfdm.so",
+			"plugin_dir": "/usr/share/bbfdm/plugins"
 		},
 		"output": {
 			"type": "UBUS",

@@ -44,11 +44,14 @@ ADD_LIBRARY(bbfdm SHARED ${BBF_DM_SOURCES} ${BBF_TR181_SOURCES} ${BBF_TR143_SOUR
 TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json m bbfdm-api ssl crypto)
 
 INSTALL(TARGETS bbfdm
+		LIBRARY DESTINATION usr/share/bbfdm)
+
+INSTALL(TARGETS bbfdm
 		LIBRARY DESTINATION usr/lib)
 
 INSTALL(DIRECTORY DESTINATION etc/bbfdm)
 INSTALL(DIRECTORY DESTINATION etc/bbfdm/dmmap)
-INSTALL(DIRECTORY DESTINATION etc/bbfdm/plugins)
+INSTALL(DIRECTORY DESTINATION usr/share/bbfdm/plugins)
 
 IF(BBF_TR143)
 	INSTALL(DIRECTORY DESTINATION usr/share/bbfdm)
@@ -58,12 +61,12 @@ IF(BBF_TR143)
 	FOREACH(script ${scripts})
 		IF(IS_DIRECTORY ${script})
 			INSTALL(DIRECTORY ${script}
-				DESTINATION usr/share/bbfdm
+				DESTINATION usr/share/bbfdm/scripts
 			)
 		ELSE()
 			INSTALL(FILES ${script}
 				PERMISSIONS OWNER_EXECUTE
-				DESTINATION usr/share/bbfdm
+				DESTINATION usr/share/bbfdm/scripts
 			)
 		ENDIF()
 	ENDFOREACH()

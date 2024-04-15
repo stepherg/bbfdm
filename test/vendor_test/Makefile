@@ -13,8 +13,8 @@ $(LIB): $(LIB_OBJS)
 	$(CC) $(LIB_CFLAGS) $(LIB_LDFLAGS) -shared -o $@ $^
 
 install:
-	cp -f $(LIB) /etc/bbfdm/plugins
-	cp -f *.json /etc/bbfdm/plugins
+	cp -f $(LIB) /usr/share/bbfdm/plugins/
+	cp -f *.json /usr/share/bbfdm/plugins
 
 clean:
 	rm -fv *.o $(LIB)

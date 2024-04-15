@@ -15,9 +15,9 @@
 #endif
 
 #ifdef BBF_TR143
-#define TRACEROUTE_DIAGNOSTIC_PATH "/usr/share/bbfdm/traceroute"
-#define DOWNLOAD_DIAGNOSTIC_PATH "/usr/share/bbfdm/download"
-#define UPLOAD_DIAGNOSTIC_PATH "/usr/share/bbfdm/upload"
+#define TRACEROUTE_DIAGNOSTIC_PATH BBFDM_SCRIPTS_PATH"/traceroute"
+#define DOWNLOAD_DIAGNOSTIC_PATH BBFDM_SCRIPTS_PATH"/download"
+#define UPLOAD_DIAGNOSTIC_PATH BBFDM_SCRIPTS_PATH"/upload"
 #endif
 
 /*************************************************************

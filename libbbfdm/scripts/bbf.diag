@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BBF_DIAG_SCRIPTS="/usr/share/bbfdm/bbf_diag"
+BBF_DIAG_SCRIPTS="/usr/share/bbfdm/scripts/bbf_diag"
 
 . /usr/share/libubox/jshn.sh
 

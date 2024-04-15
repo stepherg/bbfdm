@@ -16,9 +16,8 @@ if [ -n "${CI_SERVER_HOST}" ]; then
 fi
 
 # Make sure that all plugins are removed
-repo_dir="/etc/bbfdm/plugins"
-[ ! -d "${repo_dir}" ] && mkdir -p "${repo_dir}"
-rm -f ${repo_dir}/*
+[ ! -d "${BBFDM_PLUGIN_DIR}" ] && mkdir -p "${BBFDM_PLUGIN_DIR}"
+rm -f ${BBFDM_PLUGIN_DIR}/*
 
 if [ -z "${1}" ]; then
 	./tools/generate_dm.py tools/tools_input.json

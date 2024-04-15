@@ -514,12 +514,12 @@ static int cli_exec_command(cli_data_t *cli_data, int argc, char *argv[])
 	if (strcasecmp(cli_data->in_type, "DotSO") == 0 || strcasecmp(cli_data->in_type, "JSON") == 0) {
 
 		if (strcasecmp(cli_data->in_type, "DotSO") == 0) {
-			if (load_dotso_plugin(&cli_lib_handle, cli_data->in_name, &CLI_DM_ROOT_OBJ) != 0) {
+			if (load_dotso_plugin(&cli_lib_handle, cli_data->in_name, NULL, &CLI_DM_ROOT_OBJ) != 0) {
 				err = EXIT_FAILURE;
 				goto end;
 			}
 		} else {
-			if (load_json_plugin(&loaded_json_files, &json_list, &json_memhead, cli_data->in_name, &CLI_DM_ROOT_OBJ) != 0) {
+			if (load_json_plugin(&loaded_json_files, &json_list, &json_memhead, cli_data->in_name, NULL, &CLI_DM_ROOT_OBJ) != 0) {
 				err = EXIT_FAILURE;
 				goto end;
 			}

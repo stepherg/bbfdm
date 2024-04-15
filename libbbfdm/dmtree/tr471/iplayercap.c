@@ -11,7 +11,7 @@
 
 #include "iplayercap.h"
 
-#define IPLAYER_CAP_DIAGNOSTIC_PATH "/usr/share/bbfdm/iplayercap"
+#define IPLAYER_CAP_DIAGNOSTIC_PATH BBFDM_SCRIPTS_PATH"/iplayercap"
 
 static char *Protocol_Version[] = {"Any", "IPv4", "IPv6", NULL};
 static char *IPLayerCapacity_Role[] = {"Receiver", "Sender", NULL};

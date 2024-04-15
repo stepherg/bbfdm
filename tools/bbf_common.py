@@ -230,8 +230,8 @@ def create_bbfdm_input_json_file(proto):
             },
             "input": {
                 "type": "DotSo",
-                "name": "/lib/libbbfdm.so",
-                "plugin_dir": "/etc/bbfdm/plugins"
+                "name": "/usr/share/bbfdm/libbbfdm.so",
+                "plugin_dir": "/usr/share/bbfdm/plugins"
             },
             "output": {
                 "type": "CLI"
@@ -374,7 +374,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
                     if filename.endswith('.c'):
                         LIST_FILES.append(filename)
                     elif filename.endswith('.json'):
-                        move_file(filename, "/etc/bbfdm/plugins")
+                        move_file(filename, "/usr/share/bbfdm/plugins")
                     else:
                         print(f"Unknown file format {filename}")
                         BBF_ERROR_CODE += 1
@@ -383,7 +383,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
                     BBF_ERROR_CODE += 1
 
         if len(LIST_FILES) > 0:
-            generate_shared_library(f"/etc/bbfdm/plugins/lib{plugin_index}.so", LIST_FILES, vendor_prefix, extra_dependencies)
+            generate_shared_library(f"/usr/share/bbfdm/plugins/lib{plugin_index}.so", LIST_FILES, vendor_prefix, extra_dependencies)
 
         clear_list(LIST_FILES)
         cd_dir(CURRENT_PATH)

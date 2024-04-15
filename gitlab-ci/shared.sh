@@ -1,5 +1,7 @@
 #!/bin/bash
 
+BBFDM_PLUGIN_DIR="/usr/share/bbfdm/plugins"
+
 if [ -z "${CI_PROJECT_PATH}" ]; then
 	CI_PROJECT_PATH=${PWD}
 fi
@@ -41,7 +43,7 @@ function exec_cmd_verbose()
 
 function install_plugin()
 {
-	exec_cmd cp -f "${1}" /etc/bbfdm/plugins/
+	exec_cmd cp -f "${1}" ${BBFDM_PLUGIN_DIR}/
 }
 
 function install_libbbf()
@@ -67,7 +69,7 @@ function install_libbbf()
 
 	echo "installing libbbf"
 	exec_cmd_verbose make install
-	ln -sf /usr/share/bbfdm/bbf.diag /usr/libexec/rpcd/bbf.diag
+	ln -sf /usr/share/bbfdm/scripts/bbf.diag /usr/libexec/rpcd/bbf.diag
 	echo "371d530c95a17d1ca223a29b7a6cdc97e1135c1e0959b51106cca91a0b148b5e42742d372a359760742803f2a44bd88fca67ccdcfaeed26d02ce3b6049cb1e04" > /etc/bbfdm/.secure_hash
 	cd ..
 }
