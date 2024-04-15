@@ -1198,7 +1198,7 @@ static int get_IPInterface_Alias(char *refparam, struct dmctx *ctx, void *data, 
 	struct uci_section *dmmap_section = NULL;
 
 	get_dmmap_section_of_config_section("dmmap_network", "interface", section_name((struct uci_section *)data), &dmmap_section);
-	return bbf_get_alias(ctx, dmmap_section, "ip_int_alias", instance, value);
+	return bbf_get_alias(ctx, dmmap_section, "ip_int_alias", section_name((struct uci_section *)data), value);
 }
 
 static int set_IPInterface_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
