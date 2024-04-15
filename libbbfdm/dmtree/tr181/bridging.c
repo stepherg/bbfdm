@@ -44,15 +44,6 @@ struct provider_bridge_args
 };
 
 /**************************************************************************
-* LINKER FUNCTIONS
-***************************************************************************/
-static int get_linker_bridge(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker)
-{
-	dmasprintf(linker, "%s", data ? ((struct bridge_args *)data)->br_inst : "");
-	return 0;
-}
-
-/**************************************************************************
 * INIT FUNCTIONS
 ***************************************************************************/
 static inline int init_bridging_args(struct bridge_args *args, struct uci_section *br_s, struct uci_section *br_dmmap_s, char *br_inst)
@@ -190,10 +181,10 @@ static void set_Provider_bridge_component(char *refparam, struct dmctx *ctx, voi
 	char pr_br_sec_name[64] = {0};
 	char *br_sec_name = NULL;
 
-	if (DM_STRLEN(linker) == 0) // Linker should be like "cpe-X"
+	if (DM_STRLEN(linker) == 0) // Linker should be like "bridge-X"
 		return;
 
-	char *br_inst = DM_STRCHR(linker, '-'); // Get bridge instance 'X' which is linker from Alias prefix 'cpe-X'
+	char *br_inst = DM_STRCHR(linker, '-'); // Get bridge instance 'X' which is linker from Name parameter 'bridge-X'
 	if (!br_inst)
 		return;
 
@@ -1517,24 +1508,19 @@ static int get_BridgingBridge_Status(char *refparam, struct dmctx *ctx, void *da
 	return 0;
 }
 
-/*#Device.Bridging.Bridge.{i}.Alias!UCI:dmmap_bridge/device,@i-1/bridge_alias*/
 static int get_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmasprintf(value, "cpe-%s", ((struct bridge_args *)data)->br_inst ? ((struct bridge_args *)data)->br_inst : instance);
-	return 0;
+	return bbf_get_alias(ctx, ((struct bridge_args *)data)->bridge_dmmap_sec, "bridge_alias", instance, value);
 }
 
 static int set_BridgingBridge_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			bbfdm_set_fault_message(ctx, "Internal designated unique identifier, not allowed to update");
-			return FAULT_9007;
-	}
+	return bbf_set_alias(ctx, ((struct bridge_args *)data)->bridge_dmmap_sec, "bridge_alias", instance, value);
+}
+
+static int get_BridgingBridge_Name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmasprintf(value, "bridge-%s", ((struct bridge_args *)data)->br_inst);
 	return 0;
 }
 
@@ -2682,7 +2668,7 @@ static int set_BridgingBridgeProviderBridge_CVLANcomponents(char *refparam, stru
 /* *** Device.Bridging. *** */
 DMOBJ tBridgingObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Bridge", &DMWRITE, addObjBridgingBridge, delObjBridgingBridge, NULL, browseBridgingBridgeInst, NULL, NULL, tBridgingBridgeObj, tBridgingBridgeParams, get_linker_bridge, BBFDM_BOTH, NULL},
+{"Bridge", &DMWRITE, addObjBridgingBridge, delObjBridgingBridge, NULL, browseBridgingBridgeInst, NULL, NULL, tBridgingBridgeObj, tBridgingBridgeParams, NULL, BBFDM_BOTH, NULL},
 {"ProviderBridge", &DMWRITE, addObjBridgingProviderBridge, delObjBridgingProviderBridge, NULL, browseBridgingProviderBridgeInst, NULL, NULL, NULL, tBridgingProviderBridgeParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
@@ -2714,7 +2700,8 @@ DMLEAF tBridgingBridgeParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"Enable", &DMWRITE, DMT_BOOL, get_BridgingBridge_Enable, set_BridgingBridge_Enable, BBFDM_BOTH},
 {"Status", &DMREAD, DMT_STRING, get_BridgingBridge_Status, NULL, BBFDM_BOTH},
-{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridge_Alias, set_BridgingBridge_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
+{"Alias", &DMWRITE, DMT_STRING, get_BridgingBridge_Alias, set_BridgingBridge_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
+{"Name", &DMREAD, DMT_STRING, get_BridgingBridge_Name, NULL, BBFDM_BOTH, DM_FLAG_LINKER},
 {"Standard", &DMWRITE, DMT_STRING, get_BridgingBridge_Standard, set_BridgingBridge_Standard, BBFDM_BOTH},
 {"PortNumberOfEntries", &DMREAD, DMT_UNINT, get_BridgingBridge_PortNumberOfEntries, NULL, BBFDM_BOTH},
 {"VLANNumberOfEntries", &DMREAD, DMT_UNINT, get_BridgingBridge_VLANNumberOfEntries, NULL, BBFDM_BOTH},
