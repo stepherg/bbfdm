@@ -3392,7 +3392,13 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 				dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
 				dmuci_get_value_by_section_string(s, "band", &curr_band);
 				if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, pch, 1) == 0) {
-					dmuci_set_value_by_section(s, "enabled", "0");
+					struct uci_section *dmmap_sec = NULL;
+
+					dmuci_delete_by_section(s, NULL, NULL);
+					get_dmmap_section_of_config_section("dmmap_mapcontroller", "ap", section_name(s), &dmmap_sec);
+					if (dmmap_sec)
+						dmuci_delete_by_section(dmmap_sec, NULL, NULL);
+
 					ssid_exist = true;
 					break;
 				}
@@ -3401,6 +3407,7 @@ static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx 
 			if (!ssid_exist) {
 				status = "Error_Invalid_Input";
 				dmuci_revert_package("mapcontroller");
+				dmuci_revert_package("dmmap_mapcontroller");
 				goto end;
 			}
 		}
