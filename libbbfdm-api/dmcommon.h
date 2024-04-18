@@ -124,7 +124,7 @@ extern char *IPLayerCapacityTestType[]; // To be removed later!!!!!!!!!!!!
 extern char *RateAdjAlgorithm[]; // To be removed later!!!!!!!!!!!!
 
 #define CRONTABS_ROOT "/etc/crontabs/root"
-#define ACTIVATE_HANDLER_FILE "/usr/share/bbfdm/bbf_activate_handler.sh"
+#define ACTIVATE_HANDLER_FILE "/usr/share/bbfdm/scripts/bbf_activate_handler.sh"
 #define UPTIME "/proc/uptime"
 #define DEFAULT_CONFIG_DIR "/etc/config/"
 #define PROC_ROUTE "/proc/net/route"

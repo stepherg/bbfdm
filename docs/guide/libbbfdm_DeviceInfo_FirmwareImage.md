@@ -27,9 +27,9 @@ root@iopsys-44d43771aff0:~# ubus call usp operate '{"path":"Device.DeviceInfo.Fi
 	]
 }
 root@iopsys-44d43771aff0:~# crontab -l
-52 22 21 2 * sh /usr/share/bbfdm/bbf_activate_handler.sh 'WhenIdle' '2' '1800' '0' '' ''
-52 23 21 2 * sh /usr/share/bbfdm/bbf_activate_handler.sh 'WhenIdle' '2' '3600' '0' '' ''
-22 22 22 2 * sh /usr/share/bbfdm/bbf_activate_handler.sh 'Immediately' '2' '86400' '1' '' ''
+52 22 21 2 * sh /usr/share/bbfdm/scripts/bbf_activate_handler.sh 'WhenIdle' '2' '1800' '0' '' ''
+52 23 21 2 * sh /usr/share/bbfdm/scripts/bbf_activate_handler.sh 'WhenIdle' '2' '3600' '0' '' ''
+22 22 22 2 * sh /usr/share/bbfdm/scripts/bbf_activate_handler.sh 'Immediately' '2' '86400' '1' '' ''
 root@iopsys-44d43771aff0:~# 
 
 ```
@@ -80,7 +80,7 @@ In this mode, [bbf_activate_handler.sh](../../libbbfdm/scripts/bbf_activate_hand
 
 If the exit code from the idle script is zero then firmware image can be activated. Otherwise, it has to wait for next time slot which is defined by 'RETRY_TIME' variable.
 
-> Note1: The time slot is set through 'RETRY_TIME' variable which is defined under '/usr/share/bbfdm/bbf_activate_handler.sh' script.
+> Note1: The time slot is set through 'RETRY_TIME' variable which is defined under '/usr/share/bbfdm/scripts/bbf_activate_handler.sh' script.
 
 > Note2: The exit status of the script [bbf_check_idle.sh](../../libbbfdm/scripts/bbf_check_idle.sh) is important because based on it, the '[bbf_activate_handler.sh](../../libbbfdm/scripts/bbf_activate_handler.sh) script will decide whether the image can be activated or not.
 
