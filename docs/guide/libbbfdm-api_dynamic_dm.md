@@ -420,6 +420,6 @@ The application should bring its JSON file under **'/etc/bbfdm/json/'** path wit
 
 > Note4: Each object definition in JSON file must begin with "Device." and should have the full parent path if it is under another object
 
-- For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [UserInterface](../../test/files/etc/bbfdm/json/UserInterface.json), [X_IOPSYS_EU_Dropbear](../../test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json), [X_IOPSYS_EU_TEST](../../test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json)
+- For more examples on JSON files, you can see these links: [X_IOPSYS_EU_MCPD](https://dev.iopsys.eu/feed/broadcom/-/blob/devel/mcpd/files/etc/bbfdm/json/X_IOPSYS_EU_MCPD.json), [X_IOPSYS_EU_Dropbear](../../test/files/etc/bbfdm/json/X_IOPSYS_EU_Dropbear.json), [X_IOPSYS_EU_TEST](../../test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json)
 
 

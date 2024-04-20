@@ -595,7 +595,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	/*
 	 * Test of JSON Parameter Path
 	 */
-	ctx->in_param = "Device.UserInterface.Enable";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.Alias";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 

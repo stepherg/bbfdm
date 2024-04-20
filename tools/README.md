@@ -92,7 +92,6 @@ Examples:
 This tool helps in validating the json schema, which is very helpful in the development of a JSON based plugins.
 
 ```bash
-$ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/UserInterface.json
 $ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
 $ ./tools/validate_json_plugin.py dmtree/json/datamodel.json
 ```

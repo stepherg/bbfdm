@@ -32,7 +32,6 @@
 #include "routeradvertisement.h"
 #include "gatewayinfo.h"
 #include "mqtt.h"
-#include "userinterface.h"
 #include "packetcapture.h"
 #include "selftest.h"
 
@@ -104,7 +103,6 @@ DMOBJ tDeviceObj[] = {
 {"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH, NULL},
 {"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL},
 {"MQTT", &DMREAD, NULL, NULL, "file:/etc/config/mosquitto", NULL, NULL, NULL, tMQTTObj, tMQTTParams, NULL, BBFDM_BOTH, NULL},
-{"UserInterface", &DMREAD, NULL, NULL, "file:/etc/config/userinterface", NULL, NULL, NULL, tUIHTTPAccessObj, tUIParams, NULL, BBFDM_BOTH, NULL},
 {"PacketCaptureDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tPacketCaptureObj, tPacketCaptureParams, NULL, BBFDM_CWMP, NULL},
 {"SelfTestDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tSelfTestParams, NULL, BBFDM_CWMP, NULL},
 {0}
