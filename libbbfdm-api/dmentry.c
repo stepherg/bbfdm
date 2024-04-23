@@ -451,7 +451,8 @@ void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services)
 		}
 	}
 
-	dmuci_commit_bbfdm();
+	if (restart_services)
+		dmuci_commit_bbfdm();
 
 	free_all_list_package_change(&head_package_change);
 }
