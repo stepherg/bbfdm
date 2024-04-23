@@ -11,58 +11,230 @@
 
 #include "wifi.dataelements.h"
 
+enum set_ssid_operations {
+	SET_SSID_ADD,
+	SET_SSID_REMOVE,
+	SET_SSID_CHANGE,
+	SET_SSID_INVALID
+};
+
+typedef struct set_ssid_operate_param {
+	char *ssid;
+	char *enab;
+	char *key;
+	char *band;
+	char *akm;
+	char *adv;
+	char *mfp;
+	char *haul;
+} set_ssid_param;
+
 /*************************************************************
 * COMMON FUNCTIONS
 **************************************************************/
-static bool is_ssid_exists(struct dm_data *data, const char *ssid)
+static char *get_AKMs_dm_name(const char *value)
 {
-	struct uci_section *s = NULL;
-	const char *sec_name = section_name(data->config_section);
-	char *curr_ssid = NULL;
-	char buf[256] = {0};
-	unsigned pos = 0;
-
-	if (DM_STRLEN(sec_name) == 0 || DM_STRLEN(ssid) == 0)
-		return false;
-
-	uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
-		struct uci_section *dmmap_s = NULL;
-		char *ap_inst = NULL;
-
-		// skip the disabled fronthaul interfaces
-		char *enabled = NULL;
-		dmuci_get_value_by_section_string(s, "enabled", &enabled);
-		if (DM_STRLEN(enabled)) {
-			bool b = false;
-
-			string_to_bool(enabled, &b);
-			if (b == false)
-				continue;
-		}
-
-		dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
-		if (DM_STRLEN(curr_ssid) == 0 ||
-			DM_STRCMP(curr_ssid, ssid) != 0)
-			continue;
-
-		if ((dmmap_s = get_dup_section_in_dmmap("dmmap_mapcontroller", "ap", section_name(s))) != NULL) {
-			dmuci_get_value_by_section_string(dmmap_s, "wifi_da_ssid_instance", &ap_inst);
-
-			if (strcmp(sec_name, section_name(s)) != 0 && DM_STRLEN(ap_inst) != 0)
-				return true;
-		}
-
-		// Update band list
-		char *band = NULL;
-		dmuci_get_value_by_section_string(s, "band", &band);
-		pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", (!DM_LSTRCMP(band, "2")) ? "2.4" : (!DM_LSTRCMP(band, "5")) ? "5" : "6");
+	if (DM_LSTRCMP(value, "sae") == 0) {
+		return "sae";
 	}
 
-	if (pos)
-		buf[pos - 1] = 0;
+	if (DM_LSTRCMP(value, "sae-mixed") == 0) {
+		return "psk+sae";
+	}
 
-	data->additional_data = (void *)dmstrdup(buf);
-	return false;
+	if (DM_LSTRCMP(value, "psk2") == 0) {
+		return "psk";
+	}
+
+	if (DM_LSTRCMP(value, "dpp") == 0) {
+		return "dpp";
+	}
+
+	if (DM_LSTRCMP(value, "dpp+sae") == 0) {
+		return "dpp+sae";
+	}
+
+	if (DM_LSTRCMP(value, "dpp+sae-mixed") == 0) {
+		return "dpp+psk+sae";
+	}
+
+	return "";
+}
+
+static char *get_AKMs_uci_name(const char *value)
+{
+	if (DM_LSTRCMP(value, "psk") == 0) {
+		return "psk2";
+	} else if(DM_LSTRCMP(value, "dpp") == 0) {
+		return "dpp";
+	} else if(DM_LSTRCMP(value, "sae") == 0) {
+		return "sae";
+	} else if(DM_LSTRCMP(value, "psk+sae") == 0) {
+		return "sae-mixed";
+	} else if(DM_LSTRCMP(value, "dpp+sae") == 0) {
+		return "dpp+sae";
+	} else if(DM_LSTRCMP(value, "dpp+psk+sae") == 0) {
+		return "dpp+sae-mixed";
+	}
+
+	return "sae-mixed";
+}
+
+static char *get_mfp_dm_value_by_section(struct uci_section *sec)
+{
+	char *mfp = NULL;
+	char *encr = NULL;
+	unsigned int res = 0;
+
+	dmuci_get_value_by_section_string(sec, "mfp", &mfp);
+	if (DM_STRLEN(mfp) == 0) {
+		dmuci_get_value_by_section_string(sec, "encryption", &encr);
+		if (DM_LSTRCMP(encr, "psk2") == 0) {
+			res = 0;
+		} else if (DM_LSTRCMP(encr, "sae-mixed") == 0 || DM_LSTRCMP(encr, "sae-mixed+dpp") == 0) {
+			res = 1;
+		} else {
+			res = 2;
+		}
+	} else {
+		res = DM_STRTOUL(mfp);
+	}
+
+	switch (res) {
+	case 0:
+		return "Disabled";
+	case 1:
+		return "Optional";
+	case 2:
+		return "Required";
+	}
+
+	return "Disabled";
+}
+
+static char *get_mfp_uci_value(const char *mfp)
+{
+	if (DM_LSTRCMP(mfp, "Disabled") == 0)
+		return "0";
+
+	if (DM_LSTRCMP(mfp, "Optional") == 0)
+		return "1";
+
+	if (DM_LSTRCMP(mfp, "Required") == 0)
+		return "2";
+
+	return "";
+}
+
+static char *get_haultype_dm_value_by_section(struct uci_section *sec)
+{
+	char *type = NULL;
+	dmuci_get_value_by_section_string(sec, "type", &type);
+
+	if (DM_LSTRCMP(type, "backhaul") == 0) {
+		return "Backhaul";
+	}
+
+	return "Fronthaul";
+}
+
+static char *get_haultype_uci_value(const char *value)
+{
+	if (DM_LSTRCMP(value, "Backhaul") == 0) {
+		return "backhaul";
+	}
+
+	return "fronthaul";
+}
+
+static char *get_adv_enabled_by_section(struct uci_section *sec)
+{
+	char *hidden = NULL, *type = NULL;
+	char *value = "0";
+
+	dmuci_get_value_by_section_string(sec, "hidden", &hidden);
+	if (DM_STRLEN(hidden) == 0) {
+		dmuci_get_value_by_section_string(sec, "type", &type);
+		if (DM_LSTRCMP(type, "fronthaul") == 0) {
+			value = "1";
+		} else {
+			value = "0";
+		}
+	} else {
+		value = (hidden[0] == '0') ? "1" : "0";
+	}
+
+	return value;
+}
+
+static int get_requested_operation(const char *req)
+{
+	if (DM_LSTRCMP(req, "Add") == 0)
+		return SET_SSID_ADD;
+
+	if (DM_LSTRCMP(req, "Remove") == 0)
+		return SET_SSID_REMOVE;
+
+	if (DM_LSTRCMP(req, "Change") == 0)
+		return SET_SSID_CHANGE;
+
+	return SET_SSID_INVALID;
+}
+
+static int validate_band_value(struct dmctx *ctx, char *band)
+{
+	char *band_list[] = {"2.4", "5", "6", "All", NULL};
+
+	if (DM_STRLEN(band) == 0)
+		return 0;
+
+	if (bbfdm_validate_string_list(ctx, band, -1, -1, -1, -1, -1, band_list, NULL))
+		return -1;
+
+	/* if "All" is present then no other values are allowed in list */
+	if (DM_STRSTR(band, "All") != NULL && DM_STRLEN(band) > 3)
+		return -1;
+
+	return 0;
+}
+
+static int validate_akms_value(struct dmctx *ctx, char *akms)
+{
+	char *akms_list[] = {"psk", "dpp", "sae", "psk+sae", "dpp+sae", "dpp+psk+sae", NULL};
+
+	if (DM_STRLEN(akms) == 0)
+		return 0;
+
+	if (bbfdm_validate_string_list(ctx, akms, -1, -1, -1, -1, -1, akms_list, NULL))
+		return -1;
+
+	return 0;
+}
+
+static int validate_mfp_value(struct dmctx *ctx, char *mfp)
+{
+	char *mfp_list[] = {"Disabled", "Optional", "Required", NULL};
+
+	if (DM_STRLEN(mfp) == 0)
+		return 0;
+
+	if (bbfdm_validate_string(ctx, mfp, -1, -1, mfp_list, NULL))
+		return -1;
+
+	return 0;
+}
+
+static int validate_haultype_value(struct dmctx *ctx, char *haul)
+{
+	char *haul_list[] = {"Fronthaul", "Backhaul", NULL};
+
+	if (DM_STRLEN(haul) == 0)
+		return 0;
+
+	if (bbfdm_validate_string_list(ctx, haul, -1, -1, -1, -1, -1, haul_list, NULL))
+		return -1;
+
+	return 0;
 }
 
 /*************************************************************
@@ -98,30 +270,6 @@ static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *pa
 
 	synchronize_specific_config_sections_with_dmmap("mapcontroller", "ap", "dmmap_mapcontroller", &dup_list);
 	list_for_each_entry(curr_data, &dup_list, list) {
-		char *type = NULL;
-		char *enabled = NULL;
-		char *ssid = NULL;
-		bool b = false;
-
-		dmuci_get_value_by_section_string(curr_data->config_section, "type", &type);
-		if (DM_LSTRCMP(type, "fronthaul") != 0)
-			continue;
-
-		// skip the disabled fronthaul interfaces
-		dmuci_get_value_by_section_string(curr_data->config_section, "enabled", &enabled);
-		if (DM_STRLEN(enabled)) {
-			string_to_bool(enabled, &b);
-			if (b == false)
-				continue;
-		}
-
-		dmuci_get_value_by_section_string(curr_data->config_section, "ssid", &ssid);
-		if (DM_STRLEN(ssid) == 0)
-			continue;
-
-		if (is_ssid_exists(curr_data, ssid))
-			continue;
-
 		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "wifi_da_ssid_instance", "wifi_da_ssid_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
@@ -732,7 +880,44 @@ static int get_WiFiDataElementsNetworkSSID_SSID(char *refparam, struct dmctx *ct
 
 static int get_WiFiDataElementsNetworkSSID_Band(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = (char *)((struct dm_data *)data)->additional_data;
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "band", value);
+	if (DM_STRTOUL(*value) == 2) {
+		*value = "2.4";
+	}
+
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkSSID_Enable(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_value_by_section_fallback_def(((struct dm_data *)data)->config_section, "enabled", "1");
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkSSID_AKMs(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	char *res = NULL;
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &res);
+
+	*value = get_AKMs_dm_name(res);
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkSSID_AdvEnabled(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_adv_enabled_by_section(((struct dm_data *)data)->config_section);
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkSSID_MFP(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_mfp_dm_value_by_section(((struct dm_data *)data)->config_section);
+	return 0;
+}
+
+static int get_WiFiDataElementsNetworkSSID_Haul(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = get_haultype_dm_value_by_section(((struct dm_data *)data)->config_section);
 	return 0;
 }
 
@@ -3070,9 +3255,14 @@ static int operate_WiFiDataElementsNetwork_SetPreferredBackhauls(char *refparam,
 static operation_args WiFiDataElementsNetwork_SetSSID_args = {
 	.in = (const char *[]) {
 		"SSID",
-		"AddRemove",
+		"Enable",
+		"AddRemoveChange",
 		"PassPhrase",
 		"Band",
+		"AKMsAllowed",
+		"AdvertisementEnabled",
+		"MFPConfig",
+		"HaulType",
 		NULL
 	},
 	.out = (const char *[]) {
@@ -3087,112 +3277,292 @@ static int get_operate_args_WiFiDataElementsNetwork_SetSSID(char *refparam, stru
 	return 0;
 }
 
-static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static char *process_set_ssid_add_req(set_ssid_param *op_param)
 {
 	struct uci_section *s = NULL;
-	char *status = "Success";
-	char *curr_ssid = NULL, *curr_band = NULL;
-	char *pch = NULL, *spch = NULL;
-	bool ssid_exist = false, b = false;
-	char band_list[64] = {0};
+	bool enable = true;
+	char **band_arr = NULL;
+	size_t band_arr_length = 0;
+	char **enc_arr = NULL;
+	size_t enc_arr_length = 0;
+	char **type_arr = NULL;
+	size_t type_arr_length = 0;
+	char *curr_ssid = NULL;
+	unsigned idx = 1;
 
-	char *add_remove = dmjson_get_value((json_object *)value, 1, "AddRemove");
-	if (!add_remove || *add_remove == '\0' || bbfdm_validate_boolean(ctx, add_remove)) {
+	if (op_param == NULL) {
+		return "Error_Other";
+	}
+
+	if (DM_STRLEN(op_param->enab) != 0) {
+		string_to_bool(op_param->enab, &enable);
+	}
+
+	if (DM_STRLEN(op_param->band) == 0 || DM_LSTRCMP(op_param->band, "All") == 0) {
+		op_param->band = "2.4,5,6";
+	}
+
+	band_arr = strsplit(op_param->band, ",", &band_arr_length);
+
+	if (DM_STRLEN(op_param->akm) != 0) {
+		enc_arr = strsplit(op_param->akm, ",", &enc_arr_length);
+	}
+
+	if (DM_STRLEN(op_param->haul) != 0) {
+		type_arr = strsplit(op_param->haul, ",", &type_arr_length);
+	}
+
+	if (enc_arr_length > band_arr_length || type_arr_length > band_arr_length) {
+		return "Error_Invalid_Input";
+	}
+
+	/* Check if ssid is already added */
+	uci_foreach_sections("mapcontroller", "ap", s) {
+		dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+
+		if (DM_STRCMP(curr_ssid, op_param->ssid) == 0) {
+			return "Error_Invalid_Input";
+		}
+
+		idx++;
+	}
+
+	for (int i = 0; i < band_arr_length; i++) {
+		char sec_name[32];
+		char *encryp = NULL;
+		char *haul_type = NULL;
+		bool adv_enable = true;
+
+		snprintf(sec_name, sizeof(sec_name), "ap_%c_%u", band_arr[i][0], idx+i);
+		encryp = (enc_arr != NULL && i < enc_arr_length) ? get_AKMs_uci_name(enc_arr[i]) : "sae-mixed";
+		haul_type = (type_arr != NULL && i < type_arr_length) ? get_haultype_uci_value(type_arr[i]) : "fronthaul";
+
+		if (DM_STRLEN(op_param->adv) != 0) {
+			string_to_bool(op_param->adv, &adv_enable);
+		} else if (DM_LSTRCMP(haul_type, "backhaul") == 0) {
+			adv_enable = false;
+		}
+
+		dmuci_add_section("mapcontroller", "ap", &s);
+		dmuci_rename_section_by_section(s, sec_name);
+
+		dmuci_set_value_by_section(s, "ssid", op_param->ssid);
+		dmuci_set_value_by_section(s, "key", op_param->key);
+		dmuci_set_value_by_section(s, "encryption", encryp);
+		dmuci_set_value_by_section(s, "type", haul_type);
+		dmuci_set_value_by_section(s, "enabled", (enable == true) ? "1" : "0");
+		dmuci_set_value_by_section(s, "hidden", (adv_enable == true) ? "0" : "1");
+
+		if (DM_LSTRCMP(band_arr[i], "2.4") == 0) {
+			dmuci_set_value_by_section(s, "band", "2");
+		} else {
+			dmuci_set_value_by_section(s, "band", band_arr[i]);
+		}
+
+		if (DM_STRLEN(op_param->mfp) == 0) {
+			if (DM_LSTRCMP(encryp, "psk2") == 0) {
+				op_param->mfp = "Disabled";
+			} else if (DM_LSTRCMP(encryp, "sae-mixed") == 0 || DM_LSTRCMP(encryp, "sae-mixed+dpp") == 0) {
+				op_param->mfp = "Optional";
+			} else {
+				op_param->mfp = "Required";
+			}
+		}
+
+		dmuci_set_value_by_section(s, "mfp", get_mfp_uci_value(op_param->mfp));
+	}
+
+	return "Success";
+}
+
+static char *process_set_ssid_remove_req(set_ssid_param *op_param)
+{
+	struct uci_section *s = NULL;
+	char *curr_ssid = NULL;
+	bool ap_deleted = false;
+
+	if (op_param == NULL) {
+		return "Error_Other";
+	}
+
+	uci_foreach_sections("mapcontroller", "ap", s) {
+		dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+		if (DM_STRCMP(op_param->ssid, curr_ssid) != 0) {
+			continue;
+		}
+
+		// delete this section
+		dmuci_delete_by_section(s, NULL, NULL);
+		ap_deleted = true;
+	}
+
+	if (ap_deleted == false) {
+		return "Error_Invalid_Input";
+	}
+
+	return "Success";
+}
+
+static char *process_set_ssid_change_req(set_ssid_param *op_param)
+{
+	struct uci_section *s = NULL;
+	char **band_arr = NULL;
+	size_t band_arr_length = 0;
+	char **enc_arr = NULL;
+	size_t enc_arr_length = 0;
+	char **type_arr = NULL;
+	size_t type_arr_length = 0;
+	char *curr_ssid = NULL;
+	unsigned ap_count = 0;
+
+	if (op_param == NULL) {
+		return "Error_Other";
+	}
+
+	/* Check if ssid is present */
+	uci_foreach_sections("mapcontroller", "ap", s) {
+		dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+
+		if (DM_STRCMP(curr_ssid, op_param->ssid) == 0) {
+			ap_count++;
+		}
+	}
+
+	if (ap_count == 0) {
+		return "Error_Invalid_Input";
+	}
+
+	if (DM_STRLEN(op_param->band) != 0) {
+		if (DM_LSTRCMP(op_param->band, "All") == 0) {
+			op_param->band = "2.4,5,6";
+		}
+
+		band_arr = strsplit(op_param->band, ",", &band_arr_length);
+	}
+
+
+	if (DM_STRLEN(op_param->akm) != 0) {
+		enc_arr = strsplit(op_param->akm, ",", &enc_arr_length);
+	}
+
+	if (DM_STRLEN(op_param->haul) != 0) {
+		type_arr = strsplit(op_param->haul, ",", &type_arr_length);
+	}
+
+	if (band_arr_length > ap_count || enc_arr_length > ap_count || type_arr_length > ap_count) {
+		return "Error_Invalid_Input";
+	}
+
+	unsigned idx = 0;
+	uci_foreach_sections("mapcontroller", "ap", s) {
+		dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
+		if (DM_STRCMP(op_param->ssid, curr_ssid) != 0) {
+			continue;
+		}
+
+		// modify this section
+		bool enable = true;
+		if (DM_STRLEN(op_param->enab) != 0) {
+			string_to_bool(op_param->enab, &enable);
+			dmuci_set_value_by_section(s, "enabled", (enable == true) ? "1" : "0");
+		}
+
+		if (DM_STRLEN(op_param->key) != 0) {
+			dmuci_set_value_by_section(s, "key", op_param->key);
+		}
+
+		if (enc_arr != NULL && idx < enc_arr_length) {
+			dmuci_set_value_by_section(s, "encryption", get_AKMs_uci_name(enc_arr[idx]));
+		}
+
+		if (type_arr != NULL && idx < type_arr_length) {
+			dmuci_set_value_by_section(s, "type", get_haultype_uci_value(type_arr[idx]));
+		}
+
+		if (DM_STRLEN(op_param->adv) != 0) {
+			bool adv_enable;
+			string_to_bool(op_param->adv, &adv_enable);
+			dmuci_set_value_by_section(s, "hidden", (adv_enable == true) ? "0" : "1");
+		}
+
+		if (band_arr != NULL && idx < band_arr_length) {
+			if (DM_LSTRCMP(band_arr[idx], "2.4") == 0) {
+				dmuci_set_value_by_section(s, "band", "2");
+			} else {
+				dmuci_set_value_by_section(s, "band", band_arr[idx]);
+			}
+		}
+
+		if (DM_STRLEN(op_param->mfp) != 0) {
+			dmuci_set_value_by_section(s, "mfp", get_mfp_uci_value(op_param->mfp));
+		}
+
+		idx++;
+	}
+
+	return "Success";
+}
+
+static int operate_WiFiDataElementsNetwork_SetSSID(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	set_ssid_param op_param;
+	char *status = NULL;
+
+	char *add_remove_change = dmjson_get_value((json_object *)value, 1, "AddRemoveChange");
+	int op = get_requested_operation(add_remove_change);
+
+	if (op == SET_SSID_INVALID) {
 		status = "Error_Invalid_Input";
 		goto end;
 	}
 
-	char *ssid = dmjson_get_value((json_object *)value, 1, "SSID");
-	char *key = dmjson_get_value((json_object *)value, 1, "PassPhrase");
-	char *band = dmjson_get_value((json_object *)value, 1, "Band");
-	if (DM_STRLEN(ssid) == 0 || DM_STRLEN(band) == 0) {
+	memset(&op_param, 0, sizeof(set_ssid_param));
+
+	op_param.ssid = dmjson_get_value((json_object *)value, 1, "SSID");
+	op_param.enab = dmjson_get_value((json_object *)value, 1, "Enable");
+	op_param.key = dmjson_get_value((json_object *)value, 1, "PassPhrase");
+	op_param.band = dmjson_get_value((json_object *)value, 1, "Band");
+	op_param.akm = dmjson_get_value((json_object *)value, 1, "AKMsAllowed");
+	op_param.adv = dmjson_get_value((json_object *)value, 1, "AdvertisementEnabled");
+	op_param.mfp = dmjson_get_value((json_object *)value, 1, "MFPConfig");
+	op_param.haul = dmjson_get_value((json_object *)value, 1, "HaulType");
+
+	if (DM_STRLEN(op_param.ssid) == 0 || validate_band_value(ctx, op_param.band) != 0 ||
+	    validate_akms_value(ctx, op_param.akm) != 0 || validate_mfp_value(ctx, op_param.mfp) != 0 ||
+	    validate_haultype_value(ctx, op_param.haul) != 0) {
 		status = "Error_Invalid_Input";
 		goto end;
 	}
 
-	// Check band list
-	DM_STRNCPY(band_list, band, sizeof(band_list));
-	for (pch = strtok_r(band_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
-		if (DM_STRCMP(pch, "2.4") != 0 && DM_STRCMP(pch, "5") != 0 && DM_STRCMP(pch, "6") != 0) {
-			status = "Error_Invalid_Input";
-			goto end;
-		}
+	if (DM_STRLEN(op_param.enab) != 0 && bbfdm_validate_boolean(ctx, op_param.enab) != 0) {
+		status = "Error_Invalid_Input";
+		goto end;
 	}
 
-	DM_STRNCPY(band_list, band, sizeof(band_list));
-	string_to_bool(add_remove, &b);
+	if (DM_STRLEN(op_param.adv) != 0 && bbfdm_validate_boolean(ctx, op_param.adv) != 0) {
+		status = "Error_Invalid_Input";
+		goto end;
+	}
 
-	if (b) {
-		// Add this SSID
+	switch (op) {
+	case SET_SSID_ADD:
+		status = process_set_ssid_add_req(&op_param);
+		break;
+	case SET_SSID_REMOVE:
+		status = process_set_ssid_remove_req(&op_param);
+		break;
+	case SET_SSID_CHANGE:
+		status = process_set_ssid_change_req(&op_param);
+		break;
+	}
 
-		for (pch = strtok_r(band_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
-			ssid_exist = false;
-
-			uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
-				dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
-				dmuci_get_value_by_section_string(s, "band", &curr_band);
-				if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, pch, 1) == 0) {
-					dmuci_set_value_by_section(s, "enabled", "1");
-					if (*key) dmuci_set_value_by_section(s, "key", key);
-					ssid_exist = true;
-					break;
-				}
-			}
-
-			if (!ssid_exist) {
-				char sec_name[32];
-				unsigned idx = 1;
-
-				uci_foreach_sections("mapcontroller", "ap", s)
-					idx++;
-
-				snprintf(sec_name, sizeof(sec_name), "ap_%s_%u", (*pch == '2') ? "2" : pch, idx);
-
-				dmuci_add_section("mapcontroller", "ap", &s);
-				dmuci_rename_section_by_section(s, sec_name);
-				dmuci_set_value_by_section(s, "ssid", ssid);
-				dmuci_set_value_by_section(s, "key", key);
-				// TR181-2.16 does not have option to configure encryption mode, so use the sae as default encryption
-				dmuci_set_value_by_section(s, "encryption", "sae-mixed");
-				dmuci_set_value_by_section(s, "type", "fronthaul");
-				dmuci_set_value_by_section(s, "band", (*pch == '2') ? "2" : pch);
-				dmuci_set_value_by_section(s, "enabled", "1");
-			}
-		}
+	if (DM_LSTRCMP(status, "Success") != 0) {
+		dmuci_revert_package("mapcontroller");
 	} else {
-		// Remove each band in the list linked to this SSID
-
-		for (pch = strtok_r(band_list, ",", &spch); pch != NULL; pch = strtok_r(NULL, ",", &spch)) {
-			ssid_exist = false;
-
-			uci_foreach_option_eq("mapcontroller", "ap", "type", "fronthaul", s) {
-				dmuci_get_value_by_section_string(s, "ssid", &curr_ssid);
-				dmuci_get_value_by_section_string(s, "band", &curr_band);
-				if (DM_STRCMP(curr_ssid, ssid) == 0 && DM_STRNCMP(curr_band, pch, 1) == 0) {
-					dmuci_set_value_by_section(s, "enabled", "0");
-					ssid_exist = true;
-					break;
-				}
-			}
-
-			if (!ssid_exist) {
-				status = "Error_Invalid_Input";
-				dmuci_revert_package("mapcontroller");
-				goto end;
-			}
-		}
+		// Commit mapcontroller config changes
+		dmuci_save_package("mapcontroller");
+		dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
 	}
-
-	// Commit dmmap_mapcontroller changes
-	uci_path_foreach_sections(bbfdm, "dmmap_mapcontroller", "ap", s) {
-		dmuci_delete_by_section(s, "wifi_da_ssid_instance", NULL);
-	}
-
-	dmuci_commit_package_bbfdm("dmmap_mapcontroller");
-
-	// Commit mapcontroller config changes
-	dmuci_save_package("mapcontroller");
-	dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", "mapcontroller", String}}, 1);
 
 end:
 	add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
@@ -3626,6 +3996,11 @@ DMLEAF tWiFiDataElementsNetworkSSIDParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"SSID", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkSSID_SSID, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE},
 {"Band", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkSSID_Band, NULL, BBFDM_BOTH},
+{"Enable", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkSSID_Enable, NULL, BBFDM_BOTH},
+{"AKMsAllowed", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkSSID_AKMs, NULL, BBFDM_BOTH},
+{"AdvertisementEnabled", &DMREAD, DMT_BOOL, get_WiFiDataElementsNetworkSSID_AdvEnabled, NULL, BBFDM_BOTH},
+{"MFPConfig", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkSSID_MFP, NULL, BBFDM_BOTH},
+{"HaulType", &DMREAD, DMT_STRING, get_WiFiDataElementsNetworkSSID_Haul, NULL, BBFDM_BOTH},
 {0}
 };
 
