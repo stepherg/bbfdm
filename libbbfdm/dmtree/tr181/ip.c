@@ -1438,13 +1438,28 @@ static int get_IPInterface_MaxMTUSize(char *refparam, struct dmctx *ctx, void *d
 
 static int set_IPInterface_MaxMTUSize(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char *device = NULL;
+	struct uci_section *s = NULL;
+
 	switch (action)	{
 		case VALUECHECK:
 			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{"64","65535"}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_set_value_by_section((struct uci_section *)data, "mtu", value);
+			/* find the device section for this interface */
+			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
+
+			/* check if device is empty */
+			if ((device)[0] == '\0') {
+				return FAULT_9002;
+			}
+
+			/* set option MTU in device section */
+			uci_foreach_option_eq("network", "device", "name", device, s) {
+				dmuci_set_value_by_section(s, "mtu", value);
+				break;
+			}
 			break;
 	}
 	return 0;
