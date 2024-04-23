@@ -38,3 +38,8 @@ INSTALL(FILES scripts/bbf.secure
 	PERMISSIONS OWNER_EXECUTE
 	DESTINATION usr/libexec/rpcd
 )
+
+INSTALL(FILES scripts/bbf.config
+	PERMISSIONS OWNER_EXECUTE
+	DESTINATION usr/libexec/rpcd
+)

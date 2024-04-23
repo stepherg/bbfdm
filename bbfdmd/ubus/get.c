@@ -850,10 +850,6 @@ void bbfdm_get_value(bbfdm_data_t *data, void *output)
 		ERR("IPC failed for path(%s)", data->bbf_ctx.in_param);
 	}
 
-	// Apply all bbfdm changes
-	if (is_transaction_running() == false)
-		dmuci_commit_bbfdm();
-
 	if (output)
 		memcpy(output, data->bb.head, blob_pad_len(data->bb.head));
 	else
@@ -899,10 +895,6 @@ void bbfdm_get_names(bbfdm_data_t *data)
 
 	blobmsg_close_array(&data->bb, array);
 
-	// Apply all bbfdm changes
-	if (is_transaction_running() == false)
-		dmuci_commit_bbfdm();
-
 	bbf_cleanup(&data->bbf_ctx);
 }
 
@@ -938,10 +930,6 @@ void bbfdm_get_instances(bbfdm_data_t *data)
 	}
 
 	blobmsg_close_array(&data->bb, array);
-
-	// Apply all bbfdm changes
-	if (is_transaction_running() == false)
-		dmuci_commit_bbfdm();
 
 	bbf_cleanup(&data->bbf_ctx);
 }
