@@ -117,7 +117,7 @@
     {
       "repo": "https://dev.iopsys.eu/feed/openwrt-packages.git",
       "proto": "git",
-      "version": "bbfdm_shared",
+      "version": "devel",
       "dm_files": [
         "net/openvpn/files/bbfdm/OpenVPN_DM.json"
       ]
