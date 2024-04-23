@@ -49,9 +49,11 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	if (dm_path == NULL)
 		return;
 
+	char *str = blobmsg_format_json(msg, true);
+
 	struct dmctx bbf_ctx = {
 			.in_param = dm_path,
-			.in_value = blobmsg_format_json(msg, true),
+			.in_value = str,
 			.nextlevel = false,
 			.iscommand = false,
 			.isevent = true,
@@ -96,6 +98,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 
 end:
 	bbf_cleanup(&bbf_ctx);
+	FREE(str);
 }
 
 static void add_ubus_event_handler(struct ubus_event_handler *ev, const char *ev_name, const char *dm_path, struct list_head *ev_list)
