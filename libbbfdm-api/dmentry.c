@@ -441,9 +441,11 @@ void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services)
 
 		if (restart_services) {
 			dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
-			dmuci_commit_bbfdm();
 		}
 	}
+
+	if (restart_services)
+		dmuci_commit_bbfdm();
 
 	free_all_list_package_change(&head_package_change);
 }
