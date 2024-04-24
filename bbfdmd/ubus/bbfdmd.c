@@ -622,6 +622,7 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 {
 	struct blob_attr *tb[__DM_OPERATE_MAX] = {NULL};
 	char path[PATH_MAX] = {0};
+	char *str = NULL;
 	bbfdm_data_t data;
 
 	memset(&data, 0, sizeof(bbfdm_data_t));
@@ -641,8 +642,10 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 	data.bbf_ctx.in_param = path;
 	data.bbf_ctx.linker = tb[DM_OPERATE_COMMAND_KEY] ? blobmsg_get_string(tb[DM_OPERATE_COMMAND_KEY]) : "";
 
+	str = blobmsg_format_json(tb[DM_OPERATE_INPUT], true);
+
 	if (tb[DM_OPERATE_INPUT])
-		data.bbf_ctx.in_value = blobmsg_format_json(tb[DM_OPERATE_INPUT], true);
+		data.bbf_ctx.in_value = str;
 
 	fill_optional_data(&data, tb[DM_OPERATE_OPTIONAL]);
 
@@ -654,6 +657,7 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 		bbfdm_start_deferred(&data, bbfdm_operate_cmd_async);
 	}
 
+	FREE(str);
 	return 0;
 }
 
