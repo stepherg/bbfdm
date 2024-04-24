@@ -430,17 +430,17 @@ static char *get_datamodel_media_type(const char *media, const char *band)
 		return "IEEE 802.3u";
 	else if (!DM_LSTRCMP(media, "IEEE 802_3AB_GIGABIT_ETHERNET"))
 		return "IEEE 802.3ab";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11B"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11B") || !DM_LSTRCMP(media, "IEEE 802_11B_2_4_GHZ"))
 		return "IEEE 802.11b";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11G"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11G") || !DM_LSTRCMP(media, "IEEE 802_11G_2_4_GHZ"))
 		return "IEEE 802.11g";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11A"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11A") || !DM_LSTRCMP(media, "IEEE 802_11A_5_GHZ"))
 		return "IEEE 802.11a";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11N") && !DM_LSTRCMP(band, "2"))
+	else if ((!DM_LSTRCMP(media, "IEEE 802_11N") && !DM_LSTRCMP(band, "2")) || !DM_LSTRCMP(media, "IEEE 802_11N_2_4_GHZ"))
 		return "IEEE 802.11n 2.4";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11N") && !DM_LSTRCMP(band, "5"))
+	else if ((!DM_LSTRCMP(media, "IEEE 802_11N") && !DM_LSTRCMP(band, "5")) || !DM_LSTRCMP(media, "IEEE 802_11N_5_GHZ"))
 		return "IEEE 802.11n 5.0";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11AC"))
+	else if (!DM_LSTRCMP(media, "IEEE 802_11AC") || !DM_LSTRCMP(media, "IEEE 802_11AC_5_GHZ"))
 		return "IEEE 802.11ac";
 	else if (!DM_LSTRCMP(media, "IEEE 802_11AX") && !DM_LSTRCMP(band, "2"))
 		return "IEEE 802.11ax 2.4";
@@ -454,7 +454,7 @@ static char *get_datamodel_media_type(const char *media, const char *band)
 		return "IEEE 802.11be 5.0";
 	else if (!DM_LSTRCMP(media, "IEEE 802_11BE") && !DM_LSTRCMP(band, "6"))
 		return "IEEE 802.11be 6.0";
-	else if (!DM_LSTRCMP(media, "IEEE 802_11AD") && !DM_LSTRCMP(band, "60"))
+	else if ((!DM_LSTRCMP(media, "IEEE 802_11AD") && !DM_LSTRCMP(band, "60")) || !DM_LSTRCMP(media, "IEEE 802_11AD_60_GHZ"))
 		return "IEEE 802.11ad";
 	else if (!DM_LSTRCMP(media, "IEEE 802_11AF"))
 		return "IEEE 802.11af";
