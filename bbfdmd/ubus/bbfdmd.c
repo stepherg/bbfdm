@@ -642,10 +642,10 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 	data.bbf_ctx.in_param = path;
 	data.bbf_ctx.linker = tb[DM_OPERATE_COMMAND_KEY] ? blobmsg_get_string(tb[DM_OPERATE_COMMAND_KEY]) : "";
 
-	str = blobmsg_format_json(tb[DM_OPERATE_INPUT], true);
-
-	if (tb[DM_OPERATE_INPUT])
+	if (tb[DM_OPERATE_INPUT]) {
+		str = blobmsg_format_json(tb[DM_OPERATE_INPUT], true);
 		data.bbf_ctx.in_value = str;
+	}
 
 	fill_optional_data(&data, tb[DM_OPERATE_OPTIONAL]);
 
