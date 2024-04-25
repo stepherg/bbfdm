@@ -1880,7 +1880,8 @@ static int mobj_get_name(DMOBJECT_ARGS)
 static int mparam_get_name(DMPARAM_ARGS)
 {
 	if (node->is_ubus_service) {
-		return get_ubus_name(dmctx, node);
+		get_ubus_name(dmctx, node);
+		return 0;
 	} else {
 		char *refparam;
 		char *perm = leaf->permission->val;
