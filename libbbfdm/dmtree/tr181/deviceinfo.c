@@ -11,6 +11,7 @@
  */
 
 #include "sys/statvfs.h"
+#include <libgen.h>
 #include <openssl/sha.h>
 #include <openssl/evp.h>
 
