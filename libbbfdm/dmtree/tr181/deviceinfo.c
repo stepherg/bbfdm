@@ -10,6 +10,7 @@
  *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
+#include <libgen.h>
 #include "dmcommon.h"
 #include "deviceinfo.h"
 #include "sys/statvfs.h"
