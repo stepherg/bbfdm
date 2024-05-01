@@ -16,6 +16,7 @@
 #define DHCP_OPTION_VENDORID 60
 #define DHCP_OPTION_CLIENTID 61
 #define DHCP_OPTION_HOSTNAME 12
+#define DHCP_CLIENT_INFO "/tmp/dhcp_client_info"
 
 struct dhcp_lease {
 	uint64_t ts;
@@ -2621,27 +2622,60 @@ static int get_DHCPv4Client_DNSServers(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
+/* get remaining lease time for an interface */
+static void get_lease_time_remaining(const char *ifname, char **value)
+{
+	/* assume wrong unless we find appropriate value */
+	*value = "-1";
+
+	if (DM_STRLEN(ifname)) {
+		FILE *fp = fopen(DHCP_CLIENT_INFO, "r");
+
+		if (fp != NULL) {
+			char line[5120] = {0};
+
+			/* loop over lines, till we get our ifname  */
+			while (fgets(line, sizeof(line), fp) != NULL) {
+				char *line_ifname = NULL;
+				char *lease_time = NULL;
+				char *lease_start_time = NULL;
+				char *spch = NULL;
+
+				/* delimiter is space */
+				/* get the first word, which is the ifname */
+				line_ifname = strtok_r(line, " ", &spch);
+
+				/* if it matches our interface, then get the leasetime and lease start time */
+				if (!DM_STRCMP(line_ifname, ifname)) {
+					lease_time = strtok_r(NULL, " ", &spch);
+					if (!DM_STRLEN(lease_time) || DM_STRTOL(lease_time) == 0xFFFFFFFF)
+						break;
+
+					lease_start_time = strtok_r(NULL, " ", &spch);
+					if (!DM_STRLEN(lease_start_time))
+						break;
+
+					char *uptime = get_uptime();
+
+					/* remaining = lease_time - (uptime - lease_start_time) */
+					dmasprintf(value, "%ld", DM_STRTOL(lease_time) - (DM_STRTOL(uptime) -  DM_STRTOL(lease_start_time)));
+					break;
+				}
+			}
+			fclose(fp);
+		}
+	}
+}
+
 /*#Device.DHCPv4.Client.{i}.LeaseTimeRemaining!UBUS:network.interface/status/interface,@Name/data.leasetime*/
 static int get_DHCPv4Client_LeaseTimeRemaining(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct uci_section *dhcpv4_s = ((struct dm_data *)data)->config_section;
 
 	if (dhcpv4_s) {
-		json_object *res = NULL;
-
 		char *if_name = section_name(dhcpv4_s);
-		dmubus_call("network.interface", "status", UBUS_ARGS{{"interface", if_name, String}}, 1, &res);
-		DM_ASSERT(res, *value = "0");
-		char *lease_time = dmjson_get_value(res, 2, "data", "leasetime");
-		char *uptime_str = dmjson_get_value(res, 2, "data", "uptime");
-
-		if (!DM_STRLEN(uptime_str) || !DM_STRLEN(lease_time) || DM_STRTOL(lease_time) == 0xFFFFFFFF) {
-			*value = "-1";
-			return 0;
-		}
-
-		char *uptime = get_uptime();
-		dmasprintf(value, "%ld", DM_STRTOL(lease_time) - (DM_STRTOL(uptime) -  DM_STRTOL(uptime_str)));
+		/* get remaining lease time in value */
+		get_lease_time_remaining(if_name, value);
 	}
 	return 0;
 }
