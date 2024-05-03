@@ -14,7 +14,6 @@
 #include "deviceinfo.h"
 #include "upnp.h"
 #include "ip.h"
-#include "bridging.h"
 #include "wifi.h"
 #include "nat.h"
 #include "ppp.h"
@@ -80,7 +79,6 @@ DMOBJ tDeviceObj[] = {
 {"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH, NULL},
 {"UPnP", &DMREAD, NULL, NULL, "file:/etc/init.d/ssdpd", NULL, NULL, NULL, tUPnPObj, NULL, NULL, BBFDM_BOTH, NULL},
 {"WiFi", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiObj, tWiFiParams, NULL, BBFDM_BOTH, NULL},
-{"Bridging", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tBridgingObj, tBridgingParams, NULL, BBFDM_BOTH, NULL},
 {"IP", &DMREAD, NULL, NULL, "file:/etc/config/network", NULL, NULL, NULL, tIPObj, tIPParams, NULL, BBFDM_BOTH, NULL},
 {"NAT", &DMREAD, NULL, NULL, "file:/etc/config/firewall", NULL, NULL, NULL, tNATObj, tNATParams, NULL, BBFDM_BOTH, NULL},
 {"PPP", &DMREAD, NULL, NULL, "file:/lib/netifd/proto/ppp.sh,/etc/config/network", NULL, NULL, NULL, tPPPObj, tPPPParams, NULL, BBFDM_BOTH, NULL},

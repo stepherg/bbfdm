@@ -92,7 +92,7 @@
       "proto": "git",
       "version": "devel",
       "extra_dependencies": [
-      	"-lcrypt"
+        "-lcrypt"
       ],
       "dm_files": [
         "src/users.c"
@@ -136,8 +136,8 @@
       "version": "devel",
       "dm_files": [
         "src/dhcpmngr.c",
-	"src/dhcpv4.c",
-	"src/dhcpv6.c"
+        "src/dhcpv4.c",
+        "src/dhcpv6.c"
       ]
     },
     {
@@ -200,21 +200,15 @@
       "repo": "https://dev.iopsys.eu/hal/dslmngr.git",
       "proto": "git",
       "dm_files": [
-        "bbf_plugin/dsl.c",
-        "bbf_plugin/fast.c",
-        "bbf_plugin/atm.c",
-        "bbf_plugin/ptm.c",
-        "bbf_plugin/plugin.c"
-	]
+        "bbf_plugin/*.c"
+      ]
     },
     {
       "repo": "https://dev.iopsys.eu/hal/ethmngr.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "bbf_plugin/ethernet.c",
-        "bbf_plugin/vendor_ethernet.c",
-        "bbf_plugin/dmlayer.c"
+        "bbf_plugin/*.c"
       ]
     },
     {
@@ -223,6 +217,14 @@
       "version": "devel",
       "dm_files": [
         "src/datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/bridgemngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/*.c"
       ]
     }
   ],

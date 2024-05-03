@@ -876,16 +876,20 @@ char *get_value_by_reference(struct dmctx *ctx, char *value)
 	char *pch = NULL, *spch = NULL, *val = NULL;
 	char buf[MAX_DM_PATH * 4] = {0};
 	char buf_val[MAX_DM_PATH * 4] = {0};
-	bool path_resolved = false;
+	bool is_list = false;
+	int pos = 0;
 
 	if (DM_STRLEN(value) == 0 || !DM_LSTRSTR(value, "=="))
 		return value;
 
 	DM_STRNCPY(buf, value, sizeof(buf));
 
+	if (DM_STRCHR(buf, '&'))
+		is_list = true;
+
 	buf_val[0] = 0;
 
-	for (pch = strtok_r(buf, ",", &spch); pch; pch = strtok_r(NULL, ",", &spch)) {
+	for (pch = strtok_r(buf, is_list ? "&" : ",", &spch); pch; pch = strtok_r(NULL, is_list ? "&" : ",", &spch)) {
 		char path[MAX_DM_PATH] = {0};
 		char key_name[256], key_value[256];
 		regmatch_t pmatch[2];
@@ -916,13 +920,15 @@ char *get_value_by_reference(struct dmctx *ctx, char *value)
 		adm_entry_get_reference_param(ctx, path, key_value, &val);
 
 		if (DM_STRLEN(val)) {
-			path_resolved = true;
-			snprintf(buf_val, sizeof(buf_val), "%s", val);
-			break;
+			pos += snprintf(&buf_val[pos], sizeof(buf_val) - pos, "%s,", val);
+
+			if (!is_list) // Requested value is not list
+				break;
 		}
 	}
 
-	if (path_resolved) {
+	if (DM_STRLEN(buf_val)) {
+		buf_val[pos - 1] = 0;
 		return dmstrdup(buf_val);
 	}
 
