@@ -1300,7 +1300,12 @@ static int get_radio_possible_channels(char *refparam, struct dmctx *ctx, void *
 	DM_ASSERT(res, *value = "");
 
 	bandwidth = dmjson_get_value(res, 1, "bandwidth");
-	dmubus_call(object, "channels", UBUS_ARGS{{"bandwidth", bandwidth, Integer}}, 1, &res);
+
+	if (DM_STRTOL(bandwidth) == 0) {
+		dmubus_call(object, "channels", UBUS_ARGS{0}, 0, &res);
+	} else {
+		dmubus_call(object, "channels", UBUS_ARGS{{"bandwidth", bandwidth, Integer}}, 1, &res);
+	}
 	DM_ASSERT(res, *value = "");
 
 	*value = dmjson_get_value_array_all(res, ",", 1, "channels");
