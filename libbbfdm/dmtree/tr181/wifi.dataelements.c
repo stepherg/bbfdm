@@ -3876,23 +3876,32 @@ static int get_event_args_WiFiDataElementsAssociationEvent_Associated(char *refp
 
 static int event_WiFiDataElementsAssociationEvent_Associated(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *event_time = dmjson_get_value((json_object *)value, 1, "eventTime");
-	char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "BSSID");
-	char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "MACAddress");
-	char *status_code = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "StatusCode");
-	char *ht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "HTCapabilities");
-	char *vht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "VHTCapabilities");
-	char *he_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "HECapabilities");
+	switch (action)	{
+		case EVENT_CHECK:
+			// Nothing to check
+			break;
+		case EVENT_RUN:
+		{
+			char *event_time = dmjson_get_value((json_object *)value, 1, "eventTime");
+			char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "BSSID");
+			char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "MACAddress");
+			char *status_code = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "StatusCode");
+			char *ht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "HTCapabilities");
+			char *vht_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "VHTCapabilities");
+			char *he_cap = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent", "AssocData", "HECapabilities");
 
-	add_list_parameter(ctx, dmstrdup("TimeStamp"), dmstrdup(event_time), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("BSSID"), dmstrdup(bssid), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("MACAddress"), dmstrdup(mac_addr), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("StatusCode"), dmstrdup(status_code), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("HTCapabilities"), dmstrdup(ht_cap), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("VHTCapabilities"), dmstrdup(vht_cap), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("HECapabilities"), dmstrdup(he_cap), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("TimeStamp"), dmstrdup(event_time), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("BSSID"), dmstrdup(bssid), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("MACAddress"), dmstrdup(mac_addr), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("StatusCode"), dmstrdup(status_code), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("HTCapabilities"), dmstrdup(ht_cap), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("VHTCapabilities"), dmstrdup(vht_cap), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("HECapabilities"), dmstrdup(he_cap), DMT_TYPE[DMT_STRING], NULL);
+			break;
+		}
+	}
 
-    return 0;
+	return 0;
 }
 
 static event_args wifidataelementsdisassociationevent_disassociated_args = {
@@ -3924,29 +3933,38 @@ static int get_event_args_WiFiDataElementsDisassociationEvent_Disassociated(char
 
 static int event_WiFiDataElementsDisassociationEvent_Disassociated(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *event_time = dmjson_get_value((json_object *)value, 1, "eventTime");
-	char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BSSID");
-	char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "MACAddress");
-	char *reason_code = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ReasonCode");
-	char *bytes_sent = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BytesSent");
-	char *bytes_received = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BytesReceived");
-	char *packet_sent = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "PacketsSent");
-	char *packet_received = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "PacketsReceived");
-	char *errors_sent = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ErrorsSent");
-	char *errors_received = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ErrorsReceived");
-	char *retrans_count = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "RetransCount");
+	switch (action)	{
+		case EVENT_CHECK:
+			// Nothing to check
+			break;
+		case EVENT_RUN:
+		{
+			char *event_time = dmjson_get_value((json_object *)value, 1, "eventTime");
+			char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BSSID");
+			char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "MACAddress");
+			char *reason_code = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ReasonCode");
+			char *bytes_sent = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BytesSent");
+			char *bytes_received = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "BytesReceived");
+			char *packet_sent = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "PacketsSent");
+			char *packet_received = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "PacketsReceived");
+			char *errors_sent = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ErrorsSent");
+			char *errors_received = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "ErrorsReceived");
+			char *retrans_count = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:DisassociationEvent", "DisassocData", "RetransCount");
 
-	add_list_parameter(ctx, dmstrdup("TimeStamp"), dmstrdup(event_time), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("BSSID"), dmstrdup(bssid), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("MACAddress"), dmstrdup(mac_addr), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("ReasonCode"), dmstrdup(reason_code), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("BytesSent"), dmstrdup(bytes_sent), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("BytesReceived"), dmstrdup(bytes_received), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("PacketsSent"), dmstrdup(packet_sent), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("PacketsReceived"), dmstrdup(packet_received), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("ErrorsSent"), dmstrdup(errors_sent), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("ErrorsReceived"), dmstrdup(errors_received), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("RetransCount"), dmstrdup(retrans_count), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("TimeStamp"), dmstrdup(event_time), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("BSSID"), dmstrdup(bssid), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("MACAddress"), dmstrdup(mac_addr), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("ReasonCode"), dmstrdup(reason_code), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("BytesSent"), dmstrdup(bytes_sent), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("BytesReceived"), dmstrdup(bytes_received), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("PacketsSent"), dmstrdup(packet_sent), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("PacketsReceived"), dmstrdup(packet_received), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("ErrorsSent"), dmstrdup(errors_sent), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("ErrorsReceived"), dmstrdup(errors_received), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("RetransCount"), dmstrdup(retrans_count), DMT_TYPE[DMT_STRING], NULL);
+			break;
+		}
+	}
 
     return 0;
 }

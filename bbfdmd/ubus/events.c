@@ -45,8 +45,14 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	if (!msg || !type)
 		return;
 
-	char *dm_path = get_events_dm_path(&u->event_handlers, type);
-	if (dm_path == NULL)
+	char *event_dm_path = get_events_dm_path(&u->event_handlers, type);
+	if (event_dm_path == NULL)
+		return;
+
+	char dm_path[MAX_DM_PATH];
+
+	replace_str(event_dm_path, ".{i}.", ".*.", dm_path, sizeof(dm_path));
+	if (strlen(dm_path) == 0)
 		return;
 
 	char *str = blobmsg_format_json(msg, true);
@@ -80,12 +86,16 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	blob_buf_init(&bb, 0);
 
 	list_for_each_entry(param, &bbf_ctx.list_parameter, list) {
-		blobmsg_add_string(&bb, param->name, param->data);
+		if (strcmp(param->name, "Event_Path") == 0) {
+			blobmsg_add_string(&b, "name", param->data);
+			strncpyt(dm_path, param->data, sizeof(dm_path));
+		} else {
+			blobmsg_add_string(&bb, param->name, param->data);
+		}
 	}
 
 	snprintf(method_name, sizeof(method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
 
-	blobmsg_add_string(&b, "name", dm_path);
 	blobmsg_add_field(&b, BLOBMSG_TYPE_TABLE, "input", blob_data(bb.head), blob_len(bb.head));
 
 	ubus_send_event(ctx, method_name, b.head);

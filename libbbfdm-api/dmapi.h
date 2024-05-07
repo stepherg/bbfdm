@@ -243,6 +243,11 @@ enum set_value_action {
 	VALUESET
 };
 
+enum event_action_enum {
+	EVENT_RUN,
+	EVENT_CHECK
+};
+
 enum del_action_enum {
 	DEL_INST,
 	DEL_ALL

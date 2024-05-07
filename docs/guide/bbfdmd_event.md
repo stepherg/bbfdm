@@ -45,15 +45,22 @@ static int get_event_args_WiFiDataElementsAssociationEvent_Associated(char *refp
 
 static int event_WiFiDataElementsAssociationEvent_Associated(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *event_time = dmjson_get_value((json_object *)value, 1, "eventTime");
-	char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "BSSID");
-	char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "MACAddress");
+	switch (action)	{
+	case EVENT_CHECK:
+		// Nothing to check
+		break;
+	case EVENT_RUN:
+		char *event_time = dmjson_get_value((json_object *)value, 1, "eventTime");
+		char *bssid = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "BSSID");
+		char *mac_addr = dmjson_get_value((json_object *)value, 3, "wfa-dataelements:AssociationEvent.AssocData", "DisassocData", "MACAddress");
 	
-	add_list_parameter(ctx, dmstrdup("TimeStamp"), dmstrdup(event_time), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("BSSID"), dmstrdup(bssid), DMT_TYPE[DMT_STRING], NULL);
-	add_list_parameter(ctx, dmstrdup("MACAddress"), dmstrdup(mac_addr), DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, dmstrdup("TimeStamp"), dmstrdup(event_time), DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, dmstrdup("BSSID"), dmstrdup(bssid), DMT_TYPE[DMT_STRING], NULL);
+		add_list_parameter(ctx, dmstrdup("MACAddress"), dmstrdup(mac_addr), DMT_TYPE[DMT_STRING], NULL);
+		break;
+	}
 
-    return 0;
+	return 0;
 }
 
 DMLEAF tWiFiDataElementsAssociationEventParams[] = {

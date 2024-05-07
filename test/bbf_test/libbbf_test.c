@@ -24,6 +24,24 @@ DM_MAP_OBJ tDynamicObj[] = {
 };
 
 /*************************************************************
+* ENTRY METHOD
+**************************************************************/
+static int browseX_IOPSYS_EU_EventTESTInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	char *inst = NULL;
+
+	for (int i = 0; i < 2; i++) {
+
+		inst = handle_instance_without_section(dmctx, parent_node, i + 1);
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, NULL, inst) == DM_STOP)
+			break;
+	}
+
+	return 0;
+}
+
+/*************************************************************
 * GET & SET PARAM
 **************************************************************/
 static int get_X_IOPSYS_EU_Syslog_ServerIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -158,6 +176,44 @@ static int get_event_args_XIOPSYSEU_Boot(char *refparam, struct dmctx *ctx, void
 	return 0;
 }
 
+static event_args test_event_args = {
+	.name = "bbf.test",
+	.param = (const char *[]) {
+		"CommandKey",
+		"Status",
+		NULL
+	}
+};
+
+static int get_event_args_XIOPSYSEUEventTEST_Test(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = (char *)&test_event_args;
+	return 0;
+}
+
+static int event_XIOPSYSEUEventTEST_Test(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case EVENT_CHECK:
+		{
+			char *test_instance = dmjson_get_value((json_object *)value, 1, "instance");
+			if (DM_STRCMP(test_instance, instance) != 0)
+				return USP_FAULT_INVALID_PATH_SYNTAX;
+			break;
+		}
+		case EVENT_RUN:
+		{
+			char *command_key = dmjson_get_value((json_object *)value, 1, "command_key");
+			char *status = dmjson_get_value((json_object *)value, 1, "status");
+
+			add_list_parameter(ctx, dmstrdup("CommandKey"), dmstrdup(command_key), DMT_TYPE[DMT_STRING], NULL);
+			add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
+			break;
+		}
+	}
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & PARAM DEFINITION
 ***********************************************************************************************************************************/
@@ -166,6 +222,7 @@ DMOBJ tDynamicDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
 {"X_IOPSYS_EU_Syslog", &DMREAD, NULL, NULL, "file:/etc/config/system", NULL, NULL, NULL, NULL, tX_IOPSYS_EU_SyslogParam, NULL, BBFDM_BOTH},
 {"X_IOPSYS_EU_PingTEST", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tX_IOPSYS_EU_PingTESTParam, NULL, BBFDM_BOTH},
+{"X_IOPSYS_EU_EventTEST", &DMREAD, NULL, NULL, NULL, browseX_IOPSYS_EU_EventTESTInst, NULL, NULL, NULL, tX_IOPSYS_EU_EventTESTParam, NULL, BBFDM_BOTH},
 {0}
 };
 
@@ -192,3 +249,11 @@ DMLEAF tX_IOPSYS_EU_PingTESTParam[] = {
 {"Run()", &DMASYNC, DMT_COMMAND, get_operate_args_XIOPSYSEUPingTEST_Run, operate_DeviceXIOPSYSEUPingTEST_Run, BBFDM_USP},
 {0}
 };
+
+/*** Device.X_IOPSYS_EU_EventTEST. ***/
+DMLEAF tX_IOPSYS_EU_EventTESTParam[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
+{"Test!", &DMREAD, DMT_EVENT, get_event_args_XIOPSYSEUEventTEST_Test, event_XIOPSYSEUEventTEST_Test, BBFDM_USP},
+{0}
+};
+

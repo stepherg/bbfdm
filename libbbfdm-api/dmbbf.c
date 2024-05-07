@@ -2782,21 +2782,37 @@ static int mobj_event(DMOBJECT_ARGS)
 static int mparam_event(DMPARAM_ARGS)
 {
 	char full_param[MAX_DM_PATH];
+	int fault = 0;
 
 	snprintf(full_param, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
 
-	if (DM_STRCMP(full_param, dmctx->in_param) != 0)
-		return USP_FAULT_INVALID_PATH;
+	if (dmctx->iswildcard) {
+		if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0)
+			return USP_FAULT_INVALID_PATH;
+	} else {
+		if (DM_STRCMP(dmctx->in_param, full_param) != 0)
+			return USP_FAULT_INVALID_PATH;
+	}
+
+	if (!leaf->setvalue) {
+		dmctx->stop = 1;
+		return USP_FAULT_INTERNAL_ERROR;
+	}
+
+	json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
+
+	fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, EVENT_CHECK);
+	if (fault)
+		goto end;
 
 	dmctx->stop = 1;
 
-	if (!leaf->setvalue)
-		return USP_FAULT_INTERNAL_ERROR;
+	fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, EVENT_RUN);
+	if (!fault)
+		add_list_parameter(dmctx, dmstrdup("Event_Path"), dmstrdup(full_param), DMT_TYPE[DMT_STRING], NULL);
 
-	json_object *j_input = (dmctx->in_value) ? json_tokener_parse(dmctx->in_value) : NULL;
-	int fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, 0);
+end:
 	json_object_put(j_input);
-
 	return fault;
 }
 
@@ -2812,8 +2828,8 @@ int dm_entry_event(struct dmctx *dmctx)
 	dmctx->isevent = 1;
 	dmctx->inparam_isparam = 1;
 	dmctx->stop = 0;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_match;
+	dmctx->checkobj = (dmctx->iswildcard) ? plugin_obj_wildcard_match : plugin_obj_match;
+	dmctx->checkleaf = (dmctx->iswildcard) ? plugin_leaf_wildcard_match : plugin_leaf_match;
 	dmctx->method_obj = mobj_event;
 	dmctx->method_param = mparam_event;
 
