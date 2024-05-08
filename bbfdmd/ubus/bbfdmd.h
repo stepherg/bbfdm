@@ -67,5 +67,6 @@ typedef struct bbfdm_data {
 } bbfdm_data_t;
 
 void register_instance_refresh_timer(struct ubus_context *ctx, int start_sec);
+void cancel_instance_refresh_timer(struct ubus_context *ctx);
 
 #endif /* BBFDMD_H */

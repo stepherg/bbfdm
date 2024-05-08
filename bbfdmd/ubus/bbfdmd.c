@@ -54,7 +54,6 @@ extern struct list_head json_memhead;
 
 LIST_HEAD(head_registered_service);
 
-static void cancel_periodic_timers(struct ubus_context *ctx);
 static void run_schema_updater(struct bbfdm_context *u);
 static void periodic_instance_updater(struct uloop_timeout *t);
 
@@ -584,7 +583,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		cancel_periodic_timers(ctx);
+		cancel_instance_refresh_timer(ctx);
 		trans_id = transaction_start(&data, "INT_SET", 0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
@@ -710,7 +709,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		cancel_periodic_timers(ctx);
+		cancel_instance_refresh_timer(ctx);
 		trans_id = transaction_start(&data, "INT_ADD", 0);
 		if (trans_id == 0) {
 			ERR("Failed to get the lock for the transaction");
@@ -837,7 +836,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		cancel_periodic_timers(ctx);
+		cancel_instance_refresh_timer(ctx);
 		trans_id = transaction_start(&data, "INT_DEL", 0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
@@ -918,7 +917,6 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 	data.ctx = ctx;
 
 	if (is_str_eq(trans_cmd, "start")) {
-		cancel_periodic_timers(ctx);
 		ret = transaction_start(&data, "API", max_timeout);
 		if (ret) {
 			blobmsg_add_u8(&data.bb, "status", true);
@@ -929,11 +927,9 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 		}
 	} else if (is_str_eq(trans_cmd, "commit")) {
 		ret = transaction_commit(&data, data.trans_id, is_service_restart);
-		register_instance_refresh_timer(ctx, 100);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "abort")) {
 		ret = transaction_abort(&data, data.trans_id);
-		register_instance_refresh_timer(ctx, 100);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "status")) {
 		transaction_status(&data.bb);
@@ -1682,22 +1678,6 @@ static void lookup_event_cb(struct ubus_context *ctx,
 	}
 }
 
-static void cancel_periodic_timers(struct ubus_context *ctx)
-{
-	struct bbfdm_context *u;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		ERR("Failed to get the bbfdm context");
-		return;
-	}
-
-	DEBUG("Cancelling Instance_timer");
-	if (u->config.refresh_time != 0) {
-		uloop_timeout_cancel(&u->instance_timer);
-	}
-}
-
 void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
 {
 	struct bbfdm_context *u;
@@ -1720,6 +1700,36 @@ void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
 		u->instance_timer.cb = periodic_instance_updater;
 		uloop_timeout_set(&u->instance_timer, refresh_time);
 	}
+}
+
+void cancel_instance_refresh_timer(struct ubus_context *ctx)
+{
+	struct bbfdm_context *u;
+
+	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
+	if (u == NULL) {
+		ERR("Failed to get the bbfdm context");
+		return;
+	}
+
+	DEBUG("Cancelling Instance refresh timer");
+	if (u->config.refresh_time != 0) {
+		uloop_timeout_cancel(&u->instance_timer);
+	}
+}
+
+static void bbf_config_change_cb(struct ubus_context *ctx, struct ubus_event_handler *ev,
+				const char *type, struct blob_attr *msg)
+{
+	(void)ev;
+	(void)ctx;
+	(void)msg;
+
+	if (type && strcmp(type, "bbf.config.change") != 0)
+		return;
+
+	cancel_instance_refresh_timer(ctx);
+	register_instance_refresh_timer(ctx, 100);
 }
 
 static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
@@ -1787,6 +1797,7 @@ static int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 }
 
 static struct ubus_event_handler add_event = { .cb = lookup_event_cb };
+static struct ubus_event_handler config_change_handler = { .cb = bbf_config_change_cb };
 
 int main(int argc, char **argv)
 {
@@ -1868,6 +1879,10 @@ int main(int argc, char **argv)
 	if (err != 0)
 		goto exit;
 
+	err = ubus_register_event_handler(&bbfdm_ctx.ubus_ctx, &config_change_handler, "bbf.config.change");
+	if (err != 0)
+		goto exit;
+
 	if (is_micro_service == true) { // It's a micro-service instance
 		char proc_name[32] = {0};
 
@@ -1882,7 +1897,9 @@ int main(int argc, char **argv)
 
 		// If the micro-service is not registered, listen for "ubus.object.add" event
 		// and register the micro-service using event handler for it
-		ubus_register_event_handler(&bbfdm_ctx.ubus_ctx, &add_event, "ubus.object.add");
+		err = ubus_register_event_handler(&bbfdm_ctx.ubus_ctx, &add_event, "ubus.object.add");
+		if (err != 0)
+			goto exit;
 	}
 
 	INFO("Waiting on uloop....");

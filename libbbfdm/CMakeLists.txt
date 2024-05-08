@@ -36,22 +36,11 @@ INSTALL(DIRECTORY DESTINATION usr/libexec/rpcd)
 FILE(GLOB scripts scripts/*)
 
 FOREACH(script ${scripts})
-	IF(IS_DIRECTORY ${script})
-		INSTALL(DIRECTORY ${script}
-			DESTINATION usr/share/bbfdm/scripts
-		)
-	ELSE()
-		INSTALL(FILES ${script}
-			PERMISSIONS OWNER_EXECUTE
-			DESTINATION usr/share/bbfdm/scripts
-		)
-	ENDIF()
+	INSTALL(FILES ${script}
+		PERMISSIONS OWNER_EXECUTE
+		DESTINATION usr/share/bbfdm/scripts
+	)
 ENDFOREACH()
-
-INSTALL(FILES scripts/bbf.diag
-	PERMISSIONS OWNER_EXECUTE
-	DESTINATION usr/libexec/rpcd
-)
 
 string(REPLACE "," ";" VENDOR_LIST ${BBF_VENDOR_LIST})
 

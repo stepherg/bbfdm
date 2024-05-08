@@ -75,6 +75,8 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	if (ret)
 		goto end;
 
+	cancel_instance_refresh_timer(ctx);
+
 	struct dm_parameter *param = NULL;
 	struct blob_buf b = {0}, bb = {0};
 	char method_name[256] = {0};
