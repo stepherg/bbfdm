@@ -1657,9 +1657,10 @@ static bool is_different_group(const char *mode1, const char *mode2)
 
 }
 
-static void set_security_mode(struct uci_section *wireless_s, struct uci_section *map_s, char *value)
+static void set_security_mode(struct uci_section *wireless_s, struct uci_section *map_s, struct uci_section *dmmap, char *value)
 {
 	char *wpa_key = NULL;
+	char *dmmap_key = NULL;
 	char *mode = get_security_mode(wireless_s);
 
 	// Use default key only in case the key is not set
@@ -1704,6 +1705,13 @@ static void set_security_mode(struct uci_section *wireless_s, struct uci_section
 
 			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "none");
 		} else if (DM_LSTRCMP(value, "WPA-Personal") == 0) {
+			// get the key from dmmap if exists
+			if (dmmap) {
+				dmuci_get_value_by_section_string(dmmap, "key", &dmmap_key);
+				if (DM_STRLEN(dmmap_key)) {
+					wpa_key = dmmap_key;
+				}
+			}
 			dmuci_set_value_by_section(wireless_s, "encryption", "psk");
 			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
 			dmuci_set_value_by_section(wireless_s, "wpa_group_rekey", "3600");
@@ -1716,6 +1724,13 @@ static void set_security_mode(struct uci_section *wireless_s, struct uci_section
 
 			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "wpa");
 		} else if (DM_LSTRCMP(value, "WPA2-Personal") == 0) {
+			// get the key from dmmap if exists
+			if (dmmap) {
+				dmuci_get_value_by_section_string(dmmap, "key", &dmmap_key);
+				if (DM_STRLEN(dmmap_key)) {
+					wpa_key = dmmap_key;
+				}
+			}
 			dmuci_set_value_by_section(wireless_s, "encryption", "psk2");
 			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
 			dmuci_set_value_by_section(wireless_s, "wpa_group_rekey", "3600");
@@ -1731,6 +1746,13 @@ static void set_security_mode(struct uci_section *wireless_s, struct uci_section
 
 			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "wpa2");
 		} else if (DM_LSTRCMP(value, "WPA-WPA2-Personal") == 0) {
+			// get the key from dmmap if exists
+			if (dmmap) {
+				dmuci_get_value_by_section_string(dmmap, "key", &dmmap_key);
+				if (DM_STRLEN(dmmap_key)) {
+					wpa_key = dmmap_key;
+				}
+			}
 			dmuci_set_value_by_section(wireless_s, "encryption", "psk-mixed");
 			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
 			dmuci_set_value_by_section(wireless_s, "wpa_group_rekey", "3600");
@@ -1744,6 +1766,13 @@ static void set_security_mode(struct uci_section *wireless_s, struct uci_section
 
 			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "wpa-mixed");
 		} else if (DM_LSTRCMP(value, "WPA3-Personal") == 0) {
+			// get the key from dmmap if exists
+			if (dmmap) {
+				dmuci_get_value_by_section_string(dmmap, "SAEPassphrase", &dmmap_key);
+				if (DM_STRLEN(dmmap_key)) {
+					wpa_key = dmmap_key;
+				}
+			}
 			dmuci_set_value_by_section(wireless_s, "encryption", "sae");
 			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
 			dmuci_set_value_by_section(wireless_s, "ieee80211w", "2");
@@ -1756,6 +1785,13 @@ static void set_security_mode(struct uci_section *wireless_s, struct uci_section
 
 			if (map_s) dmuci_set_value_by_section(map_s, "encryption", "wpa");
 		} else if (DM_LSTRCMP(value, "WPA3-Personal-Transition") == 0) {
+			// get the key from dmmap if exists
+			if (dmmap) {
+				dmuci_get_value_by_section_string(dmmap, "SAEPassphrase", &dmmap_key);
+				if (DM_STRLEN(dmmap_key)) {
+					wpa_key = dmmap_key;
+				}
+			}
 			dmuci_set_value_by_section(wireless_s, "encryption", "sae-mixed");
 			dmuci_set_value_by_section(wireless_s, "key", wpa_key);
 			dmuci_set_value_by_section(wireless_s, "ieee80211w", "1");
@@ -1799,7 +1835,7 @@ static int set_access_point_security_modes(char *refparam, struct dmctx *ctx, vo
 
 			return 0;
 		case VALUESET:
-			set_security_mode(((struct dm_data *)data)->config_section, map_s, value);
+			set_security_mode(((struct dm_data *)data)->config_section, map_s, ((struct dm_data *)data)->dmmap_section, value);
 			return 0;
 	}
 	return 0;
@@ -1818,11 +1854,8 @@ static int get_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 
 static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct uci_section *map_s = NULL;
 	char *encryption;
 	char *multi_ap = NULL;
-
-	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 
 	switch (action) {
 		case VALUECHECK:
@@ -1830,8 +1863,10 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 				return FAULT_9007;
 
 			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "multi_ap", &multi_ap);
-			if (DM_STRLEN(multi_ap) && !map_s)
+			if (DM_STRLEN(multi_ap)) {
+				bbfdm_set_fault_message(ctx, "WEP not supported for multi-ap AccessPoints");
 				return FAULT_9007;
+			}
 
 			return 0;
 		case VALUESET:
@@ -1844,10 +1879,6 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 
 				// wireless config: Update key option
 				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, buf, value);
-
-				// mapcontroller config: Update the corresponding ap section if exists
-				if (map_s)
-					dmuci_set_value_by_section(map_s, buf, value);
 			}
 			return 0;
 	}
@@ -1856,14 +1887,16 @@ static int set_access_point_security_wepkey(char *refparam, struct dmctx *ctx, v
 
 static int get_access_point_security_shared_key(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "PreSharedKey", value);
+	if (DM_STRLEN(*value) == 0) {
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	}
 	return 0;
 }
 
 static int set_access_point_security_shared_key(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *map_s = NULL;
-	char *encryption = NULL;
 	char *multi_ap = NULL;
 
 	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
@@ -1879,16 +1912,18 @@ static int set_access_point_security_shared_key(char *refparam, struct dmctx *ct
 
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (DM_LSTRSTR(encryption, "psk")) {
+			// Set the key in dmmap as well, for get handler
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "PreSharedKey", value);
 
-				// wireless config: Update key option
-				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
+			// Set the key in dmmap as well
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "key", value);
 
-				// mapcontroller config: Update the corresponding ap section if exists
-				if (map_s)
-					dmuci_set_value_by_section(map_s, "key", value);
-			}
+			// wireless config: Update key option
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
+
+			// mapcontroller config: Update the corresponding ap section if exists
+			if (map_s)
+				dmuci_set_value_by_section(map_s, "key", value);
 
 			return 0;
 	}
@@ -1897,23 +1932,36 @@ static int set_access_point_security_shared_key(char *refparam, struct dmctx *ct
 
 static int get_access_point_security_passphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "KeyPassphrase", value);
+	if (DM_STRLEN(*value) == 0) {
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	}
 	return 0;
 }
 
 static int set_access_point_security_passphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
+	struct uci_section *map_s = NULL;
 
+	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, 8, 63, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (DM_LSTRSTR(encryption, "psk"))
-				set_access_point_security_shared_key(refparam, ctx, data, instance, value, action);
+			// Set the key in dmmap as well
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "KeyPassphrase", value);
+
+			// Set the key in dmmap as well
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "key", value);
+
+			// wireless config: Update key option
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
+
+			// mapcontroller config: Update the corresponding ap section if exists
+			if (map_s)
+				dmuci_set_value_by_section(map_s, "key", value);
 			return 0;
 	}
 	return 0;
@@ -1928,17 +1976,13 @@ static int get_access_point_security_rekey_interval(char *refparam, struct dmctx
 
 static int set_access_point_security_rekey_interval(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
-
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (!DM_LSTRSTR(encryption, "wep") && DM_LSTRCMP(encryption, "none") != 0)
-				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "wpa_group_rekey", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "wpa_group_rekey", value);
 			return 0;
 	}
 	return 0;
@@ -1947,14 +1991,16 @@ static int set_access_point_security_rekey_interval(char *refparam, struct dmctx
 /*#Device.WiFi.AccessPoint.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
 static int get_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "SAEPassphrase", value);
+	if (DM_STRLEN(*value) == 0) {
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	}
 	return 0;
 }
 
 static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	struct uci_section *map_s = NULL;
-	char *encryption = NULL;
 	char *multi_ap = NULL;
 
 	map_s = find_mapcontroller_section(((struct dm_data *)data)->config_section);
@@ -1970,16 +2016,15 @@ static int set_WiFiAccessPointSecurity_SAEPassphrase(char *refparam, struct dmct
 
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (DM_LSTRSTR(encryption, "sae")) {
+			// Set the key in dmmap as well
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "SAEPassphrase", value);
 
-				// wireless config: Update key option
-				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
+			// wireless config: Update key option
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
 
-				// mapcontroller config: Update the corresponding ap section if exists
-				if (map_s)
-					dmuci_set_value_by_section(map_s, "key", value);
-			}
+			// mapcontroller config: Update the corresponding ap section if exists
+			if (map_s)
+				dmuci_set_value_by_section(map_s, "key", value);
 			break;
 	}
 	return 0;
@@ -1994,17 +2039,13 @@ static int get_access_point_security_radius_ip_address(char *refparam, struct dm
 
 static int set_access_point_security_radius_ip_address(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
-
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, 45, NULL, IPAddress))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (DM_LSTRSTR(encryption, "wpa"))
-				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "auth_server", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "auth_server", value);
 			return 0;
 	}
 	return 0;
@@ -2019,17 +2060,13 @@ static int get_access_point_security_radius_server_port(char *refparam, struct d
 
 static int set_access_point_security_radius_server_port(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
-
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_unsignedInt(ctx, value, RANGE_ARGS{{NULL,NULL}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (DM_LSTRSTR(encryption, "wpa"))
-				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "auth_port", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "auth_port", value);
 			return 0;
 	}
 	return 0;
@@ -2043,17 +2080,13 @@ static int get_access_point_security_radius_secret(char *refparam, struct dmctx 
 
 static int set_access_point_security_radius_secret(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
-
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (DM_LSTRSTR(encryption, "wpa"))
-				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "auth_secret", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "auth_secret", value);
 			return 0;
 	}
 	return 0;
@@ -2555,7 +2588,7 @@ static int set_WiFiEndPointProfileSecurity_ModeEnabled(char *refparam, struct dm
 
 			return 0;
 		case VALUESET:
-			set_security_mode(((struct dm_data *)data)->config_section, map_s, value);
+			set_security_mode(((struct dm_data *)data)->config_section, map_s, ((struct dm_data *)data)->dmmap_section, value);
 			return 0;
 	}
 	return 0;
@@ -2597,23 +2630,26 @@ static int set_WiFiEndPointProfileSecurity_WEPKey(char *refparam, struct dmctx *
 
 static int get_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "PreSharedKey", value);
+	if (DM_STRLEN(*value) == 0) {
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	}
 	return 0;
 }
 
 static int set_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
-
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_hexBinary(ctx, value, RANGE_ARGS{{NULL,"32"}}, 1))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (DM_LSTRSTR(encryption, "psk"))
-				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
+			// Set in dmmap as well for get handler
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "PreSharedKey", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "key", value);
+
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
 			return 0;
 	}
 	return 0;
@@ -2621,23 +2657,26 @@ static int set_WiFiEndPointProfileSecurity_PreSharedKey(char *refparam, struct d
 
 static int get_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "KeyPassphrase", value);
+	if (DM_STRLEN(*value) == 0) {
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	}
 	return 0;
 }
 
 static int set_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
-
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, 8, 63, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (DM_LSTRSTR(encryption, "psk"))
-				set_WiFiEndPointProfileSecurity_PreSharedKey(refparam, ctx, data, instance, value, action);
+			// Set in dmmap as well for get handler
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "KeyPassphrase", value);
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "key", value);
+
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
 			return 0;
 	}
 	return 0;
@@ -2646,23 +2685,25 @@ static int set_WiFiEndPointProfileSecurity_KeyPassphrase(char *refparam, struct 
 /*#Device.WiFi.EndPoint.{i}.Profile.{i}.Security.SAEPassphrase!UCI:wireless/wifi-iface,@i-1/key*/
 static int get_WiFiEndPointProfileSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "SAEPassphrase", value);
+	if (DM_STRLEN(*value) == 0) {
+		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "key", value);
+	}
 	return 0;
 }
 
 static int set_WiFiEndPointProfileSecurity_SAEPassphrase(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char *encryption;
-
 	switch (action)	{
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, -1, NULL, NULL))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "encryption", &encryption);
-			if (DM_LSTRSTR(encryption, "sae"))
-				dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
+			// Set in dmmap as well for get handler
+			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "SAEPassphrase", value);
+
+			dmuci_set_value_by_section(((struct dm_data *)data)->config_section, "key", value);
 			break;
 	}
 	return 0;
