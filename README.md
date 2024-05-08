@@ -100,11 +100,14 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | Device.Services.VoiceService.            | tr104          | https://dev.iopsys.eu/voice/tr104.git        |
 | Device.NAT.PortTrigger.                  | port-trigger   | https://dev.iopsys.eu/network/port-trigger.git |
 | Device.DNS.                              | dnsmngr        | https://dev.iopsys.eu/network/dnsmngr.git    |
+| Device.DHCPv4.                           | dhcpmngr       | https://dev.iopsys.eu/network/dhcpmngr.git   |
+| Device.DHCPv6.                           | dhcpmngr       | https://dev.iopsys.eu/network/dhcpmngr.git   |
 | Device.DSL.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
 | Device.FAST.                             | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
 | Device.ATM.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
 | Device.PTM.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
 | Device.Ethernet.                         | ethmngr        | https://dev.iopsys.eu/hal/ethmngr.git        |
 | Device.QoS.                              | qosmngr        | https://dev.iopsys.eu/hal/qosmngr.git        |
+| Device.SSH.                              | sshmngr        | https://dev.iopsys.eu/network/sshmngr.git    |
 | Device.X_IOPSYS_EU_IGMP.                 | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |
 | Device.X_IOPSYS_EU_MLD.                  | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |

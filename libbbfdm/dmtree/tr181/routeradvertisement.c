@@ -8,7 +8,6 @@
  *	Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
  */
 
-#include "dhcpv4.h"
 #include "routeradvertisement.h"
 
 /*************************************************************

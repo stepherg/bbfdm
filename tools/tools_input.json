@@ -131,6 +131,16 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/network/dhcpmngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/dhcpmngr.c",
+	"src/dhcpv4.c",
+	"src/dhcpv6.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/network/dnsmngr.git",
       "proto": "git",
       "version": "devel",
