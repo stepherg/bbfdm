@@ -265,11 +265,16 @@ static int delObjWiFiDataElementsNetworkDeviceRadioDisAllowedOpClassChannels(cha
 static int browseWiFiDataElementsNetworkSSIDInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct dm_data *curr_data = NULL;
-	char *inst = NULL;
+	char *inst = NULL, *mld_id = NULL;
 	LIST_HEAD(dup_list);
 
 	synchronize_specific_config_sections_with_dmmap("mapcontroller", "ap", "dmmap_mapcontroller", &dup_list);
 	list_for_each_entry(curr_data, &dup_list, list) {
+		// Show the ap sections which does not have mld_id
+		dmuci_get_value_by_section_string(curr_data->config_section, "mld_id", &mld_id);
+		if (DM_STRLEN(mld_id) != 0)
+			continue;
+
 		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "wifi_da_ssid_instance", "wifi_da_ssid_alias");
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
