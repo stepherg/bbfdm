@@ -335,6 +335,24 @@ static struct uci_section *find_mapcontroller_section(struct uci_section *wirele
 	return NULL;
 }
 
+static bool multi_ap_type_backhaul(struct uci_section *config_section)
+{
+	bool ret = false;
+	char *multi_ap = NULL;
+
+	 /* multi_ap              type
+	  * 1                     Backhaul
+	  * 2                     Fronthaul
+	  * 3                     Combined
+	  * Others                None
+	  */
+	dmuci_get_value_by_section_string(config_section, "multi_ap", &multi_ap);
+	if (DM_STRCMP(multi_ap, "1") == 0)
+		ret = true;
+
+	return ret;
+}
+
 /*************************************************************
 * ADD DEL OBJ
 **************************************************************/
@@ -512,25 +530,34 @@ static void dmmap_synchronizeWiFiSSID(struct dmctx *dmctx, DMNODE *parent_node, 
 
 	uci_path_foreach_sections_safe(bbfdm, "dmmap_wireless", "ssid", stmp, s) {
 
+		dmuci_get_value_by_section_string(s, "ap_section_name", &ap_sec_name);
+		if (DM_STRLEN(ap_sec_name)) {
+			ss = get_origin_section_from_config("wireless", "wifi-iface", ap_sec_name);
+		}
+
+		// Remove if backhaul
+		if (ss && multi_ap_type_backhaul(ss)) {
+			dmuci_delete_by_section(s, NULL, NULL);
+			continue;
+		}
+
 		// section added by user ==> skip it
 		dmuci_get_value_by_section_string(s, "added_by_user", &user_s);
 		if (DM_LSTRCMP(user_s, "1") == 0)
 			continue;
 
-		// check config section ==> if it exists then skip it
-		dmuci_get_value_by_section_string(s, "ap_section_name", &ap_sec_name);
-		if (DM_STRLEN(ap_sec_name)) {
-			ss = get_origin_section_from_config("wireless", "wifi-iface", ap_sec_name);
-			if (ss)
-				continue;
+		// if not exist in uci then delete from dmmap
+		if (!ss) {
+			dmuci_delete_by_section(s, NULL, NULL);
 		}
-
-		// else ==> delete section
-		dmuci_delete_by_section(s, NULL, NULL);
 	}
 
 	uci_foreach_sections("wireless", "wifi-iface", s) {
 		char *disabled = NULL, *ssid = NULL, *device = NULL;
+
+		/* filter out backhaul types. */
+		if (multi_ap_type_backhaul(s))
+			continue;
 
 		dmuci_get_value_by_section_string(s, "disabled", &disabled);
 		dmuci_get_value_by_section_string(s, "ssid", &ssid);
@@ -609,6 +636,10 @@ static int browseWifiAccessPointInst(struct dmctx *dmctx, DMNODE *parent_node, v
 
 		dmuci_get_value_by_section_string(curr_data->config_section, "mode", &mode);
 		if (DM_LSTRCMP(mode, "ap") != 0)
+			continue;
+
+		/* filter out backhaul types. */
+		if (multi_ap_type_backhaul(curr_data->config_section))
 			continue;
 
 		dmuci_get_value_by_section_string(curr_data->config_section, "ifname", &ifname);

@@ -9,15 +9,11 @@
  *
  */
 
-#include "device.h"
 #include "deviceinfo.h"
-#include "ip.h"
-#include "wifi.h"
 #include "extension.h"
 
 DM_MAP_OBJ tDynamicObj[] = {
 /* parentobj, nextobject, parameter */
 {"Device.DeviceInfo.", NULL, tIOPSYS_DeviceInfoParams},
-{"Device.WiFi.AccessPoint.{i}.", NULL, tIOPSYS_WiFiAccessPointParams},
 {0}
 };
