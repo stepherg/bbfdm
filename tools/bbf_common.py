@@ -339,6 +339,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
         proto = get_option_value(plugin, "proto")
         dm_files = get_option_value(plugin, "dm_files")
         extra_dependencies = get_option_value(plugin, "extra_dependencies", [])
+        repo_path = None
 
         if repo is None or proto is None or dm_files is None or not isinstance(dm_files, list):
             print("Necessary input missing")
@@ -362,6 +363,11 @@ def download_and_build_plugins(plugins, vendor_prefix):
         elif proto == "local":
             repo_path = repo
             print(f'    Processing {get_repo_version_info(repo, proto)}')
+            
+        if repo_path is None:
+            print("Repository path not defined!!!")
+            BBF_ERROR_CODE += 1
+            continue			
 
         LIST_FILES = []
         os.chdir(repo_path)

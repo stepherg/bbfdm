@@ -746,6 +746,8 @@ def convert_xml_to_json(file_path):
             proto = "usp"
         else:
             proto = "both"
+            
+        model = None
 
         for child in XML_ROOT:
             if child.tag == "dataType":
@@ -754,7 +756,7 @@ def convert_xml_to_json(file_path):
             if child.tag == "model":
                 model = child
 
-        if model.tag != "model":
+        if model is None or model.tag != "model":
             print("Wrong {} XML Data model format!".format(file_path))
             return
 
