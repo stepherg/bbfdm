@@ -98,6 +98,8 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | Device.DynamicDNS.                       | ddnsmngr       | https://dev.iopsys.eu/bbf/ddnsmngr.git       |
 | Device.Hosts.                            | hostmngr       | https://dev.iopsys.eu/iopsys/hostmngr.git    |
 | Device.Services.VoiceService.            | tr104          | https://dev.iopsys.eu/voice/tr104.git        |
+| Device.Firewall.                         | firewallmngr   | https://dev.iopsys.eu/network/firewallmngr   |
+| Device.NAT.                              | firewallmngr   | https://dev.iopsys.eu/network/firewallmngr   |
 | Device.NAT.PortTrigger.                  | port-trigger   | https://dev.iopsys.eu/network/port-trigger.git |
 | Device.DNS.                              | dnsmngr        | https://dev.iopsys.eu/network/dnsmngr.git    |
 | Device.DHCPv4.                           | dhcpmngr       | https://dev.iopsys.eu/network/dhcpmngr.git   |

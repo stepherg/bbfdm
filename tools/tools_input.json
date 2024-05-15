@@ -189,11 +189,14 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/network/port-trigger.git",
+      "repo": "https://dev.iopsys.eu/network/firewallmngr.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "bbf_plugin/nat_porttrigger.c"
+        "src/firewallmngr.c",
+        "src/firewall.c",
+        "src/nat.c",
+        "src/nat_porttrigger.c"
       ]
     },
     {
