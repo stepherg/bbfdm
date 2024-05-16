@@ -367,6 +367,10 @@ def download_and_build_plugins(plugins, vendor_prefix):
         elif proto == "local":
             repo_path = repo
             print(f'    Processing {get_repo_version_info(repo, proto)}')
+        else:
+            BBF_ERROR_CODE += 1
+            print(f"Unknown protocol: {proto}")
+            continue
 
         LIST_FILES = []
         os.chdir(repo_path)

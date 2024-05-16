@@ -803,6 +803,9 @@ def chech_obj_with_other_obj(obj, dmobject):
 
 
 def object_parse_childs(dmobject, level, generatelist, check_obj):
+    obj = None
+    exist = 0
+
     if generatelist == 0 and (dmobject.get('name')).count(".") == 2:
         generatelistfromfile(dmobject)
     if check_obj == 1 and ("tr-181" in sys.argv[1] or "tr-104" in sys.argv[1]):
