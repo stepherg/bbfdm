@@ -975,7 +975,7 @@ static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *da
 	}
 
 	snprintf(linker, sizeof(linker), "cpe-%s", id);
-	adm_entry_get_reference_param(ctx, "Device.DeviceInfo.FirmwareImage.*.Alias", linker, value);
+	_bbfdm_get_references(ctx, "Device.DeviceInfo.FirmwareImage.", "Alias", linker, value);
 	return 0;
 }
 
@@ -1000,7 +1000,7 @@ static int get_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 	}
 
 	snprintf(linker, sizeof(linker), "cpe-%s", id);
-	adm_entry_get_reference_param(ctx, "Device.DeviceInfo.FirmwareImage.*.Alias", linker, value);
+	_bbfdm_get_references(ctx, "Device.DeviceInfo.FirmwareImage.", "Alias", linker, value);
 	return 0;
 }
 
@@ -1009,7 +1009,7 @@ static int set_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 	char *allowed_objects[] = {"Device.DeviceInfo.FirmwareImage.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:

@@ -1235,6 +1235,8 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 	dmuci_get_value_by_section_string(dmmap_section, "LowerLayers", value);
 
 	if ((*value)[0] == '\0') {
+		char buf[256] = {0};
+
 		char *device = get_device(section_name((struct uci_section *)data));
 		if (DM_STRLEN(device) == 0) {
 			dmuci_get_value_by_section_string((struct uci_section *)data, "device", &device);
@@ -1242,30 +1244,32 @@ static int get_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 				return 0;
 		}
 
-		adm_entry_get_reference_param(ctx, "Device.PPP.Interface.*.Name", device, value);
-		if (DM_STRLEN(*value))
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.PPP.Interface.", "Name", device, buf, sizeof(buf));
+		if (DM_STRLEN(buf))
 			goto end;
 
-		adm_entry_get_reference_param(ctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN.*.Name", device, value);
-		if (DM_STRLEN(*value))
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN.", "Name", device, buf, sizeof(buf));
+		if (DM_STRLEN(buf))
 			goto end;
 
-		adm_entry_get_reference_param(ctx, "Device.Ethernet.VLANTermination.*.Name", device, value);
-		if (DM_STRLEN(*value))
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.Ethernet.VLANTermination.", "Name", device, buf, sizeof(buf));
+		if (DM_STRLEN(buf))
 			goto end;
 
-		adm_entry_get_reference_param(ctx, "Device.Ethernet.Link.*.Name", device, value);
-		if (DM_STRLEN(*value))
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.Ethernet.Link.", "Name", device, buf, sizeof(buf));
+		if (DM_STRLEN(buf))
 			goto end;
 
 		if ((DM_STRLEN(device) > 5) && DM_LSTRNCMP(device, "gre", 3) == 0) {
 			// gre device name is of the form gre4-<iface> or gre6-<iface>
-			adm_entry_get_reference_param(ctx, "Device.GRE.Tunnel.*.Interface.*.Name", device + 5, value);
+			bbfdm_get_references(ctx, MATCH_FIRST, "Device.GRE.Tunnel.*.Interface.", "Name", device + 5, buf, sizeof(buf));
 		}
 
 end:
 		// Store LowerLayers value
-		dmuci_set_value_by_section(dmmap_section, "LowerLayers", *value);
+		dmuci_set_value_by_section(dmmap_section, "LowerLayers", buf);
+
+		*value = dmstrdup(buf);
 	} else {
 		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
@@ -1288,7 +1292,7 @@ static int set_IPInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *
 	char *curr_device = NULL;
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
@@ -1370,7 +1374,7 @@ static int get_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data,
 		dmuci_get_value_by_section_string((struct uci_section *)data, "ip4table", &ip4table);
 
 		snprintf(linker, sizeof(linker), "route_table-%s", DM_STRLEN(ip4table) ? ip4table : "254");
-		adm_entry_get_reference_param(ctx, "Device.Routing.Router.*.Alias", linker, value);
+		_bbfdm_get_references(ctx, "Device.Routing.Router.", "Alias", linker, value);
 
 		// Store LowerLayers value
 		dmuci_set_value_by_section(dmmap_section, "Router", *value);
@@ -1386,7 +1390,7 @@ static int set_IPInterface_Router(char *refparam, struct dmctx *ctx, void *data,
 	struct uci_section *s = NULL;
 	char *device = NULL;
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:
@@ -2037,7 +2041,7 @@ static int get_IPInterfaceIPv6Prefix_ParentPrefix(char *refparam, struct dmctx *
 		char *linker = NULL;
 
 		dmuci_get_value_by_section_string(((struct intf_ip_args *)data)->dmmap_sec, "address", &linker);
-		adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.IPv6Prefix.*.ChildPrefixBits", linker, value);
+		_bbfdm_get_references(ctx, "Device.IP.Interface.*.IPv6Prefix.", "ChildPrefixBits", linker, value);
 	}
 	return 0;
 }

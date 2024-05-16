@@ -952,6 +952,7 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 
 	if ((*value)[0] == '\0') {
 		char *device = NULL;
+		char buf[256] = {0};
 
 		if (ppp->iface_s) {
 			device = get_device(section_name(ppp->iface_s));
@@ -964,19 +965,21 @@ static int get_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 		if (DM_STRLEN(device) == 0)
 			return 0;
 
-		adm_entry_get_reference_param(ctx, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN.*.Name", device, value);
-		if (DM_STRLEN(*value))
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.Ethernet."BBF_VENDOR_PREFIX"MACVLAN.", "Name", device, buf, sizeof(buf));
+		if (DM_STRLEN(buf))
 			goto end;
 
-		adm_entry_get_reference_param(ctx, "Device.Ethernet.VLANTermination.*.Name", device, value);
-		if (DM_STRLEN(*value))
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.Ethernet.VLANTermination.", "Name", device, buf, sizeof(buf));
+		if (DM_STRLEN(buf))
 			goto end;
 
-		adm_entry_get_reference_param(ctx, "Device.Ethernet.Link.*.Name", device, value);
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.Ethernet.Link.", "Name", device, buf, sizeof(buf));
 
 end:
 		// Store LowerLayers value
-		dmuci_set_value_by_section(ppp->dmmap_s, "LowerLayers", *value);
+		dmuci_set_value_by_section(ppp->dmmap_s, "LowerLayers", buf);
+
+		*value = dmstrdup(buf);
 	} else {
 		if (!adm_entry_object_exists(ctx, *value))
 			*value = "";
@@ -997,7 +1000,7 @@ static int set_ppp_lower_layer(char *refparam, struct dmctx *ctx, void *data, ch
 	struct dm_reference reference = {0};
 	char proto[8] = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:

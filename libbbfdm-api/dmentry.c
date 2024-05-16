@@ -257,6 +257,8 @@ void bbf_global_clean(DMOBJ *dm_entryobj)
 
 int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]) // To be removed later!!!!!!!!!!!!
 {
+	BBF_ERR("%s API will be removed later, don't use it!!!!!!", __func__);
+
 	if (!value || !objects)
 		return -1;
 
@@ -280,6 +282,8 @@ int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *obje
 
 int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[]) // To be removed later!!!!!!!!!!!!
 {
+	BBF_ERR("%s API will be removed later, don't use it!!!!!!", __func__);
+
 	if (!value || !objects)
 		return -1;
 
@@ -370,6 +374,8 @@ int adm_entry_get_reference_value(struct dmctx *ctx, char *param, char **value)
 
 int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value) // To be removed later!!!!!!!!!!!!
 {
+	BBF_ERR("%s API will be removed later, don't use it!!!!!!", __func__);
+
 	struct dmctx dmctx = {0};
 	*value = "";
 
@@ -390,6 +396,8 @@ int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, cha
 
 int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value) // To be removed later!!!!!!!!!!!!
 {
+	BBF_ERR("%s API will be removed later, don't use it!!!!!!", __func__);
+
 	struct dmctx dmctx = {0};
 	char linker[256] = {0};
 	*value = NULL;
@@ -410,7 +418,7 @@ int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value) // 
 	return 0;
 }
 
-bool adm_entry_object_exists(struct dmctx *ctx, char *param)
+bool adm_entry_object_exists(struct dmctx *ctx, char *param) // To be removed later!!!!!!!!!!!! (After moving all Objects outside bbfdm core)
 {
 	struct dmctx dmctx = {0};
 	char linker[256] = {0};

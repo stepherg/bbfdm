@@ -78,7 +78,7 @@ static int set_ip_ping_diagnostics_state(char *refparam, struct dmctx *ctx, void
 static int get_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = diagnostics_get_option("ipping", "interface");
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", linker, value);
 	return 0;
 }
 
@@ -87,7 +87,7 @@ static int set_ip_ping_interface(char *refparam, struct dmctx *ctx, void *data, 
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
@@ -332,7 +332,7 @@ static int set_IPDiagnosticsTraceRoute_DiagnosticsState(char *refparam, struct d
 static int get_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = diagnostics_get_option("traceroute", "interface");
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", linker, value);
 	return 0;
 }
 
@@ -341,7 +341,7 @@ static int set_IPDiagnosticsTraceRoute_Interface(char *refparam, struct dmctx *c
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
@@ -587,7 +587,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_DiagnosticsState(char *refparam,
 static int get_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = diagnostics_get_option("download", "interface");
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", linker, value);
 	return 0;
 }
 
@@ -596,7 +596,7 @@ static int set_IPDiagnosticsDownloadDiagnostics_Interface(char *refparam, struct
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
@@ -917,7 +917,7 @@ static int set_IPDiagnosticsUploadDiagnostics_DiagnosticsState(char *refparam, s
 static int get_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = diagnostics_get_option("upload", "interface");
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", linker, value);
 	return 0;
 }
 
@@ -926,7 +926,7 @@ static int set_IPDiagnosticsUploadDiagnostics_Interface(char *refparam, struct d
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
@@ -1273,7 +1273,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_DiagnosticsState(char *refparam, 
 static int get_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = diagnostics_get_option("udpechodiag", "interface");
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", linker, value);
 	return 0;
 }
 
@@ -1282,7 +1282,7 @@ static int set_IPDiagnosticsUDPEchoDiagnostics_Interface(char *refparam, struct 
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
@@ -1553,7 +1553,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_DiagnosticsState(char *re
 static int get_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = diagnostics_get_option("serverselection", "interface");
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", linker, value);
 	return 0;
 }
 
@@ -1562,7 +1562,7 @@ static int set_IPDiagnosticsServerSelectionDiagnostics_Interface(char *refparam,
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:

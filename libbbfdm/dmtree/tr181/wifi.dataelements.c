@@ -2797,7 +2797,7 @@ static int get_WiFiDataElementsNetworkDeviceMultiAPDevice_LastContactTime(char *
 static int get_WiFiDataElementsNetworkDeviceMultiAPDevice_AssocIEEE1905DeviceRef(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *device_id = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "ID");
-	adm_entry_get_reference_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.IEEE1905Id", device_id, value);
+	_bbfdm_get_references(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.", "IEEE1905Id", device_id, value);
 	return 0;
 }
 

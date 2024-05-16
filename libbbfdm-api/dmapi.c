@@ -222,8 +222,10 @@ int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 	return 0;
 }
 
-int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value)
+int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value) // To be removed later!!!!!!!!!!!!
 {
+	BBF_ERR("Use bbfdm_get_references API in place of %s API, this API will be removed later!!!", __func__);
+
 	if (DM_STRLEN(path) == 0 || DM_STRLEN(key_name) == 0 || DM_STRLEN(key_value) == 0 || !value)
 		return -1;
 
@@ -231,8 +233,10 @@ int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **
 	return 0;
 }
 
-int bbf_get_reference_args(char *value, struct dm_reference *reference_args)
+int bbf_get_reference_args(char *value, struct dm_reference *reference_args) // To be removed later!!!!!!!!!!!!
 {
+	BBF_ERR("Use bbfdm_get_reference_linker API in place of %s API, this API will be removed later!!!", __func__);
+
 	if (DM_STRLEN(value) == 0)
 		return -1;
 
@@ -245,6 +249,95 @@ int bbf_get_reference_args(char *value, struct dm_reference *reference_args)
 	*seperator = 0;
 
 	reference_args->value = seperator + 2;
+
+	return 0;
+}
+
+int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, char *key_name, char *key_value, char *out, size_t out_len)
+{
+	char param_path[1024] = {0};
+	char *value = NULL;
+
+	if (DM_STRLEN(base_path) == 0) {
+		BBF_ERR("Reference base path should not be empty!!!");
+		return -1;
+	}
+
+	if (DM_STRLEN(key_name) == 0) {
+		BBF_ERR("Reference key name should not be empty!!!");
+		return -1;
+	}
+
+	if (DM_STRLEN(key_value) == 0) {
+		BBF_ERR("Reference key value should not be empty!!!");
+		return -1;
+	}
+
+	if (!out || !out_len) {
+		BBF_ERR("Output buffer is NULL or has zero length. A valid buffer with sufficient size is required");
+		return -1;
+	}
+
+	snprintf(param_path, sizeof(param_path), "%s*.%s", base_path, key_name);
+
+	adm_entry_get_reference_param(ctx, param_path, key_value, &value);
+
+	size_t len = strlen(out);
+
+	if (DM_STRLEN(value) != 0) {
+
+		if (out_len - len < strlen(value)) {
+			BBF_ERR("Buffer overflow detected. The output buffer is not large enough to hold the additional data!!!");
+			return -1;
+		}
+
+		snprintf(&out[len], out_len - len, "%s%s", len ? (match_action == MATCH_FIRST ? "," : ";") : "", value);
+		goto end;
+	}
+
+	if (is_micro_service == true) { // It's a micro-service instance
+
+		if (out_len - len < strlen(base_path) + strlen(key_name) + strlen(key_value) + 9) { // 9 = 'path[key_name==\"key_value\"].'
+			BBF_ERR("Buffer overflow detected. The output buffer is not large enough to hold the additional data!!!");
+			return -1;
+		}
+
+		snprintf(&out[len], out_len - len, "%s%s[%s==\"%s\"].", len ? (match_action == MATCH_FIRST ? "," : ";") : "", base_path, key_name, key_value);
+	}
+
+end:
+	return 0;
+}
+
+int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, char *key_name, char *key_value, char **value)
+{
+	char buf[1024] = {0};
+
+	int res = bbfdm_get_references(ctx, MATCH_FIRST, base_path, key_name, key_value, buf, sizeof(buf));
+
+	*value = (!res) ? dmstrdup(buf): "";
+
+	return 0;
+}
+
+int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct dm_reference *reference_args)
+{
+	if (DM_STRLEN(reference_path) == 0) {
+		bbfdm_set_fault_message(ctx, "%s: reference path should not be empty", __func__);
+		return -1;
+	}
+
+	reference_args->path = reference_path;
+
+	char *separator = strstr(reference_path, "=>");
+	if (!separator) {
+		bbfdm_set_fault_message(ctx, "%s: reference path must contain '=>' symbol to separate the path and value", __func__);
+		return -1;
+	}
+
+	*separator = 0;
+
+	reference_args->value = separator + 2;
 
 	return 0;
 }

@@ -194,7 +194,7 @@ static int set_PacketCapture_DiagnosticsState(char *refparam, struct dmctx *ctx,
 static int get_PacketCapture_Interface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = diagnostics_get_option("packetcapture", "Interface");
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", linker, value);
 	return 0;
 }
 
@@ -203,7 +203,7 @@ static int set_PacketCapture_Interface(char *refparam, struct dmctx *ctx, void *
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:

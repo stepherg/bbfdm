@@ -540,16 +540,18 @@ static int get_IEEE1905ALInterface_Status(char *refparam, struct dmctx *ctx, voi
 /*#Device.IEEE1905.AL.Interface.{i}.LowerLayers!UBUS:ieee1905/info//interface[@i-1].ifname*/
 static int get_IEEE1905ALInterface_LowerLayers(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
+	char buf[256] = {0};
 	char *linker = dmjson_get_value((json_object *)data, 1, "ifname");
 
-	adm_entry_get_reference_param(ctx, "Device.Ethernet.Interface.*.Name", linker, value);
+	bbfdm_get_references(ctx, MATCH_FIRST, "Device.Ethernet.Interface.", "Name", linker, buf, sizeof(buf));
 
-	if (!DM_STRLEN(*value)) {
+	if (!DM_STRLEN(buf)) {
 		struct uci_section *s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", linker);
 		dmuci_get_value_by_section_string(s, "device", &linker);
-		adm_entry_get_reference_param(ctx, "Device.WiFi.Radio.*.Name", linker, value);
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.WiFi.Radio.", "Name", linker, buf, sizeof(buf));
 	}
 
+	*value = dmstrdup(buf);
 	return 0;
 }
 
@@ -1509,7 +1511,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceInterface_FrequencyIndex2(
 /*#Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.{i}.NonIEEE1905Neighbor.{i}.LocalInterface!UBUS:ieee1905/info//topology.device[@i-1].non1905_neighbors[@i-1].interface_macaddress*/
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceNonIEEE1905Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_reference_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.Interface.*.InterfaceId", ((struct ieee1905_device_nonieee1905neighbor_args *)data)->mac_addr, value);
+	_bbfdm_get_references(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.Interface.", "InterfaceId", ((struct ieee1905_device_nonieee1905neighbor_args *)data)->mac_addr, value);
 	return 0;
 }
 
@@ -1544,7 +1546,7 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceL2Neighbor_BehindInterface
 static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceIEEE1905Neighbor_LocalInterface(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	char *linker = ((struct ieee1905_device_ieee1905neighbor_args *)data)->mac_addr;
-	adm_entry_get_reference_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.Interface.*.InterfaceId", linker, value);
+	_bbfdm_get_references(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.Interface.", "InterfaceId", linker, value);
 	return 0;
 }
 
@@ -1638,22 +1640,13 @@ static int get_IEEE1905ALNetworkTopologyIEEE1905DeviceBridgingTuple_InterfaceLis
 	json_object *json_obj = NULL;
 	char *mac_addr = NULL;
 	char buf[4096] = {0};
-	unsigned pos = 0;
 	int idx = 0;
 
-	buf[0] = 0;
 	dmjson_foreach_value_in_array((json_object *)data, json_obj, mac_addr, idx, 1, "tuple") {
-		char *linker = NULL;
-
-		adm_entry_get_reference_param(ctx, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.Interface.*.InterfaceId", mac_addr, &linker);
-		if (DM_STRLEN(linker) && (sizeof(buf) - pos) > 0)
-			pos += snprintf(&buf[pos], sizeof(buf) - pos, "%s,", linker);
+		bbfdm_get_references(ctx, MATCH_ALL, "Device.IEEE1905.AL.NetworkTopology.IEEE1905Device.*.Interface.", "InterfaceId", mac_addr, buf, sizeof(buf));
 	}
 
-	if (pos)
-		buf[pos - 1] = 0;
-
-	*value = (buf[0] != '\0') ? dmstrdup(buf) : "";
+	*value = dmstrdup(buf);
 	return 0;
 }
 

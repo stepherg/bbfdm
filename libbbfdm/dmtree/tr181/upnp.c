@@ -475,11 +475,14 @@ static int get_UPnPDiscoveryService_Location(char *refparam, struct dmctx *ctx, 
 
 static int get_UPnPDiscoveryService_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.Device.*.UUID", ((struct upnpdiscovery *)data)->uuid, value);
+	char buf[256] = {0};
 
-	if (!DM_STRLEN(*value))
-		adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.RootDevice.*.UUID", ((struct upnpdiscovery *)data)->uuid, value);
+	bbfdm_get_references(ctx, MATCH_FIRST, "Device.UPnP.Discovery.Device.", "UUID", ((struct upnpdiscovery *)data)->uuid, buf, sizeof(buf));
 
+	if (!DM_STRLEN(buf))
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.UPnP.Discovery.RootDevice.", "UUID", ((struct upnpdiscovery *)data)->uuid, buf, sizeof(buf));
+
+	*value = dmstrdup(buf);
 	return 0;
 }
 
@@ -520,7 +523,7 @@ static int get_UPnPDescriptionDeviceInstance_UDN(char *refparam, struct dmctx *c
 
 static int get_UPnPDescriptionDeviceInstance_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_reference_param(ctx, "Device.UPnP.Description.DeviceInstance.*.UDN", ((struct upnp_device_inst *)data)->parentudn, value);
+	_bbfdm_get_references(ctx, "Device.UPnP.Description.DeviceInstance.", "UDN", ((struct upnp_device_inst *)data)->parentudn, value);
 	return 0;
 }
 
@@ -529,6 +532,7 @@ static int get_UPnPDescriptionDeviceInstance_DiscoveryDevice(char *refparam, str
 	struct upnp_device_inst *upnpdevinst = (struct upnp_device_inst *)data;
 
 	if (upnpdevinst->udn && upnpdevinst->udn[0]) {
+		char buf[256] = {0};
 		size_t length = 0;
 
 		char **udnarray = strsplit(upnpdevinst->udn, ":", &length);
@@ -536,10 +540,12 @@ static int get_UPnPDescriptionDeviceInstance_DiscoveryDevice(char *refparam, str
 		if (length != 2)
 			return 0;
 
-		adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.Device.*.UUID", udnarray[1], value);
+		bbfdm_get_references(ctx, MATCH_FIRST, "Device.UPnP.Discovery.Device.", "UUID", udnarray[1], buf, sizeof(buf));
 
 		if (!DM_STRLEN(*value))
-			adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.RootDevice.*.UUID", udnarray[1], value);
+			bbfdm_get_references(ctx, MATCH_FIRST, "Device.UPnP.Discovery.RootDevice.", "UUID", udnarray[1], buf, sizeof(buf));
+
+		*value = dmstrdup(buf);
 	}
 
 	return 0;
@@ -624,7 +630,7 @@ static int get_UPnPDescriptionDeviceInstance_PresentationURL(char *refparam, str
 
 static int get_UPnPDescriptionServiceInstance_ParentDevice(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	adm_entry_get_reference_param(ctx, "Device.UPnP.Description.DeviceInstance.*.UDN", ((struct upnp_service_inst *)data)->parentudn, value);
+	_bbfdm_get_references(ctx, "Device.UPnP.Description.DeviceInstance.", "UDN", ((struct upnp_service_inst *)data)->parentudn, value);
 	return 0;
 }
 
@@ -641,7 +647,7 @@ static int get_UPnPDescriptionServiceInstance_ServiceDiscovery(char *refparam, s
 
 	snprintf(usn, sizeof(usn), "%s::%s", ((struct upnp_service_inst *)data)->parentudn, ((struct upnp_service_inst *)data)->servicetype);
 
-	adm_entry_get_reference_param(ctx, "Device.UPnP.Discovery.Service.*.USN", usn, value);
+	_bbfdm_get_references(ctx, "Device.UPnP.Discovery.Service.", "USN", usn, value);
 	return 0;
 }
 

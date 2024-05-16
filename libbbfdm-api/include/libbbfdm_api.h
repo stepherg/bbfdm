@@ -598,7 +598,7 @@ int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 ** \return  0 if operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value);
+int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value); // To be removed later!!!!!!!!!!!!
 
 /*********************************************************************//**
 **
@@ -612,7 +612,58 @@ int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **
 ** \return  0 if operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_get_reference_args(char *value, struct dm_reference *reference_args);
+int bbf_get_reference_args(char *value, struct dm_reference *reference_args); // To be removed later!!!!!!!!!!!!
+
+/*********************************************************************//**
+**
+** bbfdm_get_references
+**
+** This API is used to get the reference parameter value
+**
+** \param   ctx - bbf context
+** \param   match_action - match all or first reference resolved based on MATCH_FIRST(,), MATCH_ALL(;)
+** \param   base_path - parent path object
+** \param   key_name - parameter name used to identify the object
+** \param   key_value - value of parameter name used to identify the object
+** \param   out - buffer where the value will be stored
+** \param   out - buffer size where the value will be stored
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, char *key_name, char *key_value, char *out, size_t out_len);
+
+/*********************************************************************//**
+**
+** _bbfdm_get_references
+**
+** This API is similar to bbfdm_get_references but it is used to get only one reference
+**
+** \param   ctx - bbf context
+** \param   base_path - parent path object
+** \param   key_name - parameter name used to identify the object
+** \param   key_value - value of parameter name used to identify the object
+** \param   value - pointer to where the value will be stored
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+**************************************************************************/
+int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, char *key_name, char *key_value, char **value);
+
+/*********************************************************************//**
+**
+** bbf_get_linker_from_reference
+**
+** This API is used to get the reference arguments in order to set external linker
+**
+** \param   ctx - bbf context
+** \param   reference_path - reference path
+** \param   reference - linker of the given reference path
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+**************************************************************************/
+int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct dm_reference *reference_args);
 
 /*********************************************************************//**
 **
@@ -855,7 +906,10 @@ int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, 
 **************************************************************************/
 void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...);
 
+int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value);
+int bbf_get_reference_args(char *value, struct dm_reference *reference_args);
 
+//TODO
 /**********************
  *
  * BBF DEPRECATED APIs

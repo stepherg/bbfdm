@@ -271,6 +271,11 @@ enum {
 	BBF_EVENT,
 };
 
+enum {
+	MATCH_FIRST,
+	MATCH_ALL
+};
+
 enum usp_fault_code_enum {
 	USP_FAULT_GENERAL_FAILURE = 7000, // general failure
 	USP_FAULT_MESSAGE_NOT_UNDERSTOOD = 7001, // message was not understood

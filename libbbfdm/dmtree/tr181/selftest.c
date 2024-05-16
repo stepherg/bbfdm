@@ -28,10 +28,10 @@ static char *get_selftest_log_instance(struct dmctx *ctx)
 	if (DM_STRLEN(file_name) == 0)
 		goto err;
 
-	adm_entry_get_reference_param(ctx, "Device.DeviceInfo.VendorLogFile.*.Name", file_name, &path);
+	_bbfdm_get_references(ctx, "Device.DeviceInfo.VendorLogFile.", "Name", file_name, &path);
 
 err:
-	return dmstrdup(path ? path : "");
+	return path ? path : dmstrdup("");
 }
 
 /*************************************************************

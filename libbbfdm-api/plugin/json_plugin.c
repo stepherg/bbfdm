@@ -1656,7 +1656,7 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 		}
 	}
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:

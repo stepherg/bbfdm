@@ -2428,7 +2428,7 @@ static int get_WiFiEndPoint_SSIDReference(char *refparam, struct dmctx *ctx, voi
 {
 	struct uci_section *iface_s = get_dup_section_in_config_opt("wireless", "wifi-iface", "ifname", (char *)((struct dm_data *)data)->additional_data);
 
-	adm_entry_get_reference_param(ctx, "Device.WiFi.SSID.*.Name", section_name(iface_s), value);
+	_bbfdm_get_references(ctx, "Device.WiFi.SSID.", "Name", section_name(iface_s), value);
 	return 0;
 }
 
@@ -2879,7 +2879,8 @@ static int get_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 		char *device = NULL;
 
 		dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "device", &device);
-		adm_entry_get_reference_param(ctx, "Device.WiFi.Radio.*.Name", device, value);
+
+		_bbfdm_get_references(ctx, "Device.WiFi.Radio.", "Name", device, value);
 
 		// Store LowerLayers value
 		dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "LowerLayers", *value);
@@ -2896,7 +2897,7 @@ static int set_ssid_lower_layer(char *refparam, struct dmctx *ctx, void *data, c
 	char *allowed_objects[] = {"Device.WiFi.Radio.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
@@ -2926,7 +2927,7 @@ static int get_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "LowerLayers", value);
 
 	if ((*value)[0] == '\0') {
-		adm_entry_get_reference_param(ctx, "Device.WiFi.SSID.*.Name", section_name(((struct dm_data *)data)->config_section), value);
+		_bbfdm_get_references(ctx, "Device.WiFi.SSID.", "Name", section_name(((struct dm_data *)data)->config_section), value);
 
 		// Store LowerLayers value
 		dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "LowerLayers", *value);
@@ -2944,7 +2945,7 @@ static int set_ap_ssid_ref(char *refparam, struct dmctx *ctx, void *data, char *
 	struct uci_section *ss = NULL;
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:

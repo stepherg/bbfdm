@@ -212,7 +212,7 @@ static int get_MQTTBroker_Interface(char *refparam, struct dmctx *ctx, void *dat
 	char *intf = NULL;
 
 	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "interface", &intf);
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", intf, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", intf, value);
 	return 0;
 }
 
@@ -221,7 +221,7 @@ static int set_MQTTBroker_Interface(char *refparam, struct dmctx *ctx, void *dat
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action)	{
 		case VALUECHECK:

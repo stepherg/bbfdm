@@ -627,7 +627,7 @@ static int get_GRETunnelInterface_LowerLayers(char *refparam, struct dmctx *ctx,
 
 		dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "tunlink", &tunlink);
 
-		adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", tunlink, value);
+		_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", tunlink, value);
 
 		// Store LowerLayers value
 		dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "LowerLayers", *value);
@@ -644,7 +644,7 @@ static int set_GRETunnelInterface_LowerLayers(char *refparam, struct dmctx *ctx,
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:

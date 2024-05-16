@@ -239,10 +239,10 @@ void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section
 void get_config_section_of_dmmap_section(char* package, char* section_type, char *section_name, struct uci_section **config_section);
 int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, char **value);
 int adm_entry_get_reference_value(struct dmctx *ctx, char *param, char **value);
-int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value);
-int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value);
-int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
-int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[]);
+int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value); // To be removed later!!!!!!!!!!!!
+int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value); // To be removed later!!!!!!!!!!!!
+int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]); // To be removed later!!!!!!!!!!!!
+int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[]); // To be removed later!!!!!!!!!!!!
 int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *reference, char *objects[]);
 char *check_create_dmmap_package(const char *dmmap_package);
 unsigned int count_occurrences(const char *str, char c);
@@ -301,8 +301,11 @@ int bbfdm_validate_string_list(struct dmctx *ctx, char *value, int min_item, int
 int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char **value);
 int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value);
-int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value);
-int bbf_get_reference_args(char *value, struct dm_reference *reference_args);
+int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value); // To be removed later!!!!!!!!!!!!
+int bbf_get_reference_args(char *value, struct dm_reference *reference_args); // To be removed later!!!!!!!!!!!!
+int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, char *key_name, char *key_value, char *out, size_t out_len);
+int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, char *key_name, char *key_value, char **value);
+int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct dm_reference *reference_args);
 char *base64_decode(const char *src);
 void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len);
 bool folder_exists(const char *path);

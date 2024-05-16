@@ -736,7 +736,7 @@ static int get_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *c
 	char *linker = NULL;
 
 	dmuci_get_value_by_section_string(((struct routingfwdargs *)data)->routefwdsection, "interface", &linker);
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", linker, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", linker, value);
 	return 0;
 }
 
@@ -745,7 +745,7 @@ static int set_RoutingRouterForwarding_Interface(char *refparam, struct dmctx *c
 	char *allowed_objects[] = {"Device.IP.Interface.", NULL};
 	struct dm_reference reference = {0};
 
-	bbf_get_reference_args(value, &reference);
+	bbfdm_get_reference_linker(ctx, value, &reference);
 
 	switch (action) {
 		case VALUECHECK:
@@ -1054,7 +1054,7 @@ static int get_RoutingRouteInformationInterfaceSetting_Interface(char *refparam,
 		}
 	}
 
-	adm_entry_get_reference_param(ctx, "Device.IP.Interface.*.Name", iface, value);
+	_bbfdm_get_references(ctx, "Device.IP.Interface.", "Name", iface, value);
 	return 0;
 }
 

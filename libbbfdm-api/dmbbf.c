@@ -873,51 +873,59 @@ static int is64digit(char c)
 
 char *get_value_by_reference(struct dmctx *ctx, char *value)
 {
-	char *pch = NULL, *spch = NULL, *val = NULL;
+	if (is_micro_service == true) // It's a micro-service instance
+		return value;
+
+	char *pch = NULL, *spch = NULL;
 	char buf[MAX_DM_PATH * 4] = {0};
 	char buf_val[MAX_DM_PATH * 4] = {0};
 	bool is_list = false;
 	int pos = 0;
 
-	if (DM_STRLEN(value) == 0 || !DM_LSTRSTR(value, "=="))
+	if (DM_STRLEN(value) == 0)
 		return value;
 
 	DM_STRNCPY(buf, value, sizeof(buf));
 
-	if (DM_STRCHR(buf, '&'))
+	if (DM_STRCHR(buf, ';'))
 		is_list = true;
 
 	buf_val[0] = 0;
 
-	for (pch = strtok_r(buf, is_list ? "&" : ",", &spch); pch; pch = strtok_r(NULL, is_list ? "&" : ",", &spch)) {
-		char path[MAX_DM_PATH] = {0};
-		char key_name[256], key_value[256];
-		regmatch_t pmatch[2];
+	for (pch = strtok_r(buf, is_list ? ";" : ",", &spch); pch; pch = strtok_r(NULL, is_list ? ";" : ",", &spch)) {
+		char *val = NULL;
 
-		bool res = match(pch, "\\[(.*?)\\]", 2, pmatch);
-		if (!res)
-			goto end;
+		if (DM_LSTRSTR(pch, "==")) {
+			char path[MAX_DM_PATH] = {0};
+			char key_name[256], key_value[256];
+			regmatch_t pmatch[2];
 
-		snprintf(path, pmatch[0].rm_so + 1, "%s", pch);
-		int len = DM_STRLEN(path);
-		if (!len)
-			goto end;
+			bool res = match(pch, "\\[(.*?)\\]", 2, pmatch);
+			if (!res)
+				continue;
 
-		char *match_str = pch + pmatch[1].rm_so;
-		if (DM_STRLEN(match_str) == 0)
-			goto end;
+			snprintf(path, pmatch[0].rm_so + 1, "%s", pch);
+			int len = DM_STRLEN(path);
+			if (!len)
+				continue;
 
-		int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
-		if (n != 2) {
-			n = sscanf(match_str, "%255[^=]==%255[^]]", key_name, key_value);
+			char *match_str = pch + pmatch[1].rm_so;
+			if (DM_STRLEN(match_str) == 0)
+				continue;
+
+			int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
 			if (n != 2) {
-				goto end;
+				n = sscanf(match_str, "%255[^=]==%255[^]]", key_name, key_value);
+				if (n != 2)
+					continue;
 			}
+
+			snprintf(path + len, sizeof(path) - len, "*.%s", key_name);
+
+			adm_entry_get_reference_param(ctx, path, key_value, &val);
+		} else {
+			val = pch;
 		}
-
-		snprintf(path + len, sizeof(path) - len, "*.%s", key_name);
-
-		adm_entry_get_reference_param(ctx, path, key_value, &val);
 
 		if (DM_STRLEN(val)) {
 			pos += snprintf(&buf_val[pos], sizeof(buf_val) - pos, "%s,", val);
@@ -932,11 +940,10 @@ char *get_value_by_reference(struct dmctx *ctx, char *value)
 		return dmstrdup(buf_val);
 	}
 
-end:
-	return is_micro_service ? value : "";
+	return "";
 }
 
-static bool has_same_reference(char *curr_value, char *new_value)
+static bool has_same_reference(struct dmctx *ctx, char *curr_value, char *new_value)
 {
 	struct dm_reference reference = {0};
 	char buf[MAX_DM_PATH * 4] = {0};
@@ -944,7 +951,7 @@ static bool has_same_reference(char *curr_value, char *new_value)
 	char *pch = NULL, *spch = NULL;
 
 	snprintf(param_value, sizeof(param_value), "%s", new_value);
-	bbf_get_reference_args(param_value, &reference);
+	bbfdm_get_reference_linker(ctx, param_value, &reference);
 
 	DM_STRNCPY(buf, curr_value, sizeof(buf));
 
@@ -2366,7 +2373,7 @@ static int mparam_set_value(DMPARAM_ARGS)
 			if (DM_LSTRSTR(dmctx->in_value, "=>") == NULL)
 				get_reference_paramater_value(dmctx, dmctx->in_value, param_value, sizeof(param_value));
 
-			if (has_same_reference(value, param_value)) {
+			if (has_same_reference(dmctx, value, param_value)) {
 				BBF_DEBUG("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
 				return 0;
 			}
