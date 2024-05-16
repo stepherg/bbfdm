@@ -342,6 +342,97 @@ int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct d
 	return 0;
 }
 
+static char *bbfdm_get_reference_value(char *reference_path)
+{
+	unsigned int reference_path_dot_num = count_occurrences(reference_path, '.');
+	json_object *res = NULL;
+
+	json_object *in_args = json_object_new_object();
+	json_object_object_add(in_args, "proto", json_object_new_string("usp"));
+	json_object_object_add(in_args, "instance_mode", json_object_new_string("0"));
+	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+
+	dmubus_call("bbfdm", "get",
+			UBUS_ARGS{
+						{"path", reference_path, String},
+						{"optional", json_object_to_json_string(in_args), Table}
+			},
+			2, &res);
+
+	json_object_put(in_args);
+
+	if (!res)
+		return NULL;
+
+	json_object *res_array = dmjson_get_obj(res, 1, "results");
+	if (!res_array)
+		return NULL;
+
+	size_t nbre_obj = json_object_array_length(res_array);
+	if (nbre_obj == 0)
+		return NULL;
+
+	for (size_t i = 0; i < nbre_obj; i++) {
+		json_object *res_obj = json_object_array_get_idx(res_array, i);
+
+		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		if (DM_STRLEN(fault))
+			return NULL;
+
+		char *path = dmjson_get_value(res_obj, 1, "path");
+
+		unsigned int path_dot_num = count_occurrences(path, '.');
+		if (path_dot_num > reference_path_dot_num)
+			continue;
+
+		json_object *flags_array = dmjson_get_obj(res_obj, 1, "flags");
+		if (flags_array) {
+			size_t nbre_falgs = json_object_array_length(flags_array);
+
+			for (size_t j = 0; j < nbre_falgs; j++) {
+				json_object *flag_obj = json_object_array_get_idx(flags_array, j);
+
+				const char *flag = json_object_get_string(flag_obj);
+
+				if (DM_LSTRCMP(flag, "Linker") == 0) {
+					char *data = dmjson_get_value(res_obj, 1, "data");
+					return data ? dmstrdup(data) : "";
+				}
+			}
+		}
+	}
+
+	return NULL;
+}
+
+int bbfdm_operate_reference_linker(struct dmctx *ctx, char *reference_path, char **reference_value)
+{
+	if (!ctx) {
+		BBF_ERR("%s: ctx should not be null", __func__);
+		return -1;
+	}
+
+	if (DM_STRLEN(reference_path) == 0) {
+		BBF_ERR("%s: reference path should not be empty", __func__);
+		return -1;
+	}
+
+	if (!reference_value) {
+		BBF_ERR("%s: reference_value should not be null", __func__);
+		return -1;
+	}
+
+	adm_entry_get_reference_value(ctx, reference_path, reference_value);
+
+	if (DM_STRLEN(*reference_value) != 0)
+		return 0;
+
+	if (is_micro_service == true) // It's a micro-service instance
+		*reference_value = bbfdm_get_reference_value(reference_path);
+
+	return 0;
+}
+
 __attribute__ ((deprecated)) int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[])
 {
 	struct dmctx ctx = {0};

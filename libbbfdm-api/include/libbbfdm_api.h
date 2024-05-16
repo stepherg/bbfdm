@@ -652,7 +652,7 @@ int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, char *key_na
 
 /*********************************************************************//**
 **
-** bbf_get_linker_from_reference
+** bbfdm_get_reference_linker
 **
 ** This API is used to get the reference arguments in order to set external linker
 **
@@ -664,6 +664,23 @@ int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, char *key_na
 **
 **************************************************************************/
 int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct dm_reference *reference_args);
+
+/*********************************************************************//**
+**
+** bbfdm_operate_reference_linker
+**
+** This API is used to retrieve the linker value associated with a given reference path
+** Note: This API is only allowed to be used during an operate command.
+**
+** \param   ctx - Pointer to bbf context structure
+** \param   reference_path - reference path
+** \param   reference_value - Pointer to a string where the linker value of the given reference path will be stored
+**
+** \return  0 if operation is successful, -1 otherwise
+**
+** Note: This API is only allowed to be used during operate command
+**************************************************************************/
+int bbfdm_operate_reference_linker(struct dmctx *ctx, char *reference_path, char **reference_value);
 
 /*********************************************************************//**
 **

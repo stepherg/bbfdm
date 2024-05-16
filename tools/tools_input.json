@@ -229,6 +229,14 @@
       "dm_files": [
         "src/*.c"
       ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/tr471d.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/iplayercap.c"
+      ]
     }
   ],
   "output": {

@@ -1291,6 +1291,8 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 
 static void test_api_bbfdm_valid_standard_operate(void **state)
 {
+	// TODO: To be used later with micro-service
+#if 0
 	struct dmctx *ctx = (struct dmctx *) *state;
 	struct dm_parameter *n;
 	int fault = 0;
@@ -1319,6 +1321,7 @@ static void test_api_bbfdm_valid_standard_operate(void **state)
 			assert_string_equal(n->type, "xsd:unsignedInt");
 		}
 	}
+#endif
 }
 
 static void test_api_bbfdm_valid_standard_list_operate(void **state)

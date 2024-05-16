@@ -14,12 +14,8 @@
 
 #include "libbbfdm-api/dmcommon.h"
 
-#if defined(BBF_TR143) || defined(BBF_TR471)
 extern DMOBJ tIPDiagnosticsObj[];
 extern DMLEAF tIPDiagnosticsParams[];
-#endif
-
-#ifdef BBF_TR143
 extern DMLEAF tIPDiagnosticsIPPingParams[];
 extern DMOBJ tIPDiagnosticsTraceRouteObj[];
 extern DMLEAF tIPDiagnosticsTraceRouteParams[];
@@ -33,6 +29,5 @@ extern DMLEAF tIPDiagnosticsUploadDiagnosticsPerConnectionResultParams[];
 extern DMLEAF tIPDiagnosticsUDPEchoConfigParams[];
 extern DMLEAF tIPDiagnosticsUDPEchoDiagnosticsParams[];
 extern DMLEAF tIPDiagnosticsServerSelectionDiagnosticsParams[];
-#endif
 
-#endif
+#endif //__DIAGNOSTICS_H

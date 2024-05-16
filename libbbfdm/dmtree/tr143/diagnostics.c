@@ -10,15 +10,10 @@
  */
 
 #include "diagnostics.h"
-#ifdef BBF_TR471
-#include "iplayercap.h"
-#endif
 
-#ifdef BBF_TR143
 #define TRACEROUTE_DIAGNOSTIC_PATH BBFDM_SCRIPTS_PATH"/traceroute"
 #define DOWNLOAD_DIAGNOSTIC_PATH BBFDM_SCRIPTS_PATH"/download"
 #define UPLOAD_DIAGNOSTIC_PATH BBFDM_SCRIPTS_PATH"/upload"
-#endif
 
 /*************************************************************
 * COMMON FUNCTIONS
@@ -40,7 +35,6 @@ static void stop_traceroute_diagnostics(void)
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
-#ifdef BBF_TR143
 /*
  * *** Device.IP.Diagnostics.IPPing. ***
  */
@@ -2445,7 +2439,6 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 
 	return 0;
 }
-#endif
 
 /**********************************************************************************************************************************
 *                                            OBJ & LEAF DEFINITION
@@ -2453,23 +2446,17 @@ static int operate_IPDiagnostics_ServerSelectionDiagnostics(char *refparam, stru
 /* *** Device.IP.Diagnostics. *** */
 DMOBJ tIPDiagnosticsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-#ifdef BBF_TR143
 {"IPPing", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsIPPingParams, NULL, BBFDM_CWMP},
 {"TraceRoute", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsTraceRouteObj, tIPDiagnosticsTraceRouteParams, NULL, BBFDM_CWMP},
 {"DownloadDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsDownloadDiagnosticsObj, tIPDiagnosticsDownloadDiagnosticsParams, NULL, BBFDM_CWMP},
 {"UploadDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsUploadDiagnosticsObj, tIPDiagnosticsUploadDiagnosticsParams, NULL, BBFDM_CWMP},
 {"UDPEchoDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsUDPEchoDiagnosticsParams, NULL, BBFDM_CWMP},
 {"ServerSelectionDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsServerSelectionDiagnosticsParams, NULL, BBFDM_CWMP},
-#endif
-#ifdef BBF_TR471
-{"IPLayerCapacityMetrics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPLayerCapacityObj, tIPLayerCapacityParams, NULL, BBFDM_CWMP},
-#endif
 {0}
 };
 
 DMLEAF tIPDiagnosticsParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-#ifdef BBF_TR143
 {"IPv4PingSupported", &DMREAD, DMT_BOOL, get_diag_enable_true, NULL, BBFDM_BOTH},
 {"IPv6PingSupported", &DMREAD, DMT_BOOL, get_diag_enable_true, NULL, BBFDM_BOTH},
 {"IPv4TraceRouteSupported", &DMREAD, DMT_BOOL, get_diag_enable_true, NULL, BBFDM_BOTH},
@@ -2488,20 +2475,9 @@ DMLEAF tIPDiagnosticsParams[] = {
 {"UploadDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_UploadDiagnostics, operate_IPDiagnostics_UploadDiagnostics, BBFDM_USP},
 {"UDPEchoDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_UDPEchoDiagnostics, operate_IPDiagnostics_UDPEchoDiagnostics, BBFDM_USP},
 {"ServerSelectionDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_ServerSelectionDiagnostics, operate_IPDiagnostics_ServerSelectionDiagnostics, BBFDM_USP},
-#endif
-#ifdef BBF_TR471
-{"IPLayerCapacitySupported", &DMREAD, DMT_BOOL, get_diag_enable_true, NULL, BBFDM_BOTH},
-{"IPLayerMaxConnections", &DMREAD, DMT_UNINT, get_IPDiagnosticsIPLayerCapacity_MaxConnections, NULL, BBFDM_USP},
-{"IPLayerMaxIncrementalResult", &DMREAD, DMT_UNINT, get_IPDiagnosticsIPLayerCapacity_MaxIncrementalResult, NULL, BBFDM_USP},
-{"IPLayerCapSupportedSoftwareVersion", &DMREAD, DMT_STRING, get_IPDiagnosticsIPLayerCapacity_SoftwareVersion, NULL, BBFDM_USP},
-{"IPLayerCapSupportedControlProtocolVersion", &DMREAD, DMT_UNINT, get_IPDiagnosticsIPLayerCapacity_ControlProtocolVersion, NULL, BBFDM_USP},
-{"IPLayerCapSupportedMetrics", &DMREAD, DMT_STRING, get_IPDiagnosticsIPLayerCapacity_SupportedMetrics, NULL, BBFDM_USP},
-{"IPLayerCapacity()", &DMASYNC, DMT_COMMAND, get_operate_args_IPDiagnostics_IPLayerCapacity, operate_IPDiagnostics_IPLayerCapacity, BBFDM_USP},
-#endif
 {0}
 };
 
-#ifdef BBF_TR143
 /* *** Device.IP.Diagnostics.IPPing. *** */
 DMLEAF tIPDiagnosticsIPPingParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
@@ -2698,4 +2674,3 @@ DMLEAF tIPDiagnosticsServerSelectionDiagnosticsParams[] = {
 {"IPAddressUsed", &DMREAD, DMT_STRING, get_IPDiagnosticsServerSelectionDiagnostics_IPAddressUsed, NULL, BBFDM_CWMP},
 {0}
 };
-#endif

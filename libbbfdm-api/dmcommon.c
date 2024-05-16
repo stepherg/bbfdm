@@ -2480,7 +2480,7 @@ char *diagnostics_get_interface_name(struct dmctx *ctx, char *value)
 	if (strncmp(value, "Device.IP.Interface.", 20) != 0)
 		return "";
 
-	adm_entry_get_reference_value(ctx, value, &linker);
+	bbfdm_operate_reference_linker(ctx, value, &linker);
 	return linker ? linker : "";
 }
 
