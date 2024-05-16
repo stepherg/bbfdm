@@ -43,6 +43,15 @@ static struct event_map_list ev_map_list[] = {
 			{ "wfa-dataelements:DisassociationEvent.DisassocData.RetransCount", "RetransCount" },
 			{0}
 		}
+	},
+	{ "periodicstat.push", "Device.PeriodicStatistics.SampleSet.{i}.Push!",
+		.args = {
+			{ "reference", "Parameter.{i}.Reference" },
+			{ "values", "Parameter.{i}.Values" },
+			{ "samplesecs", "Paramter.{i}.SampleSeconds" },
+			{ "failures", "Parameter.{i}.Failures" },
+			{0}
+		}
 	}
 };
 
@@ -142,6 +151,32 @@ static void generate_blob_input(struct blob_buf *b, const char *type, struct lis
 	}
 }
 
+static void generate_periodic_stat_input(struct blob_buf *b, const char *type, json_object *report)
+{
+	json_object *data_arr = NULL, *data_obj = NULL;
+	int j = 0;
+
+	struct event_args_list *args = get_events_args(type);
+	if (args == NULL)
+		return;
+
+	dmjson_foreach_obj_in_array(report, data_arr, data_obj, j, 1, "push_items") {
+		char instance[MAX_DM_KEY_LEN] = {0};
+		snprintf(instance, sizeof(instance), "%d", j+1);
+
+		for (int i = 0; args[i].event_arg; i++) {
+			char *val = dmjson_get_value(data_obj, 1, args[i].event_arg);
+			char *path = replace_str(args[i].dm_arg, "{i}", instance);
+
+			if (path == NULL)
+				continue;
+
+			blobmsg_add_string(b, path, val ? val : "");
+			FREE(path);
+		}
+	}
+}
+
 static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_handler *ev,
 				const char *type, struct blob_attr *msg)
 {
@@ -161,10 +196,6 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	if (dm_path == NULL)
 		return;
 
-	LIST_HEAD(pv_list);
-
-	serialize_blob_msg(msg, "", &pv_list);
-
 	struct blob_buf b, bb;
 	char method_name[40] = {0};
 
@@ -173,15 +204,44 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 
 	blob_buf_init(&b, 0);
 	blob_buf_init(&bb, 0);
+	LIST_HEAD(pv_list);
 
 	snprintf(method_name, sizeof(method_name), "%s.%s", u->config.out_name, BBF_EVENT);
 
-	blobmsg_add_string(&b, "name", dm_path);
-	generate_blob_input(&bb, type, &pv_list);
+	if (strcmp(dm_path, "Device.PeriodicStatistics.SampleSet.{i}.Push!") == 0) {
+		const char *msg_str = blobmsg_format_json_indent(msg, true, -1);
+		if (msg_str == NULL)
+			goto out;
+
+		json_object *report = json_tokener_parse(msg_str);
+		free((char *)msg_str);
+
+		if (report == NULL)
+			goto out;
+
+		char *instance = dmjson_get_value(report, 1, "sampleset_instance");
+		if (instance == NULL) {
+			json_object_put(report);
+			goto out;
+		}
+
+		dm_path = replace_str(dm_path, "{i}", instance);
+		generate_periodic_stat_input(&bb, type, report);
+		json_object_put(report);
+
+		blobmsg_add_string(&b, "name", dm_path);
+		FREE(dm_path);
+	} else {
+		serialize_blob_msg(msg, "", &pv_list);
+		generate_blob_input(&bb, type, &pv_list);
+
+		blobmsg_add_string(&b, "name", dm_path);
+	}
+
 	blobmsg_add_field(&b, BLOBMSG_TYPE_TABLE, "input", blob_data(bb.head), blob_len(bb.head));
 	ubus_send_event(ctx, method_name, b.head);
 	DEBUG("Event[%s], for [%s] sent", method_name, dm_path);
-
+out:
 	blob_buf_free(&bb);
 	blob_buf_free(&b);
 	free_pv_list(&pv_list);
