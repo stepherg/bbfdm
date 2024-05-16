@@ -113,6 +113,7 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | Device.SSH.                              | sshmngr        | https://dev.iopsys.eu/network/sshmngr.git    |
 | Device.USB.                              | usbmngr        | https://dev.iopsys.eu/system/usbmngr.git     |
 | Device.Bridging.                         | bridgemngr     | https://dev.iopsys.eu/network/bridgemngr.git |
+| Device.IP.Diagnostics.                   | tr143          | https://dev.iopsys.eu/bbf/tr143d.git         |
 | Device.IP.Diagnostics.IPLayerCapacityMetrics. | tr471     | https://dev.iopsys.eu/bbf/tr471d.git         |
 | Device.X_IOPSYS_EU_IGMP.                 | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |
 | Device.X_IOPSYS_EU_MLD.                  | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |

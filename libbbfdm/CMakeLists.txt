@@ -8,7 +8,6 @@ ADD_DEFINITIONS(-DBBF_VENDOR_PREFIX="${BBF_VENDOR_PREFIX}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${CMAKE_SOURCE_DIR} -I${CMAKE_CURRENT_SOURCE_DIR} -I${CMAKE_CURRENT_SOURCE_DIR}/dmtree")
 
 OPTION(BBF_TR181 "build with tr181 datamodel" ON)
-OPTION(BBF_TR143 "build with tr143 datamodel" ON)
 OPTION(BBF_WIFI_DATAELEMENTS "build with wifi dataelements datamodel" ON)
 
 SET(BBF_DM_SOURCES dmlayer.c)
@@ -22,13 +21,7 @@ IF(BBF_TR181)
 	ENDIF(BBF_WIFI_DATAELEMENTS)
 ENDIF(BBF_TR181)
 
-IF(BBF_TR143)
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}/dmtree/tr143")
-	FILE(GLOB BBF_TR143_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dmtree/tr143/*.c)
-	add_compile_definitions(BBF_TR143)
-ENDIF(BBF_TR143)
-
-ADD_LIBRARY(bbfdm SHARED ${BBF_DM_SOURCES} ${BBF_TR181_SOURCES} ${BBF_TR143_SOURCES})
+ADD_LIBRARY(bbfdm SHARED ${BBF_DM_SOURCES} ${BBF_TR181_SOURCES})
 
 TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json m bbfdm-api ssl crypto)
 
@@ -42,29 +35,27 @@ INSTALL(DIRECTORY DESTINATION etc/bbfdm)
 INSTALL(DIRECTORY DESTINATION etc/bbfdm/dmmap)
 INSTALL(DIRECTORY DESTINATION usr/share/bbfdm/plugins)
 
-IF(BBF_TR143)
-	INSTALL(DIRECTORY DESTINATION usr/share/bbfdm)
-	INSTALL(DIRECTORY DESTINATION usr/libexec/rpcd)
-	FILE(GLOB scripts scripts/*)
+INSTALL(DIRECTORY DESTINATION usr/share/bbfdm)
+INSTALL(DIRECTORY DESTINATION usr/libexec/rpcd)
+FILE(GLOB scripts scripts/*)
 
-	FOREACH(script ${scripts})
-		IF(IS_DIRECTORY ${script})
-			INSTALL(DIRECTORY ${script}
-				DESTINATION usr/share/bbfdm/scripts
-			)
-		ELSE()
-			INSTALL(FILES ${script}
-				PERMISSIONS OWNER_EXECUTE
-				DESTINATION usr/share/bbfdm/scripts
-			)
-		ENDIF()
-	ENDFOREACH()
+FOREACH(script ${scripts})
+	IF(IS_DIRECTORY ${script})
+		INSTALL(DIRECTORY ${script}
+			DESTINATION usr/share/bbfdm/scripts
+		)
+	ELSE()
+		INSTALL(FILES ${script}
+			PERMISSIONS OWNER_EXECUTE
+			DESTINATION usr/share/bbfdm/scripts
+		)
+	ENDIF()
+ENDFOREACH()
 
-	INSTALL(FILES scripts/bbf.diag
-		PERMISSIONS OWNER_EXECUTE
-		DESTINATION usr/libexec/rpcd
-	)
-ENDIF(BBF_TR143)
+INSTALL(FILES scripts/bbf.diag
+	PERMISSIONS OWNER_EXECUTE
+	DESTINATION usr/libexec/rpcd
+)
 
 string(REPLACE "," ";" VENDOR_LIST ${BBF_VENDOR_LIST})
 

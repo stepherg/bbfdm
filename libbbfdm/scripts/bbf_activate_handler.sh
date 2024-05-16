@@ -3,7 +3,7 @@
 # Script to activate image in specified time.
 #
 # Copyright © 2022 IOPSYS Software Solutions AB
-# Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+# Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
 #
 
 ROOT="$(dirname "${0}")"

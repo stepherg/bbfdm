@@ -231,6 +231,14 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/bbf/tr143d.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/diagnostics.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/bbf/tr471d.git",
       "proto": "git",
       "version": "devel",

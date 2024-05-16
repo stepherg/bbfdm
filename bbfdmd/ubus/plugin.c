@@ -33,6 +33,8 @@ static uint8_t find_number_of_objects(DM_MAP_OBJ *dynamic_obj)
 
 static void fill_dotso_micro_service_out_args(bbfdm_config_t *config, DMOBJ *entryobj, char *parent_dm, int *idx)
 {
+	char ms_name[128] = {0};
+
 	if (!config || !entryobj || !parent_dm || !idx || *idx >= MAX_OBJS)
 		return;
 
@@ -45,13 +47,16 @@ static void fill_dotso_micro_service_out_args(bbfdm_config_t *config, DMOBJ *ent
 
 		strncpyt(config->out_objects[(*idx)++], entryobj->obj, sizeof(config->out_objects[0]));
 
-		int len = DM_STRLEN(config->out_name);
+		int len = DM_STRLEN(ms_name);
 		if (len == 0) {
-			snprintf(config->out_name, sizeof(config->out_name), "%s.%s", config->out_root_obj, entryobj->obj);
+			snprintf(ms_name, sizeof(ms_name), "%s.%s", config->out_root_obj, entryobj->obj);
 		} else {
-			snprintf(config->out_name + len, sizeof(config->out_name) - len, "_%s", entryobj->obj);
+			snprintf(ms_name + len, sizeof(ms_name) - len, "_%s", entryobj->obj);
 		}
 	}
+
+	if (DM_STRLEN(config->out_name) == 0)
+		strncpyt(config->out_name, ms_name, sizeof(config->out_name));
 }
 
 int load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
@@ -129,7 +134,7 @@ int free_dotso_plugin(void *lib_handle)
 	return 0;
 }
 
-static void fill_json_micro_service_out_args(bbfdm_config_t *config, char *parent_dm, char *obj, int idx)
+static void fill_json_micro_service_out_args(bbfdm_config_t *config, char *parent_dm, char *obj, int idx, char *ms_name, size_t ms_name_len)
 {
 	if (!config || !obj || idx >= MAX_OBJS)
 		return;
@@ -137,11 +142,11 @@ static void fill_json_micro_service_out_args(bbfdm_config_t *config, char *paren
 	strncpyt(config->out_parent_dm, parent_dm, sizeof(config->out_parent_dm));
 	strncpyt(config->out_objects[idx], obj, sizeof(config->out_objects[idx]));
 
-	int len = DM_STRLEN(config->out_name);
+	int len = DM_STRLEN(ms_name);
 	if (len == 0) {
-		snprintf(config->out_name, sizeof(config->out_name), "%s.%s", config->out_root_obj, obj);
+		snprintf(ms_name, ms_name_len, "%s.%s", config->out_root_obj, obj);
 	} else {
-		snprintf(config->out_name + len, sizeof(config->out_name) - len, "_%s", obj);
+		snprintf(ms_name + len, ms_name_len - len, "_%s", obj);
 	}
 }
 
@@ -150,6 +155,7 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 {
 	DMOBJ *dm_entryobj = NULL;
 	int json_plugin_version = JSON_VERSION_0;
+	char ms_name[128] = {0};
 	uint8_t idx = 0;
 
 	if (!file_path || !strlen(file_path) || !main_entry) {
@@ -202,7 +208,7 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 
 		// Fill out arguments if it is running as micro-service
 		if (is_micro_service == true)
-			fill_json_micro_service_out_args(config, obj_prefix, obj_name, idx);
+			fill_json_micro_service_out_args(config, obj_prefix, obj_name, idx, ms_name, sizeof(ms_name));
 
 		// Remove '.' from object prefix
 		if (obj_prefix[obj_prefix_len - 1] == '.')
@@ -226,6 +232,9 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 
 		idx++;
 	}
+
+	if (DM_STRLEN(config->out_name) == 0)
+		strncpyt(config->out_name, ms_name, sizeof(config->out_name));
 
 	*main_entry = dm_entryobj;
 	return 0;

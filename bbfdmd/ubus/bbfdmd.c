@@ -1528,14 +1528,14 @@ static int _parse_daemon_output_options(bbfdm_config_t *config, json_object *dae
 		strncpyt(config->out_root_obj, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_root_obj));
 	}
 
-	// for main process ubus object name
-	if (is_micro_service == false) {
-		opt_val = dmjson_get_value(daemon_obj, 2, "output", "name");
-		if (strlen(opt_val)) {
-			strncpyt(config->out_name, opt_val, sizeof(config->out_name));
-		} else {
-			strncpyt(config->out_name, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_name));
-		}
+	opt_val = dmjson_get_value(daemon_obj, 2, "output", "name");
+	if (strlen(opt_val)) {
+		snprintf(config->out_name, sizeof(config->out_name), "%s%s%s",
+					is_micro_service ? config->out_root_obj : opt_val,
+					is_micro_service ? "." : "",
+					is_micro_service ? opt_val : "");
+	} else {
+		snprintf(config->out_name, sizeof(config->out_name), "%s", is_micro_service ? "" : BBFDM_DEFAULT_UBUS_OBJ);
 	}
 
 	return 0;
@@ -1842,7 +1842,10 @@ int main(int argc, char **argv)
 		goto exit;
 	}
 
-	snprintf(log_level, sizeof(log_level), "bbfdm.%s", bbfdm_ctx.config.service_name);
+	snprintf(log_level, sizeof(log_level), "bbfdm%s%s",
+			is_micro_service ? "." : "",
+			is_micro_service ? bbfdm_ctx.config.service_name : "");
+
 	openlog(log_level, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
 	if (cli_argc) {

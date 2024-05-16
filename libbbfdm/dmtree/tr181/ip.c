@@ -12,9 +12,6 @@
 
 #include "dmlayer.h"
 #include "ip.h"
-#if defined(BBF_TR143)
-#include "diagnostics.h"
-#endif
 
 struct intf_ip_args
 {
@@ -2211,9 +2208,6 @@ static int operate_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *da
 DMOBJ tIPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, NULL, BBFDM_BOTH, NULL},
-#if defined(BBF_TR143)
-{"Diagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tIPDiagnosticsObj, tIPDiagnosticsParams, NULL, BBFDM_BOTH, NULL},
-#endif
 {0}
 };
 
