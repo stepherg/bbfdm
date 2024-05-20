@@ -1532,9 +1532,11 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	for (size_t i = 0; i < nbre_obj; i++) {
 		res_obj = json_object_array_get_idx(res_array, i);
 
-		dmctx->stop = 1;
-
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
+
+		if (DM_STRLEN(fault) == 0 || DM_STRTOUL(fault) != FAULT_9005)
+			dmctx->stop = 1;
+
 		if (DM_STRLEN(fault)) {
 			char *fault_msg = dmjson_get_value(res_obj, 1, "fault_msg");
 			bbfdm_set_fault_message(dmctx, "%s", fault_msg);
@@ -1621,7 +1623,7 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
-	dmubus_call(ubus_name, "operate",
+	dmubus_call_blocking(ubus_name, "operate",
 			UBUS_ARGS{
 						{"command", dmctx->in_param, String},
 						{"command_key", dmctx->linker, String},
@@ -1632,14 +1634,15 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object_put(in_args);
 
-	dmctx->stop = 1;
-
 	if (!res)
-		return FAULT_9005;
+		return USP_FAULT_INVALID_PATH;
 
 	json_object *res_array = dmjson_get_obj(res, 1, "results");
-	if (!res_array)
-		return FAULT_9005;
+	if (!res_array) {
+		if (res != NULL)
+			json_object_put(res);
+		return USP_FAULT_INVALID_PATH;
+	}
 
 	size_t nbre_obj = json_object_array_length(res_array);
 
@@ -1647,8 +1650,17 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 		res_obj = json_object_array_get_idx(res_array, i);
 
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
+
+		if (DM_STRLEN(fault) == 0 || DM_STRTOUL(fault) != USP_FAULT_INVALID_PATH)
+			dmctx->stop = 1;
+
+		if (DM_STRLEN(fault)) {
+			char *fault_msg = dmjson_get_value(res_obj, 1, "fault_msg");
+			bbfdm_set_fault_message(dmctx, "%s", fault_msg);
+			if (res != NULL)
+				json_object_put(res);
 			return DM_STRTOUL(fault);
+		}
 
 		json_object *output_array = dmjson_get_obj(res_obj, 1, "output");
 		if (output_array) {
@@ -1665,6 +1677,9 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 			}
 		}
 	}
+
+	if (res != NULL)
+		json_object_put(res);
 
 	return 0;
 }
