@@ -245,6 +245,14 @@
       "dm_files": [
         "src/iplayercap.c"
       ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/packet-capture-diagnostics.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/packetcapture.c"
+      ]
     }
   ],
   "output": {
