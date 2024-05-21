@@ -19,6 +19,7 @@
 
 #define MAX_DM_PATH (1024)
 #define DEFAULT_LOG_LEVEL (2)
+#define SEPARATOR_LIST_VALUES ";"
 
 unsigned char gLogLevel = DEFAULT_LOG_LEVEL;
 bool is_micro_service = false;
@@ -892,7 +893,7 @@ char *get_value_by_reference(struct dmctx *ctx, char *value)
 
 	buf_val[0] = 0;
 
-	for (pch = strtok_r(buf, is_list ? ";" : ",", &spch); pch; pch = strtok_r(NULL, is_list ? ";" : ",", &spch)) {
+	for (pch = strtok_r(buf, is_list ? SEPARATOR_LIST_VALUES : ",", &spch); pch; pch = strtok_r(NULL, is_list ? SEPARATOR_LIST_VALUES : ",", &spch)) {
 		char *val = NULL;
 
 		if (DM_LSTRSTR(pch, "==")) {
@@ -945,41 +946,79 @@ char *get_value_by_reference(struct dmctx *ctx, char *value)
 
 static bool has_same_reference(struct dmctx *ctx, char *curr_value, char *new_value)
 {
-	struct dm_reference reference = {0};
-	char buf[MAX_DM_PATH * 4] = {0};
-	char param_value[2048] = {0};
+	struct dm_reference reference[16] = {0};
+	char __curr_value[MAX_DM_PATH * 4] = {0};
+	char __new_value[MAX_DM_PATH * 4] = {0};
 	char *pch = NULL, *spch = NULL;
+	unsigned int i = 0, j = 0;
 
-	snprintf(param_value, sizeof(param_value), "%s", new_value);
-	bbfdm_get_reference_linker(ctx, param_value, &reference);
+	if (!ctx || !curr_value || !new_value)
+		return false;
 
-	DM_STRNCPY(buf, curr_value, sizeof(buf));
+	if (DM_STRLEN(curr_value) == 0 && DM_STRLEN(new_value) > 2) // current value is empty and set a new reference; 2('=>')
+		return false;
 
-	for (pch = strtok_r(buf, ",", &spch); pch; pch = strtok_r(NULL, ",", &spch)) {
+	if (DM_STRLEN(curr_value) > 0 && DM_STRLEN(new_value) == 2) // given value is empty and current value is not empty; 2('=>')
+		return false;
+
+	if (DM_STRLEN(curr_value) == 0 && DM_STRLEN(new_value) == 2) // both are empty
+		return true;
+
+	DM_STRNCPY(__new_value, new_value, sizeof(__new_value));
+
+	for (pch = strtok_r(__new_value, ",", &spch), i = 0; pch && i < 16; pch = strtok_r(NULL, ",", &spch), i++)
+		bbfdm_get_reference_linker(ctx, pch, &reference[i]);
+
+	DM_STRNCPY(__curr_value, curr_value, sizeof(__curr_value));
+
+	char *is_list = strchr(__curr_value, ';');
+
+	for (pch = strtok_r(__curr_value, is_list ? SEPARATOR_LIST_VALUES : ",", &spch), j = 0;
+		 pch != NULL;
+		 pch = strtok_r(NULL, is_list ? SEPARATOR_LIST_VALUES : ",", &spch), j++) {
+
 		char key_name[256] = {0}, key_value[256] = {0};
 		regmatch_t pmatch[2];
 
+		if (is_list && j > i)
+			return false;
+
 		bool res = match(pch, "\\[(.*?)\\]", 2, pmatch);
-		if (!res && DM_STRCMP(pch, reference.path) == 0)
-			return true;
+		if (!res) {
+			if (is_list) {
+				if (DM_STRCMP(pch, reference[j].path) == 0)
+					continue;
+				else
+					return false;
+			} else {
+				if (DM_STRCMP(pch, reference[0].path) == 0)
+					return true;
+			}
+		}
 
 		int len = pmatch[0].rm_so;
 		if (len <= 0)
-			continue;
+			return false;
 
 		char *match_str = pch + pmatch[1].rm_so;
 		if (DM_STRLEN(match_str) == 0)
-			continue;
+			return false;
 
 		int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
 		if (n != 2)
-			continue;
+			return false;
 
-		if (dm_strncmp_wildcard(pch, reference.path, len) == 0 && DM_STRCMP(key_value, reference.value) == 0)
-			return true;
+		if (is_list) {
+			if (dm_strncmp_wildcard(pch, reference[j].path, len) != 0 || DM_STRCMP(key_value, reference[j].value) != 0)
+				return false;
+		} else {
+			if (dm_strncmp_wildcard(pch, reference[0].path, len) == 0 && DM_STRCMP(key_value, reference[0].value) == 0)
+				return true;
+		}
+
 	}
 
-	return false;
+	return true;
 }
 
 static char *check_value_by_type(char *value, int type)
