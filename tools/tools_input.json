@@ -80,6 +80,14 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "self-diagnostics/src/selftest.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/lcm/swmodd.git",
       "proto": "git",
       "version": "devel",

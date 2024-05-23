@@ -25,7 +25,6 @@
 #include "routeradvertisement.h"
 #include "gatewayinfo.h"
 #include "mqtt.h"
-#include "selftest.h"
 
 /*************************************************************
 * GET & SET PARAM
@@ -88,7 +87,6 @@ DMOBJ tDeviceObj[] = {
 {"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH, NULL},
 {"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL},
 {"MQTT", &DMREAD, NULL, NULL, "file:/etc/config/mosquitto", NULL, NULL, NULL, tMQTTObj, tMQTTParams, NULL, BBFDM_BOTH, NULL},
-{"SelfTestDiagnostics", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tSelfTestParams, NULL, BBFDM_CWMP, NULL},
 {0}
 };
 
@@ -98,7 +96,6 @@ DMLEAF tDeviceParams[] = {
 {"RootDataModelVersion", &DMREAD, DMT_STRING, get_Device_RootDataModelVersion, NULL, BBFDM_BOTH},
 {"Reboot()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_Reboot, BBFDM_USP},
 {"FactoryReset()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_FactoryReset, BBFDM_USP},
-{"SelfTestDiagnostics()", &DMASYNC, DMT_COMMAND, get_operate_args_SelfTest, operate_Device_SelfTest, BBFDM_USP},
 //{"Boot!", &DMREAD, DMT_EVENT, NULL, NULL, BBFDM_USP},
 {0}
 };
