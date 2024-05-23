@@ -88,6 +88,14 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "ssdpd/src/datamodel.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/lcm/swmodd.git",
       "proto": "git",
       "version": "devel",
