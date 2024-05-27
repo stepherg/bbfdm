@@ -473,11 +473,15 @@ static void dm_browse_entry(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *ent
 	node.prev_data = data;
 	node.prev_instance = instance;
 
-	if (!bbfdatamodel_matches(dmctx->dm_type, entryobj->bbfdm_type))
+	if (!bbfdatamodel_matches(dmctx->dm_type, entryobj->bbfdm_type)) {
+		*err = FAULT_9005;
 		return;
+	}
 
-	if (entryobj->checkdep && (check_dependency(entryobj->checkdep) == false))
+	if (entryobj->checkdep && (check_dependency(entryobj->checkdep) == false)) {
+		*err = FAULT_9005;
 		return;
+	}
 
 	if (entryobj->browseinstobj && dmctx->isgetschema)
 		dmasprintf(&(node.current_object), "%s%s.{i}.", parent_obj, entryobj->obj);
@@ -1573,7 +1577,7 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
 
-		if (DM_STRLEN(fault) == 0 || DM_STRTOUL(fault) != FAULT_9005)
+		if (DM_STRLEN(fault) == 0 || (DM_STRTOUL(fault) != FAULT_9005 && DM_STRTOUL(fault) != USP_FAULT_INVALID_PATH))
 			dmctx->stop = 1;
 
 		if (DM_STRLEN(fault)) {
@@ -1690,7 +1694,7 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 
 		char *fault = dmjson_get_value(res_obj, 1, "fault");
 
-		if (DM_STRLEN(fault) == 0 || DM_STRTOUL(fault) != USP_FAULT_INVALID_PATH)
+		if (DM_STRLEN(fault) == 0 || (DM_STRTOUL(fault) != FAULT_9005 && DM_STRTOUL(fault) != USP_FAULT_INVALID_PATH))
 			dmctx->stop = 1;
 
 		if (DM_STRLEN(fault)) {
