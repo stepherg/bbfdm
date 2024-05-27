@@ -263,6 +263,14 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/multi-ap/ieee1905.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "tr181/datamodel.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/bbf/packet-capture-diagnostics.git",
       "proto": "git",
       "version": "devel",

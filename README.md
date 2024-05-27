@@ -118,5 +118,6 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | Device.X_IOPSYS_EU_IGMP.                 | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |
 | Device.X_IOPSYS_EU_MLD.                  | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |
 | Device.PacketCaptureDiagnostics.         | packet-capture-diagnostics | https://dev.iopsys.eu/bbf/packet-capture-diagnostics.git |
-| Device.SelfTestDiagnostics.              | self-diagnostics | https://dev.iopsys.eu/feed/iopsys.git |
-| Device.UPnP.                             | ssdpd | https://dev.iopsys.eu/feed/iopsys.git |
+| Device.SelfTestDiagnostics.              | self-diagnostics | https://dev.iopsys.eu/feed/iopsys.git      |
+| Device.UPnP.                             | ssdpd          | https://dev.iopsys.eu/feed/iopsys.git        |
+| Device.IEEE1905.                         | ieee1905       | https://dev.iopsys.eu/multi-ap/ieee1905.git  |
