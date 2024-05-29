@@ -238,12 +238,22 @@
         "src/datamodel.c"
       ]
     },
+   {
+      "repo": "https://dev.iopsys.eu/network/bridgemngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/common.c",
+        "src/bridging.c"
+      ]
+    },
     {
       "repo": "https://dev.iopsys.eu/network/bridgemngr.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "src/*.c"
+        "src/common.c",
+        "src/vendor.c"
       ]
     },
     {

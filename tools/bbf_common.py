@@ -307,8 +307,12 @@ def fill_list_supported_dm():
 
 
 def clone_git_repository(repo, version=None):
+    repo_path='.repo/'+os.path.basename(repo)
+    if os.path.exists(repo_path):
+        print(f'    {repo} already exists at {repo_path} !')
+        return True
     try:
-        cmd = ["git", "clone", repo, ".repo"]
+        cmd = ["git", "clone", repo, repo_path]
         if version is not None:
             cmd.extend(["-b", version])
         subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
@@ -349,10 +353,9 @@ def download_and_build_plugins(plugins, vendor_prefix):
         print(f' - Processing plugin: {plugin}')
 
         if proto == "git":
-            repo_path = ".repo/"
+            repo_path = ".repo/"+os.path.basename(repo)
             version = get_option_value(plugin, "version")
 
-            remove_folder(".repo")
 
             if not clone_git_repository(repo, version):
                 print(f"Failed to clone {repo}")
@@ -389,12 +392,11 @@ def download_and_build_plugins(plugins, vendor_prefix):
                     BBF_ERROR_CODE += 1
 
         if len(LIST_FILES) > 0:
-            generate_shared_library(f"/usr/share/bbfdm/plugins/lib{plugin_index}.so", LIST_FILES, vendor_prefix, extra_dependencies)
+            if not generate_shared_library(f"/usr/share/bbfdm/plugins/lib{plugin_index}.so", LIST_FILES, vendor_prefix, extra_dependencies):
+                BBF_ERROR_CODE += 1
 
         clear_list(LIST_FILES)
         cd_dir(CURRENT_PATH)
-
-        remove_folder(".repo")
 
     print('Generating plugins completed.')
 
@@ -413,6 +415,7 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
     build_and_install_bbfdm(vendor_prefix, vendor_list)
 
     # Download && Build Plugins Data Models
+    remove_folder(".repo")
     download_and_build_plugins(plugins, vendor_prefix)
 
     # Fill the list supported data model
