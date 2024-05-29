@@ -1036,11 +1036,11 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 
 		if (tb[BBF_SERVICE_OBJECTS]) {
 			struct blob_attr *objs = tb[BBF_SERVICE_OBJECTS];
-			struct blob_attr *obj = NULL;
+			struct blob_attr *attr_obj = NULL;
 			size_t rem;
 
-			blobmsg_for_each_attr(obj, objs, rem) {
-				char *srv_obj = blobmsg_get_string(obj);
+			blobmsg_for_each_attr(attr_obj, objs, rem) {
+				char *srv_obj = blobmsg_get_string(attr_obj);
 				res |= load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, srv_name, srv_parent_dm, srv_obj);
 			}
 		} else {
@@ -1393,20 +1393,6 @@ static bool register_service(struct ubus_context *ctx)
 	return true;
 }
 
-bool file_exists(const char *path)
-{
-	struct stat buffer;
-
-	return stat(path, &buffer) == 0;
-}
-
-bool dir_exists(const char *path)
-{
-	struct stat buffer;
-
-	return (stat(path, &buffer) == 0 && S_ISDIR(buffer.st_mode));
-}
-
 static int _parse_daemon_config_options(bbfdm_config_t *config, json_object *daemon_obj)
 {
 	char *opt_val = NULL;
@@ -1505,7 +1491,7 @@ static int _fill_daemon_input_option(bbfdm_config_t *config, char *sname)
 	strncpyt(config->in_name, opt_val, sizeof(config->in_name));
 
 	snprintf(opt_val, MAX_DM_PATH, "%s/%s", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, sname);
-	if (dir_exists(opt_val)) {
+	if (folder_exists(opt_val)) {
 		strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
 	}
 

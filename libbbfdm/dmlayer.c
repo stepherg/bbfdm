@@ -74,7 +74,7 @@ void gre___get_tunnel_system_name(struct uci_section *iface_section, char *devic
 {
 	char *proto = NULL;
 
-	if (!iface_section || !device_str_size || !device_str_size)
+	if (!iface_section || !device_str_size)
 		return;
 
 	dmuci_get_value_by_section_string(iface_section, "proto", &proto);
@@ -481,7 +481,7 @@ char *ethernet___get_ethernet_interface_name(char *device_name)
 
 			dmuci_get_value_by_section_string(dev_s, "type", &type);
 			if (DM_STRCMP(type, "8021ad") == 0) {
-				char *has_vid = DM_STRRCHR(dev_name, '.');
+				has_vid = DM_STRRCHR(dev_name, '.');
 				if (has_vid)
 					*has_vid = '\0';
 			}

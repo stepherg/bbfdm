@@ -1596,11 +1596,11 @@ static int set_value_from_mapping(json_object *param_obj, int json_version, char
 	if (!type_obj)
 		return -1;
 
-	char *type = json_object_get_string(type_obj);
-	if (!type)
+	char *dm_type = json_object_get_string(type_obj);
+	if (!dm_type)
 		return -1;
 
-	if (DM_LSTRCMP(type, "boolean") == 0) {
+	if (DM_LSTRCMP(dm_type, "boolean") == 0) {
 		value = dmuci_string_to_boolean(value) ? "1" : "0";
 	}
 

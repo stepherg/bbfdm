@@ -2126,15 +2126,15 @@ char *replace_str(const char *input_str, const char *old_substr, const char *new
 
 	size_t i = 0;
 	while (*input_str) {
-		char *match = strstr(input_str, old_substr);
-		if (match == input_str) {
+		char *tmp = strstr(input_str, old_substr);
+		if (tmp == input_str) {
 			// Replace old_substr with new_substr
 			strncpy(&result[i], new_substr, new_substr_len);
 			i += new_substr_len;
 			input_str += old_substr_len;
-		} else if (match) {
+		} else if (tmp) {
 			// Copy characters from input_str to result until the match
-			size_t len = match - input_str;
+			size_t len = tmp - input_str;
 			strncpy(&result[i], input_str, len);
 			i += len;
 			input_str += len;
@@ -2534,7 +2534,7 @@ long upload_file(const char *file_path, const char *url, const char *username, c
 		char dst_path[2046] = {0};
 		char buff[BUFSIZ] = {0};
 		FILE *sfp, *dfp;
-		int n, count=0;
+		size_t n;
 
 		sfp = fopen(file_path, "rb");
 		if (sfp == NULL) {
@@ -2550,7 +2550,6 @@ long upload_file(const char *file_path, const char *url, const char *username, c
 
 		while ((n = fread(buff, 1, BUFSIZ, sfp)) != 0) {
 			fwrite(buff, 1, n, dfp);
-			count+=n;
 		}
 
 		fclose(sfp);

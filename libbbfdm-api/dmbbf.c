@@ -1229,9 +1229,10 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 
 static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 {
-	json_object *res = NULL, *res_obj = NULL;
+	json_object *res = NULL, *res_obj = NULL, *tmp_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
 	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
+	char *tmp;
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
@@ -1288,10 +1289,10 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 				op->in = dmcalloc(in_nbre + 1, sizeof(char *));
 
 				for (j = 0; j < in_nbre; j++) {
-					json_object *res_obj = json_object_array_get_idx(input_array, j);
+					tmp_obj = json_object_array_get_idx(input_array, j);
 
-					char *in_path = dmjson_get_value(res_obj, 1, "path");
-					op->in[j] = dmstrdup(in_path);
+					tmp = dmjson_get_value(tmp_obj, 1, "path");
+					op->in[j] = dmstrdup(tmp);
 				}
 				op->in[j] = NULL;
 			}
@@ -1303,10 +1304,10 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 				op->out = dmcalloc(out_nbre + 1, sizeof(char *));
 
 				for (j = 0; j < out_nbre; j++) {
-					json_object *res_obj = json_object_array_get_idx(output_array, j);
+					tmp_obj = json_object_array_get_idx(output_array, j);
 
-					char *in_path = dmjson_get_value(res_obj, 1, "path");
-					op->out[j] = dmstrdup(in_path);
+					tmp = dmjson_get_value(tmp_obj, 1, "path");
+					op->out[j] = dmstrdup(tmp);
 				}
 				op->out[j] = NULL;
 			}
@@ -1324,10 +1325,10 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 				ev->param = dmcalloc(in_nbre + 1, sizeof(char *));
 
 				for (j = 0; j < in_nbre; j++) {
-					json_object *res_obj = json_object_array_get_idx(input_array, j);
+					tmp_obj = json_object_array_get_idx(input_array, j);
 
-					char *in_path = dmjson_get_value(res_obj, 1, "path");
-					ev->param[j] = dmstrdup(in_path);
+					tmp = dmjson_get_value(tmp_obj, 1, "path");
+					ev->param[j] = dmstrdup(tmp);
 				}
 				ev->param[j] = NULL;
 			}

@@ -345,7 +345,7 @@ void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 		return;
 
 	for (size_t i = 0; i < count; i++) {
-		struct pvNode *pv = &sortedPV[i];
+		pv = &sortedPV[i];
 		ptr = pv->param;
 		if (list_empty(&result_stack)) {
 			DEBUG("stack empty Processing (%s)", ptr);

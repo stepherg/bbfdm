@@ -103,7 +103,7 @@ static struct blob_attr *get_results_array(struct blob_attr *msg)
 	return tb[0];
 }
 
-static void __ubus_callback(struct ubus_request *req, int type __attribute__((unused)), struct blob_attr *msg)
+static void __ubus_callback(struct ubus_request *req, int msgtype __attribute__((unused)), struct blob_attr *msg)
 {
 	struct blob_attr *cur = NULL;
 	int rem = 0;

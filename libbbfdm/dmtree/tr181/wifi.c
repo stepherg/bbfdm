@@ -65,9 +65,9 @@ static inline int init_wifi_radio_power(struct dm_data *curr_data)
 		char *dbm = dmjson_get_value(power, 1, "dbm");
 		if (!dbm)
 			continue;
-		int power = (int)strtod(dbm, NULL);
+		int power_dbm = (int)strtod(dbm, NULL);
 		if (ind < MAX_POWER_INDEX) {
-			curr_radio_power->transmit_power[ind] = power;
+			curr_radio_power->transmit_power[ind] = power_dbm;
 			ind++;
 		}
 	}
