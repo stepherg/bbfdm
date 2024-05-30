@@ -62,7 +62,7 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 	void *handle = dlopen(plugin_path, RTLD_LAZY);
 #endif
 	if (!handle) {
-		BBF_DEBUG("Plugin failed [%s]\n", dlerror());
+		BBF_ERR("Plugin failed [%s]\n", dlerror());
 		return 0;
 	}
 
@@ -72,7 +72,7 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 	if (dynamic_obj == NULL) {
 		dlclose(handle);
-		BBF_DEBUG("Plugin %s missing init symbol ...", plugin_path);
+		BBF_ERR("Plugin %s missing init symbol ...", plugin_path);
 		return 0;
 	}
 

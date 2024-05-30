@@ -112,44 +112,44 @@ static void test_api_bbfdm_get_set_json_parameter(void **state)
 	int fault = 0;
 
 	// get value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.X_IOPSYS_EU_Radio.1.Noise";
+	ctx->in_param = "Device.X_IOPSYS_EU_WiFi.Radio.1.Noise";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.1.Noise", "-87", "xsd:int");
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_WiFi.Radio.1.Noise", "-87", "xsd:int");
 
 	// get value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.X_IOPSYS_EU_Radio.2.Noise";
+	ctx->in_param = "Device.X_IOPSYS_EU_WiFi.Radio.2.Noise";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.2.Noise", "-85", "xsd:int");
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_WiFi.Radio.2.Noise", "-85", "xsd:int");
 
 	// get value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.X_IOPSYS_EU_Radio.2.Band";
+	ctx->in_param = "Device.X_IOPSYS_EU_WiFi.Radio.2.Band";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.2.Band", "2.4GHz", "xsd:string");
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_WiFi.Radio.2.Band", "2.4GHz", "xsd:string");
 
 	// get value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.X_IOPSYS_EU_Radio.1.Stats.BytesSent";
+	ctx->in_param = "Device.X_IOPSYS_EU_WiFi.Radio.1.Stats.BytesSent";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.1.Stats.BytesSent", "14418177", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_WiFi.Radio.1.Stats.BytesSent", "14418177", "xsd:unsignedInt");
 
 	// get value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.X_IOPSYS_EU_Radio.2.Stats.BytesSent";
+	ctx->in_param = "Device.X_IOPSYS_EU_WiFi.Radio.2.Stats.BytesSent";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.X_IOPSYS_EU_Radio.2.Stats.BytesSent", "14417451", "xsd:unsignedInt");
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_WiFi.Radio.2.Stats.BytesSent", "14417451", "xsd:unsignedInt");
 }
 
 static void test_api_bbfdm_get_set_json_v1_parameter(void **state)

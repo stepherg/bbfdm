@@ -244,7 +244,7 @@ These are special parameters all with a suffix "NumberOfEntries", which has coun
 For multi-instance on ubus mapping, it has to point to an array of objects, so for NumberOfEntries, we need to get the size of that array, which is refered here as `@Count`
 ```bash
 {
-  "Device.WiFi.X_IOPSYS_EU_RadioNumberOfEntries": {
+  "Device.X_IOPSYS_EU_WiFi.RadioNumberOfEntries": {
 	"type": "unsignedInt",
     "protocols": [
       "cwmp",
@@ -384,7 +384,7 @@ Multi-instance mapping either maps to array of json objects or uci section, so f
 Ubus example for the same
 ```json
 {
-  "Device.WiFi.X_IOPSYS_EU_Radio.{i}.": {
+  "Device.X_IOPSYS_EU_WiFi.Radio.{i}.": {
     "type": "object",
     "protocols": [
       "cwmp",

@@ -111,6 +111,7 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 | Device.Ethernet.                         | ethmngr        | https://dev.iopsys.eu/hal/ethmngr.git        |
 | Device.QoS.                              | qosmngr        | https://dev.iopsys.eu/hal/qosmngr.git        |
 | Device.SSH.                              | sshmngr        | https://dev.iopsys.eu/network/sshmngr.git    |
+| Device.WiFi.                             | wifidmd        | https://dev.iopsys.eu/bbf/wifidmd.git        |
 | Device.USB.                              | usbmngr        | https://dev.iopsys.eu/system/usbmngr.git     |
 | Device.Bridging.                         | bridgemngr     | https://dev.iopsys.eu/network/bridgemngr.git |
 | Device.IP.Diagnostics.                   | tr143          | https://dev.iopsys.eu/bbf/tr143d.git         |

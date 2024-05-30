@@ -337,6 +337,8 @@ def download_and_build_plugins(plugins, vendor_prefix):
 
     print("Generating data models from defined plugins...")
 
+    remove_folder(".repo")
+
     for plugin_index, plugin in enumerate(plugins):
 
         repo = get_option_value(plugin, "repo")
@@ -415,7 +417,6 @@ def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
     build_and_install_bbfdm(vendor_prefix, vendor_list)
 
     # Download && Build Plugins Data Models
-    remove_folder(".repo")
     download_and_build_plugins(plugins, vendor_prefix)
 
     # Fill the list supported data model

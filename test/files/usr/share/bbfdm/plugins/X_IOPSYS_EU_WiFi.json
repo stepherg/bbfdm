@@ -1,6 +1,6 @@
 {
     "json_plugin_version": 2,
-    "Device.WiFi.": {
+    "Device.{BBF_VENDOR_PREFIX}WiFi.": {
         "type": "object",
         "protocols": [
             "cwmp",
@@ -28,7 +28,7 @@
                 }
             ]
         },
-        "Device.WiFi.{BBF_VENDOR_PREFIX}Radio.{i}.": {
+        "Device.{BBF_VENDOR_PREFIX}WiFi.Radio.{i}.": {
             "type": "object",
             "protocols": [
                 "cwmp",
@@ -79,7 +79,7 @@
                     }
                 ]
             },
-            "Device.WiFi.{BBF_VENDOR_PREFIX}Radio.{i}.Stats.": {
+            "Device.{BBF_VENDOR_PREFIX}WiFi.Radio.{i}.Stats.": {
                 "type": "object",
                 "protocols": [
                     "cwmp",

@@ -2055,7 +2055,7 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 	json_object *json = json_object_from_file(plugin_path);
 	if (!json) {
-		BBF_DEBUG("Plugin failed [%s]\n", plugin_path);
+		BBF_ERR("Plugin failed [%s]\n", plugin_path);
 		return 0;
 	}
 

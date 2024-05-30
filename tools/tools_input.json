@@ -131,6 +131,14 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/bbf/timemngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/vendor.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/feed/openwrt-packages.git",
       "proto": "git",
       "version": "devel",
@@ -239,13 +247,13 @@
         "src/datamodel.c"
       ]
     },
-   {
+    {
       "repo": "https://dev.iopsys.eu/network/bridgemngr.git",
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "src/common.c",
-        "src/bridging.c"
+        "src/bridging.c",
+        "src/common.c"
       ]
     },
     {
@@ -253,8 +261,8 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "src/common.c",
-        "src/vendor.c"
+        "src/vendor.c",
+        "src/common.c"
       ]
     },
     {
@@ -287,6 +295,25 @@
       "version": "devel",
       "dm_files": [
         "src/packetcapture.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/wifidmd.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/wifi.c"
+      ],
+      "extra_dependencies": [
+        "-lm"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/wifidmd.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/dataelements.c"
       ]
     }
   ],
