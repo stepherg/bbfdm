@@ -135,7 +135,8 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "net/openvpn/files/bbfdm/OpenVPN_DM.json"
+        "net/openvpn/files/bbfdm/OpenVPN_DM.json",
+        "net/mosquitto/files/mqtt_broker_plugin.json"
       ]
     },
     {

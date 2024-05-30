@@ -22,7 +22,6 @@
 #include "security.h"
 #include "routeradvertisement.h"
 #include "gatewayinfo.h"
-#include "mqtt.h"
 
 /*************************************************************
 * GET & SET PARAM
@@ -82,7 +81,6 @@ DMOBJ tDeviceObj[] = {
 {"RouterAdvertisement", &DMREAD, NULL, NULL, "file:/etc/config/dhcp", NULL, NULL, NULL, tRouterAdvertisementObj, tRouterAdvertisementParams, NULL, BBFDM_BOTH, NULL},
 {"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH, NULL},
 {"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL},
-{"MQTT", &DMREAD, NULL, NULL, "file:/etc/config/mosquitto", NULL, NULL, NULL, tMQTTObj, tMQTTParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
