@@ -101,14 +101,22 @@ void free_services_from_list(struct list_head *clist)
 
 bool load_service(DMOBJ *main_dm, struct list_head *srv_list, char *srv_name, char *srv_parent_dm, char *srv_obj)
 {
-	if (!main_dm || !srv_list || !srv_name || !srv_parent_dm || !srv_obj)
+	if (!main_dm || !srv_list || !srv_name || !srv_parent_dm || !srv_obj) {
+		BBF_ERR("Invalid arguments: main_dm, srv_list, srv_name, srv_parent_dm, and srv_obj must not be NULL.");
 		return false;
+	}
 
-	if (is_service_registered(srv_list, srv_name, srv_parent_dm, srv_obj))
+	if (is_service_registered(srv_list, srv_name, srv_parent_dm, srv_obj)) {
+		BBF_ERR("Service registration failed: Service '%s' with parent DM '%s' and object '%s' is already registered.",
+				srv_name, srv_parent_dm, srv_obj);
 		return false;
+	}
 
-	if (!add_service_to_main_tree(main_dm, srv_name, srv_parent_dm, srv_obj))
+	if (!add_service_to_main_tree(main_dm, srv_name, srv_parent_dm, srv_obj)) {
+		BBF_ERR("Failed to add service '%s' to main tree with parent DM '%s' and object '%s'.",
+				srv_name, srv_parent_dm, srv_obj);
 		return false;
+	}
 
 	add_service_to_list(srv_list, srv_name, srv_parent_dm, srv_obj);
 	return true;

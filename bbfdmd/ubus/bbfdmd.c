@@ -1786,6 +1786,8 @@ static int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 	return err;
 }
 
+static struct ubus_event_handler add_event = { .cb = lookup_event_cb };
+
 int main(int argc, char **argv)
 {
 	struct bbfdm_context bbfdm_ctx;
@@ -1869,19 +1871,18 @@ int main(int argc, char **argv)
 	if (is_micro_service == true) { // It's a micro-service instance
 		char proc_name[32] = {0};
 
+		// Create process name using service name and prefix "dm_"
 		snprintf(proc_name, sizeof(proc_name), "dm_%s", bbfdm_ctx.config.service_name);
-		// Set process name based on microservice
+
+		// Set process name for the current process
 		prctl(PR_SET_NAME, proc_name, NULL, NULL, NULL);
 
-		bool is_registred = register_service(&bbfdm_ctx.ubus_ctx);
-		if (is_registred == false) {
-			// register for add event
-			struct ubus_event_handler add_event;
+		// Register the micro-service
+		register_service(&bbfdm_ctx.ubus_ctx);
 
-			memset(&add_event, 0, sizeof(struct ubus_event_handler));
-			add_event.cb = lookup_event_cb;
-			ubus_register_event_handler(&bbfdm_ctx.ubus_ctx, &add_event, "ubus.object.add");
-		}
+		// If the micro-service is not registered, listen for "ubus.object.add" event
+		// and register the micro-service using event handler for it
+		ubus_register_event_handler(&bbfdm_ctx.ubus_ctx, &add_event, "ubus.object.add");
 	}
 
 	INFO("Waiting on uloop....");
