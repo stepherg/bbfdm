@@ -36,7 +36,6 @@ struct process_entry {
 	char size[8];
 	char priority[8];
 	char cputime[8];
-	int instance;
 };
 
 typedef struct jiffy_counts_t {
@@ -154,16 +153,6 @@ static char *get_proc_state(char state)
 	};
 
 	return "Idle";
-}
-
-static int find_last_instance(void)
-{
-	if (!list_empty(&process_list)) {
-		struct process_entry *entry = list_last_entry(&process_list, struct process_entry, list);
-		return entry->instance + 1;
-	} else {
-		return 1;
-	}
 }
 
 static struct process_entry *check_entry_exists(const char *pid)
@@ -336,7 +325,6 @@ static void init_processes(void)
 			if (!pentry)
 				return;
 
-			pentry->instance = find_last_instance();
 			list_add_tail(&pentry->list, &process_list);
 		}
 
@@ -891,11 +879,12 @@ static int browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 {
 	struct process_entry *entry = NULL;
 	char *inst = NULL;
+	int id = 0;
 
 	init_processes();
 	list_for_each_entry(entry, &process_list, list) {
 
-		inst = handle_instance_without_section(dmctx, parent_node, entry->instance);
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, entry, inst) == DM_STOP)
 			break;
