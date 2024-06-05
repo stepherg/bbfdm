@@ -11,6 +11,9 @@
 
 #include "wifi.dataelements.h"
 
+static int get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value) __attribute__ ((unused));
+static int get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value) __attribute__ ((unused));
+
 struct wifi_data_element_args
 {
 	struct json_object *dump_obj;
@@ -3631,8 +3634,13 @@ static int get_event_args_WiFiDataElementsDisassociationEvent_Disassociated(char
 DMOBJ tWiFiDataElementsObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Network", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsNetworkObj, tWiFiDataElementsNetworkParams, NULL, BBFDM_BOTH},
+#ifdef BBFDM_WIFI_DATAELEMENTS_ASSOCIATION_EVENT_DATA
 {"AssociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventObj, tWiFiDataElementsAssociationEventParams, NULL, BBFDM_BOTH, NULL},
 {"DisassociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventObj, tWiFiDataElementsDisassociationEventParams, NULL, BBFDM_BOTH, NULL},
+#else
+{"AssociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsAssociationEventParams, NULL, BBFDM_BOTH, NULL},
+{"DisassociationEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsDisassociationEventParams, NULL, BBFDM_BOTH, NULL},
+#endif
 //{"FailedConnectionEvent", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tWiFiDataElementsFailedConnectionEventObj, tWiFiDataElementsFailedConnectionEventParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
@@ -4454,7 +4462,9 @@ DMOBJ tWiFiDataElementsAssociationEventObj[] = {
 
 DMLEAF tWiFiDataElementsAssociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+#ifdef BBFDM_WIFI_DATAELEMENTS_ASSOCIATION_EVENT_DATA
 {"AssociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsAssociationEvent_AssociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
+#endif
 {"Associated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsAssociationEvent_Associated, NULL, BBFDM_USP},
 {0}
 };
@@ -4515,7 +4525,9 @@ DMOBJ tWiFiDataElementsDisassociationEventObj[] = {
 
 DMLEAF tWiFiDataElementsDisassociationEventParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+#ifdef BBFDM_WIFI_DATAELEMENTS_ASSOCIATION_EVENT_DATA
 {"DisassociationEventDataNumberOfEntries", &DMREAD, DMT_UNINT, get_WiFiDataElementsDisassociationEvent_DisassociationEventDataNumberOfEntries, NULL, BBFDM_BOTH},
+#endif
 {"Disassociated!", &DMREAD, DMT_EVENT, get_event_args_WiFiDataElementsDisassociationEvent_Disassociated, NULL, BBFDM_USP},
 {0}
 };
