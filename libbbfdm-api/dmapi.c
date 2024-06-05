@@ -269,7 +269,7 @@ int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_p
 	}
 
 	if (DM_STRLEN(key_value) == 0) {
-		BBF_ERR("Reference key value should not be empty!!!");
+		BBF_DEBUG("Reference key value should not be empty!!!");
 		return -1;
 	}
 

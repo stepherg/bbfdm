@@ -107,7 +107,7 @@ bool load_service(DMOBJ *main_dm, struct list_head *srv_list, char *srv_name, ch
 	}
 
 	if (is_service_registered(srv_list, srv_name, srv_parent_dm, srv_obj)) {
-		BBF_ERR("Service registration failed: Service '%s' with parent DM '%s' and object '%s' is already registered.",
+		BBF_DEBUG("Service registration failed: Service '%s' with parent DM '%s' and object '%s' is already registered.",
 				srv_name, srv_parent_dm, srv_obj);
 		return false;
 	}
