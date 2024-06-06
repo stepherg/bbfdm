@@ -45,10 +45,8 @@ extern struct list_head json_memhead;
 
 LIST_HEAD(head_registered_service);
 
-static void cancel_periodic_timers(struct ubus_context *ctx);
 static void run_schema_updater(struct bbfdm_context *u);
 static void periodic_instance_updater(struct uloop_timeout *t);
-static void register_instance_refresh_timer(struct ubus_context *ctx, int start_sec);
 
 // Global variables
 static void *deamon_lib_handle = NULL;
@@ -57,18 +55,10 @@ static void sig_handler(int sig)
 {
 	if (sig == SIGSEGV) {
 		handle_pending_signal(sig);
-	} else if (sig == SIGUSR1) {
-		ERR("# SIGUSR1 handler for main process PID[%ld]", getpid());
 	}
 }
 
 static void signal_init(void)
-{
-	signal(SIGSEGV, sig_handler);
-	signal(SIGUSR1, sig_handler);
-}
-
-static void service_signal_init(void)
 {
 	signal(SIGSEGV, sig_handler);
 }
@@ -218,7 +208,7 @@ static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t
 	} else if (child == 0) {
 		u = container_of(data->ctx, struct bbfdm_context, ubus_ctx);
 		if (u == NULL) {
-			ERR("Failed to get the bbfdm context");
+			ERR("{fork} Failed to get the bbfdm context");
 			exit(EXIT_FAILURE);
 		}
 
@@ -232,7 +222,7 @@ static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t
 		fclose(stdout);
 		fclose(stderr);
 
-		INFO("Calling from subprocess");
+		INFO("{fork} Calling from subprocess");
 		EXEC_CB(data, result);
 
 		bbfdm_cleanup(u);
@@ -584,7 +574,7 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		cancel_periodic_timers(ctx);
+		cancel_instance_refresh_timer(ctx);
 		trans_id = transaction_start(&data, "INT_SET", 0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
@@ -710,7 +700,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		cancel_periodic_timers(ctx);
+		cancel_instance_refresh_timer(ctx);
 		trans_id = transaction_start(&data, "INT_ADD", 0);
 		if (trans_id == 0) {
 			ERR("Failed to get the lock for the transaction");
@@ -837,7 +827,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	if (data.trans_id == 0) {
 		// Transaction-id is not defined so create an internal transaction
-		cancel_periodic_timers(ctx);
+		cancel_instance_refresh_timer(ctx);
 		trans_id = transaction_start(&data, "INT_DEL", 0);
 		if (trans_id == 0) {
 			WARNING("Failed to get the lock for the transaction");
@@ -918,7 +908,6 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 	data.ctx = ctx;
 
 	if (is_str_eq(trans_cmd, "start")) {
-		cancel_periodic_timers(ctx);
 		ret = transaction_start(&data, "API", max_timeout);
 		if (ret) {
 			blobmsg_add_u8(&data.bb, "status", true);
@@ -929,11 +918,9 @@ static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_objec
 		}
 	} else if (is_str_eq(trans_cmd, "commit")) {
 		ret = transaction_commit(&data, data.trans_id, is_service_restart);
-		register_instance_refresh_timer(ctx, 100);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "abort")) {
 		ret = transaction_abort(&data, data.trans_id);
-		register_instance_refresh_timer(ctx, 100);
 		blobmsg_add_u8(&data.bb, "status", (ret == 0));
 	} else if (is_str_eq(trans_cmd, "status")) {
 		transaction_status(&data.bb);
@@ -1158,7 +1145,7 @@ static void broadcast_add_del_event(const char *method, struct list_head *inst, 
 	a = blobmsg_open_array(&bb, "instances");
 	list_for_each_entry(ptr, inst, list) {
 		blobmsg_add_string(&bb, NULL, ptr->path);
-		DEBUG("#%s:: %s #", (is_add)?"Add":"Del", ptr->path);
+		DEBUG("#%s:: %s, method %s #", (is_add)?"Add":"Del", ptr->path, method);
 	}
 	blobmsg_close_array(&bb, a);
 
@@ -1175,6 +1162,7 @@ static void broadcast_add_del_event(const char *method, struct list_head *inst, 
 
 static void update_instances_list(struct list_head *inst)
 {
+	int ret;
 	struct dmctx bbf_ctx = {
 			.in_param = ROOT_NODE,
 			.nextlevel = false,
@@ -1185,14 +1173,15 @@ static void update_instances_list(struct list_head *inst)
 
 	bbf_init(&bbf_ctx);
 
-	if (0 == bbfdm_cmd_exec(&bbf_ctx, BBF_INSTANCES)) {
+	ret = bbfdm_cmd_exec(&bbf_ctx, BBF_INSTANCES);
+	if (ret == 0) {
 		struct dm_parameter *nptr_dp;
 
 		list_for_each_entry(nptr_dp, &bbf_ctx.list_parameter, list) {
 			add_path_list(nptr_dp->name, inst);
 		}
 	} else {
-		WARNING("Failed to get instances");
+		WARNING("Failed to get instances, err code %d", ret);
 	}
 
 	bbf_cleanup(&bbf_ctx);
@@ -1214,7 +1203,7 @@ static void instance_fork_done(struct uloop_process *p, int ret)
 		async_req_free(r);
 	}
 	if (ret) {
-		DEBUG("Instance updater cb failed %d", ret);
+		WARNING("Instance updater cb failed %d", ret);
 	}
 }
 
@@ -1284,7 +1273,7 @@ static int fork_instance_checker(struct bbfdm_context *u)
 	}
 
 	// parent
-	DEBUG("Creating instance checker process child %d", child);
+	INFO("# Creating instance checker process child %d", child);
 	r->result = u;
 	r->process.pid = child;
 	r->process.cb = instance_fork_done;
@@ -1334,7 +1323,6 @@ static void periodic_instance_updater(struct uloop_timeout *t)
 	free_path_list(&u->old_instances);
 	list_splice_init(&u->instances, &u->old_instances);
 	update_instances_list(&u->instances);
-
 	if (list_empty(&u->instances)) {
 		update_instances_list(&u->instances);
 		WARNING("Failed to get current instances, restart the timer");
@@ -1350,7 +1338,7 @@ static void periodic_instance_updater(struct uloop_timeout *t)
 
 static bool register_service(struct ubus_context *ctx)
 {
-	struct blob_buf bb;
+	struct blob_buf bb = {0};
 	uint32_t ubus_id;
 	struct bbfdm_context *u;
 
@@ -1579,23 +1567,7 @@ static void lookup_event_cb(struct ubus_context *ctx,
 	}
 }
 
-static void cancel_periodic_timers(struct ubus_context *ctx)
-{
-	struct bbfdm_context *u;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		ERR("Failed to get the bbfdm context");
-		return;
-	}
-
-	DEBUG("Cancelling Instance_timer");
-	if (u->config.refresh_time != 0) {
-		uloop_timeout_cancel(&u->instance_timer);
-	}
-}
-
-static void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
+void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
 {
 	struct bbfdm_context *u;
 	unsigned refresh_time = 0;
@@ -1619,7 +1591,37 @@ static void register_instance_refresh_timer(struct ubus_context *ctx, int start_
 	}
 }
 
-void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
+void cancel_instance_refresh_timer(struct ubus_context *ctx)
+{
+	struct bbfdm_context *u;
+
+	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
+	if (u == NULL) {
+		ERR("Failed to get the bbfdm context");
+		return;
+	}
+
+	DEBUG("Cancelling Instance refresh timer");
+	if (u->config.refresh_time != 0) {
+		uloop_timeout_cancel(&u->instance_timer);
+	}
+}
+
+static void bbf_config_change_cb(struct ubus_context *ctx, struct ubus_event_handler *ev,
+				const char *type, struct blob_attr *msg)
+{
+	(void)ev;
+	(void)ctx;
+	(void)msg;
+
+	if (type && strcmp(type, "bbf.config.change") != 0)
+		return;
+
+	cancel_instance_refresh_timer(ctx);
+	register_instance_refresh_timer(ctx, 100);
+}
+
+static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 {
 	memset(bbfdm_ctx, 0, sizeof(struct bbfdm_context));
 	blob_buf_init(&bbfdm_ctx->dm_schema, 0);
@@ -1682,6 +1684,8 @@ int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 	return err;
 }
 
+static struct ubus_event_handler config_change_handler = { .cb = bbf_config_change_cb };
+
 int main(int argc, char **argv)
 {
 	struct bbfdm_context bbfdm_ctx;
@@ -1714,11 +1718,7 @@ int main(int argc, char **argv)
 	}
 
 	bbfdm_ctx_init(&bbfdm_ctx);
-	if (is_micro_service == false) { // It's not a micro-service instance
-		signal_init();
-	} else {
-		service_signal_init();
-	}
+	signal_init();
 
 	err = bbfdm_load_deamon_config(&bbfdm_ctx.config, input_file);
 	if (err) {
@@ -1755,6 +1755,10 @@ int main(int argc, char **argv)
 
 	run_schema_updater(&bbfdm_ctx);
 	register_instance_refresh_timer(&bbfdm_ctx.ubus_ctx, 1000);
+
+	err = ubus_register_event_handler(&bbfdm_ctx.ubus_ctx, &config_change_handler, "bbf.config.change");
+	if (err != 0)
+		goto exit;
 
 	if (is_micro_service == false) { // It's not a micro-service instance
 		err = register_events_to_ubus(&bbfdm_ctx.ubus_ctx, &bbfdm_ctx.event_handlers);

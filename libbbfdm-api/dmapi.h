@@ -432,6 +432,14 @@ struct dmmap_dup {
 	struct uci_section *dmmap_section;
 };
 
+struct dm_data {
+	struct list_head list;
+	struct uci_section *config_section;
+	struct uci_section *dmmap_section;
+	struct json_object *json_object;
+	void *additional_data;
+};
+
 struct dm_fault {
 	int code;
 	char *description;
