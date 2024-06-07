@@ -803,13 +803,18 @@ static int dmmap_synchronizeVcfInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 **************************************************************/
 static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
+	struct dm_data curr_data = {0};
 	struct uci_section *s = NULL;
 	char *inst = NULL;
 
 	dmmap_synchronizeVcfInst(dmctx, parent_node, prev_data, prev_instance);
 	uci_path_foreach_sections(bbfdm, "dmmap", "vcf", s) {
+
+		curr_data.config_section = s;
+
 		inst = handle_instance(dmctx, parent_node, s, "vcf_instance", "vcf_alias");
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)s, inst) == DM_STOP)
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -835,13 +840,14 @@ static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 
 static int browseDeviceInfoProcessorInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
 	int nbr_cpus = get_number_of_cpus();
+	struct dm_data curr_data = {0};
+	char *inst = NULL;
 	int i;
 
 	for (i = 0; i < nbr_cpus; i++) {
 		inst = handle_instance_without_section(dmctx, parent_node, i+1);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, NULL, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -863,13 +869,19 @@ static int browseDeviceInfoSupportedDataModelInst(struct dmctx *dmctx, DMNODE *p
 static int browseDeviceInfoFirmwareImageInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	json_object *res = NULL, *bank_obj = NULL, *arrobj = NULL;
+	struct dm_data curr_data = {0};
 	char *inst = NULL;
 	int id = 0, i = 0;
 
 	dmubus_call("fwbank", "dump", UBUS_ARGS{0}, 0, &res);
+
 	dmjson_foreach_obj_in_array(res, arrobj, bank_obj, i, 1, "bank") {
+
+		curr_data.json_object = bank_obj;
+
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)bank_obj, inst) == DM_STOP)
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -878,15 +890,18 @@ static int browseDeviceInfoFirmwareImageInst(struct dmctx *dmctx, DMNODE *parent
 static int browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct process_entry *entry = NULL;
+	struct dm_data curr_data = {0};
 	char *inst = NULL;
 	int id = 0;
 
 	init_processes();
 	list_for_each_entry(entry, &process_list, list) {
 
+		curr_data.additional_data = entry;
+
 		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, entry, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, &curr_data, inst) == DM_STOP)
 			break;
 	}
 	return 0;
@@ -1178,13 +1193,13 @@ static int get_deviceinfo_modelnumber (char *refparam, struct dmctx *ctx, void *
 
 static int get_vcf_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "name", value);
 	return 0;
 }
 
 static int get_vcf_version(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "version", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "version", value);
 	return 0;
 }
 
@@ -1195,7 +1210,7 @@ static int get_vcf_date(char *refparam, struct dmctx *ctx, void *data, char *ins
 	char *config_name = NULL;
 
 	*value = "0001-01-01T00:00:00Z";
-	dmuci_get_value_by_section_string((struct uci_section *)data, "name", &config_name);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "name", &config_name);
 	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
 		while ((d_file = readdir (dir)) != NULL) {
 			if (config_name && DM_STRCMP(config_name, d_file->d_name) == 0) {
@@ -1215,24 +1230,24 @@ static int get_vcf_date(char *refparam, struct dmctx *ctx, void *data, char *ins
 
 static int get_vcf_backup_restore(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "backup_restore", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "backup_restore", value);
 	return 0;
 }
 
 static int get_vcf_desc(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string((struct uci_section *)data, "description", value);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "description", value);
 	return 0;
 }
 
 static int get_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, (struct uci_section *)data, "vcf_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->config_section, "vcf_alias", instance, value);
 }
 
 static int set_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, (struct uci_section *)data, "vcf_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->config_section, "vcf_alias", instance, value);
 }
 
 static int get_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1377,7 +1392,7 @@ static int get_DeviceInfoSupportedDataModel_Features(char *refparam, struct dmct
 
 static int get_DeviceInfoFirmwareImage_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	char *id = dmjson_get_value((json_object *)data, 1, "id");
+	char *id = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "id");
 	dmasprintf(value, "cpe-%s", id ? id : instance);
 	return 0;
 }
@@ -1400,7 +1415,7 @@ static int get_DeviceInfoFirmwareImage_Name(char *refparam, struct dmctx *ctx, v
 {
 	char *name;
 
-	name = dmstrdup(dmjson_get_value((json_object *)data, 1, "fwver"));
+	name = dmstrdup(dmjson_get_value(((struct dm_data *)data)->json_object, 1, "fwver"));
 	if (DM_STRLEN(name) > 64 ) {
 		name[64] = '\0';
 	}
@@ -1411,7 +1426,7 @@ static int get_DeviceInfoFirmwareImage_Name(char *refparam, struct dmctx *ctx, v
 
 static int get_DeviceInfoFirmwareImage_Version(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "swver");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "swver");
 	return 0;
 }
 
@@ -1419,7 +1434,7 @@ static int get_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *c
 {
 	struct uci_section *s = NULL;
 
-	char *id = dmjson_get_value((json_object *)data, 1, "id");
+	char *id = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "id");
 
 	uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "id", id, s) {
 		dmuci_get_value_by_section_string(s, "available", value);
@@ -1446,13 +1461,13 @@ static int set_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *c
 			string_to_bool(value, &b);
 
 			if (!b) {
-				char *boot = dmjson_get_value((json_object *)data, 1, "boot");
-				char *active = dmjson_get_value((json_object *)data, 1, "active");
+				char *boot = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "boot");
+				char *active = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "active");
 				if (DM_LSTRCMP(boot, "true") == 0 || DM_LSTRCMP(active, "true") == 0)
 					return FAULT_9001;
 			}
 
-			id = dmjson_get_value((json_object *)data, 1, "id");
+			id = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "id");
 
 			uci_path_foreach_option_eq(bbfdm, "dmmap_fw_image", "fw_image", "id", id, s) {
 				dmuci_set_value_by_section_bbfdm(s, "available", b ? "true" : "false");
@@ -1469,7 +1484,7 @@ static int set_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *c
 
 static int get_DeviceInfoFirmwareImage_Status(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmjson_get_value((json_object *)data, 1, "status");
+	*value = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "status");
 	return 0;
 }
 
@@ -1534,37 +1549,37 @@ static int get_process_number_of_entries(char* refparam, struct dmctx *ctx, void
 
 static int get_process_pid(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = data ? ((struct process_entry *)data)->pid : "";
+	*value = data ? ((struct process_entry *)((struct dm_data *)data)->additional_data)->pid : "";
 	return 0;
 }
 
 static int get_process_command(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = data ? ((struct process_entry *)data)->command : "";
+	*value = data ? ((struct process_entry *)((struct dm_data *)data)->additional_data)->command : "";
 	return 0;
 }
 
 static int get_process_size(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = data ? ((struct process_entry *)data)->size : "";
+	*value = data ? ((struct process_entry *)((struct dm_data *)data)->additional_data)->size : "";
 	return 0;
 }
 
 static int get_process_priority(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = data ? ((struct process_entry *)data)->priority : "";
+	*value = data ? ((struct process_entry *)((struct dm_data *)data)->additional_data)->priority : "";
 	return 0;
 }
 
 static int get_process_cpu_time(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = data ? ((struct process_entry *)data)->cputime : "";
+	*value = data ? ((struct process_entry *)((struct dm_data *)data)->additional_data)->cputime : "";
 	return 0;
 }
 
 static int get_process_state(char* refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = data ? ((struct process_entry *)data)->state : "";
+	*value = data ? ((struct process_entry *)((struct dm_data *)data)->additional_data)->state : "";
 	return 0;
 }
 
@@ -1653,7 +1668,7 @@ static int operate_DeviceInfoVendorConfigFile_Backup(char *refparam, struct dmct
 	char *user = dmjson_get_value((json_object *)value, 1, "Username");
 	char *pass = dmjson_get_value((json_object *)value, 1, "Password");
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "name", &vcf_name);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "name", &vcf_name);
 
 	int res = bbf_config_backup(url, user, pass, vcf_name, backup_command, backup_path);
 
@@ -1751,7 +1766,7 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 	char *commandKey = dmjson_get_value((json_object *)value, 1, "CommandKey");
 	char *keep_config = dmjson_get_value((json_object *)value, 1, BBF_VENDOR_PREFIX"KeepConfig");
 
-	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
+	char *bank_id = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "id");
 
 	int res = bbf_fw_image_download(url, auto_activate, username, password, file_size, checksum_algorithm, checksum, bank_id, command, obj_path, commandKey, keep_config);
 
@@ -1835,7 +1850,7 @@ static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx
 		last_idx++;
 	}
 
-	char *bank_id = dmjson_get_value((json_object *)data, 1, "id");
+	char *bank_id = dmjson_get_value(((struct dm_data *)data)->json_object, 1, "id");
 	if (!DM_STRLEN(bank_id))
 		return USP_FAULT_COMMAND_FAILURE;
 

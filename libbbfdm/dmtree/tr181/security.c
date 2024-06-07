@@ -22,17 +22,15 @@ static char certifcates_paths[MAX_CERT][CERT_PATH_LEN];
 struct certificate_profile {
 	char *path;
 	X509 *cert;
-	struct uci_section *dmmap_sect;
 };
 
 /*************************************************************
 * INIT
 **************************************************************/
-void init_certificate(char *path, X509 *cert, struct uci_section *dmsect, struct certificate_profile *certprofile)
+void init_certificate(char *path, X509 *cert, struct certificate_profile *certprofile)
 {
 	certprofile->path = path;
 	certprofile->cert = cert;
-	certprofile->dmmap_sect = dmsect;
 }
 
 /*************************************************************
@@ -142,9 +140,10 @@ static int get_certificate_paths(void)
 **************************************************************/
 static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
+	struct certificate_profile certificateprofile = {0};
+	struct uci_section *dmmap_sec = NULL;
+	struct dm_data curr_data = {0};
 	char *inst = NULL;
-	struct uci_section *dmmap_sect = NULL;
-	struct certificate_profile certificateprofile = {};
 	int i, status;
 
 	get_certificate_paths();
@@ -164,16 +163,18 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 			continue;
 		}
 
-		if ((dmmap_sect = get_dup_section_in_dmmap_opt("dmmap_security", "security_certificate", "path", certifcates_paths[i])) == NULL) {
-			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sect);
-			dmuci_set_value_by_section_bbfdm(dmmap_sect, "path", certifcates_paths[i]);
+		if ((dmmap_sec = get_dup_section_in_dmmap_opt("dmmap_security", "security_certificate", "path", certifcates_paths[i])) == NULL) {
+			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sec);
+			dmuci_set_value_by_section_bbfdm(dmmap_sec, "path", certifcates_paths[i]);
 		}
 
-		init_certificate(certifcates_paths[i], cert, dmmap_sect, &certificateprofile);
+		init_certificate(certifcates_paths[i], cert, &certificateprofile);
 
-		inst = handle_instance(dmctx, parent_node, dmmap_sect, "security_certificate_instance", "security_certificate_alias");
+		curr_data.additional_data = (void *)&certificateprofile;
 
-		status = DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&certificateprofile, inst);
+		inst = handle_instance(dmctx, parent_node, dmmap_sec, "security_certificate_instance", "security_certificate_alias");
+
+		status = DM_LINK_INST_OBJ(dmctx, parent_node, &curr_data, inst);
 
 		X509_free(cert);
 		cert = NULL;
@@ -195,7 +196,7 @@ static int get_Security_CertificateNumberOfEntries(char *refparam, struct dmctx 
 
 static int get_SecurityCertificate_LastModif(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)((struct dm_data *)data)->additional_data;
 	char buf[sizeof("AAAA-MM-JJTHH:MM:SSZ")] = "0001-01-01T00:00:00Z";
 	struct stat b;
 
@@ -208,7 +209,7 @@ static int get_SecurityCertificate_LastModif(char *refparam, struct dmctx *ctx, 
 
 static int get_SecurityCertificate_SerialNumber(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)((struct dm_data *)data)->additional_data;
 
 	ASN1_INTEGER *serial = X509_get_serialNumber(cert_profile->cert);
 	*value = generate_serial_number((char *)serial->data, serial->length);
@@ -218,7 +219,7 @@ static int get_SecurityCertificate_SerialNumber(char *refparam, struct dmctx *ct
 
 static int get_SecurityCertificate_Issuer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)((struct dm_data *)data)->additional_data;
 	char buf[256] = {0};
 
 	X509_NAME_oneline(X509_get_issuer_name(cert_profile->cert), buf, sizeof(buf));
@@ -232,7 +233,7 @@ static int get_SecurityCertificate_Issuer(char *refparam, struct dmctx *ctx, voi
 
 static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)((struct dm_data *)data)->additional_data;
 
 	char not_before_str[DATE_LEN];
 	struct tm tm;
@@ -249,7 +250,7 @@ static int get_SecurityCertificate_NotBefore(char *refparam, struct dmctx *ctx, 
 
 static int get_SecurityCertificate_NotAfter(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)((struct dm_data *)data)->additional_data;
 
 	char not_after_str[DATE_LEN];
 	struct tm tm;
@@ -266,7 +267,7 @@ static int get_SecurityCertificate_NotAfter(char *refparam, struct dmctx *ctx, v
 
 static int get_SecurityCertificate_Subject(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)((struct dm_data *)data)->additional_data;
 	char buf[256] = {0};
 
 	X509_NAME_oneline(X509_get_subject_name(cert_profile->cert), buf, sizeof(buf));
@@ -280,7 +281,7 @@ static int get_SecurityCertificate_Subject(char *refparam, struct dmctx *ctx, vo
 
 static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	struct certificate_profile *cert_profile = (struct certificate_profile *)data;
+	struct certificate_profile *cert_profile = (struct certificate_profile *)((struct dm_data *)data)->additional_data;
 
 	*value = dmstrdup(get_certificate_sig_alg(X509_get_signature_nid(cert_profile->cert)));
 

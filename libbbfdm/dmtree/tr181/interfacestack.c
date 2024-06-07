@@ -111,6 +111,7 @@ static int create_interface_stack_instance(struct dmctx *dmctx, DMNODE *parent_n
 		struct interfacestack_data *data, struct uci_section *s,
 		char *path, char *inst_number, char *inst_alias, int *curr_inst)
 {
+	struct dm_data curr_data = {0};
 	char *instance = NULL, *inst = NULL;
 	char *LowerLayer = NULL;
 
@@ -129,7 +130,10 @@ static int create_interface_stack_instance(struct dmctx *dmctx, DMNODE *parent_n
 	data->LowerAlias = get_lower_alias_value(data->LowerLayer);
 
 	inst = handle_instance_without_section(dmctx, parent_node, ++(*curr_inst));
-	if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)data, inst) == DM_STOP)
+
+	curr_data.additional_data = (void *)data;
+
+	if (DM_LINK_INST_OBJ(dmctx, parent_node, &curr_data, inst) == DM_STOP)
 		return -1;
 
 end:
@@ -219,6 +223,7 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 		dmuci_get_value_by_section_string(mg_port_s, "bridge_port_alias", &mg_port_alias);
 
 		uci_path_foreach_option_eq(bbfdm, "dmmap_bridge_port", "bridge_port", "br_inst", br_instance, port_s) {
+			struct dm_data curr_data = {0};
 			char *management = NULL;
 			char *instance_value = NULL;
 			char *alias_value = NULL;
@@ -238,7 +243,8 @@ int browseInterfaceStackInst(struct dmctx *dmctx, DMNODE *parent_node, void *pre
 			curr_interfacestack_data.LowerAlias = alias_value;
 
 			inst = handle_instance_without_section(dmctx, parent_node, ++idx);
-			if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_interfacestack_data, inst) == DM_STOP)
+			curr_data.additional_data = (void *)&curr_interfacestack_data;
+			if (DM_LINK_INST_OBJ(dmctx, parent_node, &curr_data, inst) == DM_STOP)
 				goto end;
 
 			/* Higher Layer is Device.Bridging.Bridge.{i}.Port.{i}.*/
@@ -285,25 +291,25 @@ static int set_InterfaceStack_Alias(char *refparam, struct dmctx *ctx, void *dat
 
 static int get_InterfaceStack_HigherLayer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = ((struct interfacestack_data *)data)->HigherLayer;
+	*value = ((struct interfacestack_data *)((struct dm_data *)data)->additional_data)->HigherLayer;
 	return 0;
 }
 
 static int get_InterfaceStack_LowerLayer(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = ((struct interfacestack_data *)data)->LowerLayer;
+	*value = ((struct interfacestack_data *)((struct dm_data *)data)->additional_data)->LowerLayer;
 	return 0;
 }
 
 static int get_InterfaceStack_HigherAlias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = ((struct interfacestack_data *)data)->HigherAlias;
+	*value = ((struct interfacestack_data *)((struct dm_data *)data)->additional_data)->HigherAlias;
 	return 0;
 }
 
 static int get_InterfaceStack_LowerAlias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = ((struct interfacestack_data *)data)->LowerAlias;
+	*value = ((struct interfacestack_data *)((struct dm_data *)data)->additional_data)->LowerAlias;
 	return 0;
 }
 
