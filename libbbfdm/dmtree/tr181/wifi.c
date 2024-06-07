@@ -16,9 +16,7 @@
 
 #include "wifi.h"
 
-#ifdef BBF_WIFI_DATAELEMENTS
 #include "wifi.dataelements.h"
-#endif
 
 #define MAX_POWER_INDEX 64
 #define UBUS_OBJ_LEN 32
@@ -3868,7 +3866,7 @@ static int operate_WiFiAccessPointSecurity_Reset(char *refparam, struct dmctx *c
 /* *** Device.WiFi. *** */
 DMOBJ tWiFiObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-#ifdef BBF_WIFI_DATAELEMENTS
+#ifdef BBFDM_TR181_WIFI_DATAELEMENTS
 {"DataElements", &DMREAD, NULL, NULL, "file:/etc/init.d/decollector", NULL, NULL, NULL, tWiFiDataElementsObj, NULL, NULL, BBFDM_BOTH, NULL},
 #endif
 {"Radio", &DMREAD, NULL, NULL, "file:/etc/config/wireless", browseWifiRadioInst, NULL, NULL, tWiFiRadioObj, tWiFiRadioParams, NULL, BBFDM_BOTH, NULL},

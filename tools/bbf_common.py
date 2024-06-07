@@ -200,6 +200,7 @@ def build_and_install_bbfdm(vendor_prefix, vendor_list):
         "cmake",
         "../",
         "-DWITH_OPENSSL=ON",
+        "-DBBF_TR181_ALL=ON",
         "-DBBF_VENDOR_EXTENSION=ON",
         "-DBBF_SCHEMA_FULL_TREE=ON",
         f"-DBBF_VENDOR_LIST={VENDOR_LIST}",
