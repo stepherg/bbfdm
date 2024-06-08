@@ -1133,7 +1133,7 @@ static int delete_router(char *refparam, struct dmctx *ctx, void *data, char *in
 
 	switch (del_action) {
 		case DEL_INST:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", &rt_table);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "rt_table", &rt_table);
 			if(DM_LSTRCMP(rt_table, "254") == 0) {
 				bbfdm_set_fault_message(ctx, "It's not allowed to delete the main '254' routing table.");
 				return FAULT_9003;
@@ -1147,7 +1147,7 @@ static int delete_router(char *refparam, struct dmctx *ctx, void *data, char *in
 					dmuci_set_value_by_section(s, "ip4table", "");
 			}
 
-			dmuci_delete_by_section((struct uci_section *)data, NULL, NULL);
+			dmuci_delete_by_section(((struct dm_data *)data)->dmmap_section, NULL, NULL);
 			break;
 		case DEL_ALL:
 			bbfdm_set_fault_message(ctx, "It's not allowed to delete all routing tables since there are some routing tables defined by the system '/etc/iproute2/rt_tables'.");
@@ -1162,7 +1162,7 @@ static int add_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, cha
 	char *rt_table = NULL;
 	char route_name[32];
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", &rt_table);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "rt_table", &rt_table);
 	snprintf(route_name, sizeof(route_name), "route_%s", *instance);
 
 	dmuci_add_section("network", "route", &s);
@@ -1197,7 +1197,7 @@ static int delete_ipv4forwarding(char *refparam, struct dmctx *ctx, void *data, 
 			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", &rt_table);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "rt_table", &rt_table);
 
 			// Remove all static routes
 			uci_foreach_option_eq_safe("network", "route", "rt_table", rt_table, stmp, route_s) {
@@ -1220,7 +1220,7 @@ static int add_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, cha
 	char *rt_table = NULL;
 	char route6_name[32];
 
-	dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", &rt_table);
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "rt_table", &rt_table);
 	snprintf(route6_name, sizeof(route6_name), "route6_%s", *instance);
 
 	dmuci_add_section("network", "route6", &s);
@@ -1255,7 +1255,7 @@ static int delete_ipv6Forwarding(char *refparam, struct dmctx *ctx, void *data, 
 			dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
 			break;
 		case DEL_ALL:
-			dmuci_get_value_by_section_string((struct uci_section *)data, "rt_table", &rt_table);
+			dmuci_get_value_by_section_string(((struct dm_data *)data)->dmmap_section, "rt_table", &rt_table);
 
 			// Remove all static enable routes
 			uci_foreach_option_eq_safe("network", "route6", "rt_table", rt_table, stmp, route6_s) {
