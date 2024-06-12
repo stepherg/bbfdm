@@ -22,9 +22,7 @@
 ├── libbbfdm
 │   ├── dmtree
 │   │   ├── json
-│   │   ├── tr143
 │   │   ├── tr181
-│   │   ├── tr471
 │   │   ├── vendor
 │   ├── scripts
 └── tools
@@ -39,15 +37,11 @@ More explanation on how this daemon works and all supported methods are presente
 
 		- `tr181` folder : TR-181 Data Model files
 
-		- `tr143` folder : Diagnostics Data Model files
-
-		- `tr471` folder : IPLayerCapacityMetrics Diagnostics Data Model files
-
 		- `vendor` folder : Vendor Data Model files
 
-		- `json` folder : TR-181 and TR-104 JSON files
+		- `json` folder : Data Model JSON file
 
-	- `scripts` folder which contains all the scripts used to run the different types of diagnostics.
+	- `scripts` folder which contains bbf APIs used to run the different diagnostics scripts.
 
 - `libbbfdm-api` folder which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management). These API are used for GET/SET/ADD/Delete/Operate calls which can be called in internal or external packages.
 All APIs exposed by libbbfdm-api are presented in this header file [libbbfdm_api.h](./libbbfdm-api/include/libbbfdm_api.h).
@@ -69,12 +63,8 @@ All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
 * [How to add new vendor](./docs/guide/libbbfdm-api_vendor.md)
 * [Dynamic Object/Parameter/Operate/Event](./docs/guide/libbbfdm-api_dynamic_dm.md)
 * [Design for firmware activation](./docs/guide/libbbfdm_DeviceInfo_FirmwareImage.md)
-* [TR181 Firewall datamodel mappings](./docs/guide/libbbfdm_Firewall.md)
-* [Wireless Configuration handling](./docs/guide/libbbfdm_WiFi.md)
 * [Explain the different Network Deployment Scenarios](./docs/guide/network_depoyment_scenarios.md)
-* [How to Configure MACVLAN](./docs/guide/libbbfdm_Ethernet_X_IOPSYS_EU_MACVLAN.md)
 * [Explain Policy Based Routing Management](./docs/guide/libbbfdm_Routing.md)
-* [TR181 DNS datamodel](./docs/guide/libbbfdm_DNS.md)
 
 ## Additional datamodel objects
 

@@ -212,7 +212,17 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "bbf_plugin/*.c"
+        "bbf_plugin/ethernet.c",
+        "bbf_plugin/dmlayer.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/hal/ethmngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "bbf_plugin/vendor_ethernet.c",
+        "bbf_plugin/dmlayer.c"
       ]
     },
     {
@@ -290,6 +300,16 @@
       "version": "devel",
       "dm_files": [
         "src/dataelements.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/hal/mcastmngr.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "bbf_plugin/mcast_bbf.c",
+        "bbf_plugin/x_iopsys_eu_igmp.c",
+        "bbf_plugin/x_iopsys_eu_mld.c"
       ]
     }
   ],
