@@ -1797,6 +1797,9 @@ static int get_operate_args_DeviceInfoFirmwareImage_Activate(char *refparam, str
 
 static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+#define CRONTABS_ROOT "/etc/crontabs/root"
+#define ACTIVATE_HANDLER_FILE "/usr/share/bbfdm/scripts/bbf_activate_handler.sh"
+
 	char *FW_Mode[] = {"AnyTime", "Immediately", "WhenIdle", "ConfirmationNeeded", NULL};
 	char *start_time[MAX_TIME_WINDOW] = {0};
 	char *end_time[MAX_TIME_WINDOW] = {0};

@@ -613,89 +613,89 @@ static void test_bbf_api_validate(void **state)
 	int validate = 0;
 
 	/*
-	 * Test of dm_validate_string function
+	 * Test of bbfdm_validate_string function
 	 */
 
-	// dm_validate_string: test with wrong min value
+	// bbfdm_validate_string: test with wrong min value
 	validate = bbfdm_validate_string(&ctx, "test", 5, 8, NULL, NULL);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_string: test with wrong max value
+	// bbfdm_validate_string: test with wrong max value
 	validate = bbfdm_validate_string(&ctx, "test", -1, 2, NULL, NULL);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_string: test with wrong enumaration value
+	// bbfdm_validate_string: test with wrong enumaration value
 	validate = bbfdm_validate_string(&ctx, "test", -1, -1, DiagnosticsState, NULL);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_string: test with wrong pattern value
+	// bbfdm_validate_string: test with wrong pattern value
 	validate = bbfdm_validate_string(&ctx, "test", -1, -1, NULL, IPv4Address);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_string: test with correct min and max value
+	// bbfdm_validate_string: test with correct min and max value
 	validate = bbfdm_validate_string(&ctx, "bbftest", 5, 8, NULL, NULL);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_string: test with correct enumaration value
+	// bbfdm_validate_string: test with correct enumaration value
 	validate = bbfdm_validate_string(&ctx, "Requested", -1, -1, DiagnosticsState, NULL);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_string: test with correct pattern value
+	// bbfdm_validate_string: test with correct pattern value
 	validate = bbfdm_validate_string(&ctx, "10.10.9.80", -1, -1, NULL, IPv4Address);
 	assert_int_equal(validate, 0);
 
 
 	/*
-	 * Test of dm_validate_boolean function
+	 * Test of bbfdm_validate_boolean function
 	 */
 
-	// dm_validate_boolean: test with wrong value
+	// bbfdm_validate_boolean: test with wrong value
 	validate = bbfdm_validate_boolean(&ctx, "test");
 	assert_int_equal(validate, -1);
 
-	// dm_validate_boolean: test with correct value
+	// bbfdm_validate_boolean: test with correct value
 	validate = bbfdm_validate_boolean(&ctx, "true");
 	assert_int_equal(validate, 0);
 
 
 	/*
-	 * Test of dm_validate_unsignedInt function
+	 * Test of bbfdm_validate_unsignedInt function
 	 */
 
-	// dm_validate_unsignedInt: test with wrong value
+	// bbfdm_validate_unsignedInt: test with wrong value
 	validate = bbfdm_validate_unsignedInt(&ctx, "12t", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_unsignedInt: test with wrong min value
+	// bbfdm_validate_unsignedInt: test with wrong min value
 	validate = bbfdm_validate_unsignedInt(&ctx, "1", RANGE_ARGS{{"12",NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_unsignedInt: test with wrong max value
+	// bbfdm_validate_unsignedInt: test with wrong max value
 	validate = bbfdm_validate_unsignedInt(&ctx, "112", RANGE_ARGS{{NULL,"50"}}, 1);
 	assert_int_equal(validate, -1);
 
 
-	// dm_validate_unsignedInt: test without min/max value
+	// bbfdm_validate_unsignedInt: test without min/max value
 	validate = bbfdm_validate_unsignedInt(&ctx, "112", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_unsignedInt: test with correct min/max value
+	// bbfdm_validate_unsignedInt: test with correct min/max value
 	validate = bbfdm_validate_unsignedInt(&ctx, "112", RANGE_ARGS{{"10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_unsignedInt: test with multi range and wrong value
+	// bbfdm_validate_unsignedInt: test with multi range and wrong value
 	validate = bbfdm_validate_unsignedInt(&ctx, "5420", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_unsignedInt: test with multi range and correct value
+	// bbfdm_validate_unsignedInt: test with multi range and correct value
 	validate = bbfdm_validate_unsignedInt(&ctx, "50", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_unsignedInt: test with wrong value
+	// bbfdm_validate_unsignedInt: test with wrong value
 	validate = bbfdm_validate_unsignedInt(&ctx, "112", RANGE_ARGS{{"4","4"}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_unsignedInt: test with correct value
+	// bbfdm_validate_unsignedInt: test with correct value
 	validate = bbfdm_validate_unsignedInt(&ctx, "1124", RANGE_ARGS{{"4","4"}}, 1);
 	assert_int_equal(validate, 0);
 
@@ -704,31 +704,31 @@ static void test_bbf_api_validate(void **state)
 	 * Test of dm_validate_int function
 	 */
 
-	// dm_validate_int: test with wrong value
+	// bbfdm_validate_int: test with wrong value
 	validate = bbfdm_validate_int(&ctx, "-12t", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_int: test with wrong min value
+	// bbfdm_validate_int: test with wrong min value
 	validate = bbfdm_validate_int(&ctx, "-1", RANGE_ARGS{{"12",NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_int: test with wrong max value
+	// bbfdm_validate_int: test with wrong max value
 	validate = bbfdm_validate_int(&ctx, "-1", RANGE_ARGS{{NULL,"-5"}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_int: test without min/max value
+	// bbfdm_validate_int: test without min/max value
 	validate = bbfdm_validate_int(&ctx, "-112", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_int: test with correct min/max value
+	// bbfdm_validate_int: test with correct min/max value
 	validate = bbfdm_validate_int(&ctx, "-2", RANGE_ARGS{{"-10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_int: test with multi range and wrong value
+	// bbfdm_validate_int: test with multi range and wrong value
 	validate = bbfdm_validate_int(&ctx, "-2", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_int: test with multi range and correct value
+	// bbfdm_validate_int: test with multi range and correct value
 	validate = bbfdm_validate_int(&ctx, "-7", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
 	assert_int_equal(validate, 0);
 
@@ -736,31 +736,31 @@ static void test_bbf_api_validate(void **state)
 	 * Test of dm_validate_unsignedLong function
 	 */
 
-	// dm_validate_unsignedLong: test with wrong value
+	// bbfdm_validate_unsignedLong: test with wrong value
 	validate = bbfdm_validate_unsignedLong(&ctx, "2t", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_unsignedLong: test with wrong min value
+	// bbfdm_validate_unsignedLong: test with wrong min value
 	validate = bbfdm_validate_unsignedLong(&ctx, "1", RANGE_ARGS{{"12",NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_unsignedLong: test with wrong max value
+	// bbfdm_validate_unsignedLong: test with wrong max value
 	validate = bbfdm_validate_unsignedLong(&ctx, "10", RANGE_ARGS{{NULL,"5"}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_unsignedLong: test without min/max value
+	// bbfdm_validate_unsignedLong: test without min/max value
 	validate = bbfdm_validate_unsignedLong(&ctx, "112", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_unsignedLong: test with correct min/max value
+	// bbfdm_validate_unsignedLong: test with correct min/max value
 	validate = bbfdm_validate_unsignedLong(&ctx, "20", RANGE_ARGS{{"10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_unsignedLong: test with multi range and wrong value
+	// bbfdm_validate_unsignedLong: test with multi range and wrong value
 	validate = bbfdm_validate_unsignedLong(&ctx, "5420", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_unsignedLong: test with multi range and correct value
+	// bbfdm_validate_unsignedLong: test with multi range and correct value
 	validate = bbfdm_validate_unsignedLong(&ctx, "15000", RANGE_ARGS{{"10","1000"},{"11200","45000"}}, 2);
 	assert_int_equal(validate, 0);
 
@@ -769,31 +769,31 @@ static void test_bbf_api_validate(void **state)
 	 * Test of dm_validate_long function
 	 */
 
-	// dm_validate_long: test with wrong value
+	// bbfdm_validate_long: test with wrong value
 	validate = bbfdm_validate_long(&ctx, "-12t", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_long: test with wrong min value
+	// bbfdm_validate_long: test with wrong min value
 	validate = bbfdm_validate_long(&ctx, "-1", RANGE_ARGS{{"12",NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_long: test with wrong max value
+	// bbfdm_validate_long: test with wrong max value
 	validate = bbfdm_validate_long(&ctx, "-1", RANGE_ARGS{{NULL,"-5"}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_long: test without min/max value
+	// bbfdm_validate_long: test without min/max value
 	validate = bbfdm_validate_long(&ctx, "-112", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_long: test with correct min/max value
+	// bbfdm_validate_long: test with correct min/max value
 	validate = bbfdm_validate_long(&ctx, "-2", RANGE_ARGS{{"-10","1000"}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_long: test with multi range and wrong value
+	// bbfdm_validate_long: test with multi range and wrong value
 	validate = bbfdm_validate_long(&ctx, "-2", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_long: test with multi range and correct value
+	// bbfdm_validate_long: test with multi range and correct value
 	validate = bbfdm_validate_long(&ctx, "-7", RANGE_ARGS{{"-10","-3"},{"-1","45"}}, 2);
 	assert_int_equal(validate, 0);
 
@@ -802,31 +802,31 @@ static void test_bbf_api_validate(void **state)
 	 * Test of dm_validate_dateTime function
 	 */
 
-	// dm_validate_dateTime: test with wrong value
+	// bbfdm_validate_dateTime: test with wrong value
 	validate = bbfdm_validate_dateTime(&ctx, "2021-12-31T20:53:99");
 	assert_int_equal(validate, -1);
 
-	// dm_validate_dateTime: test with wrong value
+	// bbfdm_validate_dateTime: test with wrong value
 	validate = bbfdm_validate_dateTime(&ctx, "2021-12-31T20:53:99.12Z");
 	assert_int_equal(validate, -1);
 
-	// dm_validate_dateTime: test with wrong value
+	// bbfdm_validate_dateTime: test with wrong value
 	validate = bbfdm_validate_dateTime(&ctx, "2021-12-31T20:53:99+01:00Z");
 	assert_int_equal(validate, -1);
 
-	// dm_validate_dateTime: test with wrong value
+	// bbfdm_validate_dateTime: test with wrong value
 	validate = bbfdm_validate_dateTime(&ctx, "2021-12-31T20:53:99.12");
 	assert_int_equal(validate, -1);
 
-	// dm_validate_dateTime: test with correct value
+	// bbfdm_validate_dateTime: test with correct value
 	validate = bbfdm_validate_dateTime(&ctx, "2021-12-31T20:53:01Z");
 	assert_int_equal(validate, 0);
 
-	// dm_validate_dateTime: test with correct value
+	// bbfdm_validate_dateTime: test with correct value
 	validate = bbfdm_validate_dateTime(&ctx, "2021-12-31T20:53:01.125Z");
 	assert_int_equal(validate, 0);
 
-	// dm_validate_dateTime: test with correct value
+	// bbfdm_validate_dateTime: test with correct value
 	validate = bbfdm_validate_dateTime(&ctx, "2021-12-31T20:53:01.125345Z");
 	assert_int_equal(validate, 0);
 
@@ -835,43 +835,43 @@ static void test_bbf_api_validate(void **state)
 	 * Test of dm_validate_hexBinary function
 	 */
 
-	// dm_validate_hexBinary: test with wrong value
+	// bbfdm_validate_hexBinary: test with wrong value
 	validate = bbfdm_validate_hexBinary(&ctx, "-12t", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_hexBinary: test with wrong min value
+	// bbfdm_validate_hexBinary: test with wrong min value
 	validate = bbfdm_validate_hexBinary(&ctx, "123bcd", RANGE_ARGS{{"12",NULL}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_hexBinary: test with wrong max value
+	// bbfdm_validate_hexBinary: test with wrong max value
 	validate = bbfdm_validate_hexBinary(&ctx, "123bcd", RANGE_ARGS{{NULL,"4"}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_hexBinary: test with wrong value
+	// bbfdm_validate_hexBinary: test with wrong value
 	validate = bbfdm_validate_hexBinary(&ctx, "123b4cd", RANGE_ARGS{{"3","3"}}, 1);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_hexBinary: test without min/max value
+	// bbfdm_validate_hexBinary: test without min/max value
 	validate = bbfdm_validate_hexBinary(&ctx, "123bcd", RANGE_ARGS{{NULL,NULL}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_hexBinary: test with correct min/max value
+	// bbfdm_validate_hexBinary: test with correct min/max value
 	validate = bbfdm_validate_hexBinary(&ctx, "123bcd", RANGE_ARGS{{"1","8"}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_hexBinary: test with correct value
+	// bbfdm_validate_hexBinary: test with correct value
 	validate = bbfdm_validate_hexBinary(&ctx, "123bcd", RANGE_ARGS{{"3","3"}}, 1);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_hexBinary: test with multi range and wrong value
+	// bbfdm_validate_hexBinary: test with multi range and wrong value
 	validate = bbfdm_validate_hexBinary(&ctx, "123bc", RANGE_ARGS{{"3","3"},{"5","5"}}, 2);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_hexBinary: test with multi range and correct value
+	// bbfdm_validate_hexBinary: test with multi range and correct value
 	validate = bbfdm_validate_hexBinary(&ctx, "123bcd", RANGE_ARGS{{"3","3"},{"5","5"}}, 2);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_hexBinary: test with multi range and correct value
+	// bbfdm_validate_hexBinary: test with multi range and correct value
 	validate = bbfdm_validate_hexBinary(&ctx, "12345abcde", RANGE_ARGS{{"3","3"},{"5","5"}}, 2);
 	assert_int_equal(validate, 0);
 
@@ -880,23 +880,23 @@ static void test_bbf_api_validate(void **state)
 	 * Test of dm_validate_string_list function
 	 */
 
-	// dm_validate_string_list: test with wrong min_item value
+	// bbfdm_validate_string_list: test with wrong min_item value
 	validate = bbfdm_validate_string_list(&ctx, "test", 2, -1, -1, -1, -1, NULL, NULL);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_string_list: test with wrong max_item value
+	// bbfdm_validate_string_list: test with wrong max_item value
 	validate = bbfdm_validate_string_list(&ctx, "test1,test2,test3", -1, 2, -1, -1, -1, NULL, NULL);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_string_list: test with wrong max_size value
+	// bbfdm_validate_string_list: test with wrong max_size value
 	validate = bbfdm_validate_string_list(&ctx, "test1,test2,test3", -1, -1, 10, -1, -1, NULL, NULL);
 	assert_int_equal(validate, -1);
 
-	// dm_validate_string_list: test with correct min and max item/size value
+	// bbfdm_validate_string_list: test with correct min and max item/size value
 	validate = bbfdm_validate_string_list(&ctx, "bbftest", -1, -1, -1, -1, -1, NULL, NULL);
 	assert_int_equal(validate, 0);
 
-	// dm_validate_string_list: test with correct min and max item/size value
+	// bbfdm_validate_string_list: test with correct min and max item/size value
 	validate = bbfdm_validate_string_list(&ctx, "test1,test2,test3", 2, 4, 20, -1, -1, NULL, NULL);
 	assert_int_equal(validate, 0);
 }

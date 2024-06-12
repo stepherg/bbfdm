@@ -142,7 +142,7 @@ int bbf_uci_add_section(char *package, char *type, struct uci_section **s);
 ** \param   package - package name to delete the section
 ** \param   type - section type name
 ** \param   option - option name
-** \param   value - not used (must be removed later)
+** \param   value - not used
 **
 ** \return  0 if the operation is successful, -1 otherwise
 **
@@ -173,7 +173,7 @@ int bbf_uci_add_section_bbfdm(char *package, char *type, struct uci_section **s)
 ** \param   package - package name to delete the section
 ** \param   type - section type name
 ** \param   option - option name
-** \param   value - not used (must be removed later)
+** \param   value - not used
 **
 ** \return  0 if the operation is successful, -1 otherwise
 **
@@ -282,7 +282,7 @@ int bbf_uci_set_value_by_section(struct uci_section *s, char *option, char *valu
 **
 ** \param   s - section pointer of uci context
 ** \param   option - option name
-** \param   value - not used (must be removed later)
+** \param   value - not used
 **
 ** \return  0 if the operation is successful, -1 otherwise
 **
@@ -583,36 +583,6 @@ int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 **
 **************************************************************************/
 int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value);
-
-/*********************************************************************//**
-**
-** bbf_get_reference_param
-**
-** This API is used to get the reference parameter value
-**
-** \param   path - parent path object
-** \param   key_name - parameter name used to identify the object
-** \param   key_value - value of parameter name used to identify the object
-** \param   value - the value to be set
-**
-** \return  0 if operation is successful, -1 otherwise
-**
-**************************************************************************/
-int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value); // To be removed later!!!!!!!!!!!!
-
-/*********************************************************************//**
-**
-** bbf_get_reference_args
-**
-** This API is used to get the reference arguments in order to set eexternal linker
-**
-** \param   value -
-** \param   reference -
-**
-** \return  0 if operation is successful, -1 otherwise
-**
-**************************************************************************/
-int bbf_get_reference_args(char *value, struct dm_reference *reference_args); // To be removed later!!!!!!!!!!!!
 
 /*********************************************************************//**
 **
@@ -923,29 +893,12 @@ int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, 
 **************************************************************************/
 void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...);
 
-int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value);
-int bbf_get_reference_args(char *value, struct dm_reference *reference_args);
-
-//TODO
 /**********************
  *
  * BBF DEPRECATED APIs
  *
  **********************/
-
-__attribute__ ((deprecated("Use bbfdm_validate_string"))) int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
-__attribute__ ((deprecated("Use bbfdm_validate_boolean"))) int bbf_validate_boolean(char *value);
-__attribute__ ((deprecated("Use bbfdm_validate_unsignedInt"))) int bbf_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated("Use bbfdm_validate_int"))) int bbf_validate_int(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated("Use bbfdm_validate_unsignedLong"))) int bbf_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated("Use bbfdm_validate_long"))) int bbf_validate_long(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated("Use bbfdm_validate_dateTime"))) int bbf_validate_dateTime(char *value);
-__attribute__ ((deprecated("Use bbfdm_validate_hexBinary"))) int bbf_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated("Use bbfdm_validate_string_list"))) int bbf_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
-__attribute__ ((deprecated("Use bbfdm_validate_unsignedInt_list"))) int bbf_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated("Use bbfdm_validate_int_list"))) int bbf_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated("Use bbfdm_validate_unsignedLong_list"))) int bbf_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated("Use bbfdm_validate_long_list"))) int bbf_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-__attribute__ ((deprecated("Use bbfdm_validate_hexBinary_list"))) int bbf_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+__attribute__ ((deprecated("Use bbfdm_get_references"))) int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value);
+__attribute__ ((deprecated("Use bbfdm_get_reference_linker"))) int bbf_get_reference_args(char *value, struct dm_reference *reference_args);
 
 #endif //__LIBBBFDM_API_H__

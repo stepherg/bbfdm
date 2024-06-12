@@ -28,14 +28,9 @@ int bbf_entry_method(struct dmctx *ctx, int cmd);
 void bbf_global_init(DMOBJ *dm_entryobj, const char *plugin_path);
 void bbf_global_clean(DMOBJ *dm_entryobj);
 
-int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]); // To be removed later!!!!!!!!!!!!
-int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[]); // To be removed later!!!!!!!!!!!!
 int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *reference, char *objects[]);
 
 bool adm_entry_object_exists(struct dmctx *ctx, char *param); // To be removed later!!!!!!!!!!!! (After moving all Objects outside bbfdm core)
-
-int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value); // To be removed later!!!!!!!!!!!!
-int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value); // To be removed later!!!!!!!!!!!!
 
 void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services);
 void bbf_entry_revert_changes(struct blob_buf *bb);

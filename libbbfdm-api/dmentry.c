@@ -255,51 +255,6 @@ void bbf_global_clean(DMOBJ *dm_entryobj)
 	dm_dynamic_cleanmem(&global_memhead);
 }
 
-int dm_entry_validate_allowed_objects(struct dmctx *ctx, char *value, char *objects[]) // To be removed later!!!!!!!!!!!!
-{
-	BBF_ERR("%s API will be removed later, don't use it!!!!!!", __func__);
-
-	if (!value || !objects)
-		return -1;
-
-	if (*value == '\0')
-		return 0;
-
-	for (; *objects; objects++) {
-
-		if (match(value, *objects, 0, NULL)) {
-			char *linker = NULL;
-
-			adm_entry_get_linker_value(ctx, value, &linker);
-			if (linker && *linker)
-				return 0;
-		}
-	}
-
-	bbfdm_set_fault_message(ctx, "'%s' value is not allowed.", value);
-	return -1;
-}
-
-int dm_entry_validate_external_linker_allowed_objects(struct dmctx *ctx, char *value, char *objects[]) // To be removed later!!!!!!!!!!!!
-{
-	BBF_ERR("%s API will be removed later, don't use it!!!!!!", __func__);
-
-	if (!value || !objects)
-		return -1;
-
-	if (*value == '\0')
-		return 0;
-
-	for (; *objects; objects++) {
-
-		if (match(value, *objects, 0, NULL))
-			return 0;
-	}
-
-	bbfdm_set_fault_message(ctx, "'%s' value is not allowed.", value);
-	return -1;
-}
-
 int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *reference, char *objects[])
 {
 	if (!reference || !objects)
@@ -366,52 +321,6 @@ int adm_entry_get_reference_value(struct dmctx *ctx, char *param, char **value)
 
 	dm_entry_get_reference_value(&dmctx);
 
-	*value = dmctx.linker;
-
-	bbf_ctx_clean_sub(&dmctx);
-	return 0;
-}
-
-int adm_entry_get_linker_param(struct dmctx *ctx, char *param, char *linker, char **value) // To be removed later!!!!!!!!!!!!
-{
-	BBF_ERR("%s API will be removed later, don't use it!!!!!!", __func__);
-
-	struct dmctx dmctx = {0};
-	*value = "";
-
-	if (!param || !linker || *linker == 0)
-		return 0;
-
-	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
-
-	dmctx.in_param = param;
-	dmctx.linker = linker;
-
-	dm_entry_get_linker(&dmctx);
-	*value = dmctx.linker_param;
-
-	bbf_ctx_clean_sub(&dmctx);
-	return 0;
-}
-
-int adm_entry_get_linker_value(struct dmctx *ctx, char *param, char **value) // To be removed later!!!!!!!!!!!!
-{
-	BBF_ERR("%s API will be removed later, don't use it!!!!!!", __func__);
-
-	struct dmctx dmctx = {0};
-	char linker[256] = {0};
-	*value = NULL;
-
-	if (!param || param[0] == '\0')
-		return 0;
-
-	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
-
-	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
-
-	dmctx.in_param = linker;
-
-	dm_entry_get_linker_value(&dmctx);
 	*value = dmctx.linker;
 
 	bbf_ctx_clean_sub(&dmctx);

@@ -222,37 +222,6 @@ int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 	return 0;
 }
 
-int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value) // To be removed later!!!!!!!!!!!!
-{
-	BBF_ERR("Use bbfdm_get_references API in place of %s API, this API will be removed later!!!", __func__);
-
-	if (DM_STRLEN(path) == 0 || DM_STRLEN(key_name) == 0 || DM_STRLEN(key_value) == 0 || !value)
-		return -1;
-
-	dmasprintf(value, "%s[%s==\"%s\"].", path, key_name, key_value);
-	return 0;
-}
-
-int bbf_get_reference_args(char *value, struct dm_reference *reference_args) // To be removed later!!!!!!!!!!!!
-{
-	BBF_ERR("Use bbfdm_get_reference_linker API in place of %s API, this API will be removed later!!!", __func__);
-
-	if (DM_STRLEN(value) == 0)
-		return -1;
-
-	reference_args->path = value;
-
-	char *seperator = strstr(value, "=>");
-	if (!seperator)
-		return -1;
-
-	*seperator = 0;
-
-	reference_args->value = seperator + 2;
-
-	return 0;
-}
-
 int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, char *key_name, char *key_value, char *out, size_t out_len)
 {
 	char param_path[1024] = {0};
@@ -433,100 +402,29 @@ int bbfdm_operate_reference_linker(struct dmctx *ctx, char *reference_path, char
 	return 0;
 }
 
-__attribute__ ((deprecated)) int bbf_validate_string(char *value, int min_length, int max_length, char *enumeration[], char *pattern[])
+__attribute__ ((deprecated)) int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value)
 {
-	struct dmctx ctx = {0};
+	if (DM_STRLEN(path) == 0 || DM_STRLEN(key_name) == 0 || DM_STRLEN(key_value) == 0 || !value)
+		return -1;
 
-	return bbfdm_validate_string(&ctx, value, min_length, max_length, enumeration, pattern);
+	dmasprintf(value, "%s[%s==\"%s\"].", path, key_name, key_value);
+	return 0;
 }
 
-__attribute__ ((deprecated)) int bbf_validate_boolean(char *value)
+__attribute__ ((deprecated)) int bbf_get_reference_args(char *value, struct dm_reference *reference_args)
 {
-	struct dmctx ctx = {0};
+	if (DM_STRLEN(value) == 0)
+		return -1;
 
-	return bbfdm_validate_boolean(&ctx, value);
-}
+	reference_args->path = value;
 
-__attribute__ ((deprecated)) int bbf_validate_unsignedInt(char *value, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
+	char *seperator = strstr(value, "=>");
+	if (!seperator)
+		return -1;
 
-	return bbfdm_validate_unsignedInt(&ctx, value, r_args, r_args_size);
-}
+	*seperator = 0;
 
-__attribute__ ((deprecated)) int bbf_validate_int(char *value, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
+	reference_args->value = seperator + 2;
 
-	return bbfdm_validate_int(&ctx, value, r_args, r_args_size);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_unsignedLong(char *value, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_unsignedLong(&ctx, value, r_args, r_args_size);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_long(char *value, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_long(&ctx, value, r_args, r_args_size);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_dateTime(char *value)
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_dateTime(&ctx, value);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_hexBinary(char *value, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_hexBinary(&ctx, value, r_args, r_args_size);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_string_list(char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[])
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_string_list(&ctx, value, min_item,max_item, max_size, min, max, enumeration, pattern);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_unsignedInt_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_unsignedInt_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_int_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_int_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_unsignedLong_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_unsignedLong_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_long_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_long_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
-}
-
-__attribute__ ((deprecated)) int bbf_validate_hexBinary_list(char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
-{
-	struct dmctx ctx = {0};
-
-	return bbfdm_validate_hexBinary_list(&ctx, value, min_item, max_item, max_size, r_args, r_args_size);
+	return 0;
 }

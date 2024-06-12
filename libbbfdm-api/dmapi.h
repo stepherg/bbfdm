@@ -139,7 +139,7 @@ typedef struct dm_obj_s {
 	struct dm_dynamic_leaf *dynamicleaf;
 	struct dm_obj_s *nextobj;
 	struct dm_leaf_s *leaf;
-	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker);
+	int (*get_linker)(char *refparam, struct dmctx *dmctx, void *data, char *instance, char **linker); // To be removed later!!!!!!!!!!!!
 	int bbfdm_type;
 	const char **unique_keys; // To be removed later!!!!!!!!!!!!
 } DMOBJ;
@@ -212,14 +212,6 @@ typedef struct dmnode {
 	int num_of_entries;
 	bool is_ubus_service;
 } DMNODE;
-
-enum operate_ret_status {
-	CMD_SUCCESS __attribute__ ((deprecated)),
-	CMD_INVALID_ARGUMENTS __attribute__ ((deprecated)),
-	CMD_FAIL __attribute__ ((deprecated)),
-	CMD_NOT_FOUND __attribute__ ((deprecated)),
-	__STATUS_MAX __attribute__ ((deprecated)),
-};
 
 typedef struct {
 	const char **in;
@@ -426,7 +418,7 @@ struct range_args {
 	const char *max;
 };
 
-struct dmmap_dup {
+struct __attribute__((deprecated("'dmmap_dup' is deprecated, please use the new structure 'dm_data'"))) dmmap_dup {
 	struct list_head list;
 	struct uci_section *config_section;
 	struct uci_section *dmmap_section;

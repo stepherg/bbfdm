@@ -17,6 +17,8 @@
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 
+#define SYSTEM_CERT_PATH "/etc/ssl/certs"
+
 static char certifcates_paths[MAX_CERT][CERT_PATH_LEN];
 
 struct certificate_profile {
