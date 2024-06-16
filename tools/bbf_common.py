@@ -13,6 +13,9 @@ import glob
 # Constants
 BBF_ERROR_CODE = 0
 CURRENT_PATH = os.getcwd()
+BBF_PLUGIN_DIR = "/usr/share/bbfdm/plugins/"
+BBF_MS_DIR = "/usr/share/bbfdm/micro_services/"
+
 DM_JSON_FILE = os.path.join(CURRENT_PATH, "libbbfdm", "dmtree", "json", "datamodel.json")
 
 LIST_SUPPORTED_USP_DM = []
@@ -145,10 +148,17 @@ def clear_list(input_list):
     input_list.clear()
 
 
-def generate_shared_library(output_library, source_files, vendor_prefix, extra_dependencies):
+def generate_shared_library(dm_name, source_files, vendor_prefix, extra_dependencies, is_microservice=False):
     # Return if source_files (list) is empty
     if len(source_files) == 0:
         return
+
+    if is_microservice:
+        outdir=BBF_MS_DIR
+    else:
+        outdir=BBF_PLUGIN_DIR
+
+    output_library = outdir + dm_name
 
     # Set vendor prefix
     if vendor_prefix is not None:
@@ -219,7 +229,7 @@ def build_and_install_bbfdm(vendor_prefix, vendor_list):
     print('Compiling and installing bbfdmd done')
 
 
-def create_bbfdm_input_json_file(proto):
+def create_bbfdm_input_json_file(proto, dm_name=None):
     data = {
         "daemon": {
         },
@@ -238,7 +248,11 @@ def create_bbfdm_input_json_file(proto):
             }
         }
     }
-    
+
+    if dm_name:
+        del data["cli"]["input"]["plugin_dir"]
+        data["cli"]["input"]["name"] = dm_name
+
     file_path = '/tmp/bbfdm/input.json'
     
     # Ensure the directory exists
@@ -249,9 +263,7 @@ def create_bbfdm_input_json_file(proto):
         json.dump(data, json_file, indent=4)
 
 
-def fill_list_dm(proto, dm_list):
-    create_bbfdm_input_json_file(proto)
-    
+def fill_list_dm(dm_list):
     command = "bbfdmd -c schema Device."
     try:
         # Run the command
@@ -296,18 +308,24 @@ def remove_duplicate_elements(input_list):
 
 
 def fill_list_supported_dm():
+    for proto, DB in [("usp", LIST_SUPPORTED_USP_DM), ("cwmp", LIST_SUPPORTED_CWMP_DM)]:
+        create_bbfdm_input_json_file(proto)
+        fill_list_dm(DB)
+        DB.sort(key=lambda x: x['param'], reverse=False)
+        DB[:] = remove_duplicate_elements(DB)
 
-    fill_list_dm("usp", LIST_SUPPORTED_USP_DM)
-    LIST_SUPPORTED_USP_DM.sort(key=lambda x: x['param'], reverse=False)
-    LIST_SUPPORTED_USP_DM[:] = remove_duplicate_elements(LIST_SUPPORTED_USP_DM)
+    for file in os.listdir(BBF_MS_DIR):
+        f = os.path.join(BBF_MS_DIR, file)
 
-    fill_list_dm("cwmp", LIST_SUPPORTED_CWMP_DM)
-    LIST_SUPPORTED_CWMP_DM.sort(key=lambda x: x['param'], reverse=False)
-    LIST_SUPPORTED_CWMP_DM[:] = remove_duplicate_elements(LIST_SUPPORTED_CWMP_DM)
-
+        if os.path.isfile(f):
+            for proto, DB in [("usp", LIST_SUPPORTED_USP_DM), ("cwmp", LIST_SUPPORTED_CWMP_DM)]:
+                create_bbfdm_input_json_file(proto, f)
+                fill_list_dm(DB)
+                DB.sort(key=lambda x: x['param'], reverse=False)
+                DB[:] = remove_duplicate_elements(DB)
 
 def clone_git_repository(repo, version=None):
-    repo_path='.repo/'+os.path.basename(repo)
+    repo_path='.repo/'+os.path.basename(repo).replace('.git','')
     if os.path.exists(repo_path):
         print(f'    {repo} already exists at {repo_path} !')
         return True
@@ -344,18 +362,20 @@ def download_and_build_plugins(plugins, vendor_prefix):
         repo = get_option_value(plugin, "repo")
         proto = get_option_value(plugin, "proto")
         dm_files = get_option_value(plugin, "dm_files")
+        is_microservice = get_option_value(plugin, "is_microservice")
         extra_dependencies = get_option_value(plugin, "extra_dependencies", [])
         repo_path = None
+        name=os.path.basename(repo).replace('.git','')
 
         if repo is None or proto is None or dm_files is None or not isinstance(dm_files, list):
             print("Necessary input missing")
             BBF_ERROR_CODE += 1
             continue
 
-        print(f' - Processing plugin: {plugin}')
+        print(f' - Processing plugin: MS({is_microservice}) {plugin}')
 
         if proto == "git":
-            repo_path = ".repo/"+os.path.basename(repo)
+            repo_path = ".repo/"+name
             version = get_option_value(plugin, "version")
 
 
@@ -394,7 +414,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
                     BBF_ERROR_CODE += 1
 
         if len(LIST_FILES) > 0:
-            if not generate_shared_library(f"/usr/share/bbfdm/plugins/lib{plugin_index}.so", LIST_FILES, vendor_prefix, extra_dependencies):
+            if not generate_shared_library(f"{name}{plugin_index}.so", LIST_FILES, vendor_prefix, extra_dependencies, is_microservice):
                 BBF_ERROR_CODE += 1
 
         clear_list(LIST_FILES)

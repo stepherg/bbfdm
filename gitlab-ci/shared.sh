@@ -1,6 +1,7 @@
 #!/bin/bash
 
 BBFDM_PLUGIN_DIR="/usr/share/bbfdm/plugins"
+BBFDM_MS_DIR="/usr/share/bbfdm/micro_services"
 
 if [ -z "${CI_PROJECT_PATH}" ]; then
 	CI_PROJECT_PATH=${PWD}

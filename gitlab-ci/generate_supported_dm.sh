@@ -19,6 +19,9 @@ fi
 [ ! -d "${BBFDM_PLUGIN_DIR}" ] && mkdir -p "${BBFDM_PLUGIN_DIR}"
 rm -f ${BBFDM_PLUGIN_DIR}/*
 
+[ ! -d "${BBFDM_MS_DIR}" ] && mkdir -p "${BBFDM_MS_DIR}"
+rm -f ${BBFDM_MS_DIR}/*
+
 if [ -z "${1}" ]; then
 	./tools/generate_dm.py tools/tools_input.json
 else
