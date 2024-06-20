@@ -29,8 +29,7 @@
   },
   "cli": {
     "config": {
-      "proto": "both",
-      "instance_mode": 0
+      "proto": "both"
     },
     "input": {
       "type": "UBUS",
@@ -382,11 +381,17 @@ To configure the log_level in micro-service, update the `loglevel` module json f
 ```json
 # cat /etc/bbfdm/micro_services/sshmngr.json
 {
-  "daemon": {
-    "enable": "1",
-    "service_name": "sshmngr",
-    "config": {
-      "loglevel": "1"
+    "cli": {
+        "config": {
+            "proto": "usp" // usp, cwmp
+        },
+        "input": {
+            "type": "UBUS", // JSON, UBUS, DotSO, UNIX
+            "name": "bbfdm"
+        },
+        "output": {
+            "type": "CLI" // CLI, JSON
+        }
     }
   }
 }

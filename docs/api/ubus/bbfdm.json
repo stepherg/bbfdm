@@ -114,12 +114,6 @@
         "pretty"
       ]
     },
-    "instance_mode_t": {
-      "type": "integer",
-      "default": 0,
-      "minimum": 0,
-      "maximum": 1
-    },
     "trans_id_t": {
       "description": "Required for CUD operation, it shall be same number as got from transaction->start",
       "type": "integer",
@@ -296,9 +290,6 @@
                 },
                 "proto": {
                   "$ref": "#/definitions/proto_t"
-                },
-                "instance_mode": {
-                  "$ref": "#/definitions/instance_mode_t"
                 }
               }
             }
@@ -367,9 +358,6 @@
               "properties": {
                 "proto": {
                   "$ref": "#/definitions/proto_t"
-                },
-                "instance_mode": {
-                  "$ref": "#/definitions/instance_mode_t"
                 }
               }
             }
@@ -590,9 +578,6 @@
                 "proto": {
                   "$ref": "#/definitions/proto_t"
                 },
-                "instance_mode": {
-                  "$ref": "#/definitions/instance_mode_t"
-                },
                 "transaction_id": {
                   "$ref": "#/definitions/trans_id_t"
                 }
@@ -671,9 +656,6 @@
                 },
                 "proto": {
                   "$ref": "#/definitions/proto_t"
-                },
-                "instance_mode": {
-                  "$ref": "#/definitions/instance_mode_t"
                 }
               }
             }

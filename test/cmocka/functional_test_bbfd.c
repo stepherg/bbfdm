@@ -439,70 +439,6 @@ static void test_api_bbfdm_get_set_library_parameter(void **state)
 	validate_parameter(ctx, "Device.WiFi.SSID.1.Enable", "0", "xsd:boolean");
 }
 
-static void test_api_bbfdm_get_set_standard_parameter_alias(void **state)
-{
-	struct dmctx *ctx = (struct dmctx *) *state;
-	int fault = 0;
-
-	ctx->instance_mode = INSTANCE_MODE_ALIAS;
-
-	// get value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Channel";
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.WiFi.Radio.[cpe-1].Channel", "100", "xsd:unsignedInt");
-
-	// Set Wrong Value ==> expected "9007" error
-	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Channel";
-	ctx->in_value = "64t";
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, FAULT_9007);
-
-	// set value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Channel";
-	ctx->in_value = "52";
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// get value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Channel";
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// validate parameter after setting to 64: name, type, value
-	validate_parameter(ctx, "Device.WiFi.Radio.[cpe-1].Channel", "52", "xsd:unsignedInt");
-
-	// set value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.Radio.[cpe-1].Alias";
-	ctx->in_value = "iopsys_test";
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// get value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.Radio.[iopsys_test].Alias";
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// validate parameter after setting to 64: name, type, value
-	validate_parameter(ctx, "Device.WiFi.Radio.[iopsys_test].Alias", "iopsys_test", "xsd:string");
-
-	// set value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.Radio.[iopsys_test].Channel";
-	ctx->in_value = "116";
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// get value ==> expected "0" error
-	ctx->in_param = "Device.WiFi.Radio.[iopsys_test].Channel";
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// validate parameter after setting to 64: name, type, value
-	validate_parameter(ctx, "Device.WiFi.Radio.[iopsys_test].Channel", "116", "xsd:unsignedInt");
-}
-
 static void test_api_bbfdm_input_value_validation_json_parameter(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
@@ -1777,7 +1713,6 @@ int main(void)
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_v1_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_library_parameter, setup, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter_alias, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_input_value_validation_json_parameter, setup, teardown_commit),
 
 		// Add/Delete Object method test cases

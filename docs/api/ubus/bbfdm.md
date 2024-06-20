@@ -507,7 +507,6 @@ Integer to decide the depth of data model to be parsed
 | Property        | Type    | Required | Default    |
 | --------------- | ------- | -------- | ---------- |
 | `format`        | string  | Optional | `"pretty"` |
-| `instance_mode` | integer | Optional | `0`        |
 | `proto`         | string  | Optional | `"both"`   |
 
 #### format
@@ -530,21 +529,6 @@ The value of this property **must** be equal to one of the [known values below](
 | ------ |
 | raw    |
 | pretty |
-
-#### instance_mode
-
-`instance_mode`
-
-- is optional
-- type: reference
-- default: `0`
-
-##### instance_mode Type
-
-`integer`
-
-- minimum value: `0`
-- maximum value: `1`
 
 #### proto
 
@@ -635,7 +619,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf get {"path":"reprehende","paths":["nostrud"],"maxdepth":-31156882,"optional":{"format":"pretty","proto":"cwmp","instance_mode":1}}
+ubus call bbf get {"path":"reprehende","paths":["nostrud"],"maxdepth":-31156882,"optional":{"format":"pretty","proto":"cwmp"}}
 ```
 
 ### JSONRPC Example
@@ -653,7 +637,7 @@ ubus call bbf get {"path":"reprehende","paths":["nostrud"],"maxdepth":-31156882,
       "path": "reprehende",
       "paths": ["nostrud"],
       "maxdepth": -31156882,
-      "optional": { "format": "pretty", "proto": "cwmp", "instance_mode": 1 }
+      "optional": { "format": "pretty", "proto": "cwmp" }
     }
   ]
 }
@@ -797,23 +781,7 @@ gets only first level objects if true
 
 | Property        | Type    | Required | Default  |
 | --------------- | ------- | -------- | -------- |
-| `instance_mode` | integer | Optional | `0`      |
 | `proto`         | string  | Optional | `"both"` |
-
-#### instance_mode
-
-`instance_mode`
-
-- is optional
-- type: reference
-- default: `0`
-
-##### instance_mode Type
-
-`integer`
-
-- minimum value: `0`
-- maximum value: `1`
 
 #### proto
 
@@ -878,7 +846,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf instances {"path":"veniam","first_level":false,"optional":{"proto":"cwmp","instance_mode":0}}
+ubus call bbf instances {"path":"veniam","first_level":false,"optional":{"proto":"cwmp"}}
 ```
 
 ### JSONRPC Example
@@ -892,7 +860,7 @@ ubus call bbf instances {"path":"veniam","first_level":false,"optional":{"proto"
     "<SID>",
     "bbf",
     "instances",
-    { "path": "veniam", "first_level": false, "optional": { "proto": "cwmp", "instance_mode": 0 } }
+    { "path": "veniam", "first_level": false, "optional": { "proto": "cwmp" } }
   ]
 }
 ```
@@ -1130,19 +1098,13 @@ Unknown type ``.
       "default": "pretty",
       "enum": ["raw", "pretty"]
     },
-    "instance_mode_t": {
-      "type": "integer",
-      "default": 0,
-      "minimum": 0,
-      "maximum": 1
-    },
     "trans_id_t": {
       "description": "Required for CUD operation, it shall be same number as got from transaction->start",
       "type": "integer",
       "minimum": 1
     }
   },
-  "out": "{\"definitions\":{\"path_t\":{\"description\":\"Complete object element path as per TR181\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.1.\",\"Device.WiFi.\"]},\"schema_path_t\":{\"description\":\"Datamodel object schema path\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.Bridging.Bridge.{i}.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.{i}.SSID\"]},\"boolean_t\":{\"type\":\"string\",\"enum\":[\"0\",\"1\"]},\"operate_path_t\":{\"description\":\"Datamodel object schema path\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.IP.Diagnostics.IPPing()\",\"Device.DHCPv4.Client.{i}.Renew()\",\"Device.FactoryReset()\"]},\"query_path_t\":{\"description\":\"DM object path with search queries\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.1.BSSID\",\"Device.WiFi.SSID.*.BSSID\",\"Device.WiFi.\"]},\"instance_t\":{\"description\":\"Multi object instances\",\"type\":\"string\",\"minLength\":6,\"maxLength\":256},\"proto_t\":{\"type\":\"string\",\"default\":\"both\",\"enum\":[\"usp\",\"cwmp\",\"both\"]},\"type_t\":{\"type\":\"string\",\"enum\":[\"xsd:string\",\"xsd:unsignedInt\",\"xsd:int\",\"xsd:unsignedLong\",\"xsd:long\",\"xsd:boolean\",\"xsd:dateTime\",\"xsd:hexBinary\",\"xsd:object\",\"xsd:command\",\"xsd:event\"]},\"fault_t\":{\"type\":\"integer\",\"minimum\":7000,\"maximum\":9050},\"trans_type_t\":{\"type\":\"string\",\"enum\":[\"start\",\"commit\",\"abort\",\"status\"]},\"srv_type_t\":{\"type\":\"string\",\"enum\":[\"register\",\"list\"]},\"format_t\":{\"type\":\"string\",\"default\":\"pretty\",\"enum\":[\"raw\",\"pretty\"]},\"instance_mode_t\":{\"type\":\"integer\",\"default\":0,\"minimum\":0,\"maximum\":1},\"trans_id_t\":{\"description\":\"Required for CUD operation, it shall be same number as got from transaction->start\",\"type\":\"integer\",\"minimum\":1}}}",
+  "out": "{\"definitions\":{\"path_t\":{\"description\":\"Complete object element path as per TR181\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.1.\",\"Device.WiFi.\"]},\"schema_path_t\":{\"description\":\"Datamodel object schema path\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.Bridging.Bridge.{i}.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.{i}.SSID\"]},\"boolean_t\":{\"type\":\"string\",\"enum\":[\"0\",\"1\"]},\"operate_path_t\":{\"description\":\"Datamodel object schema path\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.IP.Diagnostics.IPPing()\",\"Device.DHCPv4.Client.{i}.Renew()\",\"Device.FactoryReset()\"]},\"query_path_t\":{\"description\":\"DM object path with search queries\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.1.BSSID\",\"Device.WiFi.SSID.*.BSSID\",\"Device.WiFi.\"]},\"instance_t\":{\"description\":\"Multi object instances\",\"type\":\"string\",\"minLength\":6,\"maxLength\":256},\"proto_t\":{\"type\":\"string\",\"default\":\"both\",\"enum\":[\"usp\",\"cwmp\",\"both\"]},\"type_t\":{\"type\":\"string\",\"enum\":[\"xsd:string\",\"xsd:unsignedInt\",\"xsd:int\",\"xsd:unsignedLong\",\"xsd:long\",\"xsd:boolean\",\"xsd:dateTime\",\"xsd:hexBinary\",\"xsd:object\",\"xsd:command\",\"xsd:event\"]},\"fault_t\":{\"type\":\"integer\",\"minimum\":7000,\"maximum\":9050},\"trans_type_t\":{\"type\":\"string\",\"enum\":[\"start\",\"commit\",\"abort\",\"status\"]},\"srv_type_t\":{\"type\":\"string\",\"enum\":[\"register\",\"list\"]},\"format_t\":{\"type\":\"string\",\"default\":\"pretty\",\"enum\":[\"raw\",\"pretty\"]},\"trans_id_t\":{\"description\":\"Required for CUD operation, it shall be same number as got from transaction->start\",\"type\":\"integer\",\"minimum\":1}}}",
   "simpletype": "complex"
 }
 ```
@@ -1209,7 +1171,6 @@ Unknown type ``.
     "trans_type_t": { "type": "string", "enum": ["start", "commit", "abort", "status"] },
     "srv_type_t": { "type": "string", "enum": ["register", "list"] },
     "format_t": { "type": "string", "default": "pretty", "enum": ["raw", "pretty"] },
-    "instance_mode_t": { "type": "integer", "default": 0, "minimum": 0, "maximum": 1 },
     "trans_id_t": {
       "description": "Required for CUD operation, it shall be same number as got from transaction->start",
       "type": "integer",
@@ -1334,7 +1295,6 @@ Input arguments for the operate command as defined in TR-181-2.13
 | Property        | Type    | Required | Default    |
 | --------------- | ------- | -------- | ---------- |
 | `format`        | string  | Optional | `"pretty"` |
-| `instance_mode` | integer | Optional | `0`        |
 | `proto`         | string  | Optional | `"both"`   |
 
 #### format
@@ -1357,21 +1317,6 @@ The value of this property **must** be equal to one of the [known values below](
 | ------ |
 | raw    |
 | pretty |
-
-#### instance_mode
-
-`instance_mode`
-
-- is optional
-- type: reference
-- default: `0`
-
-##### instance_mode Type
-
-`integer`
-
-- minimum value: `0`
-- maximum value: `1`
 
 #### proto
 
@@ -1398,7 +1343,7 @@ The value of this property **must** be equal to one of the [known values below](
 ### Ubus CLI Example
 
 ```
-ubus call bbf operate {"command":"ex in sint ullamco","command_key":"in culpa in","input":{},"optional":{"format":"raw","proto":"cwmp","instance_mode":1}}
+ubus call bbf operate {"command":"ex in sint ullamco","command_key":"in culpa in","input":{},"optional":{"format":"raw","proto":"cwmp"}}
 ```
 
 ### JSONRPC Example
@@ -1416,7 +1361,7 @@ ubus call bbf operate {"command":"ex in sint ullamco","command_key":"in culpa in
       "command": "ex in sint ullamco",
       "command_key": "in culpa in",
       "input": {},
-      "optional": { "format": "raw", "proto": "cwmp", "instance_mode": 1 }
+      "optional": { "format": "raw", "proto": "cwmp" }
     }
   ]
 }
@@ -2090,24 +2035,8 @@ To set multiple values at once, path should be relative to object elements
 
 | Property         | Type    | Required | Default  |
 | ---------------- | ------- | -------- | -------- |
-| `instance_mode`  | integer | Optional | `0`      |
 | `proto`          | string  | Optional | `"both"` |
 | `transaction_id` | integer | Optional |          |
-
-#### instance_mode
-
-`instance_mode`
-
-- is optional
-- type: reference
-- default: `0`
-
-##### instance_mode Type
-
-`integer`
-
-- minimum value: `0`
-- maximum value: `1`
 
 #### proto
 
@@ -2214,7 +2143,7 @@ value of the object element provided in path, path should contains valid writabl
 ### Ubus CLI Example
 
 ```
-ubus call bbf set {"path":"Duis et","value":"elit velit fugiat mollit sunt","optional":{"proto":"cwmp","instance_mode":0,"transaction_id":94067988},"obj_path":{}}
+ubus call bbf set {"path":"Duis et","value":"elit velit fugiat mollit sunt","optional":{"proto":"cwmp","transaction_id":94067988},"obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -2231,7 +2160,7 @@ ubus call bbf set {"path":"Duis et","value":"elit velit fugiat mollit sunt","opt
     {
       "path": "Duis et",
       "value": "elit velit fugiat mollit sunt",
-      "optional": { "proto": "cwmp", "instance_mode": 0, "transaction_id": 94067988 },
+      "optional": { "proto": "cwmp", "transaction_id": 94067988 },
       "obj_path": {}
     }
   ]

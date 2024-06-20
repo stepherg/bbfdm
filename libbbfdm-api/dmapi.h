@@ -183,9 +183,6 @@ struct dmctx {
 	char *addobj_instance;
 	char *linker;
 	char *linker_param;
-	unsigned int alias_register;
-	unsigned int nbrof_instance;
-	unsigned int instance_mode;
 	unsigned int dm_type;
 	unsigned char inparam_isparam;
 	unsigned char findparam;
@@ -344,11 +341,6 @@ enum fault_code_enum {
 	FAULT_9031,// Invalid Deployment Unit Update: Version not specified
 	FAULT_9032,// Invalid Deployment Unit Update: Version already exist
 	__FAULT_MAX
-};
-
-enum instance_mode {
-	INSTANCE_MODE_NUMBER,
-	INSTANCE_MODE_ALIAS
 };
 
 enum dm_browse_enum {

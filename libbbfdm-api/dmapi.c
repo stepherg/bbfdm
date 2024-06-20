@@ -318,7 +318,6 @@ static char *bbfdm_get_reference_value(char *reference_path)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string("usp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string("0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
 	dmubus_call("bbfdm", "get",

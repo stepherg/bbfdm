@@ -15,8 +15,7 @@
 	},
 	"cli": {
 		"config": {
-			"proto": "both",
-			"instance_mode": 0
+			"proto": "both"
 		},
 		"input": {
 			"type": "UBUS",

@@ -46,7 +46,6 @@ static int set_resolved_paths(unsigned int dm_type, char *path, char *value, str
 {
 	int fault = 0;
 	struct dmctx bbf_ctx = {
-			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = dm_type
 	};
 

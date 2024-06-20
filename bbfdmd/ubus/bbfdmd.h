@@ -18,7 +18,6 @@ struct bbfdm_async_req {
 
 typedef struct bbfdm_config {
 	int proto; // Protocol identifier, Possible values: { '0'<both>, '1'<cwmp>, '2'<usp> }
-	int instance_mode; // Instance mode, Possible values: { '0'<Instance Number>, '1'<Instance Alias> }
 	int transaction_timeout; // Timeout for transactions
 	int subprocess_level; // Subprocess level
 	uint8_t log_level; // Log level, Possible values: { '1', '2', '3', '4' }

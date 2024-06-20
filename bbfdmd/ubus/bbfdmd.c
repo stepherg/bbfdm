@@ -138,11 +138,6 @@ static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 			data->bbf_ctx.dm_type = get_proto_type(val);
 		}
 
-		if (is_str_eq(blobmsg_name(attr), "instance_mode")) {
-			int instance_mode = blobmsg_get_u32(attr);
-			data->bbf_ctx.instance_mode = get_instance_mode(instance_mode);
-		}
-
 		if (is_str_eq(blobmsg_name(attr), "transaction_id"))
 			data->trans_id = blobmsg_get_u32(attr);
 
@@ -152,7 +147,6 @@ static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 
 	DEBUG("Proto:|%s|, Inst Mode:|%s|, Tran-id:|%d|, Format:|%s|",
 			(data->bbf_ctx.dm_type == BBFDM_BOTH) ? "both" : (data->bbf_ctx.dm_type == BBFDM_CWMP) ? "cwmp" : "usp",
-			(data->bbf_ctx.instance_mode == 0) ? "Number" : "Alias",
 			data->trans_id,
 			data->is_raw ? "raw" : "pretty");
 }
@@ -1185,7 +1179,6 @@ static void update_instances_list(struct list_head *inst)
 			.in_param = ROOT_NODE,
 			.nextlevel = false,
 			.disable_mservice_browse = true,
-			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = BBFDM_USP
 	};
 
@@ -1539,13 +1532,6 @@ static int _parse_input_cli_options(bbfdm_config_t *config, json_object *json_ob
 		config->proto = get_proto_type(opt_val);
 	} else {
 		config->proto = BBFDM_BOTH;
-	}
-
-	opt_val = dmjson_get_value(json_obj, 3, "cli", "config", "instance_mode");
-	if (DM_STRLEN(opt_val)) {
-		config->instance_mode = get_instance_mode((int) strtol(opt_val, NULL, 10));
-	} else {
-		config->instance_mode = INSTANCE_MODE_NUMBER;
 	}
 
 	opt_val = dmjson_get_value(json_obj, 3, "cli", "input", "type");

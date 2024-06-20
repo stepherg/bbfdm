@@ -58,7 +58,6 @@ bool validate_msglen(bbfdm_data_t *data);
 
 int get_dm_type(char *dm_type);
 int get_proto_type(const char *proto);
-int get_instance_mode(int instance_mode);
 
 #define DEBUG(fmt, args...) \
 	print_debug("[%s:%d]"fmt, __func__, __LINE__, ##args)

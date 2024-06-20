@@ -199,7 +199,6 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 		return bbf_fault_map(ctx, FAULT_9005);
 	}
 
-	dmentry_instance_lookup_inparam(ctx);
 	ctx->iswildcard = DM_STRCHR(ctx->in_param, '*') ? 1 : 0;
 	ctx->stop = false;
 

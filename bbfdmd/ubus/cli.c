@@ -26,7 +26,6 @@ static void *cli_lib_handle = NULL;
 
 typedef struct {
 	struct dmctx bbf_ctx;
-	unsigned int instance_mode;
 	unsigned int proto;
 	char in_name[128];
 	char in_plugin_dir[128];
@@ -184,7 +183,6 @@ static int in_ubus_out_cli_exec_cmd(cli_data_t *cli_data, const char *path, cons
 	table = blobmsg_open_table(&b, "optional");
 	blobmsg_add_string(&b, "proto", (cli_data->proto == BBFDM_CWMP) ? "cwmp" : "usp");
 	blobmsg_add_string(&b, "format", "raw");
-	blobmsg_add_u32(&b, "instance_mode", cli_data->instance_mode);
 	blobmsg_close_table(&b, table);
 
 	int e = bbfdm_ubus_invoke(cli_data->in_name, cli_data->cmd, b.head, __ubus_callback, cli_data);
@@ -209,7 +207,6 @@ static int bbfdm_load_cli_config(bbfdm_config_t *bbf_config, cli_data_t *cli_dat
 	char *opt_val = NULL;
 
 	cli_data->proto = bbf_config->proto;
-	cli_data->instance_mode = bbf_config->instance_mode;
 
 	opt_val = bbf_config->cli_in_type;
 	if (opt_val && strlen(opt_val)) {
@@ -535,7 +532,6 @@ static int cli_exec_command(cli_data_t *cli_data, int argc, char *argv[])
 		bbf_ctx_init(&cli_data->bbf_ctx, CLI_DM_ROOT_OBJ);
 
 		cli_data->bbf_ctx.dm_type = cli_data->proto;
-		cli_data->bbf_ctx.instance_mode = cli_data->instance_mode;
 	} else if (strcasecmp(cli_data->in_type, "UBUS") != 0) {
 		return -1;
 	}

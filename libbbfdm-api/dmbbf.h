@@ -35,7 +35,6 @@ void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, c
 void free_all_list_parameter(struct dmctx *ctx);
 int string_to_bool(char *v, bool *b);
 char *get_value_by_reference(struct dmctx *ctx, char *value);
-void dmentry_instance_lookup_inparam(struct dmctx *ctx);
 int dm_entry_get_value(struct dmctx *dmctx);
 int dm_entry_get_name(struct dmctx *ctx);
 int dm_entry_get_supported_dm(struct dmctx *ctx);
@@ -48,12 +47,7 @@ int dm_entry_operate(struct dmctx *dmctx);
 int dm_entry_event(struct dmctx *dmctx);
 int dm_entry_get_reference_param(struct dmctx *dmctx);
 int dm_entry_get_reference_value(struct dmctx *dmctx);
-int dm_entry_get_linker(struct dmctx *dmctx);
-int dm_entry_get_linker_value(struct dmctx *dmctx);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
-
-char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[]);
-char *update_instance(char *max_inst, int argc, ...);
 
 static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance)
 {

@@ -644,21 +644,6 @@ int get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int (*b
 	return node.num_of_entries;
 }
 
-static int get_instance_mode(struct dmctx *dmctx, DMNODE *node)
-{
-	unsigned char instancelevel = node->instance_level;
-	int inst_mode = INSTANCE_MODE_NUMBER;
-
-	if (dmctx->nbrof_instance <= instancelevel) {
-		if (dmctx->instance_mode == INSTANCE_MODE_ALIAS)
-			inst_mode = INSTANCE_MODE_ALIAS;
-	} else if (dmctx->alias_register & (1 << instancelevel)) {
-		inst_mode = INSTANCE_MODE_ALIAS;
-	}
-
-	return inst_mode;
-}
-
 static int find_max_instance(struct dmctx *ctx, DMNODE *node)
 {
 	if (node->max_instance == 0) {
@@ -685,21 +670,6 @@ char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_secti
 			dmuci_set_value_by_section(s, inst_opt, buf);
 			instance = dmstrdup(buf);
 		}
-
-		int inst_mode = get_instance_mode(dmctx, parent_node);
-
-		if (inst_mode == INSTANCE_MODE_ALIAS) {
-			char *alias = "";
-
-			dmuci_get_value_by_section_string(s, alias_opt, &alias);
-			if (alias && alias[0] == '\0') {
-				snprintf(buf, sizeof(buf), "cpe-%s", instance);
-				dmuci_set_value_by_section(s, alias_opt, buf);
-				alias = dmstrdup(buf);
-			}
-			snprintf(buf, sizeof(buf), "[%s]", alias);
-			instance = dmstrdup(buf);
-		}
 		break;
 	case BROWSE_FIND_MAX_INST:
 	case BROWSE_NUM_OF_ENTRIES:
@@ -717,9 +687,6 @@ char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, 
 	switch(parent_node->browse_type) {
 	case BROWSE_NORMAL:
 		dmasprintf(&instance, "%d", inst_nbr);
-		int inst_mode = get_instance_mode(dmctx, parent_node);
-		if (inst_mode == INSTANCE_MODE_ALIAS)
-			dmasprintf(&instance, "[cpe-%d]", inst_nbr);
 		break;
 	case BROWSE_FIND_MAX_INST:
 	case BROWSE_NUM_OF_ENTRIES:
@@ -727,86 +694,6 @@ char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, 
 	}
 
 	dmctx->inst_buf[parent_node->instance_level] = instance;
-	return instance;
-}
-
-char *update_instance(char *max_inst, int argc, ...)
-{
-	va_list arg;
-	char *instance, *last_inst = NULL;
-	int i = 0;
-	void *argv[8] = {0};
-
-	va_start(arg, argc);
-	for (i = 0; i < argc; i++) {
-		argv[i] = va_arg(arg, void*);
-	}
-	va_end(arg);
-
-	instance = update_instance_alias(0, &last_inst, &max_inst, argv);
-
-	return instance;
-}
-
-static int get_max_instance(char *dmmap_package, char *section_type, char *inst_opt, int (*check_browse)(struct uci_section *section, void *data), void *data)
-{
-	struct uci_section *s;
-	char *inst;
-	int max = 0;
-
-	uci_path_foreach_sections(bbfdm, dmmap_package, section_type, s) {
-		if (check_browse && check_browse(s, data) != 0)
-			continue;
-
-		dmuci_get_value_by_section_string(s, inst_opt, &inst);
-		if (DM_STRLEN(inst) == 0)
-			continue;
-
-		int instance = DM_STRTOL(inst);
-
-		max = max > instance ? max : instance;
-	}
-
-	return max;
-}
-
-char *update_instance_alias(int action, char **last_inst, char **max_inst, void *argv[])
-{
-	char *instance, *alias;
-	char buf[64] = {0};
-	int max_instance = 0;
-
-	struct uci_section *s = (struct uci_section *) argv[0];
-	char *inst_opt = (char *) argv[1];
-	char *alias_opt = (char *) argv[2];
-	int (*check_browse)(struct uci_section *section, void *data) = argv[3];
-	void *data = (void *) argv[4];
-
-	if (*max_inst == NULL)
-		max_instance = get_max_instance(section_config(s), section_type(s), inst_opt, check_browse, data);
-	else
-		max_instance = DM_STRTOL(*max_inst);
-
-	dmuci_get_value_by_section_string(s, inst_opt, &instance);
-	if (instance[0] == '\0') {
-		snprintf(buf, sizeof(buf), "%d", max_instance + 1);
-		dmuci_set_value_by_section(s, inst_opt, buf);
-		*max_inst = dmstrdup(instance);
-	} else {
-		dmasprintf(max_inst, "%d", max_instance);
-	}
-	*last_inst = instance;
-
-	if (action == INSTANCE_MODE_ALIAS) {
-		dmuci_get_value_by_section_string(s, alias_opt, &alias);
-		if (alias[0] == '\0') {
-			snprintf(buf, sizeof(buf), "cpe-%s", instance);
-			dmuci_set_value_by_section(s, alias_opt, buf);
-			alias = dmstrdup(buf);
-		}
-		snprintf(buf, sizeof(buf), "[%s]", alias);
-		instance = dmstrdup(buf);
-	}
 	return instance;
 }
 
@@ -1096,24 +983,6 @@ static char *get_default_value_by_type(int type)
 	}
 }
 
-void dmentry_instance_lookup_inparam(struct dmctx *ctx)
-{
-	char *pch, *spch, *in_param;
-	in_param = dmstrdup(ctx->in_param);
-	int i = 0;
-
-	for (pch = strtok_r(in_param, ".", &spch); pch != NULL; pch = strtok_r(NULL, ".", &spch)) {
-		if (pch[0]== '[') {
-			ctx->alias_register |= (1 << i);
-			i++;
-		} else if (isdigit(pch[0])) {
-			i++;
-		}
-	}
-	dmfree(in_param);
-	ctx->nbrof_instance = i;
-}
-
 static void get_reference_paramater_value(struct dmctx *dmctx, char *in_value, char *str, size_t size)
 {
 	char *pch = NULL, *pchr = NULL;
@@ -1156,7 +1025,6 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
 	dmubus_call(ubus_name, "get",
@@ -1236,7 +1104,6 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
 	dmubus_call(ubus_name, "schema",
@@ -1375,7 +1242,6 @@ static int get_ubus_instances(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
 	dmubus_call(ubus_name, "instances",
@@ -1426,7 +1292,6 @@ static int add_ubus_object(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 	json_object_object_add(in_args, "transaction_id", json_object_new_int(dmctx->trans_id));
 
@@ -1473,7 +1338,6 @@ static int del_ubus_object(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 	json_object_object_add(in_args, "transaction_id", json_object_new_int(dmctx->trans_id));
 
@@ -1545,7 +1409,6 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 	json_object_object_add(in_args, "transaction_id", json_object_new_int(dmctx->trans_id));
 
@@ -1600,7 +1463,6 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string("cwmp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
 	dmubus_call(ubus_name, "schema",
@@ -1664,7 +1526,6 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 	char *ubus_name = node->obj->checkdep;
 
 	json_object *in_args = json_object_new_object();
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
 	dmubus_call_blocking(ubus_name, "operate",
@@ -1736,7 +1597,6 @@ static int get_ubus_reference_value(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
 	dmubus_call(ubus_name, "get",
@@ -2487,7 +2347,6 @@ static int get_key_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "instance_mode", json_object_new_string(dmctx->instance_mode ? "1" : "0"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 
 	dmubus_call(ubus_name, "get",
@@ -2585,106 +2444,6 @@ int dm_entry_get_reference_param(struct dmctx *dmctx)
 }
 
 /******************
- * get linker param
- *****************/
-static int get_linker_check_obj(DMOBJECT_ARGS)
-{
-	char *link_val = "";
-
-	if (!get_linker)
-		return  FAULT_9005;
-
-	if (node->obj->browseinstobj && !node->is_instanceobj)
-		return  FAULT_9005;
-
-	get_linker(node->current_object, dmctx, data, instance, &link_val);
-
-	if (dmctx == NULL)
-		return FAULT_9005;
-
-	if (dmctx->linker == NULL)
-		return FAULT_9005;
-
-	if (dmctx->linker[0] == '\0')
-		return  FAULT_9005;
-
-	if (link_val && link_val[0] != '\0' && DM_STRCMP(link_val, dmctx->linker) == 0) {
-		if (node->current_object[DM_STRLEN(node->current_object) - 1] == '.')
-			node->current_object[DM_STRLEN(node->current_object) - 1] = 0;
-		dmctx->linker_param = dmstrdup(node->current_object);
-		dmctx->stop = true;
-		return 0;
-	}
-
-	return FAULT_9005;
-}
-
-static int get_linker_check_param(DMPARAM_ARGS)
-{
-	return FAULT_9005;
-}
-
-int dm_entry_get_linker(struct dmctx *dmctx)
-{
-	int err = 0;
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-
-	dmctx->method_obj = get_linker_check_obj;
-	dmctx->method_param = get_linker_check_param;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_onlyobj_match;
-
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-
-	return (dmctx->stop) ? err : FAULT_9005;
-}
-
-/******************
- * get linker value
- *****************/
-static int get_linker_value_check_obj(DMOBJECT_ARGS)
-{
-	if (!get_linker)
-		return FAULT_9005;
-
-	if (DM_STRCMP(node->current_object, dmctx->in_param) == 0) {
-		char *link_val = NULL;
-
-		if (!data || !instance)
-			return FAULT_9005;
-
-		get_linker(node->current_object, dmctx, data, instance, &link_val);
-		dmctx->linker = link_val ? dmstrdup(link_val) : "";
-		dmctx->stop = true;
-		return 0;
-	}
-	return FAULT_9005;
-}
-
-static int get_linker_value_check_param(DMPARAM_ARGS)
-{
-	return FAULT_9005;
-}
-
-int dm_entry_get_linker_value(struct dmctx *dmctx)
-{
-	int err = 0;
-	DMOBJ *root = dmctx->dm_entryobj;
-	DMNODE node = { .current_object = "" };
-
-	dmctx->method_obj = get_linker_value_check_obj;
-	dmctx->method_param = get_linker_value_check_param;
-	dmctx->checkobj = plugin_obj_match;
-	dmctx->checkleaf = plugin_leaf_match;
-	dmentry_instance_lookup_inparam(dmctx);
-
-	err = dm_browse(dmctx, &node, root, NULL, NULL);
-
-	return (dmctx->stop) ? err : FAULT_9005;
-}
-
-/******************
  * get reference value
  *****************/
 static int get_reference_value_check_obj(DMOBJECT_ARGS)
@@ -2737,7 +2496,6 @@ int dm_entry_get_reference_value(struct dmctx *dmctx)
 	dmctx->method_param = get_reference_value_check_param;
 	dmctx->checkobj = plugin_obj_match;
 	dmctx->checkleaf = plugin_leaf_match;
-	dmentry_instance_lookup_inparam(dmctx);
 
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
 
@@ -2782,7 +2540,6 @@ int dm_entry_object_exists(struct dmctx *dmctx)
 	dmctx->method_param = object_exists_check_param;
 	dmctx->checkobj = plugin_obj_match;
 	dmctx->checkleaf = plugin_leaf_match;
-	dmentry_instance_lookup_inparam(dmctx);
 
 	err = dm_browse(dmctx, &node, root, NULL, NULL);
 

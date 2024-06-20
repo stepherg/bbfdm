@@ -197,14 +197,6 @@ int get_proto_type(const char *proto)
 	return type;
 }
 
-int get_instance_mode(int instance_mode)
-{
-	if (instance_mode > INSTANCE_MODE_ALIAS)
-		instance_mode = INSTANCE_MODE_NUMBER;
-
-	return instance_mode;
-}
-
 // glibc doesn't guarantee a 0 termianted string on strncpy
 // strncpy with always 0 terminated string
 void strncpyt(char *dst, const char *src, size_t n)

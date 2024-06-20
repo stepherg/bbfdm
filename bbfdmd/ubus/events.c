@@ -65,7 +65,6 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 			.isevent = true,
 			.isinfo = false,
 			.disable_mservice_browse = true,
-			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = BBFDM_USP
 	};
 
@@ -147,7 +146,6 @@ int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
 			.isevent = true,
 			.isinfo = false,
 			.disable_mservice_browse = true,
-			.instance_mode = INSTANCE_MODE_NUMBER,
 			.dm_type = BBFDM_USP
 	};
 

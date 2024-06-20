@@ -235,8 +235,7 @@ def create_bbfdm_input_json_file(proto, dm_name=None):
         },
         "cli": {
             "config": {
-                "proto": proto,
-                "instance_mode": 0
+                "proto": proto
             },
             "input": {
                 "type": "DotSo",
