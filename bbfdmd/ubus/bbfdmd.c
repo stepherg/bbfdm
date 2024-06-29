@@ -653,7 +653,9 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 	if (is_sync_operate_cmd(&data)) {
 		bbfdm_operate_cmd_sync(&data);
 	} else {
+		cancel_instance_refresh_timer(ctx);
 		bbfdm_start_deferred(&data, bbfdm_operate_cmd_async);
+		register_instance_refresh_timer(ctx, 0);
 	}
 
 	FREE(str);
@@ -1689,14 +1691,14 @@ void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
 		return;
 	}
 
-	if (start_in <= 0) {
+	if (start_in < 0) {
 		refresh_time = u->config.refresh_time;
 	} else {
 		refresh_time = start_in;
 	}
 
-	DEBUG("Register instance refresh timer in %d ms...", refresh_time);
 	if (u->config.refresh_time != 0) {
+		INFO("Register instance refresh timer in %d ms...", refresh_time);
 		u->instance_timer.cb = periodic_instance_updater;
 		uloop_timeout_set(&u->instance_timer, refresh_time);
 	}
