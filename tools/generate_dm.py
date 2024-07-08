@@ -8,6 +8,7 @@ import json
 import bbf_common as bbf
 import generate_dm_xml as bbf_xml
 import generate_dm_excel as bbf_excel
+import glob
 
 
 def print_dm_usage():
@@ -96,7 +97,14 @@ else:
     output_dir = bbf.get_option_value(OUTPUT, "output_dir", "./out")
     
     bbf.create_folder(output_dir)
-    
+
+    print("Dumping default DM_JSON_FILES")
+    print(DM_JSON_FILES)
+    DM_JSON_FILES.extend(glob.glob('.repo/dm_info/*.json'))
+    print("Dumping all")
+    print(DM_JSON_FILES)
+
+
     if isinstance(file_format, list):
         for _format in file_format:
     

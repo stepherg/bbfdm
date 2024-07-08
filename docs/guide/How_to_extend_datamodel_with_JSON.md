@@ -1,13 +1,14 @@
-# How to extend Datamodel parameters using Json plugins
+# How to extend Datamodel parameters using Json
 
-It is often required to extend datamodel parameters of the device, extending the datamodel parameters using json plugin is the simplest way for the same.
+`bbfdm` provides tools to convert Broadband-forum's xml datamodel definition for cwmp and usp to a combined JSON file.
 
-To extend the datamodel using json plugin, its required to be defined it, as it is defined in `datamodel.json` file and then place that json in '/etc/bbfdm/json/' directory of device.
+JSON definition of datamodel with latest release available in [datamodel.json](../../libbbfdm/dmtree/json/datamodel.json)
 
-It is often the case, that the supported mapping might not handle all the scenarios, and required some structural changes to fulfill the new requirements, to make these plugins backward compatible with the older mappings some kind of check was required, which is can be solved with having a "version" field in the plugin, which describes the list of supported mappings with that specific version. This can be added as below:
+Now, a partial node from this file can be used to create a JSON datamodel definition, provided user adds a mapping to all LEAF parameters and multi-instance object.
+
 ```json
 {
-	"json_plugin_version": 1,
+	"json_plugin_version": 2,
 	"Device.": {
 		"type": "object",
 		"protocols": [
@@ -65,11 +66,490 @@ It is often the case, that the supported mapping might not handle all the scenar
 	}
 }
 ```
-> Note: If the `json_plugin_version` is omitted in the json then it means, it is having legacy mapping and considered as `json_plugin_version` 0.
+
+> Note1: `json_plugin_version` is **mandatory** in json datamodel definition.
+
+> Note2: It is advised to use `json_plugin_version` 2 for datamodel definition, usages version 0 and 1 are deprecated.
+
+## JSON Plugin Version 2
+
+Earlier versions of the json_plugins where treated as separate tree, so there where no sharing of data between main tree and JSON plugin, also it was not possible to overwrite/exclude a datamodel entry from core using JSON file.
+
+JSON Plugin Version 2 introduces enhancements to the previous versions by providing increased flexibility in extending, overwriting, and excluding objects/parameters/commands/events from the core data model.
+
+### How It Works
+
+To illustrate how the new features work, let's consider the following example JSON Plugin:
+
+```json
+{
+    "json_plugin_version": 2,
+    "Device.WiFi.AccessPoint.{i}.Security.": {
+        "type": "object",
+        "protocols": [
+            "cwmp",
+            "usp"
+        ],
+        "access": false,
+        "array": false,
+        "{BBF_VENDOR_PREFIX}KeyPassphrase": {
+            "type": "string",
+            "read": true,
+            "write": true,
+            "protocols": [
+                "cwmp",
+                "usp"
+            ],
+            "datatype": "string",
+            "mapping": [
+                {
+                    "data": "@Parent",
+                    "type": "uci_sec",
+                    "key": "key"
+                }
+            ]
+        },
+        "WEPKey": {
+            "type": "string",
+            "read": true,
+            "write": true,
+            "protocols": [
+                "cwmp",
+                "usp"
+            ],
+            "datatype": "string",
+            "mapping": [
+                {
+                    "data": "@Parent",
+                    "type": "uci_sec",
+                    "key": "wek_key"
+                }
+            ]
+        },
+        "SAEPassphrase": {
+            "type": "string",
+            "read": true,
+            "write": false,
+            "protocols": [
+                "none"
+            ]
+        }
+    }
+}
+```
+
+The JSON Plugin V2 operates by parsing the JSON file. Then it checks the parent top object, which in this example is `Device.WiFi.AccessPoint.{i}.Security`.
+
+- If this object exists in the core data model, the plugin proceeds to examine the next each subsequent level to determine the necessary action for each JSON object.
+  - If the object does not exist in the core data model, it is extended.
+  - If the object exists, it is either overwritten or excluded, depending on the defined protocols. If the protocols array is defined as 'none', the object is excluded.
+  - If the parent top object does not exist in the core data model, the plugin follows the old behavior defined in JSON Plugin V0 and V1, which is extending the core data model.
+
+Examples
+
+ - Device.WiFi.AccessPoint.{i}.Security.X_IOPSYS_EU_KeyPassphrase: This parameter will be extended to the core data model since it does not exist.
+ - Device.WiFi.AccessPoint.{i}.Security.WEPKey: This parameter will be overwritten in the core data model since it already exists.
+ - Device.WiFi.AccessPoint.{i}.Security.SAEPassphrase: This parameter will be excluded from the core data model since it exists, but the new protocol defined is `none`.
+
+More example(s):
+- [Extend](../../test/vendor_test/test_extend.json)
+- [Overwrite](../../test/vendor_test/test_overwrite.json), and
+- [Exclude](../../test/vendor_test/test_exclude.json)
+
+### Important Notes
+
+> Note: When extending a multiple-instance object, align the passed data from the browse function to children (LEAF) by keeping it `(struct uci_section *)data` pointer in case of the `type` is `uci_sec` or `(json_object *)data` pointer in case of the `type` is `json`.
+
+> Note: The mapping format used by JSON Plugin V2 follows the format of version 1. Ensure that all mappings are aligned with JSON Plugin V1 specifications.
+
+> Note4: Additional examples for each feature can be found in the following links:
+
+
+### Features Supported with JSON Plugin V2
+
+ - Allow extending the core tree with simple mappings based on the data passed from the parent object.
+ - Allow overwriting an existing object, parameter, command, or event from the core tree.
+ - Allow excluding an existing object, parameter, command, or event from the core tree.
+
+#### Some examples on JSON Definition
+
+**1. Object without instance:**
+
+```bash
+"Device.CWMP.": {
+    "type": "object",
+    "protocols": [
+        "cwmp",
+        "usp"
+    ],
+    "array": false,
+    "access": false
+}
+```
+
+**2. Object with instance:**
+
+- **UCI command:** uci show wireless | grep wifi-device
+
+```bash
+"Device.X_IOPSYS_EU_Radio.{i}.": {
+    "type": "object",
+    "protocols": [
+        "cwmp",
+        "usp"
+    ],
+    "array": true,
+    "access": true,
+    "mapping": {
+        "type": "uci",
+        "uci": {
+            "file": "wireless",
+            "section": {
+                "type": "wifi-device"
+            },
+            "dmmapfile": "dmmap_wireless"
+        }
+    }
+}
+```
+
+- **UBUS command:** ubus call dsl status | jsonfilter -e @.line
+
+```bash
+"Device.DSL.Line.{i}.": {
+	"type": "object",
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"array": true,
+	"access": false,
+	"mapping": {
+		"type": "ubus",
+		"ubus": {
+			"object": "dsl",
+			"method": "status",
+			"args": {},
+			"key": "line"
+		}
+	}
+}
+```
+
+**3. Parameter under object with instance:**
+
+- **UCI option command:** uci get wireless.@wifi-device[0].country
+
+- **@i:** is the number of instance object
+
+```bash
+"Country": {
+	"type": "string",
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"read": true,
+	"write": true,
+	"mapping": [
+		{
+			"type" : "uci",
+			"uci" : {
+				"file" : "wireless",
+				"section" : {
+					"type": "wifi-device",
+					"index": "@i-1"
+				},
+				"option" : {
+					"name" : "country"
+				}
+			}
+		}
+	]
+}
+```
+
+- **UCI list command:** uci get urlfilter.@profile[0].whitelist_url
+
+- **@i:** is the number of instance object
+
+```bash
+"WhitelistURL": {
+	"type": "string",
+	"read": true,
+	"write": true,
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"list": {
+		"datatype": "string"
+	},
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "urlfilter",
+				"section": {
+					"type": "profile",
+					"index": "@i-1"
+				},
+				"list": {
+					"name": "whitelist_url"
+				}
+			}
+		}
+	]
+}
+```
+
+
+- **UBUS command:** ubus call wifi status | jsonfilter -e @.radios[0].noise
+
+- **@i:** is the number of instance object
+
+```bash
+"Noise": {
+	"type": "int",
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"read": true,
+	"write": false,
+	"mapping": [
+		{
+			"type" : "ubus",
+			"ubus" : {
+				"object" : "wifi",
+				"method" : "status",
+				"args" : {},
+				"key" : "radios[@i-1].noise"
+			}
+		}
+	]
+}
+```
+
+**4. Parameter without instance:**
+
+- **UCI option command:** uci get cwmp.cpe.userid
+
+```bash
+"Username": {
+	"type": "string",
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"read": true,
+	"write": true,
+	"mapping": [
+		{
+			"type" : "uci",
+			"uci" : {
+				"file" : "cwmp",
+				"section" : {
+					"type": "cwmp",
+	      				"name": "cpe"
+	       			},
+				"option" : {
+					"name" : "userid"
+				}
+			}
+		}
+	]
+}
+```
+
+- **UCI list command:** uci get urlfilter.globals.blacklist_url
+
+- **@i:** is the number of instance object
+
+```bash
+"BlacklistURL": {
+	"type": "string",
+	"read": true,
+	"write": true,
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"list": {
+		"datatype": "string"
+	},
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "urlfilter",
+				"section": {
+					"name": "globals"
+				},
+				"list": {
+					"name": "blacklist_url"
+				}
+			}
+		}
+	]
+}
+```
+
+- **UBUS command:** ubus call system info | jsonfilter -e @.uptime
+
+```bash
+"Uptime": {
+	"type": "unsignedInt",
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"read": true,
+	"write": false,
+	"mapping": [
+		{
+			"type" : "ubus",
+			"ubus" : {
+				"object" : "system",
+				"method" : "info",
+				"args" : {},
+				"key" : "uptime"
+			}
+		}
+	]
+}
+```
+
+- **UBUS command:** ubus call system info | jsonfilter -e @.memory.total
+
+```bash
+"Total": {
+	"type": "unsignedInt",
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"read": true,
+	"write": false,
+	"mapping": [
+		{
+			"type" : "ubus",
+			"ubus" : {
+				"object" : "system",
+				"method" : "info",
+				"args" : {},
+				"key" : "memory.total"
+			}
+		}
+	]
+}
+```
+
+**5. Parameter to map another data model Object:**
+
+- **UCI option command:** uci get urlfilter.@filter[0].profile
+
+- **linker_obj** is the path name of an object that is stacked immediately below this object
+
+```bash
+"Profile": {
+	"type": "string",
+	"read": true,
+	"write": true,
+	"protocols": [
+		"cwmp",
+		"usp"
+	],
+	"mapping": [
+		{
+			"type": "uci",
+			"uci": {
+				"file": "urlfilter",
+				"section": {
+					"type": "filter",
+					"index": "@i-1"
+				},
+				"option": {
+					"name": "profile"
+				}
+			},
+			"linker_obj": "Device.{BBF_VENDOR_PREFIX}URLFilter.Profile.*.Name"
+		}
+	]
+}
+```
+
+**6. Object with Event and Operate command:**
+
+```bash
+{
+	"Device.X_IOPSYS_Test.": {
+		"type": "object",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"array": false,
+		"access": false,
+		"Push!": {
+			"type": "event",
+			"protocols": [
+				"usp"
+			],
+			"data": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"usp"
+				]
+			}
+		},
+		"Status()": {
+			"type": "command",
+			"async": true,
+			"protocols": [
+				"usp"
+			],
+			"input": {
+				"Option": {
+					"type": "string",
+					"read": "true",
+					"write": "true",
+					"protocols": [
+						"usp"
+					]
+				}
+			},
+			"output": {
+				"Result": {
+					"type": "string",
+					"read": "true",
+					"write": "false",
+					"protocols": [
+						"usp"
+					]
+				}
+			},
+			"mapping": [
+				{
+					"type": "ubus",
+					"ubus": {
+						"object": "test",
+						"method": "status"
+					}
+				}
+			]
+		}
+	}
+}
+```
 
 ## How to add object dependency using Json plugin
+
 In some cases we may need to set a dependency on datamodel object. In such cases the object will only populate if its dependencies are fulfilled.
 The json object `dependency` is used to define the same. Below is an example of how to add object dependency:
+
 ```json
 {
 	"json_plugin_version": 1,
@@ -142,23 +622,6 @@ mapping: [
 
 If we consider multi-instance objects, they are kind of special because we have group of information, where one group can be visualize as one instance. Also, the parameters of multi-instance objects also shares data with there parents, apart from that, for others as well, we might require some runtime information to get some mappings, for those scenarios, mapping have some special symbol, all start with '@' symbol, some of them only applicable in case of multi-instance object. Overall all these are just for create the convention so that datamodel can easily be extended without getting into hustle of programming. Again, the plugin handler does not have any intelligence of it own and completely driven by the mapping provided by the enduser, so if mapping is in-correct it would give incorrect result or no result in the datamodel.
 
-## Special symbols
-
-@index     => Current instance number - 1
-
-@index - 1 => Parent instance number - 1
-
-@index - 2 => Grand parent instance number - 1, and likewise
-
-@Name      => Section name of parent
-
-@Parent    => data passed by parent
-
-@Count     => Returns the count of instances
-
-@Value     => Replace with the value passed in set command, only used for ubus **set**
-
-@Input.XXX => Replace with the value passed in Input 'XXX' option, only used for ubus **operate**
 
 ## How to have different mappings for get/set:
 ```json
@@ -452,7 +915,7 @@ Ubus example for the same
  - Uci list options can only be mapped to leaf dm nodes which show the values as csv list
  - It better to use a named config sections in place of unnamed config sections for multi-instance objects
  - Children on multi-instance objects needs to have reference to their parent using 'dm_parent' option in uci section like below:
- 
+
   ```bash
 config agent 'agent'
 	option timezone 'GMT0BST,M3.5.0/1,M10.5.0'
@@ -465,17 +928,20 @@ config task_option 'http_get_mt_target'
 	option dm_parent 'http_get_mt'
 	option id 'target'
  ```
- 
+
 This object 'Device.LMAP.MeasurementAgent.{i}.Task.{i}.Option.{i}.' maps to the config above. It contains 3 Multi instance objects:
 
 1. MeasurementAgent.{i}: parent object which maps to 'agent' section
 2. Task.{i}: child object of MeasurementAgent object which maps to 'task' section, it must have a 'dm_parent' option with the value 'agent'
 3. Option.{i}: child object of Task object which maps to 'task_option' section, it must have a 'dm_parent' option with the value 'http_get_mt'
 
-## Feature supported with this mapping
- - Use of `json_plugin_version` for mapping extensions
- - Use different mappings for get/set
- - Support for NumberOfEntries parameter
- - Data sharing between parent and child node in multi-instance object
- - Use of index number in mapping
- - Support for set in ubus command
+## Special symbols
+
+| Symbols | Meaning of the symbol  |
+| ------- | ---------------------- |
+| @Name   | Section name of parent |
+| @Parent | data passed by parent  |
+| @Count  | Returns the count of instances |
+| @Value  | Replace with the value passed in set command, only used for ubus **set** |
+| @Input.XXX | Replace with the value passed in Input 'XXX' option, only used for ubus **operate** |
+

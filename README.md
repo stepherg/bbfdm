@@ -1,14 +1,14 @@
 # BroadBand Forum Data Models (BBFDM)
 
-`bbfdm` is a datamodel backend for Higher layer management protocols like [TR-069/CWMP](https://cwmp-data-models.broadband-forum.org/) or [TR-369/USP](https://usp.technology/). It is designed in a hardware agnostic way and provides the available datamodel parameters over ubus on the northbound interface and creates the datamodel mapping based on uci and ubus on southbound interface.
+`bbfdm` is a suite to provide TR181 datamodel backend for Higher layer management protocols like [TR-069/CWMP](https://cwmp-data-models.broadband-forum.org/) or [TR-369/USP](https://usp.technology/). It is designed in a hardware agnostic way and provides the available datamodel parameters over ubus on the northbound interface and creates the datamodel mapping based on uci and ubus on southbound interface.
 
 `bbfdm` has three main components:
 
-| Component  |                    Description                    |
-| ---------- | ------------------------------------------------- |
-| bbfdmd | A daemon to expose data model objects over ubus in pretty and raw format |
-| libbbfdm-api | A shared library which provides API to build and parse datamodel tree, it also provides API to create datamodel extensions using shared DotSo plugin, or with JSON Plugin. |
-| libbbfdm  | A datamodel tree/library build with libbbfdm-api, it includes core TR181 and related datamodel |
+| Component    |                    Description                    |
+| ------------ | ------------------------------------------------- |
+| bbfdmd       | A daemon to expose data model objects over ubus   |
+| libbbfdm-api | API library to create and parse datamodel tree    |
+| libbbfdm     | Minimal TR181 datamodel definition                |
 
 
 ## Directory Structure
@@ -16,101 +16,67 @@
 `bbfdm` package is structured as follow:
 
 ```bash
-├── bbfdmd
-├── docs
-├── libbbfdm-api
-├── libbbfdm
-│   ├── dmtree
-│   │   ├── json
-│   │   ├── tr181
-│   │   ├── vendor
-│   ├── scripts
-└── tools
+├── bbfdmd            --  This directory contains daemon code to expose the datamodel tree on northbound
+│   └── ubus              - Daemon to expose datamodel over ubus
+├── docs              --  More detailed explanation of datamodel and user guide
+├── gitlab-ci         --  Used for CI/CD pipeline test
+├── libbbfdm          --  Minimal TR181 datamodel implementation
+├── libbbfdm-api      --  API library to create datamodel definition and parse the datamodel definition to form a datamodel tree
+├── tools             --  Tools to convert xml datamodel definition to json, generate c code and many more
+└── utilities         --  Small helper utilities to complete/optimize the datamodel deployment
 ```
 
-- `bbfdmd` folder which contains the source code of bbfdm deamon.
-More explanation on how this daemon works and all supported methods are presented in this file [BBFDMD](./docs/guide/bbfdmd.md)
-
-- `libbbfdm` folder which contains the different data models supported by iopsys
-
-	- `dmtree` folder which includes all supported Data Models and vendor extension objects. It contains 6 folders:
-
-		- `tr181` folder : TR-181 Data Model files
-
-		- `vendor` folder : Vendor Data Model files
-
-		- `json` folder : Data Model JSON file
-
-	- `scripts` folder which contains bbf APIs used to run the different diagnostics scripts.
-
-- `libbbfdm-api` folder which contains the source code of all API functions (UCI, Ubus, JSON, CLI and memory management). These API are used for GET/SET/ADD/Delete/Operate calls which can be called in internal or external packages.
-All APIs exposed by libbbfdm-api are presented in this header file [libbbfdm_api.h](./libbbfdm-api/include/libbbfdm_api.h).
-
-- `tools` folder which contains some tools to generate Data Model in C, JSON, XML and Excel format.
-All supported tools are presented in this file[BBFDM Tools](./tools/README.md)
-
-- `docs` folder which contains all documentation files.
-
-
-## Design
-* [BBFDMD Design](./docs/guide/bbfdmd.md)
-* [Datamodel extension using JSON plugin](./docs/guide/libbbfdm-api_json_plugin_v1.md)
-* [Datamodel Plugins and Microservice](./docs/guide/libbbfdm-api_datamodel_as_microservice.md)
-* [BBFDM Tools](./tools/README.md)
-
 ## Important Topics
-* [Add support of a new Object/Parameter](./docs/guide/libbbfdm-api_obj_param_extension.md)
-* [How to add new vendor](./docs/guide/libbbfdm-api_vendor.md)
-* [Dynamic Object/Parameter/Operate/Event](./docs/guide/libbbfdm-api_dynamic_dm.md)
+
+* [BBFDMD Design](./docs/guide/bbfdmd.md)
+* [API Documentation](./docs/guide/libbbfdm-api.md)
+* [Tools](./tools/README.md)
+* [Utilities](./utilities/README.md)
+* [How to extend datamodel with C Code](./docs/guide/How_to_extend_datamodel_with_C_Code.md)
+* [How to extend datamodel with JSON](./docs/guide/How_to_extend_datamodel_with_JSON.md)
+
+### Datamodel related topics
+
 * [Design for firmware activation](./docs/guide/libbbfdm_DeviceInfo_FirmwareImage.md)
-* [Explain the different Network Deployment Scenarios](./docs/guide/network_depoyment_scenarios.md)
-* [Explain Policy Based Routing Management](./docs/guide/libbbfdm_Routing.md)
+* [Different Network Deployment Scenarios using Datamodels](./docs/guide/network_depoyment_scenarios.md)
+* [GRE datamodel details ](./docs/guide/libbbfdm_GRE.md)
+* [IP datamodel details](./docs/guide/libbbfdm_IP_Interface.md)
+
+### Compilation helper utilities
+
+* [Readme](https://dev.iopsys.eu/feed/iopsys/-/blob/devel/bbfdm/README.md)
+* [Compilation Helper utility](https://dev.iopsys.eu/feed/iopsys/-/blob/devel/bbfdm/bbfdm.mk)
+* [JSON Plugin Validator](https://dev.iopsys.eu/feed/iopsys/-/blob/devel/bbfdm/tools/validate_plugins.py)
 
 ## Additional datamodel objects
 
-| Datamodel                                | Package        | Link                                         |
-| ---------------------------------------- | -------------- | -------------------------------------------- |
-| Device.BulkData.                         | bulkdata       | https://dev.iopsys.eu/bbf/bulkdata.git       |
-| Device.ManagementServer.                 | icwmp          | https://dev.iopsys.eu/bbf/icwmp.git          |
-| Device.CWMPManagementServer.             | icwmp          | https://dev.iopsys.eu/bbf/icwmp.git          |
-| Device.IP.Diagnostics.UDPEchoConfig.     | udpecho-server | https://dev.iopsys.eu/bbf/udpecho.git        |
-| Device.IP.Diagnostics.UDPEchoDiagnostics.| udpecho-client | https://dev.iopsys.eu/bbf/udpecho.git        |
-| Device.IP.Interface.{i}.TWAMPReflector.  | twamp          | https://dev.iopsys.eu/bbf/twamp-light.git    |
-| Device.XMPP.                             | xmppc          | https://dev.iopsys.eu/bbf/xmppc.git          |
-| Device.USPAgent.                         | obuspa         | https://dev.iopsys.eu/bbf/obuspa.git         |
-| STUN parameters                          | stunc          | https://dev.iopsys.eu/bbf/stunc.git          |
-| Device.XPON.                             | ponmngr        | https://dev.iopsys.eu/hal/ponmngr.git        |
-| Device.UPNP.                             | ssdpd          | https://github.com/miniupnp/miniupnp.git     |
-| Device.Users.                            | usermngr       | https://dev.iopsys.eu/bbf/usermngr.git       |
-| Device.PeriodicStatistics.               | periodicstats  | https://dev.iopsys.eu/bbf/periodicstats.git  |
-| Device.SoftwareModules.                  | swmodd         | https://dev.iopsys.eu/lcm/swmodd.git         |
-| Device.Time.                             | timemngr       | https://dev.iopsys.eu/bbf/timemngr.git       |
-| Device.DynamicDNS.                       | ddnsmngr       | https://dev.iopsys.eu/bbf/ddnsmngr.git       |
-| Device.Hosts.                            | hostmngr       | https://dev.iopsys.eu/iopsys/hostmngr.git    |
-| Device.Services.VoiceService.            | tr104          | https://dev.iopsys.eu/voice/tr104.git        |
-| Device.Firewall.                         | firewallmngr   | https://dev.iopsys.eu/network/firewallmngr   |
-| Device.NAT.                              | firewallmngr   | https://dev.iopsys.eu/network/firewallmngr   |
-| Device.NAT.PortTrigger.                  | port-trigger   | https://dev.iopsys.eu/network/port-trigger.git |
-| Device.DNS.                              | dnsmngr        | https://dev.iopsys.eu/network/dnsmngr.git    |
-| Device.DHCPv4.                           | dhcpmngr       | https://dev.iopsys.eu/network/dhcpmngr.git   |
-| Device.DHCPv6.                           | dhcpmngr       | https://dev.iopsys.eu/network/dhcpmngr.git   |
-| Device.DSL.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
-| Device.FAST.                             | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
-| Device.ATM.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
-| Device.PTM.                              | dslmngr        | https://dev.iopsys.eu/hal/dslmngr.git        |
-| Device.Ethernet.                         | ethmngr        | https://dev.iopsys.eu/hal/ethmngr.git        |
-| Device.QoS.                              | qosmngr        | https://dev.iopsys.eu/hal/qosmngr.git        |
-| Device.SSH.                              | sshmngr        | https://dev.iopsys.eu/network/sshmngr.git    |
-| Device.WiFi.                             | wifidmd        | https://dev.iopsys.eu/bbf/wifidmd.git        |
-| Device.USB.                              | usbmngr        | https://dev.iopsys.eu/system/usbmngr.git     |
-| Device.Bridging.                         | bridgemngr     | https://dev.iopsys.eu/network/bridgemngr.git |
-| Device.IP.Diagnostics.                   | tr143          | https://dev.iopsys.eu/bbf/tr143d.git         |
-| Device.IP.Diagnostics.IPLayerCapacityMetrics. | tr471     | https://dev.iopsys.eu/bbf/tr471d.git         |
-| Device.X_IOPSYS_EU_IGMP.                 | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |
-| Device.X_IOPSYS_EU_MLD.                  | mcastmngr      | https://dev.iopsys.eu/hal/mcastmngr.git      |
-| Device.PacketCaptureDiagnostics.         | packet-capture-diagnostics | https://dev.iopsys.eu/bbf/packet-capture-diagnostics.git |
-| Device.SelfTestDiagnostics.              | self-diagnostics | https://dev.iopsys.eu/feed/iopsys.git      |
-| Device.UPnP.                             | ssdpd          | https://dev.iopsys.eu/feed/iopsys.git        |
-| Device.IEEE1905.                         | ieee1905       | https://dev.iopsys.eu/multi-ap/ieee1905.git  |
-| Device.MQTT.Broker.                      | mosquitto      | https://dev.iopsys.eu/feed/openwrt-packages.git  |
-| Device.X_IOPSYS_EU_OpenVPN.              | openvpn        | https://dev.iopsys.eu/feed/openwrt-packages.git  |
+This repository has bare minimal TR181 datamodel integrated, each service has their own datamodel additions, which they expose using plugins and micro-services.
+List of IOWRT provided service datamodel set available in [tools_input.json](./tools/tools_input.json)
+
+## Dependencies
+
+### Build-Time Dependencies
+
+To successfully build bbfdmd, following libraries are needed:
+
+| Dependency   |                    Link                     | License  |
+| ------------ | ------------------------------------------- | -------- |
+| libuci       | https://git.openwrt.org/project/uci.git     | LGPL 2.1 |
+| libubox      | https://git.openwrt.org/project/libubox.git | BSD      |
+| libubus      | https://git.openwrt.org/project/ubus.git    | LGPL 2.1 |
+| libjson-c    | https://s3.amazonaws.com/json-c_releases    | MIT      |
+| libbbfdm-api | https://dev.iopsys.eu/bbf/bbfdm.git         | BSD-3    |
+| libbbfdm     | https://dev.iopsys.eu/bbf/bbfdm.git         | BSD-3    |
+| jq           | https://github.com/stedolan/jq.git          | BSD      |
+
+
+### Run-Time Dependencies
+
+In order to run the `bbfdmd`, following dependencies are needed to be running/available before `bbfdmd`.
+
+| Dependency   |                   Link                   | License  |
+| ------------ | ---------------------------------------- | -------- |
+| ubusd        | https://git.openwrt.org/project/ubus.git | LGPL 2.1 |
+| libbbfdm-api | https://dev.iopsys.eu/bbf/bbfdm.git      | BSD-3    |
+| libbbfdm     | https://dev.iopsys.eu/bbf/bbfdm.git      | BSD-3    |
+| jq           | https://github.com/stedolan/jq.git       | BSD      |

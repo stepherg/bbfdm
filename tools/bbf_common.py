@@ -364,6 +364,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
         dm_files = get_option_value(plugin, "dm_files")
         is_microservice = get_option_value(plugin, "is_microservice")
         extra_dependencies = get_option_value(plugin, "extra_dependencies", [])
+        dm_desc_file = get_option_value(plugin, "dm_info_file", "")
         repo_path = None
         name=os.path.basename(repo).replace('.git','')
 
@@ -392,7 +393,12 @@ def download_and_build_plugins(plugins, vendor_prefix):
         if repo_path is None:
             print("Repository path not defined!!!")
             BBF_ERROR_CODE += 1
-            continue			
+            continue
+
+        create_folder(".repo/dm_info")
+        if dm_desc_file.endswith('.json'):
+            dest_file = ".repo/dm_info/" + os.path.basename(dm_desc_file).replace('.json', f"_{plugin_index}.json")
+            rename_file(repo_path + "/" + dm_desc_file, dest_file)
 
         LIST_FILES = []
         os.chdir(repo_path)

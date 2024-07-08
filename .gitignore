@@ -1,12 +1,7 @@
-CMakeFiles
-CMakeCache.txt
-Makefile
 install_manifest.txt
-*.cmake
 *.o
 *.so
 bbfdmd/ubus/bbfdmd
-docs/index.md
 __pycache__
 out
 /datamodel

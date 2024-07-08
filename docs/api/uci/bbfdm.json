@@ -6,6 +6,13 @@
       "multi": false,
       "options": [
         {
+          "name": "enable",
+          "type": "boolean",
+          "required": "no",
+          "default": "1",
+          "description": "Enables bbfdmd"
+        },
+        {
           "name": "debug",
           "type": "boolean",
           "required": "no",
@@ -41,18 +48,39 @@
           "description": "This parameter configures when subprocess can be used for get operation. Level here denotes the Datamodel object depth up-to which subprocess will be used to collect the get data. For example, if this is configured to 1, then only get for 'Device.' shall be called within the subprocess. If configured as level 2, then all the get with up-to depth 2 like 'Device.WiFi.', 'Device.IP.' shall be called in subprocess."
         },
         {
-          "name": "bbf_caching_time",
-          "type": "integer",
-          "required": "no",
-          "default": "0",
-          "description": "Max caching time in seconds for ubus output used in datamodel parameters. If not configured, output shall be cleared end the end of call."
-        },
-        {
           "name": "refresh_time",
           "type": "integer",
           "required": "no",
           "default": "5",
           "description": "The time period in seconds after which bbfdmd will refresh the datamodel instances in a periodic manner. If configured to '0' then instance updater will be disabled. If not configured at all then after every 5 seconds datamodel instances will be refreshed."
+        }
+      ]
+    },
+    {
+      "section": "micro_services",
+      "description": "Datamodel micro-service",
+      "multi": false,
+      "options": [
+        {
+          "name": "enable",
+          "type": "boolean",
+          "required": "no",
+          "default": "1",
+          "description": "Enables bbfdmd"
+        },
+        {
+          "name": "enable_core",
+          "type": "boolean",
+          "required": "no",
+          "default": "0",
+          "description": "Sets core flag in procd for datamodel microservices"
+        },
+        {
+          "name": "enable_respawn",
+          "type": "boolean",
+          "required": "no",
+          "default": "0",
+          "description": "Enable respawning of datamodel micro-service process"
         }
       ]
     }

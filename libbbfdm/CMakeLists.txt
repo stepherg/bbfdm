@@ -29,19 +29,12 @@ INSTALL(TARGETS bbfdm
 
 INSTALL(DIRECTORY DESTINATION etc/bbfdm)
 INSTALL(DIRECTORY DESTINATION etc/bbfdm/dmmap)
+INSTALL(DIRECTORY DESTINATION usr/share/bbfdm/scripts)
 INSTALL(DIRECTORY DESTINATION usr/share/bbfdm/plugins)
 INSTALL(DIRECTORY DESTINATION usr/share/bbfdm/micro_services)
 
 INSTALL(DIRECTORY DESTINATION usr/share/bbfdm)
 INSTALL(DIRECTORY DESTINATION usr/libexec/rpcd)
-FILE(GLOB scripts scripts/*)
-
-FOREACH(script ${scripts})
-	INSTALL(FILES ${script}
-		PERMISSIONS OWNER_EXECUTE
-		DESTINATION usr/share/bbfdm/scripts
-	)
-ENDFOREACH()
 
 string(REPLACE "," ";" VENDOR_LIST ${BBF_VENDOR_LIST})
 
