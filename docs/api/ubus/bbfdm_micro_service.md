@@ -139,7 +139,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf add {"path":"estanim Ut","optional":{"transaction_id":31269307},"obj_path":{}}
+ubus call bbf add {"path":"labore ullamco","optional":{"transaction_id":3482835},"obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -153,7 +153,7 @@ ubus call bbf add {"path":"estanim Ut","optional":{"transaction_id":31269307},"o
     "<SID>",
     "bbf",
     "add",
-    { "path": "estanim Ut", "optional": { "transaction_id": 31269307 }, "obj_path": {} }
+    { "path": "labore ullamco", "optional": { "transaction_id": 3482835 }, "obj_path": {} }
   ]
 }
 ```
@@ -220,7 +220,12 @@ All items must be of the type: Unknown type ``.
 ```json
 {
   "results": [
-    { "path": "nulla voluptate eiusmod sit", "data": "ni", "fault": 7499, "fault_msg": "laboris pariatur tempor" }
+    {
+      "path": "tempor consequat dolor",
+      "data": "in aliquip",
+      "fault": 7759,
+      "fault_msg": "ea irure sunt laboris commodo"
+    }
   ]
 }
 ```
@@ -354,7 +359,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf del {"path":"amet e","paths":["magna ani"],"optional":{"transaction_id":75019380}}
+ubus call bbf del {"path":"laborum","paths":["aliquip ea"],"optional":{"transaction_id":37938814}}
 ```
 
 ### JSONRPC Example
@@ -368,7 +373,7 @@ ubus call bbf del {"path":"amet e","paths":["magna ani"],"optional":{"transactio
     "<SID>",
     "bbf",
     "del",
-    { "path": "amet e", "paths": ["magna ani"], "optional": { "transaction_id": 75019380 } }
+    { "path": "laborum", "paths": ["aliquip ea"], "optional": { "transaction_id": 37938814 } }
   ]
 }
 ```
@@ -435,7 +440,7 @@ All items must be of the type: Unknown type ``.
 ```json
 {
   "results": [
-    { "path": "qui ex officia", "data": "nostrud est do ex", "fault": 7045, "fault_msg": "sed sunt Lorem occaecat" }
+    { "path": "proident eiusmod et Lorem", "data": "ullamco sed", "fault": 8168, "fault_msg": "sint quis nostrud est" }
   ]
 }
 ```
@@ -632,7 +637,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf get {"path":"occaecat culpa","paths":["non voluptate"],"maxdepth":42643410,"optional":{"format":"pretty","proto":"both","instance_mode":0}}
+ubus call bbf get {"path":"officia","paths":["aliqua nisi sunt"],"maxdepth":-49153948,"optional":{"format":"raw","proto":"cwmp","instance_mode":0}}
 ```
 
 ### JSONRPC Example
@@ -647,10 +652,10 @@ ubus call bbf get {"path":"occaecat culpa","paths":["non voluptate"],"maxdepth":
     "bbf",
     "get",
     {
-      "path": "occaecat culpa",
-      "paths": ["non voluptate"],
-      "maxdepth": 42643410,
-      "optional": { "format": "pretty", "proto": "both", "instance_mode": 0 }
+      "path": "officia",
+      "paths": ["aliqua nisi sunt"],
+      "maxdepth": -49153948,
+      "optional": { "format": "raw", "proto": "cwmp", "instance_mode": 0 }
     }
   ]
 }
@@ -719,7 +724,17 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "veniam ", "data": "et", "type": "xsd:int", "fault": 7572, "fault_msg": "enim" }] }
+{
+  "results": [
+    {
+      "path": "anim sit aute non mollit",
+      "data": "sed consectetur ipsum exercitation magna",
+      "type": "xsd:string",
+      "fault": 8050,
+      "fault_msg": "nostrud nisi laboris exercitation"
+    }
+  ]
+}
 ```
 
 ## instances
@@ -865,7 +880,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf instances {"path":"fugiat anim Lorem reprehende","first_level":false,"optional":{"proto":"cwmp","instance_mode":0}}
+ubus call bbf instances {"path":"id aliquip","first_level":false,"optional":{"proto":"usp","instance_mode":1}}
 ```
 
 ### JSONRPC Example
@@ -879,11 +894,7 @@ ubus call bbf instances {"path":"fugiat anim Lorem reprehende","first_level":fal
     "<SID>",
     "bbf",
     "instances",
-    {
-      "path": "fugiat anim Lorem reprehende",
-      "first_level": false,
-      "optional": { "proto": "cwmp", "instance_mode": 0 }
-    }
+    { "path": "id aliquip", "first_level": false, "optional": { "proto": "usp", "instance_mode": 1 } }
   ]
 }
 ```
@@ -945,7 +956,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "in ipsum proident Duis nulla", "fault": 8425, "fault_msg": "elit culpa" }] }
+{ "results": [{ "path": "ad qui ", "fault": 7181, "fault_msg": "elit" }] }
 ```
 
 ## operate
@@ -1127,7 +1138,7 @@ The value of this property **must** be equal to one of the [known values below](
 ### Ubus CLI Example
 
 ```
-ubus call bbf operate {"command":"exipsum cillum labore cupidatat minim","command_key":"ullamco nostrud sunt","input":{},"optional":{"format":"raw","proto":"both","instance_mode":1}}
+ubus call bbf operate {"command":"et sit dolor","command_key":"nulla velit ut in Excepteur","input":{},"optional":{"format":"raw","proto":"both","instance_mode":0}}
 ```
 
 ### JSONRPC Example
@@ -1142,10 +1153,10 @@ ubus call bbf operate {"command":"exipsum cillum labore cupidatat minim","comman
     "bbf",
     "operate",
     {
-      "command": "exipsum cillum labore cupidatat minim",
-      "command_key": "ullamco nostrud sunt",
+      "command": "et sit dolor",
+      "command_key": "nulla velit ut in Excepteur",
       "input": {},
-      "optional": { "format": "raw", "proto": "both", "instance_mode": 1 }
+      "optional": { "format": "raw", "proto": "both", "instance_mode": 0 }
     }
   ]
 }
@@ -1233,11 +1244,11 @@ All items must be of the type: Unknown type ``.
 {
   "results": [
     {
-      "path": "deserunt cillum amet",
+      "path": "aliqua",
       "data": "0",
-      "fault": 7140,
-      "fault_msg": "laborum",
-      "output": [{ "path": "proident", "data": "1", "type": "xsd:boolean" }]
+      "fault": 7611,
+      "fault_msg": "ea occaecat voluptate tempor",
+      "output": [{ "path": "consequat dolor elit", "data": "1", "type": "xsd:int" }]
     }
   ]
 }
@@ -1439,7 +1450,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf schema {"path":"magna cillum consequat","paths":["nisi nulla ullamco"],"first_level":false,"commands":false,"events":true,"params":false,"optional":{"proto":"both"}}
+ubus call bbf schema {"path":"laboris elit in dolore ali","paths":["pariatur elit eu"],"first_level":false,"commands":false,"events":false,"params":false,"optional":{"proto":"usp"}}
 ```
 
 ### JSONRPC Example
@@ -1454,13 +1465,13 @@ ubus call bbf schema {"path":"magna cillum consequat","paths":["nisi nulla ullam
     "bbf",
     "schema",
     {
-      "path": "magna cillum consequat",
-      "paths": ["nisi nulla ullamco"],
+      "path": "laboris elit in dolore ali",
+      "paths": ["pariatur elit eu"],
       "first_level": false,
       "commands": false,
-      "events": true,
+      "events": false,
       "params": false,
-      "optional": { "proto": "both" }
+      "optional": { "proto": "usp" }
     }
   ]
 }
@@ -1518,6 +1529,9 @@ All items must be of the type: Unknown type ``.
           "type": "string",
           "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
         },
+        "info": {
+          "type": "string"
+        },
         "input": {
           "type": "array",
           "items": [
@@ -1570,13 +1584,14 @@ All items must be of the type: Unknown type ``.
 {
   "results": [
     {
-      "path": "Duis in dolore",
+      "path": "Excepteur irure consequat",
       "data": "0",
       "type": "xsd:dateTime",
-      "fault": 7341,
-      "fault_msg": "",
-      "input": [{ "path": "veniam officia consectetur aute", "data": "0", "type": "xsd:dateTime" }],
-      "output": [{ "path": "velit laboris Lorem proident officia", "data": "1", "type": "xsd:unsignedLong" }]
+      "fault": 7546,
+      "fault_msg": "cupidatat Excepteur",
+      "info": "ullamco dolor occaecat",
+      "input": [{ "path": "minim pariatur id laboris ut", "data": "1", "type": "xsd:unsignedInt" }],
+      "output": [{ "path": "ea enim Excepteur proident est", "data": "1", "type": "xsd:long" }]
     }
   ]
 }
@@ -1783,7 +1798,7 @@ value of the object element provided in path, path should contains valid writabl
 ### Ubus CLI Example
 
 ```
-ubus call bbf set {"path":"qui ullamco non","value":"ut aliquip anim ex","optional":{"proto":"cwmp","instance_mode":0,"transaction_id":62652682},"obj_path":{}}
+ubus call bbf set {"path":"nonmagna ut anim","value":"cupidatat","optional":{"proto":"usp","instance_mode":0,"transaction_id":45864115},"obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -1798,9 +1813,9 @@ ubus call bbf set {"path":"qui ullamco non","value":"ut aliquip anim ex","option
     "bbf",
     "set",
     {
-      "path": "qui ullamco non",
-      "value": "ut aliquip anim ex",
-      "optional": { "proto": "cwmp", "instance_mode": 0, "transaction_id": 62652682 },
+      "path": "nonmagna ut anim",
+      "value": "cupidatat",
+      "optional": { "proto": "usp", "instance_mode": 0, "transaction_id": 45864115 },
       "obj_path": {}
     }
   ]
@@ -1867,7 +1882,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "labore et amet", "data": "0", "fault": 7959, "fault_msg": "dolor sunt" }] }
+{ "results": [{ "path": "pariatur", "data": "0", "fault": 8723, "fault_msg": "ut aliquip" }] }
 ```
 
 ## transaction
@@ -1988,7 +2003,7 @@ Timeout (in milliseconds) for the transaction, on timeout changes will be revert
 ### Ubus CLI Example
 
 ```
-ubus call bbf transaction {"cmd":"start","timeout":81531371,"restart_services":false,"optional":{"transaction_id":25600713}}
+ubus call bbf transaction {"cmd":"commit","timeout":95277085,"restart_services":false,"optional":{"transaction_id":36491321}}
 ```
 
 ### JSONRPC Example
@@ -2002,7 +2017,7 @@ ubus call bbf transaction {"cmd":"start","timeout":81531371,"restart_services":f
     "<SID>",
     "bbf",
     "transaction",
-    { "cmd": "start", "timeout": 81531371, "restart_services": false, "optional": { "transaction_id": 25600713 } }
+    { "cmd": "commit", "timeout": 95277085, "restart_services": false, "optional": { "transaction_id": 36491321 } }
   ]
 }
 ```
@@ -2062,5 +2077,5 @@ ubus call bbf transaction {"cmd":"start","timeout":81531371,"restart_services":f
 ### Output Example
 
 ```json
-{ "status": false, "transaction_id": 44817555, "error": "labore id laborum mollit" }
+{ "status": false, "transaction_id": 87022462, "error": "occaecat Excepteur" }
 ```

@@ -1504,6 +1504,7 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 		char *path = dmjson_get_value(res_obj, 1, "path");
 		char *data = dmjson_get_value(res_obj, 1, "data");
 		char *type = dmjson_get_value(res_obj, 1, "type");
+		char *info = dmjson_get_value(res_obj, 1, "info");
 
 		if (dmctx->nextlevel) {
 			unsigned int path_dot_num = count_occurrences(path, '.');
@@ -1514,7 +1515,7 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 				continue;
 		}
 
-		add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), NULL);
+		add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), info);
 	}
 
 	return 0;
@@ -1817,12 +1818,17 @@ static int mparam_get_name(DMPARAM_ARGS)
 	} else {
 		char *refparam;
 		char *perm = leaf->permission->val;
+		char *alias = "";
 
 		dmastrcat(&refparam, node->current_object, leaf->parameter);
 		if (leaf->permission->get_permission != NULL)
 			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
-		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
+		if (DM_LSTRCMP(leaf->parameter, "Alias") == 0) {
+			(leaf->getvalue)(refparam, dmctx, data, instance, &alias);
+		}
+
+		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], alias);
 		return 0;
 	}
 }
@@ -1841,6 +1847,7 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 	} else {
 		char *refparam;
 		char *perm = leaf->permission->val;
+		char *alias = "";
 
 		dmastrcat(&refparam, node->current_object, leaf->parameter);
 
@@ -1867,7 +1874,11 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 		if (leaf->permission->get_permission != NULL)
 			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
-		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
+		if (DM_LSTRCMP(leaf->parameter, "Alias") == 0) {
+			(leaf->getvalue)(refparam, dmctx, data, instance, &alias);
+		}
+
+		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], alias);
 		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
 		return 0;
 	}
@@ -1907,13 +1918,18 @@ static int mparam_get_name_in_obj(DMPARAM_ARGS)
 	} else {
 		char *refparam;
 		char *perm = leaf->permission->val;
+		char *alias = "";
 
 		dmastrcat(&refparam, node->current_object, leaf->parameter);
 
 		if (leaf->permission->get_permission != NULL)
 			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
-		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], NULL);
+		if (DM_LSTRCMP(leaf->parameter, "Alias") == 0) {
+			(leaf->getvalue)(refparam, dmctx, data, instance, &alias);
+		}
+
+		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], alias);
 		return 0;
 	}
 }

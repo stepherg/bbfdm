@@ -886,6 +886,7 @@ void bbfdm_get_names(bbfdm_data_t *data)
 				blobmsg_add_string(&data->bb, "path", n->name);
 				blobmsg_add_string(&data->bb, "data", n->data);
 				blobmsg_add_string(&data->bb, "type", n->type);
+				blobmsg_add_string(&data->bb, "info", n->additional_data ? n->additional_data : "");
 				blobmsg_close_table(&data->bb, table);
 			}
 		}
