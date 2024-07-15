@@ -13,6 +13,7 @@ struct bbfdm_async_req {
 	struct ubus_context *ctx;
 	struct ubus_request_data req;
 	struct uloop_process process;
+	bool is_operate;
 	void *result;
 };
 

@@ -167,6 +167,9 @@ static void async_complete_cb(struct uloop_process *p, __attribute__((unused)) i
 		ubus_send_reply(r->ctx, &r->req, bb->head);
 		INFO("pid(%d) blob data sent raw(%d)", r->process.pid, blob_raw_len(bb->head));
 		ubus_complete_deferred_request(r->ctx, &r->req, 0);
+		if (r->is_operate) {
+			register_instance_refresh_timer(r->ctx, 0);
+		}
 		munmap(r->result, DEF_IPC_DATA_LEN);
 		async_req_free(r);
 	}
@@ -185,7 +188,7 @@ static struct bbfdm_async_req *async_req_new(void)
 	return r;
 }
 
-static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t *data, void *d))
+static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t *data, void *d), bool is_operate)
 {
 	struct bbfdm_async_req *r = NULL;
 	pid_t child;
@@ -240,6 +243,7 @@ static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t
 	r->ctx = data->ctx;
 	r->process.pid = child;
 	r->process.cb = async_complete_cb;
+	r->is_operate = is_operate;
 	uloop_process_add(&r->process);
 	ubus_defer_request(data->ctx, data->req, &r->req);
 	return 0;
@@ -364,7 +368,7 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 
 	if (is_subprocess_needed) {
 		INFO("Creating subprocess for get method");
-		bbfdm_start_deferred(&data, bbfdm_get_value);
+		bbfdm_start_deferred(&data, bbfdm_get_value, false);
 	} else {
 		bbfdm_get_value(&data, NULL);
 	}
@@ -648,8 +652,7 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 		bbfdm_operate_cmd_sync(&data);
 	} else {
 		cancel_instance_refresh_timer(ctx);
-		bbfdm_start_deferred(&data, bbfdm_operate_cmd_async);
-		register_instance_refresh_timer(ctx, 0);
+		bbfdm_start_deferred(&data, bbfdm_operate_cmd_async, true);
 	}
 
 	FREE(str);

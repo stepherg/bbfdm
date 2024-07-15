@@ -91,7 +91,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 			blobmsg_add_string(&b, "name", param->data);
 			strncpyt(dm_path, param->data, sizeof(dm_path));
 		} else {
-			blobmsg_add_string(&bb, param->name, param->data);
+			blobmsg_add_string(&b, param->name, param->data);
 		}
 	}
 
@@ -100,7 +100,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	blobmsg_add_field(&b, BLOBMSG_TYPE_TABLE, "input", blob_data(bb.head), blob_len(bb.head));
 
 	ubus_send_event(ctx, method_name, b.head);
-	DEBUG("Event[%s], for [%s] sent", method_name, dm_path);
+	INFO("Event[%s], for [%s] sent", method_name, dm_path);
 
 	blob_buf_free(&bb);
 	blob_buf_free(&b);
