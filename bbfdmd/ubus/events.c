@@ -91,7 +91,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 			blobmsg_add_string(&b, "name", param->data);
 			strncpyt(dm_path, param->data, sizeof(dm_path));
 		} else {
-			blobmsg_add_string(&b, param->name, param->data);
+			blobmsg_add_string(&bb, param->name, param->data);
 		}
 	}
 
