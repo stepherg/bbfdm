@@ -145,10 +145,8 @@ static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 			data->is_raw = is_str_eq(blobmsg_get_string(attr), "raw") ? true : false;
 	}
 
-	DEBUG("Proto:|%s|, Inst Mode:|%s|, Tran-id:|%d|, Format:|%s|",
-			(data->bbf_ctx.dm_type == BBFDM_BOTH) ? "both" : (data->bbf_ctx.dm_type == BBFDM_CWMP) ? "cwmp" : "usp",
-			data->trans_id,
-			data->is_raw ? "raw" : "pretty");
+	char *proto = (data->bbf_ctx.dm_type == BBFDM_BOTH) ? "both" : (data->bbf_ctx.dm_type == BBFDM_CWMP) ? "cwmp" : "usp";
+	DEBUG("Proto:|%s|, Tran-id:|%d|, is_raw:|%d|", proto, data->trans_id, data->is_raw);
 }
 
 static void async_req_free(struct bbfdm_async_req *r)
