@@ -1179,6 +1179,12 @@ static int get_deviceinfo_cid (char *refparam, struct dmctx *ctx, void *data, ch
 	return 0;
 }
 
+static int get_deviceinfo_friendlyname(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	db_get_value_string("device", "deviceinfo", "FriendlyName", value);
+	return 0;
+}
+
 static int get_deviceinfo_pen (char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	db_get_value_string("device", "deviceinfo", "PEN", value);
@@ -1943,6 +1949,7 @@ DMLEAF tDeviceInfoParams[] = {
 {"SupportedDataModelNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_SupportedDataModelNumberOfEntries, NULL, BBFDM_CWMP},
 {"FirmwareImageNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_FirmwareImageNumberOfEntries, NULL, BBFDM_BOTH},
 {"CID", &DMREAD, DMT_STRING, get_deviceinfo_cid, NULL, BBFDM_USP},
+{"FriendlyName", &DMREAD, DMT_STRING, get_deviceinfo_friendlyname, NULL, BBFDM_USP},
 {"PEN", &DMREAD, DMT_STRING, get_deviceinfo_pen, NULL, BBFDM_USP},
 {"ModelNumber", &DMREAD, DMT_STRING, get_deviceinfo_modelnumber, NULL, BBFDM_BOTH},
 {0}
