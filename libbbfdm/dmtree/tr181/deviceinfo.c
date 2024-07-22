@@ -1110,6 +1110,7 @@ static int get_device_provisioningcode(char *refparam, struct dmctx *ctx, void *
 {
 	char *dhcp = NULL, *provisioning_code = NULL, *dhcp_provisioning_code = NULL;
 	bool discovery = false;
+	char buf[1024] = {0};
 
 	dmuci_get_option_value_string("cwmp", "acs", "dhcp_discovery", &dhcp);
 	dmuci_get_option_value_string("cwmp", "cpe", "provisioning_code", &provisioning_code);
@@ -1117,23 +1118,28 @@ static int get_device_provisioningcode(char *refparam, struct dmctx *ctx, void *
 
 	discovery = dmuci_string_to_boolean(dhcp);
 
-	if ((discovery == true) && (DM_STRLEN(dhcp_provisioning_code) != 0))
+	if ((discovery == true) && (DM_STRLEN(dhcp_provisioning_code) != 0)) {
 		*value = dhcp_provisioning_code;
-	else
-		*value = provisioning_code;
+	} else {
+		convert_hex_to_string(provisioning_code, buf, sizeof(buf));
+		*value = dmstrdup(buf);
+	}
 
 	return 0;
 }
 
 static int set_device_provisioningcode(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	char buff[1024] = {0};
+
 	switch (action) {
 		case VALUECHECK:
 			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
 				return FAULT_9007;
 			return 0;
 		case VALUESET:
-			dmuci_set_value("cwmp", "cpe", "provisioning_code", value);
+			convert_string_to_hex(value, buff, sizeof(buff));
+			dmuci_set_value("cwmp", "cpe", "provisioning_code", buff);
 			return 0;
 	}
 	return 0;
