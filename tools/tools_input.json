@@ -145,7 +145,7 @@
       "version": "devel",
       "dm_files": [
         "net/openvpn/files/bbfdm/OpenVPN_DM.json",
-        "net/mosquitto/files/mqtt_broker_plugin.json"
+        "net/mosquitto/bbf_plugin/mqtt_broker_plugin.json"
       ]
     },
     {
