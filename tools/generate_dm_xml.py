@@ -144,12 +144,13 @@ def generate_bbf_xml_file(output_file, dm_json_files=None):
     root.set("xmlns:dm", "urn:broadband-forum-org:cwmp:datamodel-1-8")
     root.set("xmlns:dmr", "urn:broadband-forum-org:cwmp:datamodel-report-0-1")
     root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-    root.set("xsi:schemaLocation", "urn:broadband-forum-org:cwmp:datamodel-1-8 https://www.broadband-forum.org/cwmp/cwmp-datamodel-1-8.xsd urn:broadband-forum-org:cwmp:datamodel-report-0-1 https://www.broadband-forum.org/cwmp/cwmp-datamodel-report.xsd")
-    root.set("spec", "urn:broadband-forum-org:tr-181-2-14-1-cwmp")
-    root.set("file", "tr-181-2-17-0-cwmp-full.xml")
+    
+    root.set("xsi:schemaLocation", "urn:broadband-forum-org:cwmp:datamodel-1-14 https://www.broadband-forum.org/cwmp/cwmp-datamodel-1-14.xsd urn:broadband-forum-org:cwmp:datamodel-report-1-0 https://www.broadband-forum.org/cwmp/cwmp-datamodel-report-1-0.xsd")
+    root.set("spec", "urn:broadband-forum-org:tr-181-2-18-0-cwmp")
+    root.set("file", "tr-181-2-18-0-cwmp.xml")
 
     model = ET.SubElement(root, "model")
-    model.set("name", "Device:2.17")
+    model.set("name", "Device:2.18")
 
     for entry in LIST_SUPPORTED_DM:
         name = entry.get("param")

@@ -40,7 +40,7 @@ echo "Check if the required tools are generated"
 [ ! -f "out/datamodel_default.xml" ] && echo "XML file with BBF format doesn't exist" && exit 1
 
 echo "Validate datamodel_default generated XML file"
-xmllint --schema test/tools/cwmp-datamodel-1-8.xsd out/datamodel_default.xml --noout
+xmllint --schema test/tools/cwmp-datamodel-*.xsd out/datamodel_default.xml --noout
 check_ret $?
 
 echo "Generation of xml and xls artifacts :: PASS"
