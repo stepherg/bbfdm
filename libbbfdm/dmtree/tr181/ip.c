@@ -12,6 +12,7 @@
 
 #include "dmlayer.h"
 #include "ip.h"
+#include "activeport.h"
 
 /*************************************************************
 * INIT
@@ -1086,6 +1087,13 @@ static int set_IP_ULAPrefix(char *refparam, struct dmctx *ctx, void *data, char 
 static int get_IP_InterfaceNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	int cnt = get_number_of_entries(ctx, data, instance, browseIPInterfaceInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+static int get_IP_ActivePortNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseIPActivePortInst);
 	dmasprintf(value, "%d", cnt);
 	return 0;
 }
@@ -2196,6 +2204,7 @@ static int operate_IPInterface_Reset(char *refparam, struct dmctx *ctx, void *da
 DMOBJ tIPObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"Interface", &DMWRITE, addObjIPInterface, delObjIPInterface, NULL, browseIPInterfaceInst, NULL, NULL, tIPInterfaceObj, tIPInterfaceParams, NULL, BBFDM_BOTH, NULL},
+{"ActivePort", &DMREAD, NULL, NULL, NULL, browseIPActivePortInst, NULL, NULL, NULL, tIPActivePortParams, NULL, BBFDM_BOTH, NULL},
 {0}
 };
 
@@ -2209,6 +2218,7 @@ DMLEAF tIPParams[] = {
 {"IPv6Status", &DMREAD, DMT_STRING, get_IP_IPv6Status, NULL, BBFDM_BOTH},
 {"ULAPrefix", &DMWRITE, DMT_STRING, get_IP_ULAPrefix, set_IP_ULAPrefix, BBFDM_BOTH},
 {"InterfaceNumberOfEntries", &DMREAD, DMT_UNINT, get_IP_InterfaceNumberOfEntries, NULL, BBFDM_BOTH},
+{"ActivePortNumberOfEntries", &DMREAD, DMT_UNINT, get_IP_ActivePortNumberOfEntries, NULL, BBFDM_BOTH},
 {0}
 };
 
