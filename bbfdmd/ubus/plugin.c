@@ -220,6 +220,9 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 			return -1;
 		}
 
+		if (idx == 0) {
+			memset(&dm_entryobj[idx], 0, sizeof(DMOBJ));
+		}
 		memset(&dm_entryobj[idx + 1], 0, sizeof(DMOBJ));
 
 		dm_entryobj[idx].obj = dm_dynamic_strdup(json_memhead, obj_prefix);
