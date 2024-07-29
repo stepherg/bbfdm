@@ -12,7 +12,6 @@ enum {
 	__DM_OPERATE_MAX,
 };
 
-void bbfdm_operate_cmd_async(bbfdm_data_t *data, void *output);
-void bbfdm_operate_cmd_sync(bbfdm_data_t *data);
+void bbfdm_operate_cmd(bbfdm_data_t *data, void *output);
 
 #endif /* OPERATE_H */

@@ -731,6 +731,120 @@ void free_all_list_parameter(struct dmctx *ctx)
 	}
 }
 
+static void bb_add_flags_arr(struct blob_buf *bb, uint32_t dm_flags)
+{
+	if (!bb || !dm_flags)
+		return;
+
+	void *flags_arr = blobmsg_open_array(bb, "flags");
+
+	if (dm_flags & DM_FLAG_REFERENCE)
+		blobmsg_add_string(bb, NULL, "Reference");
+	if (dm_flags & DM_FLAG_UNIQUE)
+		blobmsg_add_string(bb, NULL, "Unique");
+	if (dm_flags & DM_FLAG_LINKER)
+		blobmsg_add_string(bb, NULL, "Linker");
+	if (dm_flags & DM_FLAG_SECURE)
+		blobmsg_add_string(bb, NULL, "Secure");
+
+	blobmsg_close_array(bb, flags_arr);
+}
+
+void fill_blob_param(struct blob_buf *bb, char *path, char *data, char *type, uint32_t dm_flags)
+{
+	if (!bb || !path || !data || !type)
+		return;
+
+	void *table = blobmsg_open_table(bb, NULL);
+
+	blobmsg_add_string(bb, "path", path);
+	blobmsg_add_string(bb, "data", data);
+	blobmsg_add_string(bb, "type", type);
+	bb_add_flags_arr(bb, dm_flags);
+
+	blobmsg_close_table(bb, table);
+}
+
+void fill_blob_event(struct blob_buf *bb, char *path, char *type, void *data)
+{
+	if (!bb || !path || !type)
+		return;
+
+	void *table = blobmsg_open_table(bb, NULL);
+
+	blobmsg_add_string(bb, "path", path);
+	blobmsg_add_string(bb, "type", type);
+
+	if (data) {
+		event_args *ev = (event_args *)data;
+
+		blobmsg_add_string(bb, "data", (ev && ev->name) ? ev->name : "");
+
+		if (ev && ev->param) {
+			const char **in = ev->param;
+			void *key = blobmsg_open_array(bb, "input");
+
+			for (int i = 0; in[i] != NULL; i++) {
+				void *in_table = blobmsg_open_table(bb, NULL);
+				blobmsg_add_string(bb, "path", in[i]);
+				blobmsg_close_table(bb, in_table);
+			}
+
+			blobmsg_close_array(bb, key);
+		}
+	}
+
+	blobmsg_close_table(bb, table);
+}
+
+void fill_blob_operate(struct blob_buf *bb, char *path, char *data, char *type, void *in_out)
+{
+	if (!bb || !path || !data || !type)
+		return;
+
+	void *op_table = blobmsg_open_table(bb, NULL);
+
+	blobmsg_add_string(bb, "path", path);
+	blobmsg_add_string(bb, "type", type);
+	blobmsg_add_string(bb, "data", data);
+
+	if (in_out) {
+		void *array, *table;
+		const char **in, **out;
+		operation_args *args;
+		int i;
+
+		args = (operation_args *)in_out;
+		in = args->in;
+		if (in) {
+			array = blobmsg_open_array(bb, "input");
+
+			for (i = 0; in[i] != NULL; i++) {
+				table = blobmsg_open_table(bb, NULL);
+				blobmsg_add_string(bb, "path", in[i]);
+				blobmsg_close_table(bb, table);
+			}
+
+			blobmsg_close_array(bb, array);
+		}
+
+		out = args->out;
+		if (out) {
+			array = blobmsg_open_array(bb, "output");
+
+			for (i = 0; out[i] != NULL; i++) {
+				table = blobmsg_open_table(bb, NULL);
+				blobmsg_add_string(bb, "path", out[i]);
+				blobmsg_close_table(bb, table);
+			}
+
+			blobmsg_close_array(bb, array);
+		}
+	}
+
+	blobmsg_close_table(bb, op_table);
+}
+
 int string_to_bool(char *v, bool *b)
 {
 	if (v[0] == '1' && v[1] == '\0') {
@@ -1015,6 +1129,51 @@ static void get_reference_paramater_value(struct dmctx *dmctx, char *in_value, c
 
 	if (pos)
 		str[pos - 1] = 0;
+}
+
+static struct blob_attr *get_results_array(struct blob_attr *msg)
+{
+	struct blob_attr *tb[1] = {0};
+	const struct blobmsg_policy p[1] = {
+			{ "results", BLOBMSG_TYPE_ARRAY }
+	};
+
+	if (msg == NULL)
+		return NULL;
+
+	blobmsg_parse(p, 1, tb, blobmsg_data(msg), blobmsg_len(msg));
+
+	return tb[0];
+}
+
+static void prepare_optional_table(struct dmctx *dmctx, struct blob_buf *bb)
+{
+	void *table = blobmsg_open_table(bb, "optional");
+	blobmsg_add_string(bb, "proto", (dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp");
+	blobmsg_add_string(bb, "format", "raw");
+	blobmsg_close_table(bb, table);
+}
+
+typedef void (*ms_ubus_cb)(struct ubus_request *req, int type, struct blob_attr *msg);
+
+static int ubus_call_blob_msg(char *obj, char *method, struct blob_buf *blob, int timeout, ms_ubus_cb ms_callback, void *callback_arg)
+{
+	struct ubus_context *ubus_ctx = NULL;
+	uint32_t id;
+	int rc = -1;
+
+	ubus_ctx = ubus_connect(NULL);
+	if (ubus_ctx == NULL) {
+		BBF_DEBUG("UBUS context is null\n\r");
+		return -1;
+	}
+
+	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
+		rc = ubus_invoke(ubus_ctx, id, method, blob->head,
+				ms_callback, callback_arg, timeout);
+	}
+
+	return rc;
 }
 
 static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
@@ -1521,71 +1680,88 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 	return 0;
 }
 
-static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
+static void __operate_ubus(struct ubus_request *req, int type, struct blob_attr *msg)
 {
-	json_object *res = NULL, *res_obj = NULL;
-	char *ubus_name = node->obj->checkdep;
+	struct blob_attr *cur = NULL;
+	int rem = 0;
 
-	json_object *in_args = json_object_new_object();
-	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+	if (!msg || !req)
+		return;
 
-	dmubus_call_blocking(ubus_name, "operate",
-			UBUS_ARGS{
-						{"command", dmctx->in_param, String},
-						{"command_key", dmctx->linker, String},
-						{"input", dmctx->in_value ? dmctx->in_value : "{}", Table},
-						{"optional", json_object_to_json_string(in_args), Table}
-			},
-			4, &res);
+	struct dmctx *dmctx = (struct dmctx *)req->priv;
 
-	json_object_put(in_args);
-
-	if (!res)
-		return USP_FAULT_INVALID_PATH;
-
-	json_object *res_array = dmjson_get_obj(res, 1, "results");
-	if (!res_array) {
-		if (res != NULL)
-			json_object_put(res);
-		return USP_FAULT_INVALID_PATH;
+	struct blob_attr *parameters = get_results_array(msg);
+	if (parameters == NULL) {
+		dmctx->faultcode = USP_FAULT_INVALID_PATH;
+		return;
 	}
 
-	size_t nbre_obj = json_object_array_length(res_array);
+	int array_len = blobmsg_len(parameters);
+	if (array_len == 0) {
+		dmctx->findparam = 1;
+		return;
+	}
 
-	for (size_t i = 0; i < nbre_obj; i++) {
-		res_obj = json_object_array_get_idx(res_array, i);
+	blobmsg_for_each_attr(cur, parameters, rem) {
+		struct blob_attr *tb[3] = {0};
+		const struct blobmsg_policy p[3] = {
+				{ "fault", BLOBMSG_TYPE_INT32 },
+				{ "fault_msg", BLOBMSG_TYPE_STRING },
+				{ "output", BLOBMSG_TYPE_ARRAY }
+		};
 
-		char *fault = dmjson_get_value(res_obj, 1, "fault");
+		blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
 
-		if (DM_STRLEN(fault) == 0 || (DM_STRTOUL(fault) != FAULT_9005 && DM_STRTOUL(fault) != USP_FAULT_INVALID_PATH))
+		uint32_t fault = tb[0] ? blobmsg_get_u32(tb[0]) : 0;
+
+		if (fault == 0 || (fault != FAULT_9005 && fault != USP_FAULT_INVALID_PATH))
 			dmctx->stop = 1;
 
-		if (DM_STRLEN(fault)) {
-			char *fault_msg = dmjson_get_value(res_obj, 1, "fault_msg");
-			bbfdm_set_fault_message(dmctx, "%s", fault_msg);
-			if (res != NULL)
-				json_object_put(res);
-			return DM_STRTOUL(fault);
+		if (fault) {
+			bbfdm_set_fault_message(dmctx, "%s", tb[0] ? blobmsg_get_string(tb[0]) : "");
+			dmctx->faultcode = fault;
+			return;
+		} else {
+			dmctx->faultcode = 0;
 		}
 
-		json_object *output_array = dmjson_get_obj(res_obj, 1, "output");
-		if (output_array) {
-			size_t out_nbre = json_object_array_length(output_array);
+		if (tb[2]) {
+			struct blob_attr *output = NULL;
+			int _rem = 0;
 
-			for (size_t j = 0; j < out_nbre; j++) {
-				json_object *out_obj = json_object_array_get_idx(output_array, j);
-
-				char *path = dmjson_get_value(out_obj, 1, "path");
-				char *data = dmjson_get_value(out_obj, 1, "data");
-				char *type = dmjson_get_value(out_obj, 1, "type");
-
-				add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), NULL);
+			blobmsg_for_each_attr(output, tb[2], _rem) {
+				blobmsg_add_blob(&dmctx->bb, output);
 			}
 		}
 	}
+}
 
-	if (res != NULL)
-		json_object_put(res);
+static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
+{
+	char *ubus_name = node->obj->checkdep;
+	struct blob_buf blob = {0};
+
+	memset(&blob, 0, sizeof(struct blob_buf));
+	blob_buf_init(&blob, 0);
+
+	blobmsg_add_string(&blob, "command", dmctx->in_param);
+	blobmsg_add_string(&blob, "command_key", dmctx->linker);
+
+	json_object *jobj = json_tokener_parse(dmctx->in_value ? dmctx->in_value : "{}");
+	blobmsg_add_json_element(&blob, "input", jobj);
+	json_object_put(jobj);
+
+	prepare_optional_table(dmctx, &blob);
+
+	int res = ubus_call_blob_msg(ubus_name, "operate", &blob, 20000, __operate_ubus, dmctx);
+
+	blob_buf_free(&blob);
+
+	if (res)
+		return USP_FAULT_INVALID_PATH;
+
+	if (dmctx->faultcode)
+		return dmctx->faultcode;
 
 	return 0;
 }
@@ -2652,9 +2828,12 @@ static int mparam_event(DMPARAM_ARGS)
 
 	dmctx->stop = 1;
 
+	blobmsg_add_string(&dmctx->bb, "name", full_param);
+	void *table = blobmsg_open_table(&dmctx->bb, "input");
+
 	fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, EVENT_RUN);
-	if (!fault)
-		add_list_parameter(dmctx, dmstrdup("Event_Path"), dmstrdup(full_param), DMT_TYPE[DMT_STRING], NULL);
+
+	blobmsg_close_table(&dmctx->bb, table);
 
 end:
 	json_object_put(j_input);

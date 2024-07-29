@@ -33,6 +33,11 @@ char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, 
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *additional_data);
 void free_all_list_parameter(struct dmctx *ctx);
+
+void fill_blob_param(struct blob_buf *bb, char *path, char *data, char *type, uint32_t dm_flags);
+void fill_blob_event(struct blob_buf *bb, char *path, char *type, void *data);
+void fill_blob_operate(struct blob_buf *bb, char *path, char *data, char *type, void *in_out);
+
 int string_to_bool(char *v, bool *b);
 char *get_value_by_reference(struct dmctx *ctx, char *value);
 int dm_entry_get_value(struct dmctx *dmctx);

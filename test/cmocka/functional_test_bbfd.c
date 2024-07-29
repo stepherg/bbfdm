@@ -1230,7 +1230,8 @@ static void test_api_bbfdm_valid_standard_operate(void **state)
 	// TODO: To be used later with micro-service
 #if 0
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
+	struct blob_attr *cur = NULL;
+	size_t rem = 0;
 	int fault = 0;
 
 	ctx->in_param = "Device.IP.Diagnostics.IPPing()";
@@ -1239,22 +1240,35 @@ static void test_api_bbfdm_valid_standard_operate(void **state)
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
-		if (DM_STRCMP(n->name, "Status") == 0) {
-			assert_string_equal(n->data, "Complete");
-			assert_string_equal(n->type, "xsd:string");
-		} else if (DM_STRCMP(n->name, "IPAddressUsed") == 0) {
-			assert_string_equal(n->data, "");
-			assert_string_equal(n->type, "xsd:string");
-		} else if (DM_STRCMP(n->name, "SuccessCount") == 0) {
-			assert_string_equal(n->data, "1");
-			assert_string_equal(n->type, "xsd:unsignedInt");
-		} else if (DM_STRCMP(n->name, "FailureCount") == 0) {
-			assert_string_equal(n->data, "0");
-			assert_string_equal(n->type, "xsd:unsignedInt");
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[3] = {0};
+		const struct blobmsg_policy p[3] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING }
+		};
+
+		blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = blobmsg_get_string(tb[0]);
+		char *data = blobmsg_get_string(tb[1]);
+		char *type = blobmsg_get_string(tb[2]);
+
+		if (DM_STRCMP(name, "Status") == 0) {
+			assert_string_equal(data, "Complete");
+			assert_string_equal(type, "xsd:string");
+		} else if (DM_STRCMP(name, "IPAddressUsed") == 0) {
+			assert_string_equal(data, "");
+			assert_string_equal(type, "xsd:string");
+		} else if (DM_STRCMP(name, "SuccessCount") == 0) {
+			assert_string_equal(data, "1");
+			assert_string_equal(type, "xsd:unsignedInt");
+		} else if (DM_STRCMP(name, "FailureCount") == 0) {
+			assert_string_equal(data, "0");
+			assert_string_equal(type, "xsd:unsignedInt");
 		} else {
-			assert_string_not_equal(n->data, "0");
-			assert_string_equal(n->type, "xsd:unsignedInt");
+			assert_string_not_equal(data, "0");
+			assert_string_equal(type, "xsd:unsignedInt");
 		}
 	}
 #endif
@@ -1341,7 +1355,8 @@ static void test_api_bbfdm_valid_standard_list_operate(void **state)
 static void test_api_bbfdm_valid_library_operate(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
+	struct blob_attr *cur = NULL;
+	size_t rem = 0;
 	int fault = 0;
 
 	ctx->in_param = "Device.X_IOPSYS_EU_PingTEST.Run()";
@@ -1350,10 +1365,22 @@ static void test_api_bbfdm_valid_library_operate(void **state)
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
-		assert_string_not_equal(n->data, "0");
-		assert_string_equal(n->type, "xsd:unsignedInt");
-	}}
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[2] = {0};
+		const struct blobmsg_policy p[2] = {
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING }
+		};
+
+		blobmsg_parse(p, 2, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *data = blobmsg_get_string(tb[0]);
+		char *type = blobmsg_get_string(tb[1]);
+
+		assert_string_not_equal(data, "0");
+		assert_string_equal(type, "xsd:unsignedInt");
+	}
+}
 
 static void test_api_bbfdm_valid_library_list_operate(void **state)
 {
@@ -1419,7 +1446,8 @@ static void test_api_bbfdm_valid_library_list_operate(void **state)
 static void test_api_bbfdm_valid_json_operate(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
+	struct blob_attr *cur = NULL;
+	size_t rem = 0;
 	int fault = 0;
 
 	ctx->in_param = "Device.X_IOPSYS_EU_TEST.1.Status()";
@@ -1427,10 +1455,23 @@ static void test_api_bbfdm_valid_json_operate(void **state)
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
-		assert_string_equal(n->name, "Result");
-		assert_string_equal(n->data, "Success");
-		assert_string_equal(n->type, "xsd:string");
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[3] = {0};
+		const struct blobmsg_policy p[3] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING }
+		};
+
+		blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *dm_name = blobmsg_get_string(tb[0]);
+		char *dm_data = blobmsg_get_string(tb[1]);
+		char *dm_type = blobmsg_get_string(tb[2]);
+
+		assert_string_equal(dm_name, "Result");
+		assert_string_equal(dm_data, "Success");
+		assert_string_equal(dm_type, "xsd:string");
 	}
 }
 
@@ -1486,7 +1527,8 @@ static void test_api_bbfdm_valid_json_list_operate(void **state)
 static void test_api_bbfdm_valid_json_v1_operate(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
+	struct blob_attr *cur = NULL;
+	size_t rem = 0;
 	int fault = 0;
 
 	ctx->in_param = "Device.UBUS_TEST_V1.Interface.3.Status()";
@@ -1494,10 +1536,23 @@ static void test_api_bbfdm_valid_json_v1_operate(void **state)
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
-		assert_string_equal(n->name, "Result");
-		assert_string_equal(n->data, "Success");
-		assert_string_equal(n->type, "xsd:string");
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[3] = {0};
+		const struct blobmsg_policy p[3] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING }
+		};
+
+		blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *dm_name = blobmsg_get_string(tb[0]);
+		char *dm_data = blobmsg_get_string(tb[1]);
+		char *dm_type = blobmsg_get_string(tb[2]);
+
+		assert_string_equal(dm_name, "Result");
+		assert_string_equal(dm_data, "Success");
+		assert_string_equal(dm_type, "xsd:string");
 	}
 }
 

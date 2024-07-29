@@ -24,6 +24,7 @@
 #include <uci.h>
 #include <libubox/list.h>
 #include <json-c/json.h>
+#include <libubox/blob.h>
 
 extern struct dm_permession_s DMREAD;
 extern struct dm_permession_s DMWRITE;
@@ -172,6 +173,7 @@ struct dmctx {
 	int (*checkleaf)(DMOBJECT_ARGS);
 	struct list_head list_parameter;
 	struct list_head *memhead;
+	struct blob_buf bb;
 	DMOBJ *dm_entryobj;
 	bool nextlevel;
 	bool iswildcard;

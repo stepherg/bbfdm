@@ -143,11 +143,11 @@ static int operate_DeviceXIOPSYSEUPingTEST_Run(char *refparam, struct dmctx *ctx
 			if (DM_STRSTR(line, "rtt")) {
 				strtok_r(line, "=", &min);
 				strtok_r(min ? min+1 : "", "/", &avg);
-				add_list_parameter(ctx, dmstrdup("MinimumResponseTime"), dmstrdup(min ? min+1 : ""), "xsd:unsignedInt", NULL);
+				fill_blob_param(&ctx->bb, "MinimumResponseTime", min ? min + 1 : "", "xsd:unsignedInt", 0);
 				strtok_r(avg, "/", &max);
-				add_list_parameter(ctx, dmstrdup("AverageResponseTime"), dmstrdup(avg ? avg : ""), "xsd:unsignedInt", NULL);
+				fill_blob_param(&ctx->bb, "AverageResponseTime", avg ? avg : "", "xsd:unsignedInt", 0);
 				strtok_r(max, "/", &p);
-				add_list_parameter(ctx, dmstrdup("MaximumResponseTime"), dmstrdup(max ? max : ""), "xsd:unsignedInt", NULL);
+				fill_blob_param(&ctx->bb, "MaximumResponseTime", max ? max : "", "xsd:unsignedInt", 0);
 				break;
 			}
 		}
@@ -206,8 +206,8 @@ static int event_XIOPSYSEUEventTEST_Test(char *refparam, struct dmctx *ctx, void
 			char *command_key = dmjson_get_value((json_object *)value, 1, "command_key");
 			char *status = dmjson_get_value((json_object *)value, 1, "status");
 
-			add_list_parameter(ctx, dmstrdup("CommandKey"), dmstrdup(command_key), DMT_TYPE[DMT_STRING], NULL);
-			add_list_parameter(ctx, dmstrdup("Status"), dmstrdup(status), DMT_TYPE[DMT_STRING], NULL);
+			fill_blob_param(&ctx->bb, "CommandKey", command_key, DMT_TYPE[DMT_STRING], 0);
+			fill_blob_param(&ctx->bb, "Status", status, DMT_TYPE[DMT_STRING], 0);
 			break;
 		}
 	}

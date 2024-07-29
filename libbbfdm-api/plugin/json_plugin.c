@@ -1091,7 +1091,7 @@ static int ubus_set_operate(json_object *mapping_obj, int json_version, char *re
 			resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, key, buf_key, sizeof(buf_key));
 			resolve_all_symbols(ctx, data, instance, "", nbr_instances, json_version, json_object_get_string(val), buf_val, sizeof(buf_val));
 
-			add_list_parameter(ctx, dmstrdup(buf_key), dmstrdup(buf_val), DMT_TYPE[DMT_STRING], NULL);
+			fill_blob_param(&ctx->bb, buf_key, buf_val, DMT_TYPE[DMT_STRING], 0);
 		}
 		json_object_put(res);
 	}

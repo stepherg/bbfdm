@@ -44,6 +44,8 @@ static struct dm_fault DM_FAULT_ARRAY[] = {
 
 void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 {
+	memset(&ctx->bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&ctx->bb, 0);
 	INIT_LIST_HEAD(&ctx->list_parameter);
 	ctx->dm_entryobj = tEntryObj;
 	bbfdm_init_mem(ctx);
@@ -52,6 +54,7 @@ void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 
 void bbf_ctx_clean(struct dmctx *ctx)
 {
+	blob_buf_free(&ctx->bb);
 	free_all_list_parameter(ctx);
 
 	dm_uci_exit();
@@ -187,7 +190,9 @@ int bbf_fault_map(struct dmctx *ctx, int fault)
 int bbf_entry_method(struct dmctx *ctx, int cmd)
 {
 	int fault = 0;
+	ctx->iswildcard = DM_STRCHR(ctx->in_param, '*') ? 1 : 0;
 	ctx->fault_msg[0] = 0;
+	ctx->stop = false;
 
 	if (!ctx->dm_entryobj) {
 		bbfdm_set_fault_message(ctx, "Root entry was not defined.");
@@ -198,9 +203,6 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 		bbfdm_set_fault_message(ctx, "Path should not be blank.");
 		return bbf_fault_map(ctx, FAULT_9005);
 	}
-
-	ctx->iswildcard = DM_STRCHR(ctx->in_param, '*') ? 1 : 0;
-	ctx->stop = false;
 
 	switch(cmd) {
 	case BBF_GET_VALUE:

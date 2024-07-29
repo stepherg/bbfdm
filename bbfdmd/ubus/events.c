@@ -76,34 +76,12 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 
 	cancel_instance_refresh_timer(ctx);
 
-	struct dm_parameter *param = NULL;
-	struct blob_buf b = {0}, bb = {0};
 	char method_name[256] = {0};
-
-	memset(&b, 0, sizeof(struct blob_buf));
-	memset(&bb, 0, sizeof(struct blob_buf));
-
-	blob_buf_init(&b, 0);
-	blob_buf_init(&bb, 0);
-
-	list_for_each_entry(param, &bbf_ctx.list_parameter, list) {
-		if (strcmp(param->name, "Event_Path") == 0) {
-			blobmsg_add_string(&b, "name", param->data);
-			strncpyt(dm_path, param->data, sizeof(dm_path));
-		} else {
-			blobmsg_add_string(&bb, param->name, param->data);
-		}
-	}
 
 	snprintf(method_name, sizeof(method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
 
-	blobmsg_add_field(&b, BLOBMSG_TYPE_TABLE, "input", blob_data(bb.head), blob_len(bb.head));
-
-	ubus_send_event(ctx, method_name, b.head);
+	ubus_send_event(ctx, method_name, bbf_ctx.bb.head);
 	INFO("Event[%s], for [%s] sent", method_name, dm_path);
-
-	blob_buf_free(&bb);
-	blob_buf_free(&b);
 
 	register_instance_refresh_timer(ctx, 2000);
 

@@ -16,12 +16,16 @@
 
 #include <libubus.h>
 
-static int bbfdm_dm_operate(bbfdm_data_t *data)
+void bbfdm_operate_cmd(bbfdm_data_t *data, void *output)
 {
 	int fault = 0;
-	void *table, *array;
+
+	memset(&data->bb, 0, sizeof(struct blob_buf));
 
 	bbf_init(&data->bbf_ctx);
+	blob_buf_init(&data->bb, 0);
+
+	void *global_array = blobmsg_open_array(&data->bb, "results");
 
 	void *global_table = blobmsg_open_table(&data->bb, NULL);
 	blobmsg_add_string(&data->bb, "path", data->bbf_ctx.in_param);
@@ -29,23 +33,34 @@ static int bbfdm_dm_operate(bbfdm_data_t *data)
 
 	fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_OPERATE);
 	if (fault == 0) {
-		struct dm_parameter *n;
+		void *table = NULL, *array = NULL;
+		struct blob_attr *cur = NULL;
+		size_t rem = 0;
 
 		if (data->is_raw) {
 			array = blobmsg_open_array(&data->bb, "output");
-			list_for_each_entry(n, &data->bbf_ctx.list_parameter, list) {
-				table = blobmsg_open_table(&data->bb, NULL);
-				bb_add_string(&data->bb, "path", n->name);
-				bb_add_string(&data->bb, "data", n->data);
-				bb_add_string(&data->bb, "type", n->type);
-				blobmsg_close_table(&data->bb, table);
+			blobmsg_for_each_attr(cur, data->bbf_ctx.bb.head, rem) {
+				blobmsg_add_blob(&data->bb, cur);
 			}
 			blobmsg_close_array(&data->bb, array);
 		} else {
 			LIST_HEAD(pv_local);
 
-			list_for_each_entry(n, &data->bbf_ctx.list_parameter, list) {
-				add_pv_list(n->name, n->data, n->type, &pv_local);
+			blobmsg_for_each_attr(cur, data->bbf_ctx.bb.head, rem) {
+				struct blob_attr *tb[3] = {0};
+				const struct blobmsg_policy p[3] = {
+						{ "path", BLOBMSG_TYPE_STRING },
+						{ "data", BLOBMSG_TYPE_STRING },
+						{ "type", BLOBMSG_TYPE_STRING }
+				};
+
+				blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+				char *op_name = blobmsg_get_string(tb[0]);
+				char *op_data = blobmsg_get_string(tb[1]);
+				char *op_type = blobmsg_get_string(tb[2]);
+
+				add_pv_list(op_name, op_data, op_type, &pv_local);
 			}
 
 			array = blobmsg_open_array(&data->bb, "output");
@@ -63,34 +78,13 @@ static int bbfdm_dm_operate(bbfdm_data_t *data)
 
 	blobmsg_close_table(&data->bb, global_table);
 
+	blobmsg_close_array(&data->bb, global_array);
+
+	if (output)
+		memcpy(output, data->bb.head, blob_pad_len(data->bb.head));
+	else
+		ubus_send_reply(data->ctx, data->req, data->bb.head);
+
+	blob_buf_free(&data->bb);
 	bbf_cleanup(&data->bbf_ctx);
-
-	return fault;
-}
-
-static void bbfdm_operate_cmd(bbfdm_data_t *data)
-{
-	void *array = blobmsg_open_array(&data->bb, "results");
-	bbfdm_dm_operate(data);
-	blobmsg_close_array(&data->bb, array);
-}
-
-void bbfdm_operate_cmd_async(bbfdm_data_t *data, void *output)
-{
-	blob_buf_init(&data->bb, 0);
-
-	bbfdm_operate_cmd(data);
-
-	memcpy(output, data->bb.head, blob_pad_len(data->bb.head));
-	blob_buf_free(&data->bb);
-}
-
-void bbfdm_operate_cmd_sync(bbfdm_data_t *data)
-{
-	blob_buf_init(&data->bb, 0);
-
-	bbfdm_operate_cmd(data);
-
-	ubus_send_reply(data->ctx, data->req, data->bb.head);
-	blob_buf_free(&data->bb);
 }

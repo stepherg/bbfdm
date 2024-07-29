@@ -647,10 +647,10 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 	INFO("ubus method|%s|, name|%s|, path(%s)", method, obj->name, data.bbf_ctx.in_param);
 
 	if (is_sync_operate_cmd(&data)) {
-		bbfdm_operate_cmd_sync(&data);
+		bbfdm_operate_cmd(&data, NULL);
 	} else {
 		cancel_instance_refresh_timer(ctx);
-		bbfdm_start_deferred(&data, bbfdm_operate_cmd_async, true);
+		bbfdm_start_deferred(&data, bbfdm_operate_cmd, true);
 	}
 
 	FREE(str);

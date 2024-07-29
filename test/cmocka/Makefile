@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -g -Wall -Werror
-LDFLAGS = -lcmocka -L/usr/share/bbfdm -lbbfdm-api -lbbfdm
+LDFLAGS = -lcmocka -lbbfdm-api -lbbfdm -lubox -lblobmsg_json
 UNIT_TESTS = unit_test_bbfd
 FUNCTIONAL_TESTS = functional_test_bbfd
 FUNCTIONAL_API_TESTS = functional_api_test_bbfd
