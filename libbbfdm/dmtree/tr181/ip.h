@@ -23,6 +23,7 @@ extern DMLEAF tIPInterfaceIPv4AddressParams[];
 extern DMLEAF tIPInterfaceIPv6AddressParams[];
 extern DMLEAF tIPInterfaceIPv6PrefixParams[];
 extern DMLEAF tIPInterfaceStatsParams[];
+extern DMLEAF tIPActivePortParams[];
 
 #endif //__IP_H
 
