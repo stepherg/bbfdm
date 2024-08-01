@@ -153,38 +153,6 @@ static int dm_strcmp_wildcard(char *str1, char *str2)
 	return 0;
 }
 
-static int dm_strncmp_wildcard(char *str1, char *str2, size_t n)
-{
-	char *sp1 = str1, *sp2 = str2;
-	size_t i = 0;
-
-	if (str1 == NULL || str2 == NULL)
-		return -1;
-
-	while (*str2 && i < n) {
-		if (*str1 == '\0')
-			return -1;
-
-		if ((*str2 == *str1) ||
-				(sp2 != str2 && *str2 == '*' && is_instance_number_alias(&str1)) ||
-				(sp1 != str1 && *str1 == '*' && is_instance_number_alias(&str2))) {
-			str1++;
-			str2++;
-			i++;
-		} else {
-			return -1;
-		}
-	}
-
-	if (i == n)
-		return 0;
-
-	if (*str1)
-		return -1;
-
-	return 0;
-}
-
 static int plugin_obj_match(DMOBJECT_ARGS)
 {
 	if (node->matched)
@@ -949,83 +917,6 @@ char *get_value_by_reference(struct dmctx *ctx, char *value)
 	return "";
 }
 
-static bool has_same_reference(struct dmctx *ctx, char *curr_value, char *new_value)
-{
-	struct dm_reference reference[16] = {0};
-	char __curr_value[MAX_DM_PATH * 4] = {0};
-	char __new_value[MAX_DM_PATH * 4] = {0};
-	char *pch = NULL, *spch = NULL;
-	unsigned int i = 0, j = 0;
-
-	if (!ctx || !curr_value || !new_value)
-		return false;
-
-	if (DM_STRLEN(curr_value) == 0 && DM_STRLEN(new_value) > 2) // current value is empty and set a new reference; 2('=>')
-		return false;
-
-	if (DM_STRLEN(curr_value) > 0 && DM_STRLEN(new_value) == 2) // given value is empty and current value is not empty; 2('=>')
-		return false;
-
-	if (DM_STRLEN(curr_value) == 0 && DM_STRLEN(new_value) == 2) // both are empty
-		return true;
-
-	DM_STRNCPY(__new_value, new_value, sizeof(__new_value));
-
-	for (pch = strtok_r(__new_value, ",", &spch), i = 0; pch && i < 16; pch = strtok_r(NULL, ",", &spch), i++)
-		bbfdm_get_reference_linker(ctx, pch, &reference[i]);
-
-	DM_STRNCPY(__curr_value, curr_value, sizeof(__curr_value));
-
-	char *is_list = strchr(__curr_value, ';');
-
-	for (pch = strtok_r(__curr_value, is_list ? SEPARATOR_LIST_VALUES : ",", &spch), j = 0;
-		 pch != NULL;
-		 pch = strtok_r(NULL, is_list ? SEPARATOR_LIST_VALUES : ",", &spch), j++) {
-
-		char key_name[256] = {0}, key_value[256] = {0};
-		regmatch_t pmatch[2];
-
-		if (is_list && j > i)
-			return false;
-
-		bool res = match(pch, "\\[(.*?)\\]", 2, pmatch);
-		if (!res) {
-			if (is_list) {
-				if (DM_STRCMP(pch, reference[j].path) == 0)
-					continue;
-				else
-					return false;
-			} else {
-				if (DM_STRCMP(pch, reference[0].path) == 0)
-					return true;
-			}
-		}
-
-		int len = pmatch[0].rm_so;
-		if (len <= 0)
-			return false;
-
-		char *match_str = pch + pmatch[1].rm_so;
-		if (DM_STRLEN(match_str) == 0)
-			return false;
-
-		int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
-		if (n != 2)
-			return false;
-
-		if (is_list) {
-			if (dm_strncmp_wildcard(pch, reference[j].path, len) != 0 || DM_STRCMP(key_value, reference[j].value) != 0)
-				return false;
-		} else {
-			if (dm_strncmp_wildcard(pch, reference[0].path, len) == 0 && DM_STRCMP(key_value, reference[0].value) == 0)
-				return true;
-		}
-
-	}
-
-	return true;
-}
-
 static char *check_value_by_type(char *value, int type)
 {
 	int i = 0, len = DM_STRLEN(value);
@@ -1533,7 +1424,7 @@ static int del_ubus_object(struct dmctx *dmctx, struct dmnode *node)
 	return 0;
 }
 
-static bool is_reference_parameter(char *ubus_name, char *param_name, json_object *in_args)
+static bool is_reference_parameter(char *ubus_name, char *param_name, json_object *in_args, char **value)
 {
 	json_object *res = NULL, *res_obj = NULL;
 
@@ -1555,6 +1446,8 @@ static bool is_reference_parameter(char *ubus_name, char *param_name, json_objec
 	if (!res_obj)
 		return false;
 
+	*value = dmjson_get_value(res_obj, 1, "data");
+
 	char *flags_list = dmjson_get_value_array_all(res_obj, ",", 1, "flags");
 
 	return DM_LSTRSTR(flags_list, "Reference") ? true : false;
@@ -1565,13 +1458,22 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
 	char param_value[2048] = {0};
+	char *ref_value = "";
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
 	json_object_object_add(in_args, "transaction_id", json_object_new_int(dmctx->trans_id));
 
-	if (is_reference_parameter(ubus_name, dmctx->in_param, in_args)) {
+	if (is_reference_parameter(ubus_name, dmctx->in_param, in_args, &ref_value)) {
+		ref_value = get_value_by_reference(dmctx, ref_value);
+
+		if (DM_STRCMP(ref_value, dmctx->in_value) == 0) {
+			BBF_DEBUG("Requested reference value (%s) is same as current reference value (%s)", dmctx->in_value, ref_value);
+			dmctx->stop = 1;
+			return 0;
+		}
+
 		get_reference_paramater_value(dmctx, dmctx->in_value, param_value, sizeof(param_value));
 	} else {
 		snprintf(param_value, sizeof(param_value), "%s", dmctx->in_value);
@@ -2477,20 +2379,22 @@ static int mparam_set_value(DMPARAM_ARGS)
 
 			res = string_to_bool(dmctx->in_value, &val);
 			if (res == 0 && dmuci_string_to_boolean(value) == val) {
-				BBF_DEBUG("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
+				BBF_DEBUG("Requested value (%s) is same as current value (%s).", dmctx->in_value, value);
 				return 0;
 			}
 		} else if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
-			if (DM_LSTRSTR(dmctx->in_value, "=>") == NULL)
-				get_reference_paramater_value(dmctx, dmctx->in_value, param_value, sizeof(param_value));
+			value = get_value_by_reference(dmctx, value);
 
-			if (has_same_reference(dmctx, value, param_value)) {
-				BBF_DEBUG("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
+			if (DM_STRCMP(value, dmctx->in_value) == 0) {
+				BBF_DEBUG("Requested value (%s) is same as current value (%s)..", dmctx->in_value, value);
 				return 0;
 			}
+
+			if (DM_LSTRSTR(dmctx->in_value, "=>") == NULL)
+				get_reference_paramater_value(dmctx, dmctx->in_value, param_value, sizeof(param_value));
 		} else {
 			if (DM_STRCMP(value, dmctx->in_value) == 0) {
-				BBF_DEBUG("Requested value (%s) is same as current value (%s)", dmctx->in_value, value);
+				BBF_DEBUG("Requested value (%s) is same as current value (%s)...", dmctx->in_value, value);
 				return 0;
 			}
 		}
