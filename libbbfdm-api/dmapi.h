@@ -239,7 +239,7 @@ enum event_action_enum {
 	EVENT_CHECK
 };
 
-enum del_action_enum {
+enum del_action_enum { // To be removed later!!!!!!!!!!!!
 	DEL_INST,
 	DEL_ALL
 };

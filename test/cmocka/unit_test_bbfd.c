@@ -345,7 +345,7 @@ static void test_api_bbfdm_delete_object_all_instances(void **state)
 	ctx->in_param = "Device.Users.User.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
-	assert_int_equal(fault, 0);
+	assert_int_equal(fault, FAULT_9005);
 }
 
 static void test_api_bbfdm_delete_wrong_object(void **state)
@@ -568,7 +568,7 @@ static void test_api_bbfdm_json_delete_object(void **state)
 	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
-	assert_int_equal(fault, 0);
+	assert_int_equal(fault, FAULT_9005);
 }
 
 static void test_api_bbfdm_library_get_value(void **state)
@@ -624,7 +624,7 @@ static void test_api_bbfdm_library_delete_object(void **state)
 	ctx->in_param = "Device.WiFi.SSID.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
-	assert_int_equal(fault, 0);
+	assert_int_equal(fault, FAULT_9005);
 }
 
 int main(void)

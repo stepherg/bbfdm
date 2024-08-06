@@ -2289,7 +2289,6 @@ static int delete_object_obj(DMOBJECT_ARGS)
 	} else {
 		char *refparam = node->current_object;
 		char *perm = permission->val;
-		unsigned char del_action = DEL_INST;
 
 		if (DM_STRCMP(refparam, dmctx->in_param) != 0)
 			return FAULT_9005;
@@ -2303,9 +2302,9 @@ static int delete_object_obj(DMOBJECT_ARGS)
 			return FAULT_9005;
 
 		if (!node->is_instanceobj)
-			del_action = DEL_ALL;
+			return FAULT_9005;
 
-		return (delobj)(refparam, dmctx, data, instance, del_action);
+		return (delobj)(refparam, dmctx, data, instance, DEL_INST);
 	}
 
 	return 0;

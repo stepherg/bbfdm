@@ -1068,15 +1068,9 @@ static void test_api_bbfdm_add_del_standard_object(void **state)
 	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
 
-	// delete all object ==> expected "0" error
+	// delete all object ==> expected "9005" error
 	ctx->in_param = "Device.Users.User.";
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
-	assert_int_equal(fault, 0);
-
-	// Get name object after deleting all instances ==> expected "9005" error
-	ctx->in_param = "Device.Users.User.1.";
-	ctx->nextlevel = true;
-	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
 }
 
@@ -1111,15 +1105,9 @@ static void test_api_bbfdm_add_del_json_object(void **state)
 	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
 
-	// delete all object ==> expected "0" error
+	// delete all object ==> expected "9005" error
 	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
-	assert_int_equal(fault, 0);
-
-	// Get name object after deleting all instances ==> expected "9005" error
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.";
-	ctx->nextlevel = true;
-	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
 }
 
@@ -1154,15 +1142,9 @@ static void test_api_bbfdm_add_del_json_v1_object(void **state)
 	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
 
-	// delete all object ==> expected "0" error
+	// delete all object ==> expected "9005" error
 	ctx->in_param = "Device.UCI_TEST_V1.OWSD.";
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
-	assert_int_equal(fault, 0);
-
-	// Get name object after deleting all instances ==> expected "9005" error
-	ctx->in_param = "Device.UCI_TEST_V1.OWSD.1.";
-	ctx->nextlevel = true;
-	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
 
 	// add object ==> expected "9005" error
@@ -1213,15 +1195,9 @@ static void test_api_bbfdm_add_del_library_object(void **state)
 	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
 
-	// delete all object ==> expected "0" error
+	// delete all object ==> expected "9005" error
 	ctx->in_param = "Device.WiFi.SSID.";
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
-	assert_int_equal(fault, 0);
-
-	// Get name object after deleting all instances ==> expected "9005" error
-	ctx->in_param = "Device.WiFi.SSID.1.";
-	ctx->nextlevel = true;
-	fault = bbf_entry_method(ctx, BBF_GET_NAME);
 	assert_int_equal(fault, FAULT_9005);
 }
 

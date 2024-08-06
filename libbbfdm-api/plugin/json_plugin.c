@@ -634,49 +634,22 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 		if (file && section_type && dmmap_file) {
 			struct uci_section *s = NULL, *stmp = NULL, *dmmap_section = NULL;
 
-			switch (del_action) {
-				case DEL_INST:
-					uci_package_foreach_sections_safe(json_object_get_string(file), stmp, s) {
-						char *dm_parent = NULL;
+			uci_package_foreach_sections_safe(json_object_get_string(file), stmp, s) {
+				char *dm_parent = NULL;
 
-						dmuci_get_value_by_section_string(s, "dm_parent", &dm_parent);
-						if (DM_STRLEN(dm_parent) && strcmp(section_name(((struct dm_data *)data)->config_section), dm_parent) == 0) {
-							if (dmuci_delete_by_section(s, NULL, NULL))
-								return -1;
-						}
-					}
-
-					get_dmmap_section_of_config_section(json_object_get_string(dmmap_file), json_object_get_string(section_type), section_name(((struct dm_data *)data)->config_section), &dmmap_section);
-					if (dmuci_delete_by_section(dmmap_section, NULL, NULL))
+				dmuci_get_value_by_section_string(s, "dm_parent", &dm_parent);
+				if (DM_STRLEN(dm_parent) && strcmp(section_name(((struct dm_data *)data)->config_section), dm_parent) == 0) {
+					if (dmuci_delete_by_section(s, NULL, NULL))
 						return -1;
-
-					if (dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL))
-						return -1;
-
-					break;
-				case DEL_ALL:
-					uci_foreach_sections_safe(json_object_get_string(file), json_object_get_string(section_type), stmp, s) {
-						struct uci_section *ss = NULL, *sstmp = NULL;
-
-						uci_package_foreach_sections_safe(json_object_get_string(file), sstmp, ss) {
-							char *dm_parent = NULL;
-
-							dmuci_get_value_by_section_string(ss, "dm_parent", &dm_parent);
-							if (DM_STRLEN(dm_parent) && strcmp(section_name(s), dm_parent) == 0) {
-								if (dmuci_delete_by_section(ss, NULL, NULL))
-									return -1;
-							}
-						}
-
-						get_dmmap_section_of_config_section(json_object_get_string(dmmap_file), json_object_get_string(section_type), section_name(s), &dmmap_section);
-						if (dmuci_delete_by_section(dmmap_section, NULL, NULL))
-							return -1;
-
-						if (dmuci_delete_by_section(s, NULL, NULL))
-							return -1;
-					}
-					break;
+				}
 			}
+
+			get_dmmap_section_of_config_section(json_object_get_string(dmmap_file), json_object_get_string(section_type), section_name(((struct dm_data *)data)->config_section), &dmmap_section);
+			if (dmuci_delete_by_section(dmmap_section, NULL, NULL))
+				return -1;
+
+			if (dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL))
+				return -1;
 		}
 	}
 
