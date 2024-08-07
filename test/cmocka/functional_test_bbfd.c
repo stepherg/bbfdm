@@ -53,23 +53,35 @@ static int group_teardown(void **state)
 
 static void validate_parameter(struct dmctx *ctx, const char *name, const char *value, const char *type)
 {
-	struct dm_parameter *n;
+	struct blob_attr *cur = NULL;
+	size_t rem = 0;
 
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[3] = {0};
+		const struct blobmsg_policy p[3] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING }
+		};
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
+		blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *dm_name = blobmsg_get_string(tb[0]);
+		char *dm_data = blobmsg_get_string(tb[1]);
+		char *dm_type = blobmsg_get_string(tb[2]);
 
 		// check the returned path
-		assert_string_equal(n->name, name);
+		assert_string_equal(dm_name, name);
 
 		// check the returned value
-		assert_string_equal(n->data, value);
+		assert_string_equal(dm_data, value);
 
 		// check the returned type
-		assert_string_equal(n->type, type);
+		assert_string_equal(dm_type, type);
 	}
 
-	bbf_ctx_clean_sub(ctx);
-	bbf_ctx_init_sub(ctx, TR181_ROOT_TREE);
+	bbf_ctx_clean(ctx);
+	bbf_ctx_init(ctx, TR181_ROOT_TREE);
 }
 
 static void test_api_bbfdm_get_set_standard_parameter(void **state)
@@ -1253,8 +1265,9 @@ static void test_api_bbfdm_valid_standard_operate(void **state)
 static void test_api_bbfdm_valid_standard_list_operate(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
-	int fault = 0, i = 0;
+	struct blob_attr *cur = NULL;
+	size_t rem = 0;
+	int fault = 0, idx = 0;
 
 	ctx->in_param = "Device.";
 	ctx->dm_type = BBFDM_USP;
@@ -1266,64 +1279,88 @@ static void test_api_bbfdm_valid_standard_list_operate(void **state)
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *_cur = NULL;
+		size_t _rem = 0;
+		struct blob_attr *tb[5] = {0};
+		const struct blobmsg_policy p[5] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING },
+				{ "input", BLOBMSG_TYPE_ARRAY },
+				{ "output", BLOBMSG_TYPE_ARRAY }
+		};
 
-		if (DM_STRCMP(n->name, "Device.FactoryReset()") == 0) {
-			assert_string_equal(n->type, "xsd:command");
-			assert_string_equal(n->additional_data, "sync");
-			assert_null(n->data);
+		blobmsg_parse(p, 5, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = blobmsg_get_string(tb[0]);
+		char *data = blobmsg_get_string(tb[1]);
+		char *type = blobmsg_get_string(tb[2]);
+		struct blob_attr *command_in = tb[3];
+		struct blob_attr *command_out = tb[4];
+
+		if (DM_STRCMP(name, "Device.FactoryReset()") == 0) {
+			assert_string_equal(type, "xsd:command");
+			assert_string_equal(data, "sync");
+			assert_null(data);
 		}
 
-		if (DM_STRCMP(n->name, "Device.DeviceInfo.VendorLogFile.{i}.Upload()") == 0) {
-			assert_string_equal(n->type, "xsd:command");
-			assert_string_equal(n->additional_data, "async");
-			operation_args *args = (operation_args *)n->data;
-			assert_non_null(args);
-			const char **command_in = args->in;
-			const char **command_out = args->out;
+		if (DM_STRCMP(name, "Device.DeviceInfo.VendorLogFile.{i}.Upload()") == 0) {
+			assert_string_equal(type, "xsd:command");
+			assert_string_equal(data, "async");
 			assert_non_null(command_in);
 			assert_null(command_out);
 
-			for (i = 0; command_in[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(command_in[i], "URL");
-					break;
-				case 1:
-					assert_string_equal(command_in[i], "Username");
-					break;
-				case 2:
-					assert_string_equal(command_in[i], "Password");
-					break;
+			blobmsg_for_each_attr(_cur, command_in, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
+
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "URL");
+						break;
+					case 1:
+						assert_string_equal(blobmsg_get_string(__cur), "Username");
+						break;
+					case 2:
+						assert_string_equal(blobmsg_get_string(__cur), "Password");
+						break;
+					}
+					idx++;
 				}
 			}
-			assert_int_equal(i, 3);
+			assert_int_equal(idx, 3);
 		}
 
-		if (DM_STRCMP(n->name, "Device.WiFi.NeighboringWiFiDiagnostic()") == 0) {
-			assert_string_equal(n->type, "xsd:command");
-			assert_string_equal(n->additional_data, "async");
-			operation_args *args = (operation_args *)n->data;
-			assert_non_null(args);
-			const char **command_in = args->in;
-			const char **command_out = args->out;
+		if (DM_STRCMP(name, "Device.WiFi.NeighboringWiFiDiagnostic()") == 0) {
+			assert_string_equal(type, "xsd:command");
+			assert_string_equal(data, "async");
 			assert_null(command_in);
 			assert_non_null(command_out);
 
-			for (i = 0; command_out[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(command_out[i], "Status");
-					break;
-				case 1:
-					assert_string_equal(command_out[i], "Result.{i}.Radio");
-					break;
-				case 2:
-					assert_string_equal(command_out[i], "Result.{i}.SSID");
-					break;
+			idx = 0;
+
+			blobmsg_for_each_attr(_cur, command_out, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
+
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "Status");
+						break;
+					case 1:
+						assert_string_equal(blobmsg_get_string(__cur), "Result.{i}.Radio");
+						break;
+					case 2:
+						assert_string_equal(blobmsg_get_string(__cur), "Result.{i}.SSID");
+						break;
+					}
+					idx++;
 				}
 			}
-			assert_int_equal(i, 18);
+			assert_int_equal(idx, 18);
 		}
 	}
 }
@@ -1361,8 +1398,9 @@ static void test_api_bbfdm_valid_library_operate(void **state)
 static void test_api_bbfdm_valid_library_list_operate(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
-	int fault = 0, i = 0;
+	struct blob_attr *cur = NULL, *_cur = NULL;
+	size_t rem = 0, _rem = 0;
+	int fault = 0, idx = 0;
 
 	ctx->in_param = "Device.";
 	ctx->dm_type = BBFDM_USP;
@@ -1374,47 +1412,74 @@ static void test_api_bbfdm_valid_library_list_operate(void **state)
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[5] = {0};
+		const struct blobmsg_policy p[5] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING },
+				{ "input", BLOBMSG_TYPE_ARRAY },
+				{ "output", BLOBMSG_TYPE_ARRAY }
+		};
 
-		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_Reboot()") == 0) {
-			assert_string_equal(n->type, "xsd:command");
-			assert_string_equal(n->additional_data, "sync");
-			assert_null(n->data);
+		blobmsg_parse(p, 5, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = blobmsg_get_string(tb[0]);
+		char *data = blobmsg_get_string(tb[1]);
+		char *type = blobmsg_get_string(tb[2]);
+		struct blob_attr *command_in = tb[3];
+		struct blob_attr *command_out = tb[4];
+
+		if (DM_STRCMP(name, "Device.X_IOPSYS_EU_Reboot()") == 0) {
+			assert_string_equal(type, "xsd:command");
+			assert_string_equal(data, "sync");
+			assert_null(command_in);
+			assert_null(command_out);
 		}
 
-		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_PingTEST.Run()") == 0) {
-			assert_string_equal(n->type, "xsd:command");
-			assert_string_equal(n->additional_data, "async");
-			operation_args *args = (operation_args *)n->data;
-			assert_non_null(args);
-			const char **command_in = args->in;
-			const char **command_out = args->out;
+		if (DM_STRCMP(name, "Device.X_IOPSYS_EU_PingTEST.Run()") == 0) {
+			assert_string_equal(type, "xsd:command");
+			assert_string_equal(data, "async");
 			assert_non_null(command_in);
 			assert_non_null(command_out);
 
-			for (i = 0; command_in[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(command_in[i], "Host");
-					break;
-				}
-			}
-			assert_int_equal(i, 1);
+			blobmsg_for_each_attr(_cur, command_in, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
 
-			for (i = 0; command_out[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(command_out[i], "AverageResponseTime");
-					break;
-				case 1:
-					assert_string_equal(command_out[i], "MinimumResponseTime");
-					break;
-				case 2:
-					assert_string_equal(command_out[i], "MaximumResponseTime");
-					break;
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "Host");
+						break;
+					}
+					idx++;
 				}
 			}
-			assert_int_equal(i, 3);
+			assert_int_equal(idx, 1);
+
+			idx = 0;
+
+			blobmsg_for_each_attr(_cur, command_out, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
+
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "AverageResponseTime");
+						break;
+					case 1:
+						assert_string_equal(blobmsg_get_string(__cur), "MinimumResponseTime");
+						break;
+					case 2:
+						assert_string_equal(blobmsg_get_string(__cur), "MaximumResponseTime");
+						break;
+					}
+					idx++;
+				}
+			}
+			assert_int_equal(idx, 3);
 		}
 	}
 }
@@ -1454,8 +1519,9 @@ static void test_api_bbfdm_valid_json_operate(void **state)
 static void test_api_bbfdm_valid_json_list_operate(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
-	int fault = 0, i = 0;
+	struct blob_attr *cur = NULL, *_cur = NULL;
+	size_t rem = 0, _rem = 0;
+	int fault = 0, idx = 0;
 
 	ctx->in_param = "Device.";
 	ctx->dm_type = BBFDM_USP;
@@ -1467,35 +1533,61 @@ static void test_api_bbfdm_valid_json_list_operate(void **state)
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[5] = {0};
+		const struct blobmsg_policy p[5] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING },
+				{ "input", BLOBMSG_TYPE_ARRAY },
+				{ "output", BLOBMSG_TYPE_ARRAY }
+		};
 
-		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Status()") == 0) {
-			assert_string_equal(n->type, "xsd:command");
-			assert_string_equal(n->additional_data, "async");
-			operation_args *args = (operation_args *)n->data;
-			assert_non_null(args);
-			const char **command_in = args->in;
-			const char **command_out = args->out;
+		blobmsg_parse(p, 5, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = blobmsg_get_string(tb[0]);
+		char *data = blobmsg_get_string(tb[1]);
+		char *type = blobmsg_get_string(tb[2]);
+		struct blob_attr *command_in = tb[3];
+		struct blob_attr *command_out = tb[4];
+
+		if (DM_STRCMP(name, "Device.X_IOPSYS_EU_TEST.{i}.Status()") == 0) {
+			assert_string_equal(type, "xsd:command");
+			assert_string_equal(data, "async");
 			assert_non_null(command_in);
 			assert_non_null(command_out);
 
-			for (i = 0; command_in[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(command_in[i], "Option");
-					break;
-				}
-			}
-			assert_int_equal(i, 1);
+			blobmsg_for_each_attr(_cur, command_in, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
 
-			for (i = 0; command_out[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(command_out[i], "Result");
-					break;
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "Option");
+						break;
+					}
+					idx++;
 				}
 			}
-			assert_int_equal(i, 1);
+			assert_int_equal(idx, 1);
+
+			idx = 0;
+
+			blobmsg_for_each_attr(_cur, command_out, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
+
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "Result");
+						break;
+					}
+					idx++;
+				}
+			}
+			assert_int_equal(idx, 1);
 		}
 	}
 }
@@ -1535,8 +1627,9 @@ static void test_api_bbfdm_valid_json_v1_operate(void **state)
 static void test_api_bbfdm_valid_json_v1_list_operate(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
-	int fault = 0, i = 0;
+	struct blob_attr *cur = NULL, *_cur = NULL;
+	int fault = 0, _rem = 0, idx = 0;
+	size_t rem = 0;
 
 	ctx->in_param = "Device.";
 	ctx->dm_type = BBFDM_USP;
@@ -1548,41 +1641,67 @@ static void test_api_bbfdm_valid_json_v1_list_operate(void **state)
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[5] = {0};
+		const struct blobmsg_policy p[5] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING },
+				{ "input", BLOBMSG_TYPE_ARRAY },
+				{ "output", BLOBMSG_TYPE_ARRAY }
+		};
 
-		if (DM_STRCMP(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Status()") == 0) {
-			assert_string_equal(n->type, "xsd:command");
-			assert_string_equal(n->additional_data, "async");
-			operation_args *args = (operation_args *)n->data;
-			assert_non_null(args);
-			const char **command_in = args->in;
-			const char **command_out = args->out;
+		blobmsg_parse(p, 5, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = blobmsg_get_string(tb[0]);
+		char *data = blobmsg_get_string(tb[1]);
+		char *type = blobmsg_get_string(tb[2]);
+		struct blob_attr *command_in = tb[3];
+		struct blob_attr *command_out = tb[4];
+
+		if (DM_STRCMP(name, "Device.UBUS_TEST_V1.Interface.{i}.Status()") == 0) {
+			assert_string_equal(type, "xsd:command");
+			assert_string_equal(data, "async");
 			assert_non_null(command_in);
 			assert_non_null(command_out);
 
-			for (i = 0; command_in[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(command_in[i], "Option");
-					break;
-				case 1:
-					assert_string_equal(command_out[i], "Value");
-					break;
-				}
-			}
-			assert_int_equal(i, 2);
+			blobmsg_for_each_attr(_cur, command_in, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
 
-			for (i = 0; command_out[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(command_out[i], "Result");
-					break;
-				case 1:
-					assert_string_equal(command_out[i], "Value");
-					break;
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "Option");
+						break;
+					case 1:
+						assert_string_equal(blobmsg_get_string(__cur), "Value");
+						break;
+					}
+					idx++;
 				}
 			}
-			assert_int_equal(i, 2);
+			assert_int_equal(idx, 2);
+
+			idx = 0;
+
+			blobmsg_for_each_attr(_cur, command_out, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
+
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "Result");
+						break;
+					case 1:
+						assert_string_equal(blobmsg_get_string(__cur), "Value");
+						break;
+					}
+					idx++;
+				}
+			}
+			assert_int_equal(idx, 2);
 		}
 	}
 }
@@ -1590,8 +1709,9 @@ static void test_api_bbfdm_valid_json_v1_list_operate(void **state)
 static void test_api_bbfdm_valid_library_event(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
-	int fault = 0, idx = 0;
+	struct blob_attr *cur = NULL, *_cur = NULL;
+	int fault = 0, _rem = 0, idx = 0, event_num = 0;
+	size_t rem = 0;
 
 	ctx->in_param = "Device.";
 	ctx->dm_type = BBFDM_USP;
@@ -1603,48 +1723,68 @@ static void test_api_bbfdm_valid_library_event(void **state)
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[4] = {0};
+		const struct blobmsg_policy p[4] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING },
+				{ "input", BLOBMSG_TYPE_ARRAY }
+		};
 
-		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_WakeUp!") == 0) {
-			assert_string_equal(n->type, "xsd:event");
-			assert_null(n->data);
+		blobmsg_parse(p, 4, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = blobmsg_get_string(tb[0]);
+		char *data = blobmsg_get_string(tb[1]);
+		char *type = blobmsg_get_string(tb[2]);
+		struct blob_attr *event_in = tb[3];
+
+		if (DM_STRCMP(name, "Device.X_IOPSYS_EU_WakeUp!") == 0) {
+			assert_string_equal(type, "xsd:event");
+			assert_null(data);
 		}
 
-		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_Boot!") == 0) {
-			assert_string_equal(n->type, "xsd:event");
-			event_args *args = (event_args *)n->data;
-			assert_non_null(args);
-			const char **event_param = args->param;
-			assert_non_null(event_param);
-			for (int i = 0; event_param[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(event_param[i], "CommandKey");
-					break;
-				case 1:
-					assert_string_equal(event_param[i], "Cause");
-					break;
-				case 2:
-					assert_string_equal(event_param[i], "FirmwareUpdated");
-					break;
-				case 3:
-					assert_string_equal(event_param[i], "ParameterMap");
-					break;
+		if (DM_STRCMP(name, "Device.X_IOPSYS_EU_Boot!") == 0) {
+			assert_string_equal(type, "xsd:event");
+			assert_non_null(event_in);
+
+			blobmsg_for_each_attr(_cur, event_in, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
+
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "CommandKey");
+						break;
+					case 1:
+						assert_string_equal(blobmsg_get_string(__cur), "Cause");
+						break;
+					case 2:
+						assert_string_equal(blobmsg_get_string(__cur), "FirmwareUpdated");
+						break;
+					case 3:
+						assert_string_equal(blobmsg_get_string(__cur), "ParameterMap");
+						break;
+					}
+					idx++;
 				}
 			}
+			assert_int_equal(idx, 4);
 		}
 
-		idx++;
+		event_num++;
 	}
 
-	assert_int_not_equal(idx, 0);
+	assert_int_not_equal(event_num, 0);
 }
 
 static void test_api_bbfdm_valid_json_event(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
-	int fault = 0, idx = 0;
+	struct blob_attr *cur = NULL, *_cur = NULL;
+	int fault = 0, _rem = 0, idx = 0, event_num = 0;
+	size_t rem = 0;
 
 	ctx->in_param = "Device.";
 	ctx->dm_type = BBFDM_USP;
@@ -1656,42 +1796,62 @@ static void test_api_bbfdm_valid_json_event(void **state)
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[4] = {0};
+		const struct blobmsg_policy p[4] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING },
+				{ "input", BLOBMSG_TYPE_ARRAY }
+		};
 
-		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Periodic!") == 0) {
-			assert_string_equal(n->type, "xsd:event");
-			assert_null(n->data);
+		blobmsg_parse(p, 4, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = blobmsg_get_string(tb[0]);
+		char *data = blobmsg_get_string(tb[1]);
+		char *type = blobmsg_get_string(tb[2]);
+		struct blob_attr *event_in = tb[3];
+
+		if (DM_STRCMP(name, "Device.X_IOPSYS_EU_TEST.{i}.Periodic!") == 0) {
+			assert_string_equal(type, "xsd:event");
+			assert_null(data);
 		}
 
-		if (DM_STRCMP(n->name, "Device.X_IOPSYS_EU_TEST.{i}.Push!") == 0) {
-			assert_string_equal(n->type, "xsd:event");
-			event_args *args = (event_args *)n->data;
-			assert_non_null(args);
-			const char **event_param = args->param;
-			assert_non_null(event_param);
-			for (int i = 0; event_param[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(event_param[i], "Data");
-					break;
-				case 1:
-					assert_string_equal(event_param[i], "Status");
-					break;
+		if (DM_STRCMP(name, "Device.X_IOPSYS_EU_TEST.{i}.Push!") == 0) {
+			assert_string_equal(type, "xsd:event");
+			assert_non_null(event_in);
+
+			blobmsg_for_each_attr(_cur, event_in, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
+
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "Data");
+						break;
+					case 1:
+						assert_string_equal(blobmsg_get_string(__cur), "Status");
+						break;
+					}
+					idx++;
 				}
 			}
+			assert_int_equal(idx, 2);
 		}
 
-		idx++;
+		event_num++;
 	}
 
-	assert_int_not_equal(idx, 0);
+	assert_int_not_equal(event_num, 0);
 }
 
 static void test_api_bbfdm_valid_json_v1_event(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
-	struct dm_parameter *n;
-	int fault = 0, idx = 0;
+	struct blob_attr *cur = NULL, *_cur = NULL;
+	int fault = 0, _rem = 0, idx = 0, event_num = 0;
+	size_t rem = 0;
 
 	ctx->in_param = "Device.";
 	ctx->dm_type = BBFDM_USP;
@@ -1703,37 +1863,57 @@ static void test_api_bbfdm_valid_json_v1_event(void **state)
 	fault = bbf_entry_method(ctx, BBF_SCHEMA);
 	assert_int_equal(fault, 0);
 
-	list_for_each_entry(n, &ctx->list_parameter, list) {
-		if (DM_STRCMP(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Periodic!") == 0) {
-			assert_string_equal(n->type, "xsd:event");
-			assert_null(n->data);
+	blobmsg_for_each_attr(cur, ctx->bb.head, rem) {
+		struct blob_attr *tb[4] = {0};
+		const struct blobmsg_policy p[4] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING },
+				{ "input", BLOBMSG_TYPE_ARRAY }
+		};
+
+		blobmsg_parse(p, 4, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = blobmsg_get_string(tb[0]);
+		char *data = blobmsg_get_string(tb[1]);
+		char *type = blobmsg_get_string(tb[2]);
+		struct blob_attr *event_in = tb[3];
+
+		if (DM_STRCMP(name, "Device.UBUS_TEST_V1.Interface.{i}.Periodic!") == 0) {
+			assert_string_equal(type, "xsd:event");
+			assert_null(data);
 		}
 
-		if (DM_STRCMP(n->name, "Device.UBUS_TEST_V1.Interface.{i}.Push!") == 0) {
-			assert_string_equal(n->type, "xsd:event");
-			event_args *args = (event_args *)n->data;
-			assert_non_null(args);
-			const char **event_param = args->param;
-			assert_non_null(event_param);
-			for (int i = 0; event_param[i] != NULL; i++) {
-				switch (i) {
-				case 0:
-					assert_string_equal(event_param[i], "Data");
-					break;
-				case 1:
-					assert_string_equal(event_param[i], "Status");
-					break;
-				case 2:
-					assert_string_equal(event_param[i], "Value");
-					break;
+		if (DM_STRCMP(name, "Device.UBUS_TEST_V1.Interface.{i}.Push!") == 0) {
+			assert_string_equal(type, "xsd:event");
+			assert_non_null(event_in);
+
+			blobmsg_for_each_attr(_cur, event_in, _rem) {
+				struct blob_attr *__cur = NULL;
+				size_t __rem = 0;
+
+				blobmsg_for_each_attr(__cur, _cur, __rem) {
+					switch (idx) {
+					case 0:
+						assert_string_equal(blobmsg_get_string(__cur), "Data");
+						break;
+					case 1:
+						assert_string_equal(blobmsg_get_string(__cur), "Status");
+						break;
+					case 2:
+						assert_string_equal(blobmsg_get_string(__cur), "Value");
+						break;
+					}
+					idx++;
 				}
 			}
+			assert_int_equal(idx, 3);
 		}
 
-		idx++;
+		event_num++;
 	}
 
-	assert_int_not_equal(idx, 0);
+	assert_int_not_equal(event_num, 0);
 }
 
 int main(void)

@@ -1,7 +1,9 @@
 {
 	"daemon": {
 		"config": {
-			"loglevel": "1"
+			"loglevel": "1",
+			"transaction_timeout": "30",
+			"subprocess_level": "2"
 		},
 		"input": {
 			"type": "DotSo",

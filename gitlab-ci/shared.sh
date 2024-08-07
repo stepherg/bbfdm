@@ -70,7 +70,6 @@ function install_libbbf()
 
 	echo "installing libbbf"
 	exec_cmd_verbose make install
-	ln -sf /usr/share/bbfdm/scripts/bbf.diag /usr/libexec/rpcd/bbf.diag
 	echo "371d530c95a17d1ca223a29b7a6cdc97e1135c1e0959b51106cca91a0b148b5e42742d372a359760742803f2a44bd88fca67ccdcfaeed26d02ce3b6049cb1e04" > /etc/bbfdm/.secure_hash
 	cd ..
 }

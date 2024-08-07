@@ -509,7 +509,6 @@ Integer to decide the depth of data model to be parsed
 | Property        | Type    | Required | Default    |
 | --------------- | ------- | -------- | ---------- |
 | `format`        | string  | Optional | `"pretty"` |
-| `instance_mode` | integer | Optional | `0`        |
 | `proto`         | string  | Optional | `"both"`   |
 
 #### format
@@ -532,21 +531,6 @@ The value of this property **must** be equal to one of the [known values below](
 | ------ |
 | raw    |
 | pretty |
-
-#### instance_mode
-
-`instance_mode`
-
-- is optional
-- type: reference
-- default: `0`
-
-##### instance_mode Type
-
-`integer`
-
-- minimum value: `0`
-- maximum value: `1`
 
 #### proto
 
@@ -637,7 +621,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf get {"path":"officia","paths":["aliqua nisi sunt"],"maxdepth":-49153948,"optional":{"format":"raw","proto":"cwmp","instance_mode":0}}
+ubus call bbf get {"path":"officia","paths":["aliqua nisi sunt"],"maxdepth":-49153948,"optional":{"format":"raw","proto":"cwmp"}}
 ```
 
 ### JSONRPC Example
@@ -655,7 +639,7 @@ ubus call bbf get {"path":"officia","paths":["aliqua nisi sunt"],"maxdepth":-491
       "path": "officia",
       "paths": ["aliqua nisi sunt"],
       "maxdepth": -49153948,
-      "optional": { "format": "raw", "proto": "cwmp", "instance_mode": 0 }
+      "optional": { "format": "raw", "proto": "cwmp" }
     }
   ]
 }
@@ -799,23 +783,7 @@ gets only first level objects if true
 
 | Property        | Type    | Required | Default  |
 | --------------- | ------- | -------- | -------- |
-| `instance_mode` | integer | Optional | `0`      |
 | `proto`         | string  | Optional | `"both"` |
-
-#### instance_mode
-
-`instance_mode`
-
-- is optional
-- type: reference
-- default: `0`
-
-##### instance_mode Type
-
-`integer`
-
-- minimum value: `0`
-- maximum value: `1`
 
 #### proto
 
@@ -880,7 +848,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf instances {"path":"id aliquip","first_level":false,"optional":{"proto":"usp","instance_mode":1}}
+ubus call bbf instances {"path":"id aliquip","first_level":false,"optional":{"proto":"usp"}}
 ```
 
 ### JSONRPC Example
@@ -894,7 +862,7 @@ ubus call bbf instances {"path":"id aliquip","first_level":false,"optional":{"pr
     "<SID>",
     "bbf",
     "instances",
-    { "path": "id aliquip", "first_level": false, "optional": { "proto": "usp", "instance_mode": 1 } }
+    { "path": "id aliquip", "first_level": false, "optional": { "proto": "usp" } }
   ]
 }
 ```
@@ -1074,7 +1042,6 @@ Input arguments for the operate command as defined in TR-181-2.13
 | Property        | Type    | Required | Default    |
 | --------------- | ------- | -------- | ---------- |
 | `format`        | string  | Optional | `"pretty"` |
-| `instance_mode` | integer | Optional | `0`        |
 | `proto`         | string  | Optional | `"both"`   |
 
 #### format
@@ -1097,21 +1064,6 @@ The value of this property **must** be equal to one of the [known values below](
 | ------ |
 | raw    |
 | pretty |
-
-#### instance_mode
-
-`instance_mode`
-
-- is optional
-- type: reference
-- default: `0`
-
-##### instance_mode Type
-
-`integer`
-
-- minimum value: `0`
-- maximum value: `1`
 
 #### proto
 
@@ -1138,7 +1090,7 @@ The value of this property **must** be equal to one of the [known values below](
 ### Ubus CLI Example
 
 ```
-ubus call bbf operate {"command":"et sit dolor","command_key":"nulla velit ut in Excepteur","input":{},"optional":{"format":"raw","proto":"both","instance_mode":0}}
+ubus call bbf operate {"command":"et sit dolor","command_key":"nulla velit ut in Excepteur","input":{},"optional":{"format":"raw","proto":"both"}}
 ```
 
 ### JSONRPC Example
@@ -1156,7 +1108,7 @@ ubus call bbf operate {"command":"et sit dolor","command_key":"nulla velit ut in
       "command": "et sit dolor",
       "command_key": "nulla velit ut in Excepteur",
       "input": {},
-      "optional": { "format": "raw", "proto": "both", "instance_mode": 0 }
+      "optional": { "format": "raw", "proto": "both" }
     }
   ]
 }
@@ -1529,9 +1481,6 @@ All items must be of the type: Unknown type ``.
           "type": "string",
           "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
         },
-        "info": {
-          "type": "string"
-        },
         "input": {
           "type": "array",
           "items": [
@@ -1589,7 +1538,6 @@ All items must be of the type: Unknown type ``.
       "type": "xsd:dateTime",
       "fault": 7546,
       "fault_msg": "cupidatat Excepteur",
-      "info": "ullamco dolor occaecat",
       "input": [{ "path": "minim pariatur id laboris ut", "data": "1", "type": "xsd:unsignedInt" }],
       "output": [{ "path": "ea enim Excepteur proident est", "data": "1", "type": "xsd:long" }]
     }
@@ -1674,24 +1622,8 @@ To set multiple values at once, path should be relative to object elements
 
 | Property         | Type    | Required | Default  |
 | ---------------- | ------- | -------- | -------- |
-| `instance_mode`  | integer | Optional | `0`      |
 | `proto`          | string  | Optional | `"both"` |
 | `transaction_id` | integer | Optional |          |
-
-#### instance_mode
-
-`instance_mode`
-
-- is optional
-- type: reference
-- default: `0`
-
-##### instance_mode Type
-
-`integer`
-
-- minimum value: `0`
-- maximum value: `1`
 
 #### proto
 
@@ -1798,7 +1730,7 @@ value of the object element provided in path, path should contains valid writabl
 ### Ubus CLI Example
 
 ```
-ubus call bbf set {"path":"nonmagna ut anim","value":"cupidatat","optional":{"proto":"usp","instance_mode":0,"transaction_id":45864115},"obj_path":{}}
+ubus call bbf set {"path":"nonmagna ut anim","value":"cupidatat","optional":{"proto":"usp","transaction_id":45864115},"obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -1815,7 +1747,7 @@ ubus call bbf set {"path":"nonmagna ut anim","value":"cupidatat","optional":{"pr
     {
       "path": "nonmagna ut anim",
       "value": "cupidatat",
-      "optional": { "proto": "usp", "instance_mode": 0, "transaction_id": 45864115 },
+      "optional": { "proto": "usp", "transaction_id": 45864115 },
       "obj_path": {}
     }
   ]

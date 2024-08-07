@@ -87,23 +87,11 @@ char *bbfdm_strdup(struct dmctx *ctx, const char *s);
  */
 int bbfdm_asprintf(struct dmctx *ctx, char **s, const char *format, ...);
 
-/*
- * Concatenate the string lastname to the string obj.
- * @param ctx - Pointer to bbf context
- * @param s - Pointer to store the resulting string
- * @param obj - Pointer to the first string
- * @param lastname - Pointer to the second string to concatenate
- * @return 0 on success, -1 on failure
- */
-int bbfdm_astrcat(struct dmctx *ctx, char **s, char *obj, char *lastname);
-
-
 #define dmmalloc(x) bbfdm_malloc(0, x)
 #define dmcalloc(n, x) bbfdm_calloc(0, n, x)
 #define dmrealloc(x, n) bbfdm_realloc(0, x, n)
 #define dmstrdup(x) bbfdm_strdup(0, x)
 #define dmasprintf(s, format, ...) bbfdm_asprintf(0, s, format, ## __VA_ARGS__)
-#define dmastrcat(s, b, m) bbfdm_astrcat(0, s, b, m)
 
 #define dm_dynamic_malloc(m, x) __dmmalloc(m, x)
 #define dm_dynamic_calloc(m, n, x) __dmcalloc(m, n, x)

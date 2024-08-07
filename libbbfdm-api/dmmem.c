@@ -285,22 +285,3 @@ int bbfdm_asprintf(struct dmctx *ctx, char **s, const char *format, ...)
 
 	return 0;
 }
-
-int bbfdm_astrcat(struct dmctx *ctx, char **s, char *obj, char *lastname)
-{
-	char buf[2048] = {0};
-
-	if (obj == NULL || lastname == NULL)
-		return -1;
-
-	int olen = strlen(obj);
-	memcpy(buf, obj, olen);
-	int llen = strlen(lastname) + 1;
-	memcpy(buf + olen, lastname, llen);
-
-	*s = bbfdm_strdup(ctx, buf);
-	if (*s == NULL)
-		return -1;
-
-	return 0;
-}

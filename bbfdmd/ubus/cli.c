@@ -263,10 +263,22 @@ static int in_dotso_out_cli_exec_get(cli_data_t *cli_data, char *argv[])
 
 	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_GET_VALUE);
 	if (!err) {
-		struct dm_parameter *n;
+		struct blob_attr *cur = NULL;
+		size_t rem = 0;
 
-		list_for_each_entry(n, &cli_data->bbf_ctx.list_parameter, list) {
-			printf("%s => %s\n", n->name, n->data);
+		blobmsg_for_each_attr(cur, cli_data->bbf_ctx.bb.head, rem) {
+			struct blob_attr *tb[2] = {0};
+			const struct blobmsg_policy p[2] = {
+					{ "path", BLOBMSG_TYPE_STRING },
+					{ "data", BLOBMSG_TYPE_STRING }
+			};
+
+			blobmsg_parse(p, 2, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+			char *name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+			char *data = (tb[1]) ? blobmsg_get_string(tb[1]) : "";
+
+			printf("%s => %s\n", name, data);
 		}
 		dmuci_commit_bbfdm();
 	} else {
@@ -421,10 +433,18 @@ static int in_dotso_out_cli_exec_instances(cli_data_t *cli_data, char *argv[])
 
 	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_INSTANCES);
 	if (!err) {
-		struct dm_parameter *n;
+		struct blob_attr *cur = NULL;
+		size_t rem = 0;
 
-		list_for_each_entry(n, &cli_data->bbf_ctx.list_parameter, list) {
-			printf("%s\n", n->name);
+		blobmsg_for_each_attr(cur, cli_data->bbf_ctx.bb.head, rem) {
+			struct blob_attr *tb[1] = {0};
+			const struct blobmsg_policy p[1] = {
+					{ "path", BLOBMSG_TYPE_STRING }
+			};
+
+			blobmsg_parse(p, 1, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+			printf("%s\n", (tb[0]) ? blobmsg_get_string(tb[0]) : "");
 		}
 	} else {
 		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
@@ -465,11 +485,25 @@ static int in_dotso_out_cli_exec_schema(cli_data_t *cli_data, char *argv[])
 
 	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_SCHEMA);
 	if (!err) {
-		struct dm_parameter *n;
+		struct blob_attr *cur = NULL;
+		size_t rem = 0;
 
-		list_for_each_entry(n, &cli_data->bbf_ctx.list_parameter, list) {
-			int cmd = get_dm_type(n->type);
-			printf("%s %s %s\n", n->name, n->type, (cmd != DMT_EVENT && cmd != DMT_COMMAND) ? n->data : "0");
+		blobmsg_for_each_attr(cur, cli_data->bbf_ctx.bb.head, rem) {
+			struct blob_attr *tb[3] = {0};
+			const struct blobmsg_policy p[3] = {
+					{ "path", BLOBMSG_TYPE_STRING },
+					{ "data", BLOBMSG_TYPE_STRING },
+					{ "type", BLOBMSG_TYPE_STRING }
+			};
+
+			blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+			char *name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+			char *data = (tb[1]) ? blobmsg_get_string(tb[1]) : "";
+			char *type = (tb[2]) ? blobmsg_get_string(tb[2]) : "";
+
+			int cmd = get_dm_type(type);
+			printf("%s %s %s\n", name, type, (cmd != DMT_EVENT && cmd != DMT_COMMAND) ? data : "0");
 		}
 	} else {
 		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);

@@ -56,9 +56,9 @@ void bbfdm_operate_cmd(bbfdm_data_t *data, void *output)
 
 				blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
 
-				char *op_name = blobmsg_get_string(tb[0]);
-				char *op_data = blobmsg_get_string(tb[1]);
-				char *op_type = blobmsg_get_string(tb[2]);
+				char *op_name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+				char *op_data = (tb[1]) ? blobmsg_get_string(tb[1]) : "";
+				char *op_type = (tb[2]) ? blobmsg_get_string(tb[2]) : "";
 
 				add_pv_list(op_name, op_data, op_type, &pv_local);
 			}

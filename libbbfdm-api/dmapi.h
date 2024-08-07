@@ -124,7 +124,7 @@ typedef struct dm_leaf_s {
 	int (*getvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 	int (*setvalue)(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action);
 	int bbfdm_type;
-	uint32_t dm_falgs;
+	uint32_t dm_flags;
 
 } DMLEAF;
 
@@ -171,7 +171,6 @@ struct dmctx {
 	int (*method_obj)(DMOBJECT_ARGS);
 	int (*checkobj)(DMOBJECT_ARGS);
 	int (*checkleaf)(DMOBJECT_ARGS);
-	struct list_head list_parameter;
 	struct list_head *memhead;
 	struct blob_buf bb;
 	DMOBJ *dm_entryobj;

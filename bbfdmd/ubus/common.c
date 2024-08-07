@@ -135,12 +135,12 @@ int count_delim(const char *path)
 
 bool validate_msglen(bbfdm_data_t *data)
 {
-	size_t data_len = blob_pad_len(data->bb.head);
+	size_t data_len = blob_pad_len(data->bbf_ctx.bb.head);
 
 	if (data_len >= DEF_IPC_DATA_LEN) {
 		ERR("Blob exceed max len(%zd), data len(%zd)", DEF_IPC_DATA_LEN, data_len);
-		blob_buf_free(&data->bb);
-		blob_buf_init(&data->bb, 0);
+		blob_buf_free(&data->bbf_ctx.bb);
+		blob_buf_init(&data->bbf_ctx.bb, 0);
 		fill_err_code_table(data, FAULT_9002);
 		return false;
 	}

@@ -1738,9 +1738,6 @@ All items must be of the type: Unknown type ``.
           "type": "string",
           "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
         },
-        "info": {
-          "type": "string"
-        },
         "input": {
           "type": "array",
           "items": [
@@ -1798,7 +1795,6 @@ All items must be of the type: Unknown type ``.
       "type": "xsd:int",
       "fault": 8767,
       "fault_msg": "cupidatat amet",
-      "info": "laborum",
       "input": [{ "path": "quiselit ad", "data": "0", "type": "xsd:hexBinary" }],
       "output": [{ "path": "ipsum do Lorem nulla officia", "data": "0", "type": "xsd:unsignedLong" }]
     }

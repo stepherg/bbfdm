@@ -202,9 +202,6 @@
                       "type": "string",
                       "Description": "Any discrepancy in input will result in fault. The type of fault can be identified by fault code"
                     },
-                    "info": {
-                      "type": "string"
-                    },
                     "input": {
                       "type": "array",
                       "items": [

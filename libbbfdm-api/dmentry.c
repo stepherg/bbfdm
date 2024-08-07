@@ -46,7 +46,7 @@ void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 {
 	memset(&ctx->bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&ctx->bb, 0);
-	INIT_LIST_HEAD(&ctx->list_parameter);
+
 	ctx->dm_entryobj = tEntryObj;
 	bbfdm_init_mem(ctx);
 	dm_uci_init();
@@ -55,7 +55,6 @@ void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 void bbf_ctx_clean(struct dmctx *ctx)
 {
 	blob_buf_free(&ctx->bb);
-	free_all_list_parameter(ctx);
 
 	dm_uci_exit();
 	dmubus_free();
@@ -64,13 +63,11 @@ void bbf_ctx_clean(struct dmctx *ctx)
 
 void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj)
 {
-	INIT_LIST_HEAD(&ctx->list_parameter);
 	ctx->dm_entryobj = tEntryObj;
 }
 
 void bbf_ctx_clean_sub(struct dmctx *ctx)
 {
-	free_all_list_parameter(ctx);
 }
 
 static char *get_fault_message(int fault_code)
@@ -339,12 +336,15 @@ bool adm_entry_object_exists(struct dmctx *ctx, char *param) // To be removed la
 	snprintf(linker, sizeof(linker), "%s%c", param, (param[DM_STRLEN(param) - 1] != '.') ? '.' : '\0');
 
 	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
+	memset(&dmctx.bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&dmctx.bb, 0);
 
 	dmctx.in_param = linker;
 
 	dm_entry_object_exists(&dmctx);
 
 	bbf_ctx_clean_sub(&dmctx);
+	blob_buf_free(&dmctx.bb);
 
 	return dmctx.match;
 }

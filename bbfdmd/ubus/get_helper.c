@@ -94,27 +94,6 @@ void bbf_sub_cleanup(struct dmctx *dm_ctx)
 	bbf_ctx_clean_sub(dm_ctx);
 }
 
-void bb_add_flags_arr(struct blob_buf *bb, char *data)
-{
-	uint32_t *dm_falgs = (uint32_t *)data;
-
-	if (!bb || !dm_falgs)
-		return;
-
-	void *flags_arr = blobmsg_open_array(bb, "flags");
-
-	if (*dm_falgs & DM_FLAG_REFERENCE)
-		bb_add_string(bb, NULL, "Reference");
-	if (*dm_falgs & DM_FLAG_UNIQUE)
-		bb_add_string(bb, NULL, "Unique");
-	if (*dm_falgs & DM_FLAG_LINKER)
-		bb_add_string(bb, NULL, "Linker");
-	if (*dm_falgs & DM_FLAG_SECURE)
-		bb_add_string(bb, NULL, "Secure");
-
-	blobmsg_close_array(bb, flags_arr);
-}
-
 bool present_in_path_list(struct list_head *plist, char *entry)
 {
 	struct pathNode *pos;

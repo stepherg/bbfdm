@@ -155,12 +155,10 @@ Each datamodel micro-service expose their own ubus object, which is slightly dif
 > Note1: `optional` table are present in all methods and it supports below options:
 
 ```console
-"optional":{"proto":"String", "instance_mode":"Integer", "transaction_id":"Integer", "format":"String"}
+"optional":{"proto":"String", "transaction_id":"Integer", "format":"String"}
 ```
 
  - `proto` in each method specify the data-model prototype('cwmp', 'usp') to use, if not provided default data-model will be used.
-
- - `instance_mode` could be 0 or 1, for instance number, instance alias respectively.
 
  - `transaction_id` to define the transaction id number.
 
@@ -327,6 +325,7 @@ In Devices, datamodel micro-services started and managed by `/etc/init.d/bbfdm.s
 > In plugins approach, the 3rd party datamodel gets attached to main bbfdm process, which further increases nodes in main datamodel tree, which overtime become a huge tree, results in slower turn around service time for the APIs. Also, any unhandled fault in plugin result in segfault in main bbfdmd process, which takes down the whole tree along with plugin, resulting in complete failure from cwmp and USP, with micro-services plugins runs as an individual processes, so impact of fault limited to its own micro-service only.
 
 Micro-service approach, disintegrate the plugins further and run them as individual daemons with the help of "bbfdmd" "-m" command line options.
+
 ## Datamodel debugging tools
 
 To debug the datamodel objects/parameters, `bbfdmd` provides a command line interface, which can

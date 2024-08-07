@@ -94,7 +94,6 @@ static void bbfdm_cleanup(struct bbfdm_context *u)
 		free_services_from_list(&head_registered_service);
 	}
 
-	blob_buf_free(&u->dm_schema);
 	/* DotSo Plugin */
 	free_dotso_plugin(deamon_lib_handle);
 	deamon_lib_handle = NULL;
@@ -258,9 +257,11 @@ err_out:
 
 static bool is_object_schema_update_available(struct bbfdm_context *u)
 {
-	size_t ll, min_len;
+	bool ret = false;
 	LIST_HEAD(paths_list);
 	bbfdm_data_t data = {
+			.ctx = 0,
+			.req = 0,
 			.is_raw = true,
 			.plist = &paths_list,
 			.bbf_ctx.nextlevel = false,
@@ -270,27 +271,22 @@ static bool is_object_schema_update_available(struct bbfdm_context *u)
 			.bbf_ctx.dm_type = BBFDM_USP
 	};
 
-	memset(&data.bb, 0, sizeof(struct blob_buf));
-	int schema_len = blobmsg_len(u->dm_schema.head);
-	blob_buf_free(&u->dm_schema);
-	blob_buf_init(&u->dm_schema, 0);
-	data.bbp = &u->dm_schema;
+	int old_schema_len = u->schema_len;
 
 	// If new parameter gets added it would be a minimum tuple of three params
-	min_len = 100;
+	int min_len = 100;
 
 	add_path_list(ROOT_NODE, &paths_list);
-	bool ret = bbf_dm_get_supported_dm(&data);
-	if (ret != 0) {
+	int new_schema_len = bbfdm_get_supported_dm(&data);
+	if (new_schema_len == 0) {
 		WARNING("Failed to get schema");
 		free_path_list(&paths_list);
 		return ret;
 	}
 
-	ll = blobmsg_len(data.bbp->head);
-	if (ll - schema_len > min_len) {
-		DEBUG("DM Schema update available old:new[%zd:%zd]", schema_len, ll);
-		if (schema_len != 0) {
+	if (new_schema_len - old_schema_len > min_len) {
+		DEBUG("DM Schema update available old:new[%zd:%zd]", old_schema_len, new_schema_len);
+		if (old_schema_len != 0) {
 			ret = true;
 		}
 	}
@@ -429,27 +425,24 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 
 	unsigned int dm_type = data.bbf_ctx.dm_type;
 
+	data.ctx = ctx;
+	data.req = req;
 	data.bbf_ctx.nextlevel = (tb[DM_SCHEMA_FIRST_LEVEL]) ? blobmsg_get_bool(tb[DM_SCHEMA_FIRST_LEVEL]) : false;
 	data.bbf_ctx.iscommand = (dm_type == BBFDM_CWMP) ? false : true;
 	data.bbf_ctx.isevent = (dm_type == BBFDM_CWMP) ? false : true;
 	data.bbf_ctx.isinfo = (dm_type == BBFDM_CWMP) ? false : true;
 	data.plist = &paths_list;
 
-	blob_buf_init(&data.bb, 0);
-
 #ifdef BBF_SCHEMA_FULL_TREE
 	data.bbf_ctx.isinfo = true;
-	bbf_dm_get_supported_dm(&data);
+	bbfdm_get_supported_dm(&data);
 #else
 	if (dm_type == BBFDM_CWMP)
 		bbfdm_get_names(&data);
 	else
-		get_schema_from_blob(&u->dm_schema, &data);
+		bbfdm_get_supported_dm(&data);
 #endif
 
-	ubus_send_reply(ctx, req, data.bb.head);
-
-	blob_buf_free(&data.bb);
 	free_path_list(&paths_list);
 	return 0;
 }
@@ -496,16 +489,15 @@ static int bbfdm_instances_handler(struct ubus_context *ctx, struct ubus_object 
 		}
 	}
 
+	data.ctx = ctx;
+	data.req = req;
 	data.bbf_ctx.nextlevel = (tb[DM_INSTANCES_FIRST_LEVEL]) ? blobmsg_get_bool(tb[DM_INSTANCES_FIRST_LEVEL]) : false;
 	data.plist = &paths_list;
 
 	fill_optional_data(&data, tb[DM_INSTANCES_OPTIONAL]);
 
-	blob_buf_init(&data.bb, 0);
 	bbfdm_get_instances(&data);
-	ubus_send_reply(ctx, req, data.bb.head);
 
-	blob_buf_free(&data.bb);
 	free_path_list(&paths_list);
 	return 0;
 }
@@ -1187,10 +1179,20 @@ static void update_instances_list(struct list_head *inst)
 
 	ret = bbfdm_cmd_exec(&bbf_ctx, BBF_INSTANCES);
 	if (ret == 0) {
-		struct dm_parameter *nptr_dp;
+		struct blob_attr *cur = NULL;
+		size_t rem = 0;
 
-		list_for_each_entry(nptr_dp, &bbf_ctx.list_parameter, list) {
-			add_path_list(nptr_dp->name, inst);
+		blobmsg_for_each_attr(cur, bbf_ctx.bb.head, rem) {
+			struct blob_attr *tb[1] = {0};
+			const struct blobmsg_policy p[1] = {
+					{ "path", BLOBMSG_TYPE_STRING }
+			};
+
+			blobmsg_parse(p, 1, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+			char *name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+
+			add_path_list(name, inst);
 		}
 	} else {
 		WARNING("Failed to get instances, err code %d", ret);
@@ -1724,7 +1726,6 @@ static void bbf_config_change_cb(struct ubus_context *ctx, struct ubus_event_han
 static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 {
 	memset(bbfdm_ctx, 0, sizeof(struct bbfdm_context));
-	blob_buf_init(&bbfdm_ctx->dm_schema, 0);
 	INIT_LIST_HEAD(&bbfdm_ctx->instances);
 	INIT_LIST_HEAD(&bbfdm_ctx->old_instances);
 	INIT_LIST_HEAD(&bbfdm_ctx->event_handlers);

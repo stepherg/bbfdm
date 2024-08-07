@@ -34,7 +34,6 @@ void bbfdm_get_names(bbfdm_data_t *data);
 
 void bbfdm_get_instances(bbfdm_data_t *data);
 
-int bbf_dm_get_supported_dm(bbfdm_data_t *data);
+int bbfdm_get_supported_dm(bbfdm_data_t *data);
 
-void get_schema_from_blob(struct blob_buf *schema_bp, bbfdm_data_t *data);
 #endif /* GET_H */

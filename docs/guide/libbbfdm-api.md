@@ -186,6 +186,8 @@ Following table has list of APIs/datatypes which no longer exists in libbbfdm-ap
 | function | `dm_validate_hexBinary_list` 	| `bbfdm_validate_hexBinary_list` 	| To support fault_msg in case of errors |
 | function | `dm_entry_validate_allowed_objects`| `dm_validate_allowed_objects` 	| Replaced with a generic API that is accessible for both internal (bbfdm core) and external (microservices) data models |
 | function | `dm_entry_validate_external_linker_allowed_objects` | `dm_validate_allowed_objects` | Replaced with a generic API that is accessible for both internal (bbfdm core) and external (microservices) data models |
+| function | `add_list_parameter` | | Removed, no more required |
+| function | `free_all_list_parameter` | | Removed, no more required |
 | function | `adm_entry_get_linker_param` 	| | Removed, no more required |
 | function | `adm_entry_get_linker_value` 	| | Removed, no more required |
 | enum 	   | `CMD_SUCCESS` 			| | Removed, no more required |

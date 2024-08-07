@@ -2,7 +2,7 @@ LIB = libbbf_test.so
 
 LIB_OBJS = libbbf_test.o
 LIB_CFLAGS = $(CFLAGS) -Wall -Werror -fPIC -I /usr/local/include/
-LIB_LDFLAGS = $(LDFLAGS) -L/usr/share/bbfdm -lbbfdm-api
+LIB_LDFLAGS = $(LDFLAGS) -lbbfdm-api
 
 %.o: %.c
 	$(CC) $(LIB_CFLAGS) $(FPIC) -c -o $@ $<

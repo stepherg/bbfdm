@@ -40,11 +40,11 @@ typedef struct bbfdm_config {
 struct bbfdm_context {
 	bbfdm_config_t config;
 	struct ubus_context ubus_ctx;
-	struct blob_buf dm_schema;
 	struct uloop_timeout instance_timer;
 	struct list_head event_handlers;
 	struct list_head instances;
 	struct list_head old_instances;
+	int schema_len;
 };
 
 struct ev_handler_node {
@@ -59,7 +59,6 @@ typedef struct bbfdm_data {
 	struct ubus_request_data *req;
 	struct list_head *plist;
 	struct dmctx bbf_ctx;
-	struct blob_buf *bbp;
 	struct blob_buf bb;
 	uint8_t depth;
 	bool is_raw;

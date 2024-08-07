@@ -40,8 +40,6 @@ void fill_err_code_array(bbfdm_data_t *data, int fault);
 
 void bb_add_string(struct blob_buf *bb, const char *name, const char *value);
 
-void bb_add_flags_arr(struct blob_buf *bb, char *data);
-
 int transaction_start(bbfdm_data_t *data, char *app, uint32_t max_timeout);
 int transaction_commit(bbfdm_data_t *data, int trans_id, bool is_service_restart);
 int transaction_abort(bbfdm_data_t *data, int trans_id);

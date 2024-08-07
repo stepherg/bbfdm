@@ -147,7 +147,8 @@ static size_t get_glob_len(char *path)
 
 static void resulting(uint8_t maxdepth, char *path, struct dmctx *bbf_ctx, struct list_head *pv_local)
 {
-	struct dm_parameter *n;
+	struct blob_attr *cur = NULL;
+	size_t rem = 0;
 	uint8_t count;
 
 	size_t plen = get_glob_len(bbf_ctx->in_param);
@@ -155,17 +156,30 @@ static void resulting(uint8_t maxdepth, char *path, struct dmctx *bbf_ctx, struc
 	if (path_len == 0)
 		return;
 
-	list_for_each_entry(n, &bbf_ctx->list_parameter, list) {
-		if (match(n->name, path, 0, NULL)) {
+	blobmsg_for_each_attr(cur, bbf_ctx->bb.head, rem) {
+		struct blob_attr *tb[3] = {0};
+		const struct blobmsg_policy p[3] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING }
+		};
+
+		blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+		char *data = (tb[1]) ? blobmsg_get_string(tb[1]) : "";
+		char *type = (tb[2]) ? blobmsg_get_string(tb[2]) : "";
+
+		if (match(name, path, 0, NULL)) {
 			if (is_search_by_reference(bbf_ctx->in_param))
 				plen = 0;
 
 			if (maxdepth > 4 || maxdepth == 0) {
-				add_pv_list(n->name + plen, n->data, n->type, pv_local);
+				add_pv_list(name + plen, data, type, pv_local);
 			} else {
-				count = count_delim(n->name + path_len);
+				count = count_delim(name + path_len);
 				if (count < maxdepth)
-					add_pv_list(n->name + plen, n->data, n->type, pv_local);
+					add_pv_list(name + plen, data, type, pv_local);
 			}
 		}
 	}
@@ -388,21 +402,25 @@ void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 void prepare_raw_result(struct blob_buf *bb, struct dmctx *bbf_ctx, struct list_head *rslvd)
 {
 	struct pathNode *iter = NULL;
-	struct dm_parameter *n = NULL;
-	void *table = NULL;
+	struct blob_attr *cur = NULL;
+	size_t rem = 0;
 
 	list_for_each_entry(iter, rslvd, list) {
 		if (DM_STRLEN(iter->path) == 0)
 			continue;
 
-		list_for_each_entry(n, &bbf_ctx->list_parameter, list) {
-			if (match(n->name, iter->path, 0, NULL)) {
-				table = blobmsg_open_table(bb, NULL);
-				bb_add_string(bb, "path", n->name);
-				bb_add_string(bb, "data", n->data);
-				bb_add_string(bb, "type", n->type);
-				bb_add_flags_arr(bb, n->additional_data);
-				blobmsg_close_table(bb, table);
+		blobmsg_for_each_attr(cur, bbf_ctx->bb.head, rem) {
+			struct blob_attr *tb[1] = {0};
+			const struct blobmsg_policy p[1] = {
+					{ "path", BLOBMSG_TYPE_STRING }
+			};
+
+			blobmsg_parse(p, 1, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+			char *name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+
+			if (match(name, iter->path, 0, NULL)) {
+				blobmsg_add_blob(bb, cur);
 			}
 		}
 	}

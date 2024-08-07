@@ -119,7 +119,7 @@ Each leaf in the **DMLEAF** table can be a **Parameter**, **Command** or **Event
 | `getvalue`          | The function which return the value of this parameter |
 | `setvalue`          | The function which set the value of this parameter |
 | `bbfdm_type`        | The bbfdm type of the parameter. Could be **BBFDM_CWMP**, **BBFDM_USP**, **BBFDM_BOTH** or **BBFDM_NONE**.If it's **BBFDM_BOTH** then we can see this parameter in all protocols (CWMP, USP,...) |
-| `dm_falgs`          | An enumeration value used to specify the displayed parameter value. Could be **DM_FLAG_REFERENCE**, **DM_FLAG_UNIQUE**, **DM_FLAG_LINKER** or **DM_FLAG_SECURE**. |
+| `dm_flags`          | An enumeration value used to specify the displayed parameter value. Could be **DM_FLAG_REFERENCE**, **DM_FLAG_UNIQUE**, **DM_FLAG_LINKER** or **DM_FLAG_SECURE**. |
 
 #### 2.Command definition
 

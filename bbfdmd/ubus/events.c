@@ -130,12 +130,22 @@ int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
 	bbf_init(&bbf_ctx);
 
 	if (0 == bbfdm_cmd_exec(&bbf_ctx, BBF_SCHEMA)) {
-		struct dm_parameter *param;
+		struct blob_attr *cur = NULL;
+		size_t rem = 0;
 
-		list_for_each_entry(param, &bbf_ctx.list_parameter, list) {
-			event_args *event = (event_args *)param->data;
+		blobmsg_for_each_attr(cur, bbf_ctx.bb.head, rem) {
+			struct blob_attr *tb[2] = {0};
+			const struct blobmsg_policy p[2] = {
+					{ "path", BLOBMSG_TYPE_STRING },
+					{ "data", BLOBMSG_TYPE_STRING }
+			};
 
-			if (!param->name || !event || !event->name || !strlen(event->name))
+			blobmsg_parse(p, 2, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+			char *param_name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+			char *event_name = (tb[1]) ? blobmsg_get_string(tb[1]) : "";
+
+			if (!param_name || !event_name || !strlen(event_name))
 				continue;
 
 			struct ubus_event_handler *ev = (struct ubus_event_handler *)malloc(sizeof(struct ubus_event_handler));
@@ -148,13 +158,13 @@ int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
 			memset(ev, 0, sizeof(struct ubus_event_handler));
 			ev->cb = bbfdm_event_handler;
 
-			if (0 != ubus_register_event_handler(ctx, ev, event->name)) {
-				ERR("Failed to register: %s", event->name);
+			if (0 != ubus_register_event_handler(ctx, ev, event_name)) {
+				ERR("Failed to register: %s", event_name);
 				err = -1;
 				goto end;
 			}
 
-			add_ubus_event_handler(ev, event->name, param->name, ev_list);
+			add_ubus_event_handler(ev, event_name, param_name, ev_list);
 		}
 	}
 

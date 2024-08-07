@@ -671,34 +671,6 @@ int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, cha
 	return 0;
 }
 
-void add_list_parameter(struct dmctx *ctx, char *param_name, char *param_data, char *param_type, char *additional_data)
-{
-	struct dm_parameter *dm_parameter;
-
-	dm_parameter = dmcalloc(1, sizeof(struct dm_parameter));
-	list_add_tail(&dm_parameter->list, &ctx->list_parameter);
-	dm_parameter->name = param_name;
-	dm_parameter->data = param_data;
-	dm_parameter->type = param_type;
-	dm_parameter->additional_data = additional_data;
-}
-
-static void api_del_list_parameter(struct dm_parameter *dm_parameter)
-{
-	list_del(&dm_parameter->list);
-	dmfree(dm_parameter->name);
-	dmfree(dm_parameter);
-}
-
-void free_all_list_parameter(struct dmctx *ctx)
-{
-	struct dm_parameter *dm_parameter = NULL;
-	while (ctx->list_parameter.next != &ctx->list_parameter) {
-		dm_parameter = list_entry(ctx->list_parameter.next, struct dm_parameter, list);
-		api_del_list_parameter(dm_parameter);
-	}
-}
-
 static void bb_add_flags_arr(struct blob_buf *bb, uint32_t dm_flags)
 {
 	if (!bb || !dm_flags)
@@ -1064,273 +1036,243 @@ static int ubus_call_blob_msg(char *obj, char *method, struct blob_buf *blob, in
 				ms_callback, callback_arg, timeout);
 	}
 
+	if (ubus_ctx) {
+		ubus_free(ubus_ctx);
+		ubus_ctx = NULL;
+	}
+
 	return rc;
+}
+
+static uint32_t get_dm_flags(struct blob_attr *flags_arr)
+{
+	struct blob_attr *flag = NULL;
+	uint32_t dm_flags = 0;
+	int rem = 0;
+
+	if (!flags_arr)
+		return 0;
+
+	blobmsg_for_each_attr(flag, flags_arr, rem) {
+		char *flag_str = blobmsg_get_string(flag);
+		if (DM_LSTRCMP(flag_str, "Reference") == 0)
+			dm_flags |= DM_FLAG_REFERENCE;
+		if (DM_LSTRCMP(flag_str, "Unique") == 0)
+			dm_flags |= DM_FLAG_UNIQUE;
+		if (DM_LSTRCMP(flag_str, "Linker") == 0)
+			dm_flags |= DM_FLAG_LINKER;
+		if (DM_LSTRCMP(flag_str, "Secure") == 0)
+			dm_flags |= DM_FLAG_SECURE;
+	}
+
+	return dm_flags;
+}
+
+static void __get_ubus_value(struct ubus_request *req, int type, struct blob_attr *msg)
+{
+	struct blob_attr *cur = NULL;
+	int rem = 0;
+
+	if (!msg || !req)
+		return;
+
+	struct dmctx *dmctx = (struct dmctx *)req->priv;
+
+	struct blob_attr *parameters = get_results_array(msg);
+	if (parameters == NULL) {
+		dmctx->faultcode = FAULT_9005;
+		return;
+	}
+
+	int array_len = blobmsg_len(parameters);
+	if (array_len == 0) {
+		dmctx->findparam = 1;
+		return;
+	}
+
+	blobmsg_for_each_attr(cur, parameters, rem) {
+		struct blob_attr *tb[5] = {0};
+		const struct blobmsg_policy p[5] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING },
+				{ "flags", BLOBMSG_TYPE_ARRAY },
+				{ "fault", BLOBMSG_TYPE_INT32 }
+		};
+
+		blobmsg_parse(p, 5, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		if (tb[4]) {
+			int fault = blobmsg_get_u32(tb[4]);
+			dmctx->faultcode = fault;
+			return;
+		} else {
+			dmctx->faultcode = 0;
+		}
+
+		dmctx->findparam = 1;
+
+		uint32_t dm_flags = get_dm_flags(tb[3]);
+
+		bool is_reference = dm_flags & DM_FLAG_REFERENCE;
+
+		if (is_reference) {
+			char *dm_path = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+			char *dm_data = (tb[1]) ? get_value_by_reference(dmctx, blobmsg_get_string(tb[1])) : "";
+			char *dm_type = (tb[2]) ? blobmsg_get_string(tb[2]) : "";
+
+			fill_blob_param(&dmctx->bb, dm_path, dm_data, dm_type, dm_flags);
+		} else {
+			blobmsg_add_blob(&dmctx->bb, cur);
+		}
+	}
 }
 
 static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 {
-	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
 	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
+	struct blob_buf blob = {0};
 
-	json_object *in_args = json_object_new_object();
-	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+	memset(&blob, 0, sizeof(struct blob_buf));
+	blob_buf_init(&blob, 0);
 
-	dmubus_call(ubus_name, "get",
-			UBUS_ARGS{
-						{"path", in_path, String},
-						{"optional", json_object_to_json_string(in_args), Table}
-			},
-			2, &res);
+	blobmsg_add_string(&blob, "path", in_path);
+	prepare_optional_table(dmctx, &blob);
 
-	json_object_put(in_args);
+	int res = ubus_call_blob_msg(ubus_name, "get", &blob, 5000, __get_ubus_value, dmctx);
 
-	if (!res)
+	blob_buf_free(&blob);
+
+	if (res)
 		return FAULT_9005;
 
-	json_object *res_array = dmjson_get_obj(res, 1, "results");
-	if (!res_array)
-		return FAULT_9005;
-
-	size_t nbre_obj = json_object_array_length(res_array);
-
-	if (nbre_obj == 0) {
-		dmctx->findparam = 1;
-		return 0;
-	}
-
-	for (size_t i = 0; i < nbre_obj; i++) {
-		uint32_t *dm_flags = NULL;
-
-		res_obj = json_object_array_get_idx(res_array, i);
-
-		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
-			return DM_STRTOUL(fault);
-
-		dmctx->findparam = 1;
-
-		char *path = dmjson_get_value(res_obj, 1, "path");
-		char *data = dmjson_get_value(res_obj, 1, "data");
-		char *type = dmjson_get_value(res_obj, 1, "type");
-
-		json_object *flags_array = dmjson_get_obj(res_obj, 1, "flags");
-		if (flags_array) {
-			size_t nbre_falgs = json_object_array_length(flags_array);
-
-			dm_flags = (uint32_t *)dmcalloc(1, sizeof(uint32_t));
-
-			for (size_t j = 0; j < nbre_falgs; j++) {
-				json_object *flag_obj = json_object_array_get_idx(flags_array, j);
-
-				const char *flag = json_object_get_string(flag_obj);
-
-				if (DM_LSTRCMP(flag, "Reference") == 0) {
-					data = get_value_by_reference(dmctx, data);
-					*dm_flags |= DM_FLAG_REFERENCE;
-				} else if (DM_LSTRCMP(flag, "Unique") == 0) {
-					*dm_flags |= DM_FLAG_UNIQUE;
-				} else if (DM_LSTRCMP(flag, "Linker") == 0) {
-					*dm_flags |= DM_FLAG_LINKER;
-				} else if (DM_LSTRCMP(flag, "Secure") == 0) {
-					*dm_flags |= DM_FLAG_SECURE;
-				}
-			}
-		}
-
-		add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), (char *)dm_flags);
-	}
+	if (dmctx->faultcode)
+		return dmctx->faultcode;
 
 	return 0;
+}
+
+static void __get_ubus_supported_dm(struct ubus_request *req, int type, struct blob_attr *msg)
+{
+	struct blob_attr *cur = NULL;
+	int rem = 0;
+
+	if (!msg || !req)
+		return;
+
+	struct dmctx *dmctx = (struct dmctx *)req->priv;
+
+	struct blob_attr *parameters = get_results_array(msg);
+	if (parameters == NULL)
+		return;
+
+	int array_len = blobmsg_len(parameters);
+	if (array_len == 0) {
+		dmctx->findparam = 1;
+		return;
+	}
+
+	blobmsg_for_each_attr(cur, parameters, rem) {
+		struct blob_attr *tb[1] = {0};
+		const struct blobmsg_policy p[1] = {
+				{ "fault", BLOBMSG_TYPE_INT32 }
+		};
+
+		blobmsg_parse(p, 1, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		if (tb[0])
+			continue;
+
+		dmctx->findparam = 1;
+		blobmsg_add_blob(&dmctx->bb, cur);
+	}
 }
 
 static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 {
-	json_object *res = NULL, *res_obj = NULL, *tmp_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
 	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
-	char *tmp;
+	struct blob_buf blob = {0};
 
-	json_object *in_args = json_object_new_object();
-	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+	memset(&blob, 0, sizeof(struct blob_buf));
+	blob_buf_init(&blob, 0);
 
-	dmubus_call(ubus_name, "schema",
-			UBUS_ARGS{
-						{"path", in_path, String},
-						{"first_level", dmctx->nextlevel ? "1" : "0", Boolean},
-						{"optional", json_object_to_json_string(in_args), Table}
-			},
-			3, &res);
+	blobmsg_add_string(&blob, "path", in_path);
+	blobmsg_add_u8(&blob, "first_level", dmctx->nextlevel);
+	prepare_optional_table(dmctx, &blob);
 
-	json_object_put(in_args);
+	ubus_call_blob_msg(ubus_name, "schema", &blob, 5000, __get_ubus_supported_dm, dmctx);
 
-	if (!res)
-		return 0;
-
-	json_object *res_array = dmjson_get_obj(res, 1, "results");
-	if (!res_array)
-		return 0;
-
-	size_t nbre_obj = json_object_array_length(res_array);
-	if (nbre_obj == 0) {
-		dmctx->findparam = 1;
-		return 0;
-	}
-
-	for (size_t i = 0; i < nbre_obj; i++) {
-		res_obj = json_object_array_get_idx(res_array, i);
-
-		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
-			continue;
-
-		dmctx->findparam = 1;
-
-		char *path = dmjson_get_value(res_obj, 1, "path");
-		char *data = dmjson_get_value(res_obj, 1, "data");
-		char *type = dmjson_get_value(res_obj, 1, "type");
-
-		if (DM_LSTRCMP(type, "xsd:object") == 0) { //Object
-			add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), "xsd:object", NULL);
-		} else if (DM_LSTRCMP(type, "xsd:command") == 0) { //Command Leaf
-			operation_args *op = NULL;
-
-			op = dmcalloc(1, sizeof(operation_args));
-
-			json_object *input_array = dmjson_get_obj(res_obj, 1, "input");
-			if (input_array) {
-				size_t j = 0;
-				size_t in_nbre = json_object_array_length(input_array);
-				op->in = dmcalloc(in_nbre + 1, sizeof(char *));
-
-				for (j = 0; j < in_nbre; j++) {
-					tmp_obj = json_object_array_get_idx(input_array, j);
-
-					tmp = dmjson_get_value(tmp_obj, 1, "path");
-					op->in[j] = dmstrdup(tmp);
-				}
-				op->in[j] = NULL;
-			}
-
-			json_object *output_array = dmjson_get_obj(res_obj, 1, "output");
-			if (output_array) {
-				size_t j = 0;
-				size_t out_nbre = json_object_array_length(output_array);
-				op->out = dmcalloc(out_nbre + 1, sizeof(char *));
-
-				for (j = 0; j < out_nbre; j++) {
-					tmp_obj = json_object_array_get_idx(output_array, j);
-
-					tmp = dmjson_get_value(tmp_obj, 1, "path");
-					op->out[j] = dmstrdup(tmp);
-				}
-				op->out[j] = NULL;
-			}
-
-			add_list_parameter(dmctx, dmstrdup(path), (char *)op, "xsd:command", dmstrdup(data));
-		} else if (DM_LSTRCMP(type, "xsd:event") == 0) { //Event Leaf
-			event_args *ev = NULL;
-
-			json_object *input_array = dmjson_get_obj(res_obj, 1, "input");
-			if (input_array) {
-				ev = dmcalloc(1, sizeof(event_args));
-
-				size_t j = 0;
-				size_t in_nbre = json_object_array_length(input_array);
-				ev->param = dmcalloc(in_nbre + 1, sizeof(char *));
-
-				for (j = 0; j < in_nbre; j++) {
-					tmp_obj = json_object_array_get_idx(input_array, j);
-
-					tmp = dmjson_get_value(tmp_obj, 1, "path");
-					ev->param[j] = dmstrdup(tmp);
-				}
-				ev->param[j] = NULL;
-			}
-
-			add_list_parameter(dmctx, dmstrdup(path), (char *)ev, "xsd:event", NULL);
-		} else { //Param Leaf
-			uint32_t *dm_flags = NULL;
-
-			json_object *flags_array = dmjson_get_obj(res_obj, 1, "flags");
-			if (flags_array) {
-				size_t nbre_falgs = json_object_array_length(flags_array);
-
-				dm_flags = (uint32_t *)dmcalloc(1, sizeof(uint32_t));
-
-				for (size_t j = 0; j < nbre_falgs; j++) {
-					json_object *flag_obj = json_object_array_get_idx(flags_array, j);
-
-					const char *flag = json_object_get_string(flag_obj);
-
-					if (DM_LSTRCMP(flag, "Reference") == 0) {
-						data = get_value_by_reference(dmctx, data);
-						*dm_flags |= DM_FLAG_REFERENCE;
-					} else if (DM_LSTRCMP(flag, "Unique") == 0) {
-						*dm_flags |= DM_FLAG_UNIQUE;
-					} else if (DM_LSTRCMP(flag, "Linker") == 0) {
-						*dm_flags |= DM_FLAG_LINKER;
-					} else if (DM_LSTRCMP(flag, "Secure") == 0) {
-						*dm_flags |= DM_FLAG_SECURE;
-					}
-				}
-			}
-
-			add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), (char *)dm_flags);
-		}
-	}
+	blob_buf_free(&blob);
 
 	return 0;
 }
 
+static void __get_ubus_instances(struct ubus_request *req, int type, struct blob_attr *msg)
+{
+	struct blob_attr *cur = NULL;
+	int rem = 0;
+
+	if (!msg || !req)
+		return;
+
+	struct dmctx *dmctx = (struct dmctx *)req->priv;
+
+	struct blob_attr *parameters = get_results_array(msg);
+	if (parameters == NULL) {
+		dmctx->faultcode = FAULT_9005;
+		return;
+	}
+
+	int array_len = blobmsg_len(parameters);
+	if (array_len == 0) {
+		dmctx->findparam = 1;
+		return;
+	}
+
+	blobmsg_for_each_attr(cur, parameters, rem) {
+		struct blob_attr *tb[1] = {0};
+		const struct blobmsg_policy p[1] = {
+				{ "fault", BLOBMSG_TYPE_INT32 }
+		};
+
+		blobmsg_parse(p, 1, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		if (tb[0]) {
+			int fault = blobmsg_get_u32(tb[0]);
+			dmctx->faultcode = fault;
+			return;
+		} else {
+			dmctx->faultcode = 0;
+		}
+
+		dmctx->findparam = 1;
+		blobmsg_add_blob(&dmctx->bb, cur);
+	}
+}
+
 static int get_ubus_instances(struct dmctx *dmctx, struct dmnode *node)
 {
-	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
+	struct blob_buf blob = {0};
 
-	json_object *in_args = json_object_new_object();
-	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
-	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+	memset(&blob, 0, sizeof(struct blob_buf));
+	blob_buf_init(&blob, 0);
 
-	dmubus_call(ubus_name, "instances",
-			UBUS_ARGS{
-						{"path", dmctx->in_param, String},
-						{"first_level", dmctx->nextlevel ? "1" : "0", Boolean},
-						{"optional", json_object_to_json_string(in_args), Table}
-			},
-			3, &res);
+	blobmsg_add_string(&blob, "path", dmctx->in_param);
+	blobmsg_add_u8(&blob, "first_level", dmctx->nextlevel);
+	prepare_optional_table(dmctx, &blob);
 
-	json_object_put(in_args);
+	int res = ubus_call_blob_msg(ubus_name, "instances", &blob, 5000, __get_ubus_instances, dmctx);
 
-	if (!res)
+	blob_buf_free(&blob);
+
+	if (res)
 		return FAULT_9005;
 
-	json_object *res_array = dmjson_get_obj(res, 1, "results");
-	if (!res_array)
-		return FAULT_9005;
-
-	size_t nbre_obj = json_object_array_length(res_array);
-
-	if (nbre_obj == 0) {
-		dmctx->findparam = 1;
-		return 0;
-	}
-
-	for (size_t i = 0; i < nbre_obj; i++) {
-		res_obj = json_object_array_get_idx(res_array, i);
-
-		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
-			return DM_STRTOUL(fault);
-
-		dmctx->findparam = 1;
-
-		char *path = dmjson_get_value(res_obj, 1, "path");
-
-		add_list_parameter(dmctx, dmstrdup(path), NULL, "xsd:object", NULL);
-	}
+	if (dmctx->faultcode)
+		return dmctx->faultcode;
 
 	return 0;
 }
@@ -1515,59 +1457,50 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	return 0;
 }
 
-static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
+static void __get_ubus_name(struct ubus_request *req, int type, struct blob_attr *msg)
 {
+	struct blob_attr *cur = NULL;
+	int rem = 0, idx = 0;
+
+	if (!msg || !req)
+		return;
+
+	struct dmctx *dmctx = (struct dmctx *)req->priv;
 	unsigned int in_path_dot_num = count_occurrences(dmctx->in_param, '.');
-	json_object *res = NULL, *res_obj = NULL;
-	char *ubus_name = node->obj->checkdep;
-	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
 
-	json_object *in_args = json_object_new_object();
-	json_object_object_add(in_args, "proto", json_object_new_string("cwmp"));
-	json_object_object_add(in_args, "format", json_object_new_string("raw"));
+	struct blob_attr *parameters = get_results_array(msg);
+	if (parameters == NULL)
+		return;
 
-	dmubus_call(ubus_name, "schema",
-			UBUS_ARGS{
-						{"path", in_path, String},
-						{"first_level", dmctx->nextlevel ? "1" : "0", Boolean},
-						{"optional", json_object_to_json_string(in_args), Table}
-			},
-			3, &res);
-
-	json_object_put(in_args);
-
-	if (!res)
-		return 0;
-
-	json_object *res_array = dmjson_get_obj(res, 1, "results");
-	if (!res_array)
-		return 0;
-
-	size_t nbre_obj = json_object_array_length(res_array);
-
-	if (nbre_obj == 0) {
+	int array_len = blobmsg_len(parameters);
+	if (array_len == 0) {
 		dmctx->findparam = 1;
-		return 0;
+		return;
 	}
 
-	for (size_t i = 0; i < nbre_obj; i++) {
-		res_obj = json_object_array_get_idx(res_array, i);
+	blobmsg_for_each_attr(cur, parameters, rem) {
+		struct blob_attr *tb[2] = {0};
+		const struct blobmsg_policy p[2] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "fault", BLOBMSG_TYPE_INT32 }
+		};
 
-		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
-			return DM_STRTOUL(fault);
+		blobmsg_parse(p, 2, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		if (tb[1]) {
+			dmctx->faultcode = blobmsg_get_u32(tb[1]);
+			return;
+		}
 
 		dmctx->findparam = 1;
 
-		if (i == 0 &&  dmctx->nextlevel && (count_occurrences(node->current_object, '.') == in_path_dot_num + 1))
-			add_list_parameter(dmctx, dmstrdup(node->current_object), "0", "xsd:object", NULL);
-
-		char *path = dmjson_get_value(res_obj, 1, "path");
-		char *data = dmjson_get_value(res_obj, 1, "data");
-		char *type = dmjson_get_value(res_obj, 1, "type");
-		char *info = dmjson_get_value(res_obj, 1, "info");
+		if (idx == 0 &&  dmctx->nextlevel && (count_occurrences(dmctx->in_value, '.') == in_path_dot_num + 1)) {
+			fill_blob_param(&dmctx->bb, dmctx->in_value, "0", "xsd:object", 0);
+			idx++;
+		}
 
 		if (dmctx->nextlevel) {
+			char *path = tb[0] ? blobmsg_get_string(tb[0]) : "";
 			unsigned int path_dot_num = count_occurrences(path, '.');
 			size_t len = DM_STRLEN(path);
 
@@ -1576,8 +1509,27 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 				continue;
 		}
 
-		add_list_parameter(dmctx, dmstrdup(path), dmstrdup(data), dmstrdup(type), info);
+		blobmsg_add_blob(&dmctx->bb, cur);
 	}
+}
+
+static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
+{
+	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
+	char *ubus_name = node->obj->checkdep;
+	dmctx->in_value = node->current_object;
+	struct blob_buf blob = {0};
+
+	memset(&blob, 0, sizeof(struct blob_buf));
+	blob_buf_init(&blob, 0);
+
+	blobmsg_add_string(&blob, "path", in_path);
+	blobmsg_add_u8(&blob, "first_level", dmctx->nextlevel);
+	prepare_optional_table(dmctx, &blob);
+
+	ubus_call_blob_msg(ubus_name, "schema", &blob, 5000, __get_ubus_name, dmctx);
+
+	blob_buf_free(&blob);
 
 	return 0;
 }
@@ -1655,7 +1607,7 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 
 	prepare_optional_table(dmctx, &blob);
 
-	int res = ubus_call_blob_msg(ubus_name, "operate", &blob, 20000, __operate_ubus, dmctx);
+	int res = ubus_call_blob_msg(ubus_name, "operate", &blob, 120000, __operate_ubus, dmctx);
 
 	blob_buf_free(&blob);
 
@@ -1746,16 +1698,17 @@ static int get_value_param(DMPARAM_ARGS)
 	if (node->is_ubus_service) {
 		return get_ubus_value(dmctx, node);
 	} else {
-		char *full_param;
+		char full_param[MAX_DM_PATH] = {0};
 		char *value = "";
 
-		dmastrcat(&full_param, node->current_object, leaf->parameter);
+		snprintf(full_param, sizeof(full_param), "%s%s", node->current_object, leaf->parameter);
+
 		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-		if ((leaf->dm_falgs & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
+		if ((leaf->dm_flags & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
 			value = "";
 		} else if (value && *value) {
-			if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
+			if (leaf->dm_flags & DM_FLAG_REFERENCE) {
 				value = get_value_by_reference(dmctx, value);
 			} else {
 				value = check_value_by_type(value, leaf->type);
@@ -1764,7 +1717,7 @@ static int get_value_param(DMPARAM_ARGS)
 			value = get_default_value_by_type(leaf->type);
 		}
 
-		add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], leaf->dm_falgs ? (char *)&leaf->dm_falgs : NULL);
+		fill_blob_param(&dmctx->bb, full_param, value, DMT_TYPE[leaf->type], leaf->dm_flags);
 	}
 
 	return 0;
@@ -1784,29 +1737,25 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
 		dmctx->stop = (dmctx->iswildcard) ? false : true;
 	} else {
-		char *full_param;
+		char full_param[MAX_DM_PATH] = {0};
 		char *value = "";
 
-		dmastrcat(&full_param, node->current_object, leaf->parameter);
+		snprintf(full_param, sizeof(full_param), "%s%s", node->current_object, leaf->parameter);
 
 		if (dmctx->iswildcard) {
-			if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0) {
-				dmfree(full_param);
+			if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0)
 				return FAULT_9005;
-			}
 		} else {
-			if (DM_STRCMP(dmctx->in_param, full_param) != 0) {
-				dmfree(full_param);
+			if (DM_STRCMP(dmctx->in_param, full_param) != 0)
 				return FAULT_9005;
-			}
 		}
 
 		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-		if ((leaf->dm_falgs & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
+		if ((leaf->dm_flags & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
 			value = "";
 		} else if (value && *value) {
-			if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
+			if (leaf->dm_flags & DM_FLAG_REFERENCE) {
 				value = get_value_by_reference(dmctx, value);
 			} else
 				value = check_value_by_type(value, leaf->type);
@@ -1814,7 +1763,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 			value = get_default_value_by_type(leaf->type);
 		}
 
-		add_list_parameter(dmctx, full_param, value, DMT_TYPE[leaf->type], leaf->dm_falgs ? (char *)&leaf->dm_falgs : NULL);
+		fill_blob_param(&dmctx->bb, full_param, value, DMT_TYPE[leaf->type], leaf->dm_flags);
 
 		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
 		dmctx->stop = (dmctx->iswildcard) ? false : true;
@@ -1872,6 +1821,28 @@ int dm_entry_get_value(struct dmctx *dmctx)
 /* **********
  * get name 
  * **********/
+static void fill_blob_alias_param(struct blob_buf *bb, char *path, char *data, char *type, char *alias)
+{
+	if (!bb || !path || !data || !type || !alias)
+		return;
+
+	void *table = blobmsg_open_table(bb, NULL);
+
+	blobmsg_add_string(bb, "path", path);
+	blobmsg_add_string(bb, "data", data);
+	blobmsg_add_string(bb, "type", type);
+
+	void *array = blobmsg_open_array(bb, "output");
+
+	void *out_table = blobmsg_open_table(bb, NULL);
+	blobmsg_add_string(bb, "data", alias);
+	blobmsg_close_table(bb, out_table);
+
+	blobmsg_close_array(bb, array);
+
+	blobmsg_close_table(bb, table);
+}
+
 static int mobj_get_name(DMOBJECT_ARGS)
 {
 	if (node->is_ubus_service) {
@@ -1883,7 +1854,7 @@ static int mobj_get_name(DMOBJECT_ARGS)
 		if (permission->get_permission != NULL)
 			perm = permission->get_permission(refparam, dmctx, data, instance);
 
-		add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
+		fill_blob_param(&dmctx->bb, refparam, perm, "xsd:object", 0);
 		return 0;
 	}
 }
@@ -1894,19 +1865,23 @@ static int mparam_get_name(DMPARAM_ARGS)
 		get_ubus_name(dmctx, node);
 		return 0;
 	} else {
-		char *refparam;
 		char *perm = leaf->permission->val;
-		char *alias = "";
+		char refparam[MAX_DM_PATH] = {0};
 
-		dmastrcat(&refparam, node->current_object, leaf->parameter);
+		snprintf(refparam, sizeof(refparam), "%s%s", node->current_object, leaf->parameter);
+
 		if (leaf->permission->get_permission != NULL)
 			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
 		if (DM_LSTRCMP(leaf->parameter, "Alias") == 0) {
+			char *alias = "";
+
 			(leaf->getvalue)(refparam, dmctx, data, instance, &alias);
+			fill_blob_alias_param(&dmctx->bb, refparam, perm, DMT_TYPE[leaf->type], alias);
+		} else {
+			fill_blob_param(&dmctx->bb, refparam, perm, DMT_TYPE[leaf->type], 0);
 		}
 
-		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], alias);
 		return 0;
 	}
 }
@@ -1923,29 +1898,23 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 		dmctx->stop = true;
 		return err ? err : 0;
 	} else {
-		char *refparam;
 		char *perm = leaf->permission->val;
-		char *alias = "";
+		char refparam[MAX_DM_PATH] = {0};
 
-		dmastrcat(&refparam, node->current_object, leaf->parameter);
+		snprintf(refparam, sizeof(refparam), "%s%s", node->current_object, leaf->parameter);
 
 		if (dmctx->iswildcard) {
-			if (dm_strcmp_wildcard(refparam, dmctx->in_param) != 0) {
-				dmfree(refparam);
+			if (dm_strcmp_wildcard(refparam, dmctx->in_param) != 0)
 				return FAULT_9005;
-			}
 		} else {
-			if (DM_STRCMP(refparam, dmctx->in_param) != 0) {
-				dmfree(refparam);
+			if (DM_STRCMP(refparam, dmctx->in_param) != 0)
 				return FAULT_9005;
-			}
 		}
 
 		dmctx->stop = (dmctx->iswildcard) ? 0 : 1;
 
 		if (dmctx->nextlevel == 1) {
 			dmctx->stop = 1;
-			dmfree(refparam);
 			return FAULT_9003;
 		}
 
@@ -1953,10 +1922,14 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
 		if (DM_LSTRCMP(leaf->parameter, "Alias") == 0) {
+			char *alias = "";
+
 			(leaf->getvalue)(refparam, dmctx, data, instance, &alias);
+			fill_blob_alias_param(&dmctx->bb, refparam, perm, DMT_TYPE[leaf->type], alias);
+		} else {
+			fill_blob_param(&dmctx->bb, refparam, perm, DMT_TYPE[leaf->type], 0);
 		}
 
-		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], alias);
 		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
 		return 0;
 	}
@@ -1984,7 +1957,7 @@ static int mobj_get_name_in_obj(DMOBJECT_ARGS)
 		if (permission->get_permission != NULL)
 			perm = permission->get_permission(refparam, dmctx, data, instance);
 
-		add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
+		fill_blob_param(&dmctx->bb, refparam, perm, "xsd:object", 0);
 		return 0;
 	}
 }
@@ -1994,20 +1967,23 @@ static int mparam_get_name_in_obj(DMPARAM_ARGS)
 	if (node->is_ubus_service) {
 		return get_ubus_name(dmctx, node);
 	} else {
-		char *refparam;
 		char *perm = leaf->permission->val;
-		char *alias = "";
+		char refparam[MAX_DM_PATH] = {0};
 
-		dmastrcat(&refparam, node->current_object, leaf->parameter);
+		snprintf(refparam, sizeof(refparam), "%s%s", node->current_object, leaf->parameter);
 
 		if (leaf->permission->get_permission != NULL)
 			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
 		if (DM_LSTRCMP(leaf->parameter, "Alias") == 0) {
+			char *alias = "";
+
 			(leaf->getvalue)(refparam, dmctx, data, instance, &alias);
+			fill_blob_alias_param(&dmctx->bb, refparam, perm, DMT_TYPE[leaf->type], alias);
+		} else {
+			fill_blob_param(&dmctx->bb, refparam, perm, DMT_TYPE[leaf->type], 0);
 		}
 
-		add_list_parameter(dmctx, refparam, perm, DMT_TYPE[leaf->type], alias);
 		return 0;
 	}
 }
@@ -2086,7 +2062,7 @@ static int mobj_get_supported_dm(DMOBJECT_ARGS)
 		char *refparam = node->current_object;
 
 		if (node->matched && dmctx->isinfo) {
-			add_list_parameter(dmctx, refparam, perm, "xsd:object", NULL);
+			fill_blob_param(&dmctx->bb, refparam, perm, "xsd:object", 0);
 		}
 	}
 
@@ -2098,10 +2074,10 @@ static int mparam_get_supported_dm(DMPARAM_ARGS)
 	if (node->is_ubus_service) {
 		return get_ubus_supported_dm(dmctx, node);
 	} else {
+		char refparam[MAX_DM_PATH] = {0};
 		char *value = NULL;
-		char *refparam;
 
-		dmastrcat(&refparam, node->current_object, leaf->parameter);
+		snprintf(refparam, sizeof(refparam), "%s%s", node->current_object, leaf->parameter);
 
 		if (node->matched) {
 			if (leaf->type == DMT_EVENT) {
@@ -2109,7 +2085,7 @@ static int mparam_get_supported_dm(DMPARAM_ARGS)
 					if (leaf->getvalue)
 						(leaf->getvalue)(refparam, dmctx, data, instance, &value);
 
-					add_list_parameter(dmctx, refparam, value, DMT_TYPE[leaf->type], NULL);
+					fill_blob_event(&dmctx->bb, refparam, DMT_TYPE[leaf->type], value);
 				}
 
 			} else if (leaf->type == DMT_COMMAND) {
@@ -2118,10 +2094,10 @@ static int mparam_get_supported_dm(DMPARAM_ARGS)
 					if (leaf->getvalue)
 						(leaf->getvalue)(refparam, dmctx, data, instance, &value);
 
-					add_list_parameter(dmctx, refparam, value, DMT_TYPE[leaf->type], leaf->permission->val);
+					fill_blob_operate(&dmctx->bb, refparam, leaf->permission->val, DMT_TYPE[leaf->type], value);
 				}
 			} else {
-				add_list_parameter(dmctx, refparam, leaf->permission->val, DMT_TYPE[leaf->type], leaf->dm_falgs ? (char *)&leaf->dm_falgs : NULL);
+				fill_blob_param(&dmctx->bb, refparam, leaf->permission->val, DMT_TYPE[leaf->type], leaf->dm_flags);
 			}
 		}
 
@@ -2162,11 +2138,18 @@ static int mobj_get_instances_in_obj(DMOBJECT_ARGS)
 		return get_ubus_instances(dmctx, node);
 	} else {
 		if (node->matched && node->is_instanceobj) {
-			char *name = dmstrdup(node->current_object);
+			char path[MAX_DM_PATH] = {0};
 
-			if (name) {
-				name[DM_STRLEN(name) - 1] = 0;
-				add_list_parameter(dmctx, name, NULL, "xsd:object", NULL);
+			snprintf(path, sizeof(path), "%s", node->current_object);
+
+			int len = DM_STRLEN(path);
+
+			if (len) {
+				path[len - 1] = 0;
+
+				void *table = blobmsg_open_table(&dmctx->bb, NULL);
+				blobmsg_add_string(&dmctx->bb, "path", path);
+				blobmsg_close_table(&dmctx->bb, table);
 			}
 		}
 	}
@@ -2381,7 +2364,7 @@ static int mparam_set_value(DMPARAM_ARGS)
 				BBF_DEBUG("Requested value (%s) is same as current value (%s).", dmctx->in_value, value);
 				return 0;
 			}
-		} else if (leaf->dm_falgs & DM_FLAG_REFERENCE) {
+		} else if (leaf->dm_flags & DM_FLAG_REFERENCE) {
 			value = get_value_by_reference(dmctx, value);
 
 			if (DM_STRCMP(value, dmctx->in_value) == 0) {
@@ -2498,15 +2481,13 @@ static int get_key_check_param(DMPARAM_ARGS)
 		dmctx->stop = true;
 		return err ? err : 0;
 	} else {
-		char *full_param;
+		char full_param[MAX_DM_PATH] = {0};
 		char *value = "";
 
-		dmastrcat(&full_param, node->current_object, leaf->parameter);
+		snprintf(full_param, sizeof(full_param), "%s%s", node->current_object, leaf->parameter);
 
-		if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0) {
-			dmfree(full_param);
+		if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0)
 			return FAULT_9005;
-		}
 
 		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
@@ -2557,11 +2538,11 @@ static int get_reference_value_check_obj(DMOBJECT_ARGS)
 
 			for (; (leaf && leaf->parameter); leaf++) {
 
-				if (leaf->dm_falgs & DM_FLAG_LINKER) {
-					char *full_param = NULL;
+				if (leaf->dm_flags & DM_FLAG_LINKER) {
+					char full_param[MAX_DM_PATH] = {0};
 					char *link_val = NULL;
 
-					dmastrcat(&full_param, node->current_object, leaf->parameter);
+					snprintf(full_param, sizeof(full_param), "%s%s", node->current_object, leaf->parameter);
 
 					(leaf->getvalue)(full_param, dmctx, data, instance, &link_val);
 

@@ -1829,19 +1829,19 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	json_object_object_get_ex(jobj, "protocols", &protocols);
 	pleaf[i].bbfdm_type = get_bbfdm_type(protocols);
 
-	//dm_falgs
+	//dm_flags
 	json_object_object_get_ex(jobj, "flags", &flags);
 	n_flags = flags ? json_object_array_length(flags) : 0;
 	for (int idx = 0; idx < n_flags; idx++) {
 		struct json_object *falg_val = json_object_array_get_idx(flags, idx);
 		if (falg_val && strcmp(json_object_get_string(falg_val), "Linker") == 0)
-			pleaf[i].dm_falgs |= DM_FLAG_LINKER;
+			pleaf[i].dm_flags |= DM_FLAG_LINKER;
 		else if (falg_val && strcmp(json_object_get_string(falg_val), "Reference") == 0)
-			pleaf[i].dm_falgs |= DM_FLAG_REFERENCE;
+			pleaf[i].dm_flags |= DM_FLAG_REFERENCE;
 		else if (falg_val && strcmp(json_object_get_string(falg_val), "Unique") == 0)
-			pleaf[i].dm_falgs |= DM_FLAG_UNIQUE;
+			pleaf[i].dm_flags |= DM_FLAG_UNIQUE;
 		else if (falg_val && strcmp(json_object_get_string(falg_val), "Secure") == 0)
-			pleaf[i].dm_falgs |= DM_FLAG_SECURE;
+			pleaf[i].dm_flags |= DM_FLAG_SECURE;
 	}
 
 	snprintf(full_param, sizeof(full_param), "%s%s", object, param_ext);

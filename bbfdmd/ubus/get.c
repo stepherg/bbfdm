@@ -137,14 +137,24 @@ static bool get_next_param(char *qPath, size_t *pos, char *param)
 
 static bool is_present_in_datamodel(struct dmctx *bbf_ctx, char *path)
 {
+	struct blob_attr *cur = NULL;
+	size_t plen = 0, rem = 0;
 	bool found = false;
-	struct dm_parameter *n;
-	size_t plen;
 
 	DEBUG("path(%s)", path);
 	plen = DM_STRLEN(path);
-	list_for_each_entry(n, &bbf_ctx->list_parameter, list) {
-		if (strncmp(n->name, path, plen) == 0) {
+
+	blobmsg_for_each_attr(cur, bbf_ctx->bb.head, rem) {
+		struct blob_attr *tb[1] = {0};
+		const struct blobmsg_policy p[1] = {
+				{ "path", BLOBMSG_TYPE_STRING }
+		};
+
+		blobmsg_parse(p, 1, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+
+		if (strncmp(name, path, plen) == 0) {
 			found = true;
 			break;
 		}
@@ -630,9 +640,9 @@ static int search_n_apply(char *bPath, char *para, enum operation oper, char *va
 
 static int solve_all_filters(struct dmctx *bbf_ctx, char *bPath, char *param, struct list_head *resolved_plist)
 {
-	char *token, *save;
-	struct dm_parameter *n;
-	size_t blen;
+	struct blob_attr *cur = NULL;
+	char *token = NULL, *save = NULL;
+	size_t blen = 0, rem = 0;
 	int ret = 0;
 
 	LIST_HEAD(pv_local);
@@ -642,9 +652,23 @@ static int solve_all_filters(struct dmctx *bbf_ctx, char *bPath, char *param, st
 
 	// Use shorter list for rest of the operation
 	blen = DM_STRLEN(bPath);
-	list_for_each_entry(n, &bbf_ctx->list_parameter, list) {
-		if (strncmp(n->name, bPath, blen) == 0) {
-			add_pv_list(n->name, n->data, n->type, &pv_local);
+
+	blobmsg_for_each_attr(cur, bbf_ctx->bb.head, rem) {
+		struct blob_attr *tb[3] = {0};
+		const struct blobmsg_policy p[3] = {
+				{ "path", BLOBMSG_TYPE_STRING },
+				{ "data", BLOBMSG_TYPE_STRING },
+				{ "type", BLOBMSG_TYPE_STRING }
+		};
+
+		blobmsg_parse(p, 3, tb, blobmsg_data(cur), blobmsg_len(cur));
+
+		char *name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
+		char *data = (tb[1]) ? blobmsg_get_string(tb[1]) : "";
+		char *type = (tb[2]) ? blobmsg_get_string(tb[2]) : "";
+
+		if (strncmp(name, bPath, blen) == 0) {
+			add_pv_list(name, data, type, &pv_local);
 		}
 	}
 
@@ -846,9 +870,8 @@ void bbfdm_get_value(bbfdm_data_t *data, void *output)
 	if (data->is_raw)
 		blobmsg_close_array(&data->bb, array);
 
-	if (!validate_msglen(data)) {
+	if (!validate_msglen(data))
 		ERR("IPC failed for path(%s)", data->bbf_ctx.in_param);
-	}
 
 	if (output)
 		memcpy(output, data->bb.head, blob_pad_len(data->bb.head));
@@ -862,12 +885,12 @@ void bbfdm_get_value(bbfdm_data_t *data, void *output)
 
 void bbfdm_get_names(bbfdm_data_t *data)
 {
+	struct pathNode *pn = NULL;
 	int fault = 0;
-	struct pathNode *pn;
 
 	bbf_init(&data->bbf_ctx);
 
-	void *array = blobmsg_open_array(&data->bb, "results");
+	void *array = blobmsg_open_array(&data->bbf_ctx.bb, "results");
 
 	list_for_each_entry(pn, data->plist, list) {
 		bbf_sub_init(&data->bbf_ctx);
@@ -876,37 +899,32 @@ void bbfdm_get_names(bbfdm_data_t *data)
 
 		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_GET_NAME);
 		if (fault) {
-			fill_err_code_table(data, fault);
-		} else {
-			struct dm_parameter *n = NULL;
-			void *table = NULL;
-
-			list_for_each_entry(n, &data->bbf_ctx.list_parameter, list) {
-				table = blobmsg_open_table(&data->bb, NULL);
-				blobmsg_add_string(&data->bb, "path", n->name);
-				blobmsg_add_string(&data->bb, "data", n->data);
-				blobmsg_add_string(&data->bb, "type", n->type);
-				blobmsg_add_string(&data->bb, "info", n->additional_data ? n->additional_data : "");
-				blobmsg_close_table(&data->bb, table);
-			}
+			void *table = blobmsg_open_table(&data->bbf_ctx.bb, NULL);
+			blobmsg_add_string(&data->bbf_ctx.bb, "path", data->bbf_ctx.in_param ? data->bbf_ctx.in_param : "");
+			blobmsg_add_u32(&data->bbf_ctx.bb, "fault", bbf_fault_map(&data->bbf_ctx, fault));
+			bb_add_string(&data->bbf_ctx.bb, "fault_msg", data->bbf_ctx.fault_msg);
+			blobmsg_close_table(&data->bbf_ctx.bb, table);
 		}
 
 		bbf_sub_cleanup(&data->bbf_ctx);
 	}
 
-	blobmsg_close_array(&data->bb, array);
+	blobmsg_close_array(&data->bbf_ctx.bb, array);
+
+	if (data->ctx && data->req)
+		ubus_send_reply(data->ctx, data->req, data->bbf_ctx.bb.head);
 
 	bbf_cleanup(&data->bbf_ctx);
 }
 
 void bbfdm_get_instances(bbfdm_data_t *data)
 {
+	struct pathNode *pn = NULL;
 	int fault = 0;
-	struct pathNode *pn;
 
 	bbf_init(&data->bbf_ctx);
 
-	void *array = blobmsg_open_array(&data->bb, "results");
+	void *array = blobmsg_open_array(&data->bbf_ctx.bb, "results");
 
 	list_for_each_entry(pn, data->plist, list) {
 		bbf_sub_init(&data->bbf_ctx);
@@ -915,192 +933,33 @@ void bbfdm_get_instances(bbfdm_data_t *data)
 
 		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_INSTANCES);
 		if (fault) {
-			fill_err_code_table(data, fault);
-		} else {
-			struct dm_parameter *n;
-
-
-			list_for_each_entry(n, &data->bbf_ctx.list_parameter, list) {
-				void *table = blobmsg_open_table(&data->bb, NULL);
-				blobmsg_add_string(&data->bb, "path", n->name);
-				blobmsg_close_table(&data->bb, table);
-			}
+			void *table = blobmsg_open_table(&data->bbf_ctx.bb, NULL);
+			blobmsg_add_string(&data->bbf_ctx.bb, "path", data->bbf_ctx.in_param ? data->bbf_ctx.in_param : "");
+			blobmsg_add_u32(&data->bbf_ctx.bb, "fault", bbf_fault_map(&data->bbf_ctx, fault));
+			bb_add_string(&data->bbf_ctx.bb, "fault_msg", data->bbf_ctx.fault_msg);
+			blobmsg_close_table(&data->bbf_ctx.bb, table);
 		}
 
 		bbf_sub_cleanup(&data->bbf_ctx);
 	}
 
-	blobmsg_close_array(&data->bb, array);
+	blobmsg_close_array(&data->bbf_ctx.bb, array);
+
+	if (data->ctx && data->req)
+		ubus_send_reply(data->ctx, data->req, data->bbf_ctx.bb.head);
 
 	bbf_cleanup(&data->bbf_ctx);
 }
 
-static void fill_operate_schema(struct blob_buf *bb, struct dm_parameter *param)
+int bbfdm_get_supported_dm(bbfdm_data_t *data)
 {
-	blobmsg_add_string(bb, "path", param->name);
-	blobmsg_add_string(bb, "type", param->type);
-	blobmsg_add_string(bb, "data", param->additional_data);
-
-	if (param->data) {
-		void *array, *table;
-		const char **in, **out;
-		operation_args *args;
-		int i;
-
-		args = (operation_args *) param->data;
-		in = args->in;
-		if (in) {
-			array = blobmsg_open_array(bb, "input");
-
-			for (i = 0; in[i] != NULL; i++) {
-				table = blobmsg_open_table(bb, NULL);
-				blobmsg_add_string(bb, "path", in[i]);
-				blobmsg_close_table(bb, table);
-			}
-
-			blobmsg_close_array(bb, array);
-		}
-
-		out = args->out;
-		if (out) {
-			array = blobmsg_open_array(bb, "output");
-
-			for (i = 0; out[i] != NULL; i++) {
-				table = blobmsg_open_table(bb, NULL);
-				blobmsg_add_string(bb, "path", out[i]);
-				blobmsg_close_table(bb, table);
-			}
-
-			blobmsg_close_array(bb, array);
-		}
-	}
-}
-
-static void fill_event_schema(struct blob_buf *bb, struct dm_parameter *param)
-{
-	blobmsg_add_string(bb, "path", param->name);
-	blobmsg_add_string(bb, "type", param->type);
-
-	if (param->data) {
-		event_args *ev;
-		void *table;
-
-		ev = (event_args *)param->data;
-
-		if (ev->param) {
-			const char **in = ev->param;
-			void *key = blobmsg_open_array(bb, "input");
-
-			for (int i = 0; in[i] != NULL; i++) {
-				table = blobmsg_open_table(bb, NULL);
-				blobmsg_add_string(bb, "path", in[i]);
-				blobmsg_close_table(bb, table);
-			}
-
-			blobmsg_close_array(bb, key);
-		}
-	}
-}
-
-static void fill_param_schema(struct blob_buf *bb, struct dm_parameter *param)
-{
-	bb_add_string(bb, "path", param->name);
-	bb_add_string(bb, "data", param->data ? param->data : "0");
-	bb_add_string(bb, "type", param->type);
-	bb_add_flags_arr(bb, param->additional_data);
-}
-
-
-struct blob_attr *get_parameters(struct blob_attr *msg, const char *key)
-{
-	struct blob_attr *params = NULL;
-	struct blob_attr *cur;
-	int rem;
-
-	blobmsg_for_each_attr(cur, msg, rem) {
-		const char *name = blobmsg_name(cur);
-
-		if (strcmp(key, name) == 0) {
-			params = cur;
-			break;
-		}
-	}
-	return params;
-}
-
-
-bool valid_entry(bbfdm_data_t *data, struct blob_attr *input)
-{
-	bool ret = false;
-	struct blob_attr *p;
-	char *name;
-	size_t len;
-	struct pathNode *pn;
-
-	p = get_parameters(input, "path");
-	if (p) {
-		name = blobmsg_get_string(p);
-		list_for_each_entry(pn, data->plist, list) {
-			len = strlen(pn->path);
-			if (pn->path[len - 1] != '.') {
-				continue;
-			}
-			if (strncmp(pn->path, name, len) == 0) {
-				ret = true;
-				break;
-			}
-		}
-	}
-
-	return ret;
-}
-
-void get_schema_from_blob(struct blob_buf *schema_bp, bbfdm_data_t *data)
-{
-	struct blob_buf *bp = &data->bb;
-	struct blob_attr *schema_blob = NULL;
-	struct blob_attr *params;
-	struct blob_attr *cur;
-	size_t rem = 0;
-
-	void *array = blobmsg_open_array(bp, "results");
-
-	schema_blob = blob_memdup(schema_bp->head);
-	if (schema_blob == NULL) {
-		goto end;
-	}
-
-	params = get_parameters(schema_blob, "results");
-	if (params == NULL) {
-		goto end;
-	}
-
-	blobmsg_for_each_attr(cur, params, rem) {
-		if (valid_entry(data, cur)) {
-			blobmsg_add_blob(bp, cur);
-		}
-	}
-end:
-	blobmsg_close_array(bp, array);
-	FREE(schema_blob);
-}
-
-int bbf_dm_get_supported_dm(bbfdm_data_t *data)
-{
-	struct dm_parameter *param;
-	struct pathNode *pn;
+	struct pathNode *pn = NULL;
+	int schema_len = 0;
 	int fault = 0;
-	struct blob_buf *bp;
 
 	bbf_init(&data->bbf_ctx);
 
-	if (data->bbp) {
-		bp = data->bbp;
-	} else {
-		bp = &data->bb;
-	}
-
-	void *array = blobmsg_open_array(bp, "results");
+	void *array = blobmsg_open_array(&data->bbf_ctx.bb, "results");
 
 	list_for_each_entry(pn, data->plist, list) {
 		bbf_sub_init(&data->bbf_ctx);
@@ -1109,30 +968,24 @@ int bbf_dm_get_supported_dm(bbfdm_data_t *data)
 
 		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_SCHEMA);
 		if (fault) {
-			fill_err_code_table(data, fault);
-		} else {
-			INFO("Preparing result for(%s)", data->bbf_ctx.in_param);
-
-			list_for_each_entry(param, &data->bbf_ctx.list_parameter, list) {
-				int cmd = get_dm_type(param->type);
-
-				void *table = blobmsg_open_table(bp, NULL);
-				if (cmd == DMT_COMMAND) {
-					fill_operate_schema(bp, param);
-				} else if (cmd == DMT_EVENT) {
-					fill_event_schema(bp, param);
-				} else {
-					fill_param_schema(bp, param);
-				}
-				blobmsg_close_table(bp, table);
-			}
+			void *table = blobmsg_open_table(&data->bbf_ctx.bb, NULL);
+			blobmsg_add_string(&data->bbf_ctx.bb, "path", data->bbf_ctx.in_param ? data->bbf_ctx.in_param : "");
+			blobmsg_add_u32(&data->bbf_ctx.bb, "fault", bbf_fault_map(&data->bbf_ctx, fault));
+			bb_add_string(&data->bbf_ctx.bb, "fault_msg", data->bbf_ctx.fault_msg);
+			blobmsg_close_table(&data->bbf_ctx.bb, table);
 		}
+
 		bbf_sub_cleanup(&data->bbf_ctx);
 	}
 
-	blobmsg_close_array(bp, array);
+	blobmsg_close_array(&data->bbf_ctx.bb, array);
+
+	schema_len = blobmsg_len(data->bbf_ctx.bb.head);
+
+	if (data->ctx && data->req)
+		ubus_send_reply(data->ctx, data->req, data->bbf_ctx.bb.head);
 
 	bbf_cleanup(&data->bbf_ctx);
 
-	return fault;
+	return schema_len;
 }
