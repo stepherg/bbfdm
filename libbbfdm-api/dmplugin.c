@@ -279,25 +279,6 @@ void disable_entry_obj(DMOBJ *entryobj, char *obj_path, const char *parent_obj, 
 			return;
 		}
 	}
-
-	if (entryobj->nextdynamicobj) {
-		for (int i = 0; i < 2; i++) {
-			struct dm_dynamic_obj *next_dyn_array = entryobj->nextdynamicobj + i;
-			if (next_dyn_array->nextobj) {
-				for (int j = 0; next_dyn_array->nextobj[j]; j++) {
-					DMOBJ *jentryobj = next_dyn_array->nextobj[j];
-					for (; (jentryobj && jentryobj->obj); jentryobj++) {
-
-						if (DM_STRCMP(jentryobj->obj, obj_name) == 0) {
-							BBF_INFO("## Excluding [%s%s.] from the core tree and the same object will be exposed again using (%s) ##", parent_obj, obj_name, plugin_path);
-							jentryobj->bbfdm_type = BBFDM_NONE;
-							return;
-						}
-					}
-				}
-			}
-		}
-	}
 }
 
 void disable_entry_leaf(DMOBJ *entryobj, char *leaf_path, const char *parent_obj, const char *plugin_path)
@@ -318,25 +299,6 @@ void disable_entry_leaf(DMOBJ *entryobj, char *leaf_path, const char *parent_obj
 			BBF_INFO("## Excluding [%s%s] from the core tree and the same parameter will be exposed again using (%s) ##", parent_obj, leaf_name, plugin_path);
 			leaf->bbfdm_type = BBFDM_NONE;
 			return;
-		}
-	}
-
-	if (entryobj->dynamicleaf) {
-		for (int i = 0; i < 2; i++) {
-			struct dm_dynamic_leaf *next_dyn_array = entryobj->dynamicleaf + i;
-			if (next_dyn_array->nextleaf) {
-				for (int j = 0; next_dyn_array->nextleaf[j]; j++) {
-					DMLEAF *jleaf = next_dyn_array->nextleaf[j];
-					for (; (jleaf && jleaf->parameter); jleaf++) {
-
-						if (DM_STRCMP(jleaf->parameter, leaf_name) == 0) {
-							BBF_INFO("## Excluding [%s%s] from the core tree and the same parameter will be exposed again using (%s) ##", parent_obj, leaf_name, plugin_path);
-							jleaf->bbfdm_type = BBFDM_NONE;
-							return;
-						}
-					}
-				}
-			}
 		}
 	}
 }

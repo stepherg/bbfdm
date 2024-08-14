@@ -62,7 +62,7 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 	void *handle = dlopen(plugin_path, RTLD_LAZY);
 #endif
 	if (!handle) {
-		BBF_ERR("Plugin failed [%s]\n", dlerror());
+		BBF_ERR("Failed to add DotSo plugin '%s', [%s]\n", plugin_path, dlerror());
 		return 0;
 	}
 
@@ -79,8 +79,10 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 	for (int i = 0; dynamic_obj[i].path; i++) {
 
 		DMOBJ *dm_entryobj = find_entry_obj(entryobj, dynamic_obj[i].path);
-		if (!dm_entryobj)
+		if (!dm_entryobj) {
+			BBF_ERR("Failed to add DotSo plugin '%s' to main tree with parent DM '%s'.", plugin_path, dynamic_obj[i].path);
 			continue;
+		}
 
 		dotso_plugin_disable_requested_entries(dm_entryobj, dynamic_obj[i].root_obj, dynamic_obj[i].root_leaf, dynamic_obj[i].path, plugin_path);
 

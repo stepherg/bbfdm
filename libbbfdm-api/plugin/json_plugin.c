@@ -2095,7 +2095,7 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 		dm_entryobj = find_entry_obj(entryobj, obj_prefix);
 		if (!dm_entryobj) {
-			BBF_DEBUG("ERROR: entry obj doesn't exist for (%s) Object", obj_prefix);
+			BBF_ERR("Failed to add JSON plugin '%s' to main tree with parent DM '%s'.", plugin_path, obj_prefix);
 			continue;
 		}
 
