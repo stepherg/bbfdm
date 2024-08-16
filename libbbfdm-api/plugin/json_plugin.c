@@ -1629,7 +1629,12 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 		}
 	}
 
-	bbfdm_get_reference_linker(ctx, value, &reference);
+	if (DM_LSTRSTR(value, "=>")) {
+		bbfdm_get_reference_linker(ctx, value, &reference);
+	} else {
+		reference.path = value;
+		reference.value = "";
+	}
 
 	switch (action) {
 		case VALUECHECK:
