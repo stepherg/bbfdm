@@ -1483,7 +1483,12 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 		}
 	}
 
-	bbf_get_reference_args(value, &reference);
+	if (DM_LSTRSTR(value, "=>")) {
+		bbf_get_reference_args(value, &reference);
+	} else {
+		reference.path = value;
+		reference.value = "";
+	}
 
 	switch (action) {
 		case VALUECHECK:
