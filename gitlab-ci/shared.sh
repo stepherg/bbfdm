@@ -72,6 +72,7 @@ function install_libbbf()
 	exec_cmd_verbose make install
 	echo "371d530c95a17d1ca223a29b7a6cdc97e1135c1e0959b51106cca91a0b148b5e42742d372a359760742803f2a44bd88fca67ccdcfaeed26d02ce3b6049cb1e04" > /etc/bbfdm/.secure_hash
 	cd ..
+	exec_cmd cp utilities/bbf_configd /usr/sbin/
 }
 
 function install_libbbf_test()
@@ -100,18 +101,9 @@ function error_on_zero()
 }
 
 function check_valgrind_xml() {
-	echo "${1}: Checking memory leaks..."
-	echo "checking UninitCondition"
-	grep -q "<kind>UninitCondition</kind>" ${2}
-	error_on_zero $?
-
-	echo "checking Leak_PossiblyLost"
-	grep -q "<kind>Leak_PossiblyLost</kind>" ${2}
-	error_on_zero $?
-
-	echo "checking Leak_DefinitelyLost"
-	grep -q "<kind>Leak_DefinitelyLost</kind>" ${2}
-	error_on_zero $?
+	echo "Memory check [$@] ..."
+	valgrind-ci ${1} --summary
+	exec_cmd valgrind-ci ${1} --abort-on-errors
 }
 
 function generate_report()

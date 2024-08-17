@@ -32,7 +32,7 @@ static int teardown_commit(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
 
-	bbf_entry_restart_services(NULL, true);
+	bbf_entry_services(ctx->dm_type, true, true);
 	bbf_ctx_clean(ctx);
 	free(ctx);
 
@@ -183,6 +183,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	ctx->in_value = "iopsys_test";
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
+	dmuci_commit_package("users");
 
 	// get value ==> expected "0" error
 	ctx->in_param = "Device.UCI_TEST_V1.Password";
@@ -285,6 +286,7 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	ctx->in_value = "owsd_pwd";
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
+	dmuci_commit_package("owsd");
 
 	// get value ==> expected "0" error
 	ctx->in_param = "Device.UCI_TEST_V1.OWSD.3.Password";

@@ -181,7 +181,7 @@ static int in_ubus_out_cli_exec_cmd(cli_data_t *cli_data, const char *path, cons
 	if (value) blobmsg_add_string(&b, "value", value);
 
 	table = blobmsg_open_table(&b, "optional");
-	blobmsg_add_string(&b, "proto", (cli_data->proto == BBFDM_CWMP) ? "cwmp" : "usp");
+	blobmsg_add_string(&b, "proto", (cli_data->proto == BBFDM_CWMP) ? "cwmp" : (cli_data->proto == BBFDM_USP) ? "usp" : "both");
 	blobmsg_add_string(&b, "format", "raw");
 	blobmsg_close_table(&b, table);
 
@@ -280,6 +280,8 @@ static int in_dotso_out_cli_exec_get(cli_data_t *cli_data, char *argv[])
 
 			printf("%s => %s\n", name, data);
 		}
+
+		// Apply all bbfdm changes
 		dmuci_commit_bbfdm();
 	} else {
 		printf("ERROR: %d retrieving %s\n", err, cli_data->bbf_ctx.in_param);
@@ -319,10 +321,10 @@ static int in_dotso_out_cli_exec_set(cli_data_t *cli_data, char *argv[])
 	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_SET_VALUE);
 	if (!err) {
 		printf("%s => Set value is successfully done\n", cli_data->bbf_ctx.in_param);
-		bbf_entry_restart_services(NULL, true);
+		bbf_entry_services(cli_data->proto, true, true);
 	} else {
 		printf("Fault %d: %s\n", err, cli_data->bbf_ctx.fault_msg);
-		bbf_entry_revert_changes(NULL);
+		bbf_entry_services(cli_data->proto, false, true);
 		err = EXIT_FAILURE;
 	}
 
@@ -357,10 +359,10 @@ static int in_dotso_out_cli_exec_add(cli_data_t *cli_data, char *argv[])
 	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_ADD_OBJECT);
 	if (!err) {
 		printf("Added %s%s.\n", cli_data->bbf_ctx.in_param, cli_data->bbf_ctx.addobj_instance);
-		bbf_entry_restart_services(NULL, true);
+		bbf_entry_services(cli_data->proto, true, false);
 	} else {
 		printf("Fault %d: %s\n", err, cli_data->bbf_ctx.fault_msg);
-		bbf_entry_revert_changes(NULL);
+		bbf_entry_services(cli_data->proto, false, false);
 		err = EXIT_FAILURE;
 	}
 
@@ -395,10 +397,10 @@ static int in_dotso_out_cli_exec_del(cli_data_t *cli_data, char *argv[])
 	err = bbf_entry_method(&cli_data->bbf_ctx, BBF_DEL_OBJECT);
 	if (!err) {
 		printf("Deleted %s\n", cli_data->bbf_ctx.in_param);
-		bbf_entry_restart_services(NULL, true);
+		bbf_entry_services(cli_data->proto, true, true);
 	} else {
 		printf("Fault %d: %s\n", err, cli_data->bbf_ctx.fault_msg);
-		bbf_entry_revert_changes(NULL);
+		bbf_entry_services(cli_data->proto, false, true);
 		err = EXIT_FAILURE;
 	}
 

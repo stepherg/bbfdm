@@ -24,19 +24,11 @@
 #include <uci.h>
 #include <libubox/list.h>
 
+#include "dmapi.h"
+
 #ifndef ETC_DB_CONFIG
 #define ETC_DB_CONFIG "/etc/board-db/config"
 #endif
-#define VARSTATE_CONFIG "/var/state"
-#ifndef BBFDM_CONFIG
-#define BBFDM_CONFIG "/etc/bbfdm/dmmap"
-#endif
-#define BBFDM_SAVEDIR "/tmp/.bbfdm"
-#ifndef UCI_CONFIG_DIR
-#define UCI_CONFIG_DIR "/etc/config/"
-#endif
-#define VARSTATE_CONFDIR "/var/state/"
-#define VARSTATE_SAVEDIR "/tmp/.bbfdm_var"
 
 struct package_change
 {
@@ -153,10 +145,8 @@ static inline void uci_list_init(struct uci_list *ptr)
 	ptr->next = ptr;
 }
 
-#define NEW_UCI_PATH(UCI_PATH, CPATH, DPATH)		\
+#define NEW_UCI_PATH(UCI_PATH)		\
 struct uci_context *uci_ctx_##UCI_PATH = NULL;			\
-const char *uci_savedir_##UCI_PATH = DPATH; \
-const char *uci_confdir_##UCI_PATH = CPATH; \
 int dmuci_get_section_type_##UCI_PATH(char *package, char *section,char **value)	\
 {\
 	struct uci_context *save_uci_ctx;	\
@@ -165,23 +155,6 @@ int dmuci_get_section_type_##UCI_PATH(char *package, char *section,char **value)
 	int res = dmuci_get_section_type(package, section, value);	\
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
-}\
-int dmuci_init_##UCI_PATH(void)		\
-{\
-	if (uci_ctx_##UCI_PATH == NULL) {				\
-		uci_ctx_##UCI_PATH = uci_alloc_context();	\
-		if (!uci_ctx_##UCI_PATH)					\
-			return -1;								\
-		uci_add_delta_path(uci_ctx_##UCI_PATH, uci_ctx_##UCI_PATH->savedir);	\
-		uci_set_savedir(uci_ctx_##UCI_PATH, uci_savedir_##UCI_PATH);			\
-		uci_set_confdir(uci_ctx_##UCI_PATH, uci_confdir_##UCI_PATH);			\
-	}																			\
-	return 0;	\
-}\
-void dmuci_exit_##UCI_PATH(void)		\
-{\
-	if (uci_ctx_##UCI_PATH) uci_free_context(uci_ctx_##UCI_PATH);\
-	uci_ctx_##UCI_PATH = NULL; \
 }\
 int dmuci_get_option_value_string_##UCI_PATH(char *package, char *section, char *option, char **value)	\
 {\
@@ -328,12 +301,10 @@ int dmuci_delete_by_section_unnamed_##UCI_PATH(struct uci_section *s, char *opti
 	return res;						\
 }\
 
-int dmuci_init(void);
-void dmuci_exit(void);
-int dm_uci_init(void);
-int dm_uci_exit(void);
+void bbfdm_uci_init(struct dmctx *bbf_ctx);
+void bbfdm_uci_exit(struct dmctx *bbf_ctx);
+
 char *dmuci_list_to_string(struct uci_list *list, const char *delimitor);
-void free_all_list_package_change(struct list_head *clist);
 int dmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
 int dmuci_import(char *package_name, const char *input_path);
 int dmuci_export_package(char *package, const char *output_path);
@@ -344,7 +315,6 @@ int dmuci_save_package(char *package);
 int dmuci_save(void);
 int dmuci_revert_package(char *package);
 int dmuci_revert(void);
-int dmuci_change_packages(struct list_head *clist);
 
 int dmuci_get_section_type(char *package, char *section, char **value);
 int dmuci_get_option_value_string(char *package, char *section, char *option, char **value);
@@ -386,12 +356,8 @@ int dmuci_save_package_varstate(char *package);
 int dmuci_revert_package_varstate(char *package);
 struct uci_section *dmuci_walk_section_bbfdm(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
 struct uci_section *dmuci_walk_section_varstate(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
-int dmuci_init_bbfdm(void);
-void dmuci_exit_bbfdm(void);
 void commit_and_free_uci_ctx_bbfdm(char *dmmap_config);
 int dmuci_add_section_varstate(char *package, char *stype, struct uci_section **s);
-int dmuci_init_varstate(void);
-void dmuci_exit_varstate(void);
 int db_get_value_string(char *package, char *section, char *option, char **value);
 int dmuci_get_option_value_string_varstate(char *package, char *section, char *option, char **value);
 int dmuci_set_value_varstate(char *package, char *section, char *option, char *value);

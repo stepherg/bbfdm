@@ -11,15 +11,15 @@ static struct dmctx bbf_ctx = {0};
 static int setup_teardown(void **state)
 {
 	bbfdm_init_mem(&bbf_ctx);
-	dm_uci_init();
+	bbfdm_uci_init(&bbf_ctx);
 	return 0;
 }
 
 static int group_teardown(void **state)
 {
-	dm_uci_exit();
-	dmubus_free();
+	bbfdm_uci_exit(&bbf_ctx);
 	bbfdm_clean_mem(&bbf_ctx);
+	dmubus_free();
 	return 0;
 }
 

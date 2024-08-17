@@ -7,7 +7,7 @@ source ./gitlab-ci/shared.sh
 # install required packages
 exec_cmd apt update
 exec_cmd apt install -y python3-pip iproute2 jq
-exec_cmd pip3 install pexpect ubus xlwt
+exec_cmd pip3 install pexpect ubus xlwt ValgrindCI
 
 # Make sure that all plugins are removed
 [ ! -d "${BBFDM_PLUGIN_DIR}" ] && mkdir -p "${BBFDM_PLUGIN_DIR}"

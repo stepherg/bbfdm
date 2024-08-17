@@ -85,23 +85,6 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="td_row_odd">
-                                            <div class="td_row_odd">transaction_timeout</div>
-                                        </td>
-                                        <td class="td_row_odd">
-                                            <div class="td_row_odd">integer</div>
-                                        </td>
-                                        <td class="td_row_odd">
-                                            <div class="td_row_odd">no</div>
-                                        </td>
-                                        <td class="td_row_odd">
-                                            <div class="td_row_odd">10</div>
-                                        </td>
-                                        <td class="td_row_odd">
-                                            <div class="td_row_odd">Transaction timeout value in seconds</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
                                         <td class="td_row_even">
                                             <div class="td_row_even">loglevel</div>
                                         </td>

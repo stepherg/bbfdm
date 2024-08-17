@@ -11,6 +11,7 @@ make clean -C test/cmocka/
 make functional-test -C test/cmocka/
 check_ret $?
 
+sleep 10
 supervisorctl stop all
 supervisorctl status
 

@@ -18,16 +18,7 @@
 #include "common.h"
 #include "pretty_print.h"
 
-extern struct list_head head_registered_service;
-
 DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
-
-static struct {
-	int trans_id;
-	struct uloop_timeout trans_timeout;
-	int timeout_ms;
-	char app[32];
-} g_current_trans = {.trans_id=0, .timeout_ms=10000};
 
 static jmp_buf gs_jump_location;
 static bool gs_jump_called_by_bbf = false;
@@ -189,24 +180,6 @@ void fill_err_code_array(bbfdm_data_t *data, int fault)
 	blobmsg_close_array(&data->bb, array);
 }
 
-static void transaction_timeout_handler(struct uloop_timeout *t __attribute__((unused)))
-{
-	INFO("Transaction timeout called, aborting tid %d", g_current_trans.trans_id);
-	transaction_abort(NULL, g_current_trans.trans_id);
-}
-
-static int get_random_id(void)
-{
-	int ret;
-
-	srand(time(0));
-	ret = rand();
-	if (!ret)
-		ret = 1;
-
-	return ret;
-}
-
 static int CountConsecutiveDigits(char *p)
 {
     char c;
@@ -271,134 +244,6 @@ static int compare_path(const void *arg1, const void *arg2)
 	// If the code gets here, then the strings contain either no digits, or the same number of digits,
 	// so just compare the characters (this also works if the characters are digits)
 	return (int)c1 - (int)c2;
-}
-
-// Returns transaction id if successful, otherwise 0
-int transaction_start(bbfdm_data_t *data, char *app, uint32_t max_timeout)
-{
-	int ret = 0;
-	uint32_t timeout;
-
-	if (g_current_trans.trans_id) {
-		WARNING("%s Transaction locked by %s", app, g_current_trans.app);
-		return 0;
-	}
-
-	if (max_timeout > 0) {
-		timeout = max_timeout;
-	} else {
-		timeout = g_current_trans.timeout_ms;
-	}
-
-	ret = data->trans_id ? data->trans_id : get_random_id();
-	strncpyt(g_current_trans.app, app, 32);
-
-	g_current_trans.trans_id = ret;
-	g_current_trans.trans_timeout.cb = transaction_timeout_handler;
-	uloop_timeout_set(&g_current_trans.trans_timeout, timeout);
-	INFO("Transaction created by [%s] id %d, timeout %zd", g_current_trans.app, g_current_trans.trans_id, timeout);
-
-	if (strcmp(app, "API") == 0) {
-		// Call transaction for registered services only if transaction id is defined
-		handle_transaction_of_registered_service(data->ctx, NULL, &head_registered_service, "start", ret, timeout, 0);
-	}
-
-	return ret;
-}
-
-int transaction_status(struct blob_buf *bb)
-{
-	if (g_current_trans.trans_id) {
-		int64_t rem = uloop_timeout_remaining64(&g_current_trans.trans_timeout);
-		blobmsg_add_string(bb, "app", g_current_trans.app);
-		blobmsg_add_string(bb, "tstatus", "running");
-		blobmsg_add_u64(bb, "remaining_time", rem / 1000);
-	} else {
-		blobmsg_add_string(bb, "tstatus", "Idle");
-	}
-
-	return 0;
-}
-
-bool is_transaction_running(void)
-{
-	return (g_current_trans.trans_id == 0 ? false : true);
-}
-
-bool is_transaction_valid(int trans_id)
-{
-	if (trans_id == 0)
-		return false;
-
-	return (trans_id == g_current_trans.trans_id);
-}
-
-int transaction_commit(bbfdm_data_t *data, int trans_id, bool is_service_restart)
-{
-	int ret = -1;
-
-	if (is_transaction_valid(trans_id)) {
-		struct blob_buf *bb = data ? &data->bb : NULL;
-		void *arr = NULL;
-
-		INFO("Commit on-going transaction by %s", g_current_trans.app);
-		uloop_timeout_cancel(&g_current_trans.trans_timeout);
-		g_current_trans.trans_id = 0;
-		g_current_trans.app[0] = '\0';
-
-		if (bb) arr = blobmsg_open_array(bb, "updated_services");
-		bbf_entry_restart_services(bb, is_service_restart);
-		if (data && data->trans_id) {
-			// Call transaction for registered services only if transaction id is defined
-			handle_transaction_of_registered_service(data->ctx, bb, &head_registered_service, "commit", data->trans_id, 0, is_service_restart);
-		}
-		if (bb) blobmsg_close_array(bb, arr);
-
-		ret = 0;
-	} else {
-		WARNING("Transaction id mismatch(%d)", trans_id);
-	}
-
-	return ret;
-}
-
-int transaction_abort(bbfdm_data_t *data, int trans_id)
-{
-	int ret = -1;
-
-	if (is_transaction_valid(trans_id)) {
-		struct blob_buf *bb = data ? &data->bb : NULL;
-		void *arr = NULL;
-
-		INFO("Abort on-going transaction by %s", g_current_trans.app);
-		uloop_timeout_cancel(&g_current_trans.trans_timeout);
-		g_current_trans.trans_id = 0;
-		g_current_trans.app[0] = '\0';
-
-		if (bb) arr = blobmsg_open_array(bb, "updated_services");
-		bbf_entry_revert_changes(bb);
-		if (data && data->trans_id) {
-			// Call transaction for registered services only if transaction id is defined
-			handle_transaction_of_registered_service(data->ctx, bb, &head_registered_service, "abort", data->trans_id, 0, 0);
-		}
-		if (bb) blobmsg_close_array(bb, arr);
-
-		ret = 0;
-	} else {
-		WARNING("Transaction id mismatch(%d)", trans_id);
-	}
-
-	return ret;
-}
-
-int configure_transaction_timeout(int timeout)
-{
-	if (timeout <= 0)
-		return -1;
-
-	g_current_trans.timeout_ms = timeout * 1000;
-
-	return 0;
 }
 
 // Returns a pointer to the sorted array of PVs, memory need to be freed by caller

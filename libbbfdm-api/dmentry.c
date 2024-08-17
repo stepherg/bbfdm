@@ -17,7 +17,6 @@
 #include "dmcommon.h"
 #include "dmentry.h"
 
-LIST_HEAD(head_package_change);
 LIST_HEAD(global_memhead);
 
 static struct dm_fault DM_FAULT_ARRAY[] = {
@@ -49,16 +48,16 @@ void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 
 	ctx->dm_entryobj = tEntryObj;
 	bbfdm_init_mem(ctx);
-	dm_uci_init();
+	bbfdm_uci_init(ctx);
 }
 
 void bbf_ctx_clean(struct dmctx *ctx)
 {
 	blob_buf_free(&ctx->bb);
 
-	dm_uci_exit();
-	dmubus_free();
+	bbfdm_uci_exit(ctx);
 	bbfdm_clean_mem(ctx);
+	dmubus_free();
 }
 
 void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj)
@@ -216,18 +215,12 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 		break;
 	case BBF_SET_VALUE:
 		fault = dm_entry_set_value(ctx);
-		if (!fault)
-			dmuci_change_packages(&head_package_change);
 		break;
 	case BBF_ADD_OBJECT:
 		fault = dm_entry_add_object(ctx);
-		if (!fault)
-			dmuci_change_packages(&head_package_change);
 		break;
 	case BBF_DEL_OBJECT:
 		fault = dm_entry_delete_object(ctx);
-		if (!fault)
-			dmuci_change_packages(&head_package_change);
 		break;
 	case BBF_OPERATE:
 		fault = dm_entry_operate(ctx);
@@ -349,40 +342,19 @@ bool adm_entry_object_exists(struct dmctx *ctx, char *param) // To be removed la
 	return dmctx.match;
 }
 
-void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services)
+void bbf_entry_services(unsigned int proto, bool is_commit, bool reload_required)
 {
-	struct package_change *pc = NULL;
+	struct blob_buf bb = {0};
 
-	list_for_each_entry(pc, &head_package_change, list) {
+	memset(&bb, 0, sizeof(struct blob_buf));
 
-		if (bb) blobmsg_add_string(bb, NULL, pc->package);
+	blob_buf_init(&bb, 0);
 
-		if (restart_services) {
-			// Internal transaction: need to commit the changes
-			dmubus_call_set("uci", "commit", UBUS_ARGS{{"config", pc->package, String}}, 1);
-		}
-	}
+	blobmsg_add_string(&bb, "proto", (proto == BBFDM_CWMP) ? "cwmp": (proto == BBFDM_USP) ? "usp" : "both");
+	blobmsg_add_u8(&bb, "monitor", false);
+	blobmsg_add_u8(&bb, "reload", reload_required);
 
-	if (restart_services) {
-		// Internal transaction: need to commit the changes
-		dmuci_commit_bbfdm();
-	}
+	dmubus_call_blob_msg_set("bbf.config", is_commit ? "commit" : "revert", &bb);
 
-	free_all_list_package_change(&head_package_change);
-}
-
-void bbf_entry_revert_changes(struct blob_buf *bb)
-{
-	struct package_change *pc = NULL;
-
-	list_for_each_entry(pc, &head_package_change, list) {
-
-		if (bb) blobmsg_add_string(bb, NULL, pc->package);
-
-		dmubus_call_set("uci", "revert", UBUS_ARGS{{"config", pc->package, String}}, 1);
-	}
-
-	dmuci_revert_bbfdm();
-
-	free_all_list_package_change(&head_package_change);
+	blob_buf_free(&bb);
 }

@@ -14,7 +14,6 @@
     "config": {
       "loglevel": "1",
       "refresh_time": "120",
-      "transaction_timeout": "30",
       "subprocess_level": "2"
     },
     "input": {
@@ -132,7 +131,6 @@ Following are the ubus methods exposed by `bbfdmd` main process:
         "operate":{"command":"String","command_key":"String","input":"Table","optional":"Table"}
         "add":{"path":"String","obj_path":"Table","optional":"Table"}
         "del":{"path":"String","paths":"Array","optional":"Table"}
-        "transaction":{"cmd":"String","timeout":"Integer","restart_services":"Boolean","optional":"Table"}
         "service":{"cmd":"String","name":"String","parent_dm":"String","objects":"Array"}
         "notify_event":{"name":"String","input":"Table"}
 ```
@@ -149,18 +147,15 @@ Each datamodel micro-service expose their own ubus object, which is slightly dif
         "operate":{"command":"String","command_key":"String","input":"Table","optional":"Table"}
         "add":{"path":"String","obj_path":"Table","optional":"Table"}
         "del":{"path":"String","paths":"Array","optional":"Table"}
-        "transaction":{"cmd":"String","timeout":"Integer","restart_services":"Boolean","optional":"Table"}
 ```
 
 > Note1: `optional` table are present in all methods and it supports below options:
 
 ```console
-"optional":{"proto":"String", "transaction_id":"Integer", "format":"String"}
+"optional":{"proto":"String", "format":"String"}
 ```
 
  - `proto` in each method specify the data-model prototype('cwmp', 'usp') to use, if not provided default data-model will be used.
-
- - `transaction_id` to define the transaction id number.
 
  - `format` could be 'raw' or 'pretty', to specify the format to use as output, if not provided 'pretty' format will be used.
 

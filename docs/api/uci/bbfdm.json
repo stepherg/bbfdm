@@ -27,13 +27,6 @@
           "description": "Path for ubus socket to register bbfdmd services"
         },
         {
-          "name": "transaction_timeout",
-          "type": "integer",
-          "required": "no",
-          "default": "10",
-          "description": "Transaction timeout value in seconds"
-        },
-        {
           "name": "loglevel",
           "type": "integer",
           "required": "no",

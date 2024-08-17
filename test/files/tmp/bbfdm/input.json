@@ -1,8 +1,7 @@
 {
 	"daemon": {
 		"config": {
-			"loglevel": "1",
-			"transaction_timeout": "30",
+			"loglevel": "4",
 			"subprocess_level": "2"
 		},
 		"input": {

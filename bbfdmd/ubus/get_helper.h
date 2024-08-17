@@ -40,13 +40,6 @@ void fill_err_code_array(bbfdm_data_t *data, int fault);
 
 void bb_add_string(struct blob_buf *bb, const char *name, const char *value);
 
-int transaction_start(bbfdm_data_t *data, char *app, uint32_t max_timeout);
-int transaction_commit(bbfdm_data_t *data, int trans_id, bool is_service_restart);
-int transaction_abort(bbfdm_data_t *data, int trans_id);
-int transaction_status(struct blob_buf *bb);
-bool is_transaction_running(void);
-bool is_transaction_valid(int trans_id);
-int configure_transaction_timeout(int timeout);
 struct pvNode *sort_pv_path(struct list_head *pv_list, size_t pv_count);
 
 #endif /* GET_HELPER_H */

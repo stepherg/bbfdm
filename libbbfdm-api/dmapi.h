@@ -174,6 +174,9 @@ struct dmctx {
 	struct list_head *memhead;
 	struct blob_buf bb;
 	DMOBJ *dm_entryobj;
+	struct uci_context *config_uci_ctx;
+	struct uci_context *dmmap_uci_ctx;
+	struct uci_context *varstate_uci_ctx;
 	bool nextlevel;
 	bool iswildcard;
 	int faultcode;
@@ -193,7 +196,6 @@ struct dmctx {
 	bool isevent;
 	bool isinfo;
 	bool disable_mservice_browse;
-	int trans_id;
 };
 
 typedef struct dmnode {

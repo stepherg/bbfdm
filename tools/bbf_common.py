@@ -324,7 +324,7 @@ def fill_list_supported_dm():
                 DB[:] = remove_duplicate_elements(DB)
 
 def clone_git_repository(repo, version=None):
-    repo_path='.repo/'+os.path.basename(repo).replace('.git','')
+    repo_path='/tmp/repo/'+os.path.basename(repo).replace('.git','')
     if os.path.exists(repo_path):
         print(f'    {repo} already exists at {repo_path} !')
         return True
@@ -354,7 +354,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
 
     print("Generating data models from defined plugins...")
 
-    remove_folder(".repo")
+    remove_folder("/tmp/repo")
 
     for plugin_index, plugin in enumerate(plugins):
 
@@ -375,7 +375,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
         print(f' - Processing plugin: MS({is_microservice}) {plugin}')
 
         if proto == "git":
-            repo_path = ".repo/"+name
+            repo_path = "/tmp/repo/"+name
             version = get_option_value(plugin, "version")
 
 
@@ -394,9 +394,9 @@ def download_and_build_plugins(plugins, vendor_prefix):
             BBF_ERROR_CODE += 1
             continue
 
-        create_folder(".repo/dm_info")
+        create_folder("/tmp/repo/dm_info")
         if dm_desc_file.endswith('.json'):
-            dest_file = ".repo/dm_info/" + os.path.basename(dm_desc_file).replace('.json', f"_{plugin_index}.json")
+            dest_file = "/tmp/repo/dm_info/" + os.path.basename(dm_desc_file).replace('.json', f"_{plugin_index}.json")
             rename_file(repo_path + "/" + dm_desc_file, dest_file)
 
         LIST_FILES = []

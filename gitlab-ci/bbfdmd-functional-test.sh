@@ -55,8 +55,8 @@ supervisorctl status
 gcovr -r . --xml -o ./funl-test-coverage.xml
 gcovr -r .
 
-echo > memory-report.xml
-check_valgrind_xml "Main Service bbfdmd" "/tmp/memory-report.xml"
+check_valgrind_xml "/tmp/memory-report.xml" "bbfdmd"
+check_valgrind_xml "/tmp/memory-config-report.xml" "bbf.config"
 
 if [ "${fault}" -ne 0 ]; then
 	echo "Failed running ubus-api-validator fault[$fault]"

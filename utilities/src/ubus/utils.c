@@ -69,22 +69,54 @@ static void reload_service(struct ubus_context *ctx, const char *config_name, bo
 	blob_buf_free(&bb);
 }
 
-void reload_services(struct ubus_context *ctx, struct blob_attr *services, bool is_commit)
+void reload_specified_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir, struct blob_attr *services, bool is_commit, bool reload)
 {
+	struct uci_context *uci_ctx = NULL;
 	struct blob_attr *service = NULL;
 	size_t rem = 0;
 
-	blobmsg_for_each_attr(service, services, rem) {
-		char *config_name = blobmsg_get_string(service);
-		reload_service(ctx, config_name, is_commit);
+	uci_ctx = uci_alloc_context();
+	if (!uci_ctx) {
+		return;
 	}
+
+	if (conf_dir) {
+		uci_set_confdir(uci_ctx, conf_dir);
+	}
+
+	if (save_dir) {
+		uci_set_savedir(uci_ctx, save_dir);
+	}
+
+	blobmsg_for_each_attr(service, services, rem) {
+		struct uci_ptr ptr = {0};
+
+		char *config_name = blobmsg_get_string(service);
+
+		if (uci_lookup_ptr(uci_ctx, &ptr, config_name, true) != UCI_OK)
+			continue;
+
+		if (is_commit) {
+			if (uci_commit(uci_ctx, &ptr.p, false) != UCI_OK)
+				continue;
+		} else {
+			if (uci_revert(uci_ctx, &ptr) != UCI_OK) {
+				continue;
+			}
+		}
+
+		if (reload) {
+			reload_service(ctx, config_name, is_commit);
+		}
+	}
+
+	uci_free_context(uci_ctx);
 }
 
-void uci_apply_changes(const char *conf_dir, const char *save_dir, bool is_commit)
+void reload_all_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir, bool is_commit,  bool reload)
 {
 	struct uci_context *uci_ctx = NULL;
 	char **configs = NULL, **p = NULL;
-	struct uci_ptr ptr = {0};
 
 	uci_ctx = uci_alloc_context();
 	if (!uci_ctx) {
@@ -104,6 +136,59 @@ void uci_apply_changes(const char *conf_dir, const char *save_dir, bool is_commi
 	}
 
 	for (p = configs; p && *p; p++) {
+		struct uci_ptr ptr = {0};
+
+		if (uci_lookup_ptr(uci_ctx, &ptr, *p, true) != UCI_OK)
+			continue;
+
+		if (uci_list_empty(&ptr.p->saved_delta))
+			continue;
+
+		if (is_commit) {
+			if (uci_commit(uci_ctx, &ptr.p, false) != UCI_OK)
+				continue;
+		} else {
+			if (uci_revert(uci_ctx, &ptr) != UCI_OK) {
+				continue;
+			}
+		}
+
+		if (reload) {
+			reload_service(ctx, *p, is_commit);
+		}
+	}
+
+	free(configs);
+
+exit:
+	uci_free_context(uci_ctx);
+}
+
+void uci_apply_changes(const char *conf_dir, const char *save_dir, bool is_commit)
+{
+	struct uci_context *uci_ctx = NULL;
+	char **configs = NULL, **p = NULL;
+
+	uci_ctx = uci_alloc_context();
+	if (!uci_ctx) {
+		return;
+	}
+
+	if (conf_dir) {
+		uci_set_confdir(uci_ctx, conf_dir);
+	}
+
+	if (save_dir) {
+		uci_set_savedir(uci_ctx, save_dir);
+	}
+
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK) {
+		goto exit;
+	}
+
+	for (p = configs; p && *p; p++) {
+		struct uci_ptr ptr = {0};
+
 		if (uci_lookup_ptr(uci_ctx, &ptr, *p, true) != UCI_OK)
 			continue;
 
@@ -116,6 +201,46 @@ void uci_apply_changes(const char *conf_dir, const char *save_dir, bool is_commi
 				continue;
 			}
 		}
+	}
+
+	free(configs);
+
+exit:
+	uci_free_context(uci_ctx);
+}
+
+void uci_config_changes(const char *conf_dir, const char *save_dir, struct blob_buf *bb)
+{
+	struct uci_context *uci_ctx = NULL;
+	char **configs = NULL, **p = NULL;
+
+	uci_ctx = uci_alloc_context();
+	if (!uci_ctx) {
+		return;
+	}
+
+	if (conf_dir) {
+		uci_set_confdir(uci_ctx, conf_dir);
+	}
+
+	if (save_dir) {
+		uci_set_savedir(uci_ctx, save_dir);
+	}
+
+	if (uci_list_configs(uci_ctx, &configs) != UCI_OK) {
+		goto exit;
+	}
+
+	for (p = configs; p && *p; p++) {
+		struct uci_ptr ptr = {0};
+
+		if (uci_lookup_ptr(uci_ctx, &ptr, *p, true) != UCI_OK)
+			continue;
+
+		if (uci_list_empty(&ptr.p->saved_delta))
+			continue;
+
+		blobmsg_add_string(bb, NULL, *p);
 	}
 
 	free(configs);

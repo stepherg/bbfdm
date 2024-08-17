@@ -19,7 +19,6 @@ struct bbfdm_async_req {
 
 typedef struct bbfdm_config {
 	int proto; // Protocol identifier, Possible values: { '0'<both>, '1'<cwmp>, '2'<usp> }
-	int transaction_timeout; // Timeout for transactions
 	int subprocess_level; // Subprocess level
 	uint8_t log_level; // Log level, Possible values: { '1', '2', '3', '4' }
 	uint32_t refresh_time; // Refresh time
@@ -62,7 +61,6 @@ typedef struct bbfdm_data {
 	struct blob_buf bb;
 	uint8_t depth;
 	bool is_raw;
-	int trans_id;
 } bbfdm_data_t;
 
 void register_instance_refresh_timer(struct ubus_context *ctx, int start_sec);

@@ -1285,7 +1285,6 @@ static int add_ubus_object(struct dmctx *dmctx, struct dmnode *node)
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
-	json_object_object_add(in_args, "transaction_id", json_object_new_int(dmctx->trans_id));
 
 	dmubus_call(ubus_name, "add",
 			UBUS_ARGS{
@@ -1331,7 +1330,6 @@ static int del_ubus_object(struct dmctx *dmctx, struct dmnode *node)
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
-	json_object_object_add(in_args, "transaction_id", json_object_new_int(dmctx->trans_id));
 
 	dmubus_call(ubus_name, "del",
 			UBUS_ARGS{
@@ -1405,7 +1403,6 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
 	json_object_object_add(in_args, "format", json_object_new_string("raw"));
-	json_object_object_add(in_args, "transaction_id", json_object_new_int(dmctx->trans_id));
 
 	if (is_reference_parameter(ubus_name, dmctx->in_param, in_args, &ref_value)) {
 		ref_value = get_value_by_reference(dmctx, ref_value);

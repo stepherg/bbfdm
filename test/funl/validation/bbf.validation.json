@@ -119,22 +119,6 @@
             "rc": 0
         },
         {
-            "method": "transaction",
-            "args": {
-                    "cmd": "commit",
-                    "optional":{"transaction_id":123}
-            },
-            "rc": 0
-        },
-        {
-            "method": "transaction",
-            "args": {
-                    "cmd": "abort",
-                    "optional":{"transaction_id":123}
-            },
-            "rc": 0
-        },
-        {
             "method": "get",
             "args": {
                 "paths": ["Device.WiFi.SSID.1.SSID","Device.WiFi.SSID.2.SSID"],
@@ -146,8 +130,7 @@
             "method": "set",
             "args": {
                 "path": "Device.WiFi.SSID.1.",
-                "obj_path": {"Alias":"test", "Enable":"1"},
-                "optional":{"transaction_id":123}
+                "obj_path": {"Alias":"test", "Enable":"1"}
             },
             "rc": 0
         }

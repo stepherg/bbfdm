@@ -32,14 +32,10 @@ int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *referenc
 
 bool adm_entry_object_exists(struct dmctx *ctx, char *param); // To be removed later!!!!!!!!!!!! (After moving all Objects outside bbfdm core)
 
-void bbf_entry_restart_services(struct blob_buf *bb, bool restart_services);
-void bbf_entry_revert_changes(struct blob_buf *bb);
+void bbf_entry_services(unsigned int proto, bool is_commit, bool reload_required);
 
 void get_list_of_registered_service(struct list_head *srvlist, struct blob_buf *bb);
 bool load_service(DMOBJ *main_dm, struct list_head *srv_list, char *srv_name, char *srv_parent_dm, char *srv_obj);
 void free_services_from_list(struct list_head *clist);
-
-int handle_transaction_of_registered_service(struct ubus_context *ctx, struct blob_buf *trans_bb, struct list_head *srvlist,
-		const char *trans_cmd, int trans_id, uint32_t max_timeout, bool service_restart);
 
 #endif //__DMENTRY_H__

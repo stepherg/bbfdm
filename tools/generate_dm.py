@@ -100,7 +100,7 @@ else:
 
     print("Dumping default DM_JSON_FILES")
     print(DM_JSON_FILES)
-    DM_JSON_FILES.extend(glob.glob('.repo/dm_info/*.json'))
+    DM_JSON_FILES.extend(glob.glob('/tmp/repo/dm_info/*.json'))
     print("Dumping all")
     print(DM_JSON_FILES)
 

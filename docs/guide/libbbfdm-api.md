@@ -118,8 +118,8 @@ input
 		pointer to the struct blob_buf object. contains all the packages updated.
 
 	bool restart_services
-		if true packages will be updated through ubus call.
-		if false packages will be updated through uci.
+		if true packages will be updated through ubus call bbf.config internally.
+		if false packages will be updated through ubus call bbf.config externally.
 	
 return
 	None
@@ -129,11 +129,15 @@ return
 This method is used to revert the changes whenever its state is changed
 
 ```
-void bbf_entry_revert_changes(struct blob_buf *bb)
+void bbf_entry_revert_changes(struct blob_buf *bb, bool revert_changes)
 
 input
 	struct blob_buf *bb
 		pointer to the struct blob_buf object. contains all the packages updated.
+
+	bool revert_changes
+		if true changes will be reverted through ubus call bbf.config internally.
+		if false changes will be reverted through ubus call bbf.config externally.
 	
 return
 	None

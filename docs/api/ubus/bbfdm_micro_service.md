@@ -10,16 +10,15 @@ https://dev.iopsys.eu/bbf/bbfdm/-/blob/devel/docs/api/ubus/bbfdm.md
 
 # bbf
 
-| List of Methods             |
-| --------------------------- |
-| [add](#add)                 | Method | bbf (this schema) |
-| [del](#del)                 | Method | bbf (this schema) |
-| [get](#get)                 | Method | bbf (this schema) |
-| [instances](#instances)     | Method | bbf (this schema) |
-| [operate](#operate)         | Method | bbf (this schema) |
-| [schema](#schema)           | Method | bbf (this schema) |
-| [set](#set)                 | Method | bbf (this schema) |
-| [transaction](#transaction) | Method | bbf (this schema) |
+| List of Methods         |
+| ----------------------- |
+| [add](#add)             | Method | bbf (this schema) |
+| [del](#del)             | Method | bbf (this schema) |
+| [get](#get)             | Method | bbf (this schema) |
+| [instances](#instances) | Method | bbf (this schema) |
+| [operate](#operate)     | Method | bbf (this schema) |
+| [schema](#schema)       | Method | bbf (this schema) |
+| [set](#set)             | Method | bbf (this schema) |
 
 ## add
 
@@ -54,7 +53,6 @@ Add a new object in multi instance object
 | Property   | Type   | Required     |
 | ---------- | ------ | ------------ |
 | `obj_path` | object | Optional     |
-| `optional` | object | **Required** |
 | `path`     | string | **Required** |
 
 #### obj_path
@@ -71,36 +69,6 @@ Add a new object in multi instance object
 | Property | Type | Required |
 | -------- | ---- | -------- |
 | None     | None | None     |
-
-#### optional
-
-`optional`
-
-- is **required**
-- type: `object`
-
-##### optional Type
-
-`object` with following properties:
-
-| Property         | Type    | Required |
-| ---------------- | ------- | -------- |
-| `transaction_id` | integer | Optional |
-
-#### transaction_id
-
-Required for CUD operation, it shall be same number as got from transaction->start
-
-`transaction_id`
-
-- is optional
-- type: reference
-
-##### transaction_id Type
-
-`integer`
-
-- minimum value: `1`
 
 #### path
 
@@ -139,7 +107,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf add {"path":"labore ullamco","optional":{"transaction_id":3482835},"obj_path":{}}
+ubus call bbf add {"path":"tempor nostrud in i","obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -149,12 +117,7 @@ ubus call bbf add {"path":"labore ullamco","optional":{"transaction_id":3482835}
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": [
-    "<SID>",
-    "bbf",
-    "add",
-    { "path": "labore ullamco", "optional": { "transaction_id": 3482835 }, "obj_path": {} }
-  ]
+  "params": ["<SID>", "bbf", "add", { "path": "tempor nostrud in i", "obj_path": {} }]
 }
 ```
 
@@ -218,16 +181,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{
-  "results": [
-    {
-      "path": "tempor consequat dolor",
-      "data": "in aliquip",
-      "fault": 7759,
-      "fault_msg": "ea irure sunt laboris commodo"
-    }
-  ]
-}
+{ "results": [{ "path": "laborum", "data": "mollit enim", "fault": 8110, "fault_msg": "culpa fugiat" }] }
 ```
 
 ## del
@@ -260,41 +214,10 @@ Delete a object instance from multi instance object
 
 `object` with following properties:
 
-| Property   | Type   | Required     |
-| ---------- | ------ | ------------ |
-| `optional` | object | Optional     |
-| `path`     | string | **Required** |
-| `paths`    | array  | Optional     |
-
-#### optional
-
-`optional`
-
-- is optional
-- type: `object`
-
-##### optional Type
-
-`object` with following properties:
-
-| Property         | Type    | Required |
-| ---------------- | ------- | -------- |
-| `transaction_id` | integer | Optional |
-
-#### transaction_id
-
-Required for CUD operation, it shall be same number as got from transaction->start
-
-`transaction_id`
-
-- is optional
-- type: reference
-
-##### transaction_id Type
-
-`integer`
-
-- minimum value: `1`
+| Property | Type   | Required     |
+| -------- | ------ | ------------ |
+| `path`   | string | **Required** |
+| `paths`  | array  | Optional     |
 
 #### path
 
@@ -359,7 +282,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf del {"path":"laborum","paths":["aliquip ea"],"optional":{"transaction_id":37938814}}
+ubus call bbf del {"path":"culpasunt","paths":["deserunt labore ut consequa"]}
 ```
 
 ### JSONRPC Example
@@ -369,12 +292,7 @@ ubus call bbf del {"path":"laborum","paths":["aliquip ea"],"optional":{"transact
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": [
-    "<SID>",
-    "bbf",
-    "del",
-    { "path": "laborum", "paths": ["aliquip ea"], "optional": { "transaction_id": 37938814 } }
-  ]
+  "params": ["<SID>", "bbf", "del", { "path": "culpasunt", "paths": ["deserunt labore ut consequa"] }]
 }
 ```
 
@@ -438,11 +356,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{
-  "results": [
-    { "path": "proident eiusmod et Lorem", "data": "ullamco sed", "fault": 8168, "fault_msg": "sint quis nostrud est" }
-  ]
-}
+{ "results": [{ "path": "dolor laborum esse", "data": "laborum amet Excepteur", "fault": 8595, "fault_msg": "ut" }] }
 ```
 
 ## get
@@ -506,10 +420,10 @@ Integer to decide the depth of data model to be parsed
 
 `object` with following properties:
 
-| Property        | Type    | Required | Default    |
-| --------------- | ------- | -------- | ---------- |
-| `format`        | string  | Optional | `"pretty"` |
-| `proto`         | string  | Optional | `"both"`   |
+| Property | Type   | Required | Default    |
+| -------- | ------ | -------- | ---------- |
+| `format` | string | Optional | `"pretty"` |
+| `proto`  | string | Optional | `"both"`   |
 
 #### format
 
@@ -621,7 +535,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf get {"path":"officia","paths":["aliqua nisi sunt"],"maxdepth":-49153948,"optional":{"format":"raw","proto":"cwmp"}}
+ubus call bbf get {"path":"officia","paths":["reprehenderit Ut"],"maxdepth":-61996452,"optional":{"format":"pretty","proto":"both"}}
 ```
 
 ### JSONRPC Example
@@ -637,9 +551,9 @@ ubus call bbf get {"path":"officia","paths":["aliqua nisi sunt"],"maxdepth":-491
     "get",
     {
       "path": "officia",
-      "paths": ["aliqua nisi sunt"],
-      "maxdepth": -49153948,
-      "optional": { "format": "raw", "proto": "cwmp" }
+      "paths": ["reprehenderit Ut"],
+      "maxdepth": -61996452,
+      "optional": { "format": "pretty", "proto": "both" }
     }
   ]
 }
@@ -710,13 +624,7 @@ All items must be of the type: Unknown type ``.
 ```json
 {
   "results": [
-    {
-      "path": "anim sit aute non mollit",
-      "data": "sed consectetur ipsum exercitation magna",
-      "type": "xsd:string",
-      "fault": 8050,
-      "fault_msg": "nostrud nisi laboris exercitation"
-    }
+    { "path": "proident", "data": "consectetur", "type": "xsd:unsignedLong", "fault": 8751, "fault_msg": "culpa ea" }
   ]
 }
 ```
@@ -781,9 +689,9 @@ gets only first level objects if true
 
 `object` with following properties:
 
-| Property        | Type    | Required | Default  |
-| --------------- | ------- | -------- | -------- |
-| `proto`         | string  | Optional | `"both"` |
+| Property | Type   | Required | Default  |
+| -------- | ------ | -------- | -------- |
+| `proto`  | string | Optional | `"both"` |
 
 #### proto
 
@@ -848,7 +756,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf instances {"path":"id aliquip","first_level":false,"optional":{"proto":"usp"}}
+ubus call bbf instances {"path":"et elit officia ut","first_level":false,"optional":{"proto":"both"}}
 ```
 
 ### JSONRPC Example
@@ -862,7 +770,7 @@ ubus call bbf instances {"path":"id aliquip","first_level":false,"optional":{"pr
     "<SID>",
     "bbf",
     "instances",
-    { "path": "id aliquip", "first_level": false, "optional": { "proto": "usp" } }
+    { "path": "et elit officia ut", "first_level": false, "optional": { "proto": "both" } }
   ]
 }
 ```
@@ -924,7 +832,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "ad qui ", "fault": 7181, "fault_msg": "elit" }] }
+{ "results": [{ "path": "est do aliqua dolor", "fault": 7913, "fault_msg": "enim ex ipsum tempor elit" }] }
 ```
 
 ## operate
@@ -1039,10 +947,10 @@ Input arguments for the operate command as defined in TR-181-2.13
 
 `object` with following properties:
 
-| Property        | Type    | Required | Default    |
-| --------------- | ------- | -------- | ---------- |
-| `format`        | string  | Optional | `"pretty"` |
-| `proto`         | string  | Optional | `"both"`   |
+| Property | Type   | Required | Default    |
+| -------- | ------ | -------- | ---------- |
+| `format` | string | Optional | `"pretty"` |
+| `proto`  | string | Optional | `"both"`   |
 
 #### format
 
@@ -1090,7 +998,7 @@ The value of this property **must** be equal to one of the [known values below](
 ### Ubus CLI Example
 
 ```
-ubus call bbf operate {"command":"et sit dolor","command_key":"nulla velit ut in Excepteur","input":{},"optional":{"format":"raw","proto":"both"}}
+ubus call bbf operate {"command":"irure reprehen","command_key":"tempor ipsum","input":{},"optional":{"format":"raw","proto":"usp"}}
 ```
 
 ### JSONRPC Example
@@ -1105,10 +1013,10 @@ ubus call bbf operate {"command":"et sit dolor","command_key":"nulla velit ut in
     "bbf",
     "operate",
     {
-      "command": "et sit dolor",
-      "command_key": "nulla velit ut in Excepteur",
+      "command": "irure reprehen",
+      "command_key": "tempor ipsum",
       "input": {},
-      "optional": { "format": "raw", "proto": "both" }
+      "optional": { "format": "raw", "proto": "usp" }
     }
   ]
 }
@@ -1196,11 +1104,11 @@ All items must be of the type: Unknown type ``.
 {
   "results": [
     {
-      "path": "aliqua",
-      "data": "0",
-      "fault": 7611,
-      "fault_msg": "ea occaecat voluptate tempor",
-      "output": [{ "path": "consequat dolor elit", "data": "1", "type": "xsd:int" }]
+      "path": "ea Lorem officia n",
+      "data": "1",
+      "fault": 8207,
+      "fault_msg": "in Duis eiusmod culpa",
+      "output": [{ "path": "eiusmod voluptate", "data": "1", "type": "xsd:command" }]
     }
   ]
 }
@@ -1402,7 +1310,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf schema {"path":"laboris elit in dolore ali","paths":["pariatur elit eu"],"first_level":false,"commands":false,"events":false,"params":false,"optional":{"proto":"usp"}}
+ubus call bbf schema {"path":"sit Lorem aliquip quis adipisic","paths":["cupidatat Excepteur"],"first_level":true,"commands":true,"events":false,"params":true,"optional":{"proto":"both"}}
 ```
 
 ### JSONRPC Example
@@ -1417,13 +1325,13 @@ ubus call bbf schema {"path":"laboris elit in dolore ali","paths":["pariatur eli
     "bbf",
     "schema",
     {
-      "path": "laboris elit in dolore ali",
-      "paths": ["pariatur elit eu"],
-      "first_level": false,
-      "commands": false,
+      "path": "sit Lorem aliquip quis adipisic",
+      "paths": ["cupidatat Excepteur"],
+      "first_level": true,
+      "commands": true,
       "events": false,
-      "params": false,
-      "optional": { "proto": "usp" }
+      "params": true,
+      "optional": { "proto": "both" }
     }
   ]
 }
@@ -1533,13 +1441,13 @@ All items must be of the type: Unknown type ``.
 {
   "results": [
     {
-      "path": "Excepteur irure consequat",
+      "path": "veniam ipsum ea elit lab",
       "data": "0",
-      "type": "xsd:dateTime",
-      "fault": 7546,
-      "fault_msg": "cupidatat Excepteur",
-      "input": [{ "path": "minim pariatur id laboris ut", "data": "1", "type": "xsd:unsignedInt" }],
-      "output": [{ "path": "ea enim Excepteur proident est", "data": "1", "type": "xsd:long" }]
+      "type": "xsd:command",
+      "fault": 7148,
+      "fault_msg": "laboris et officia Duis",
+      "input": [{ "path": "cillum ea", "data": "1", "type": "xsd:dateTime" }],
+      "output": [{ "path": "esse aliquip in eu et", "data": "1", "type": "xsd:string" }]
     }
   ]
 }
@@ -1578,7 +1486,6 @@ Set values of datamodel object element
 | Property   | Type   | Required     |
 | ---------- | ------ | ------------ |
 | `obj_path` | object | Optional     |
-| `optional` | object | **Required** |
 | `path`     | string | **Required** |
 | `value`    | string | **Required** |
 
@@ -1608,59 +1515,6 @@ To set multiple values at once, path should be relative to object elements
 ```json
 { "path": "Device.WiFi.SSID.2.", "obj_path": { "SSID": "test_ssid" } }
 ```
-
-#### optional
-
-`optional`
-
-- is **required**
-- type: `object`
-
-##### optional Type
-
-`object` with following properties:
-
-| Property         | Type    | Required | Default  |
-| ---------------- | ------- | -------- | -------- |
-| `proto`          | string  | Optional | `"both"` |
-| `transaction_id` | integer | Optional |          |
-
-#### proto
-
-`proto`
-
-- is optional
-- type: reference
-- default: `"both"`
-
-##### proto Type
-
-`string`
-
-The value of this property **must** be equal to one of the [known values below](#set-known-values).
-
-##### proto Known Values
-
-| Value |
-| ----- |
-| usp   |
-| cwmp  |
-| both  |
-
-#### transaction_id
-
-Required for CUD operation, it shall be same number as got from transaction->start
-
-`transaction_id`
-
-- is optional
-- type: reference
-
-##### transaction_id Type
-
-`integer`
-
-- minimum value: `1`
 
 #### path
 
@@ -1730,7 +1584,7 @@ value of the object element provided in path, path should contains valid writabl
 ### Ubus CLI Example
 
 ```
-ubus call bbf set {"path":"nonmagna ut anim","value":"cupidatat","optional":{"proto":"usp","transaction_id":45864115},"obj_path":{}}
+ubus call bbf set {"path":"quioccaecat labore elit offic","value":"dolore nostrud dolore anim non","obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -1744,12 +1598,7 @@ ubus call bbf set {"path":"nonmagna ut anim","value":"cupidatat","optional":{"pr
     "<SID>",
     "bbf",
     "set",
-    {
-      "path": "nonmagna ut anim",
-      "value": "cupidatat",
-      "optional": { "proto": "usp", "transaction_id": 45864115 },
-      "obj_path": {}
-    }
+    { "path": "quioccaecat labore elit offic", "value": "dolore nostrud dolore anim non", "obj_path": {} }
   ]
 }
 ```
@@ -1814,200 +1663,5 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "pariatur", "data": "0", "fault": 8723, "fault_msg": "ut aliquip" }] }
-```
-
-## transaction
-
-### Start/commit/abort/status a transaction before set/add/del operations
-
-`transaction`
-
-- type: `Method`
-
-### transaction Type
-
-`object` with following properties:
-
-| Property | Type   | Required     |
-| -------- | ------ | ------------ |
-| `input`  | object | **Required** |
-| `output` | object | **Required** |
-
-#### input
-
-`input`
-
-- is **required**
-- type: `object`
-
-##### input Type
-
-`object` with following properties:
-
-| Property           | Type    | Required     |
-| ------------------ | ------- | ------------ |
-| `cmd`              | string  | **Required** |
-| `optional`         | object  | Optional     |
-| `restart_services` | boolean | Optional     |
-| `timeout`          | integer | Optional     |
-
-#### cmd
-
-`cmd`
-
-- is **required**
-- type: reference
-
-##### cmd Type
-
-`string`
-
-The value of this property **must** be equal to one of the [known values below](#transaction-known-values).
-
-##### cmd Known Values
-
-| Value  |
-| ------ |
-| start  |
-| commit |
-| abort  |
-| status |
-
-#### optional
-
-`optional`
-
-- is optional
-- type: `object`
-
-##### optional Type
-
-`object` with following properties:
-
-| Property         | Type    | Required |
-| ---------------- | ------- | -------- |
-| `transaction_id` | integer | Optional |
-
-#### transaction_id
-
-Required for CUD operation, it shall be same number as got from transaction->start
-
-`transaction_id`
-
-- is optional
-- type: reference
-
-##### transaction_id Type
-
-`integer`
-
-- minimum value: `1`
-
-#### restart_services
-
-If yes, bbfdmd restart the service after CUD operation, else return list of updated uci to handler restart externally.
-
-`restart_services`
-
-- is optional
-- type: `boolean`
-
-##### restart_services Type
-
-`boolean`
-
-#### timeout
-
-Timeout (in milliseconds) for the transaction, on timeout changes will be reverted
-
-`timeout`
-
-- is optional
-- type: `integer`
-
-##### timeout Type
-
-`integer`
-
-- minimum value: `0`
-
-### Ubus CLI Example
-
-```
-ubus call bbf transaction {"cmd":"commit","timeout":95277085,"restart_services":false,"optional":{"transaction_id":36491321}}
-```
-
-### JSONRPC Example
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 0,
-  "method": "call",
-  "params": [
-    "<SID>",
-    "bbf",
-    "transaction",
-    { "cmd": "commit", "timeout": 95277085, "restart_services": false, "optional": { "transaction_id": 36491321 } }
-  ]
-}
-```
-
-#### output
-
-`output`
-
-- is **required**
-- type: `object`
-
-##### output Type
-
-`object` with following properties:
-
-| Property         | Type    | Required     |
-| ---------------- | ------- | ------------ |
-| `error`          | string  | Optional     |
-| `status`         | boolean | **Required** |
-| `transaction_id` | integer | Optional     |
-
-#### error
-
-`error`
-
-- is optional
-- type: `string`
-
-##### error Type
-
-`string`
-
-#### status
-
-`status`
-
-- is **required**
-- type: `boolean`
-
-##### status Type
-
-`boolean`
-
-#### transaction_id
-
-`transaction_id`
-
-- is optional
-- type: `integer`
-
-##### transaction_id Type
-
-`integer`
-
-- minimum value: `1`
-
-### Output Example
-
-```json
-{ "status": false, "transaction_id": 87022462, "error": "occaecat Excepteur" }
+{ "results": [{ "path": "anim no", "data": "0", "fault": 7259, "fault_msg": "ad" }] }
 ```

@@ -880,6 +880,10 @@ void bbfdm_get_value(bbfdm_data_t *data, void *output)
 
 	// free
 	blob_buf_free(&data->bb);
+
+	// Apply all bbfdm changes
+	dmuci_commit_bbfdm();
+
 	bbf_cleanup(&data->bbf_ctx);
 }
 
@@ -914,6 +918,9 @@ void bbfdm_get_names(bbfdm_data_t *data)
 	if (data->ctx && data->req)
 		ubus_send_reply(data->ctx, data->req, data->bbf_ctx.bb.head);
 
+	// Apply all bbfdm changes
+	dmuci_commit_bbfdm();
+
 	bbf_cleanup(&data->bbf_ctx);
 }
 
@@ -947,6 +954,9 @@ void bbfdm_get_instances(bbfdm_data_t *data)
 
 	if (data->ctx && data->req)
 		ubus_send_reply(data->ctx, data->req, data->bbf_ctx.bb.head);
+
+	// Apply all bbfdm changes
+	dmuci_commit_bbfdm();
 
 	bbf_cleanup(&data->bbf_ctx);
 }

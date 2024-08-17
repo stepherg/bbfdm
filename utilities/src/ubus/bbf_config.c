@@ -23,8 +23,34 @@
 #define MAX_INSTANCE_NUM 32
 #define NAME_LENGTH 64
 
-#define DM_DMMAP_CONFIG "/etc/bbfdm/dmmap"
-#define DM_DMMAP_SAVEDIR "/tmp/.bbfdm"
+#define CONFIG_CONFDIR "/etc/config/"
+#define DMMAP_CONFDIR "/etc/bbfdm/dmmap/"
+
+uint8_t g_log_level = 0;
+
+void print_log(const char *format, ...);
+
+#define LOG(fmt, args...) \
+	print_log(fmt, ##args)
+
+struct proto_args {
+	const char *name;
+	const char *config_savedir;
+	const char *dmmap_savedir;
+	unsigned char index;
+};
+
+static struct proto_args supported_protocols[] = {
+		{
+				"both", "/tmp/bbfdm/.bbfdm/config/", "/tmp/bbfdm/.bbfdm/dmmap/", 0
+		},
+		{
+				"cwmp", "/tmp/bbfdm/.cwmp/config/", "/tmp/bbfdm/.cwmp/dmmap/", 1
+		},
+		{
+				"usp", "/tmp/bbfdm/.usp/config/", "/tmp/bbfdm/.usp/dmmap/", 2
+		},
+};
 
 // Structure to represent an instance of a service
 struct instance {
@@ -48,12 +74,40 @@ struct config_package {
 
 enum {
 	SERVICES_NAME,
+	SERVICES_PROTO,
+	SERVICES_MONITOR,
+	SERVICES_RELOAD,
 	__MAX
 };
 
 static const struct blobmsg_policy bbf_config_policy[] = {
 	[SERVICES_NAME] = { .name = "services", .type = BLOBMSG_TYPE_ARRAY },
+	[SERVICES_PROTO] = { .name = "proto", .type = BLOBMSG_TYPE_STRING },
+	[SERVICES_MONITOR] = { .name = "monitor", .type = BLOBMSG_TYPE_BOOL },
+	[SERVICES_RELOAD] = { .name = "reload", .type = BLOBMSG_TYPE_BOOL },
 };
+
+void print_log(const char *format, ...)
+{
+	va_list arglist;
+
+	if (g_log_level < 1)
+		return;
+
+	va_start(arglist, format);
+	vsyslog(LOG_INFO, format, arglist);
+	va_end(arglist);
+}
+
+static unsigned char get_idx_by_proto(const char *proto)
+{
+	for (int i = 0; i < ARRAY_SIZE(supported_protocols); i++) {
+		if (strcmp(supported_protocols[i].name, proto) == 0)
+			return supported_protocols[i].index;
+	}
+
+	return 0;
+}
 
 static int find_config_idx(struct config_package *package, const char *config_name)
 {
@@ -289,6 +343,7 @@ static void fill_service_info(struct ubus_context *ctx, struct config_package *p
 {
 	struct blob_buf ubus_bb = {0};
 
+	memset(&ubus_bb, 0 , sizeof(struct blob_buf));
 	blob_buf_init(&ubus_bb, 0);
 
 	if (name) blobmsg_add_string(&ubus_bb, "name", name);
@@ -365,13 +420,24 @@ wait:
 	sleep(TIME_TO_WAIT_FOR_RELOAD);
 }
 
-static void send_bbf_config_change_event(struct ubus_context *ctx)
+static void send_bbf_config_change_event()
 {
+	struct ubus_context *ctx;
 	struct blob_buf bb = {0};
 
+	ctx = ubus_connect(NULL);
+	if (ctx == NULL) {
+		LOG("Can't create UBUS context for event");
+		return;
+	}
+
+	LOG("Sending bbf.config.change event");
+
+	memset(&bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&bb, 0);
 	ubus_send_event(ctx, "bbf.config.change", bb.head);
 	blob_buf_free(&bb);
+	ubus_free(ctx);
 }
 
 static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
@@ -381,7 +447,10 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 	struct blob_attr *tb[__MAX];
 	struct blob_buf bb = {0};
 	struct config_package package[MAX_PACKAGE_NUM];
+	unsigned char idx = 0;
+	bool monitor = true, reload = true;
 
+	LOG("Commit handler called");
 	memset(package, 0, sizeof(struct config_package) * MAX_PACKAGE_NUM);
 
 	memset(&bb, 0, sizeof(struct blob_buf));
@@ -392,33 +461,45 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 		goto end;
 	}
 
-	struct blob_attr *services = tb[SERVICES_NAME];
-
-	if (!services) {
-		blobmsg_add_string(&bb, "error", "Services array should be defined !!!");
-		goto end;
+	if (tb[SERVICES_PROTO]) {
+		char *proto = blobmsg_get_string(tb[SERVICES_PROTO]);
+		idx = get_idx_by_proto(proto);
 	}
 
-	// Commit all uci dmmap changes
-	uci_apply_changes(DM_DMMAP_CONFIG, DM_DMMAP_SAVEDIR, true);
+	if (tb[SERVICES_MONITOR])
+		monitor = blobmsg_get_bool(tb[SERVICES_MONITOR]);
 
-	size_t arr_len = blobmsg_len(services);
+	if (tb[SERVICES_RELOAD])
+		reload = blobmsg_get_bool(tb[SERVICES_RELOAD]);
 
-	if (arr_len) {
+	if (monitor) {
 		// Get all configs information before calling ubus call uci commit
 		fill_service_info(ctx, package, NULL, true, _get_service_list_cb);
+	}
 
-		// Commit uci config changes for the required configs
-		reload_services(ctx, services, true);
+	if (reload) {
+		// Commit all uci dmmap changes
+		uci_apply_changes(DMMAP_CONFDIR, supported_protocols[idx].dmmap_savedir, true);
+	}
 
+	struct blob_attr *services = tb[SERVICES_NAME];
+
+	size_t arr_len = (services) ? blobmsg_len(services) : 0;
+
+	if (arr_len) {
+		// Commit uci config changes for the required configs and reload services
+		reload_specified_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, services, true, reload);
+	} else {
+		// Commit uci config changes for all configs and reload services
+		reload_all_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, true, reload);
+	}
+
+	if (monitor) {
 		// Wait at least 2 seconds to reload the services
 		sleep(2);
 
 		// Check if the required services are really reloaded
 		validate_required_services(ctx, package, services);
-
-		// Send 'bbf.config.change' event to run refresh instances
-		send_bbf_config_change_event(ctx);
 	}
 
 	blobmsg_add_string(&bb, "status", "ok");
@@ -426,6 +507,10 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 end:
 	ubus_send_reply(ctx, req, bb.head);
 	blob_buf_free(&bb);
+
+	// Send 'bbf.config.change' event to run refresh instances
+	send_bbf_config_change_event();
+	LOG("Commit handler exit");
 
 	return 0;
 }
@@ -436,6 +521,57 @@ static int bbf_config_revert_handler(struct ubus_context *ctx, struct ubus_objec
 {
 	struct blob_attr *tb[__MAX];
 	struct blob_buf bb = {0};
+	unsigned char idx = 0;
+
+	memset(&bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&bb, 0);
+
+	LOG("Revert handler called");
+	if (blobmsg_parse(bbf_config_policy, __MAX, tb, blob_data(msg), blob_len(msg))) {
+		blobmsg_add_string(&bb, "error", "Failed to parse blob");
+		goto end;
+	}
+
+	if (tb[SERVICES_PROTO]) {
+		char *proto = blobmsg_get_string(tb[SERVICES_PROTO]);
+		idx = get_idx_by_proto(proto);
+	}
+
+	struct blob_attr *services = tb[SERVICES_NAME];
+
+	size_t arr_len = (services) ? blobmsg_len(services) : 0;
+
+	if (arr_len) {
+		// Revert uci config changes for the required configs and reload services
+		reload_specified_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, services, false, false);
+	} else {
+		// Revert uci config changes for all configs and reload services
+		reload_all_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, false, false);
+	}
+
+	// Revert all uci dmmap changes
+	uci_apply_changes(DMMAP_CONFDIR, supported_protocols[idx].dmmap_savedir, false);
+
+	blobmsg_add_string(&bb, "status", "ok");
+
+end:
+	ubus_send_reply(ctx, req, bb.head);
+	blob_buf_free(&bb);
+
+	// Send 'bbf.config.change' event to run refresh instances
+	send_bbf_config_change_event();
+	LOG("revert handler exit");
+
+	return 0;
+}
+
+static int bbf_config_changes_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
+		    struct ubus_request_data *req, const char *method __attribute__((unused)),
+		    struct blob_attr *msg)
+{
+	struct blob_attr *tb[__MAX];
+	struct blob_buf bb = {0};
+	unsigned char idx = 0;
 
 	memset(&bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&bb, 0);
@@ -445,27 +581,16 @@ static int bbf_config_revert_handler(struct ubus_context *ctx, struct ubus_objec
 		goto end;
 	}
 
-	struct blob_attr *services = tb[SERVICES_NAME];
-
-	if (!services) {
-		blobmsg_add_string(&bb, "error", "Services array should be defined !!!");
-		goto end;
+	if (tb[SERVICES_PROTO]) {
+		char *proto = blobmsg_get_string(tb[SERVICES_PROTO]);
+		idx = get_idx_by_proto(proto);
 	}
 
-	// Revert all uci dmmap changes
-	uci_apply_changes(DM_DMMAP_CONFIG, DM_DMMAP_SAVEDIR, false);
+	void *array = blobmsg_open_array(&bb, "configs");
 
-	size_t arr_len = blobmsg_len(services);
+	uci_config_changes(CONFIG_CONFDIR, supported_protocols[idx].config_savedir, &bb);
 
-	if (arr_len) {
-		// Revert uci config changes for the required configs
-		reload_services(ctx, services, false);
-
-		// Send 'bbf.config.change' event to run refresh instances
-		send_bbf_config_change_event(ctx);
-	}
-
-	blobmsg_add_string(&bb, "status", "ok");
+	blobmsg_close_array(&bb, array);
 
 end:
 	ubus_send_reply(ctx, req, bb.head);
@@ -478,6 +603,7 @@ end:
 static const struct ubus_method bbf_config_methods[] = {
 	UBUS_METHOD("commit", bbf_config_commit_handler, bbf_config_policy),
 	UBUS_METHOD("revert", bbf_config_revert_handler, bbf_config_policy),
+	UBUS_METHOD("changes", bbf_config_changes_handler, bbf_config_policy),
 };
 
 static struct ubus_object_type bbf_config_object_type = UBUS_OBJECT_TYPE("bbf.config", bbf_config_methods);
@@ -489,9 +615,20 @@ static struct ubus_object bbf_config_object = {
 	.n_methods = ARRAY_SIZE(bbf_config_methods),
 };
 
+static void usage(char *prog)
+{
+	fprintf(stderr, "Usage: %s [options]\n", prog);
+	fprintf(stderr, "\n");
+	fprintf(stderr, "options:\n");
+	fprintf(stderr, "    -d    Use multiple time to get more verbose debug logs\n");
+	fprintf(stderr, "    -h    Displays this help\n");
+	fprintf(stderr, "\n");
+}
+
 int main(int argc, char **argv)
 {
 	struct ubus_context *uctx;
+	int ch;
 
 	openlog("bbf.config", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
@@ -499,6 +636,19 @@ int main(int argc, char **argv)
 	if (uctx == NULL) {
 		printf("Can't create UBUS context");
 		return -1;
+	}
+
+	while ((ch = getopt(argc, argv, "hd")) != -1) {
+		switch (ch) {
+		case 'd':
+			g_log_level += 1;
+			break;
+		case 'h':
+			usage(argv[0]);
+			exit(0);
+		default:
+			break;
+		}
 	}
 
 	uloop_init();

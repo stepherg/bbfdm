@@ -32,7 +32,7 @@ static int teardown_commit(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
 
-	bbf_entry_restart_services(NULL, true);
+	bbf_entry_services(ctx->dm_type, true, true);
 	bbf_ctx_clean(ctx);
 	free(ctx);
 
@@ -43,7 +43,7 @@ static int teardown_revert(void **state)
 {
 	struct dmctx *ctx = (struct dmctx *) *state;
 
-	bbf_entry_revert_changes(NULL);
+	bbf_entry_services(ctx->dm_type, false, true);
 	bbf_ctx_clean(ctx);
 	free(ctx);
 
@@ -553,7 +553,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	bbf_ctx_clean(ctx);
 	bbf_ctx_init(ctx, TR181_ROOT_TREE);
 
-	ctx->in_param = "Device.WiFi.SSID.1.Enable";
+	ctx->in_param = "Device.WiFi.SSID.2.Enable";
 
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
@@ -580,7 +580,7 @@ static void test_api_bbfdm_library_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.SSID.1.";
+	ctx->in_param = "Device.WiFi.SSID.2.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);

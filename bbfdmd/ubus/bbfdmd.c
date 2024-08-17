@@ -49,8 +49,6 @@ extern struct list_head json_memhead;
 
 // micro-services should not use fork by default
 #define BBF_SUBPROCESS_DEPTH (0)
-// default instance updater timeout
-#define BBF_INSTANCES_UPDATE_TIMEOUT (60 * 1000)
 
 LIST_HEAD(head_registered_service);
 
@@ -137,15 +135,12 @@ static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 			data->bbf_ctx.dm_type = get_proto_type(val);
 		}
 
-		if (is_str_eq(blobmsg_name(attr), "transaction_id"))
-			data->trans_id = blobmsg_get_u32(attr);
-
 		if (is_str_eq(blobmsg_name(attr), "format"))
 			data->is_raw = is_str_eq(blobmsg_get_string(attr), "raw") ? true : false;
 	}
 
 	char *proto = (data->bbf_ctx.dm_type == BBFDM_BOTH) ? "both" : (data->bbf_ctx.dm_type == BBFDM_CWMP) ? "cwmp" : "usp";
-	DEBUG("Proto:|%s|, Tran-id:|%d|, is_raw:|%d|", proto, data->trans_id, data->is_raw);
+	DEBUG("Proto:|%s|, is_raw:|%d|", proto, data->is_raw);
 }
 
 static void async_req_free(struct bbfdm_async_req *r)
@@ -517,7 +512,6 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	char path[PATH_MAX] = {'\0'};
 	bbfdm_data_t data;
 	int fault = 0;
-	int trans_id = 0;
 	LIST_HEAD(pv_list);
 
 	memset(&data, 0, sizeof(bbfdm_data_t));
@@ -555,44 +549,25 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	if (list_empty(&pv_list)) {
 		ERR("Fault in fill pvlist set path |%s| : |list is empty|", data.bbf_ctx.in_param);
 		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
+		fault = USP_FAULT_INTERNAL_ERROR;
 		goto end;
 	}
 
 	data.plist = &pv_list;
 
-	// no need to process it further since transaction-id is not valid
-	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
-		WARNING("Transaction not started yet");
-		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
-		goto end;
-	} else {
-		data.bbf_ctx.trans_id = data.trans_id;
-	}
-
-	if (data.trans_id == 0) {
-		// Transaction-id is not defined so create an internal transaction
-		cancel_instance_refresh_timer(ctx);
-		trans_id = transaction_start(&data, "INT_SET", 0);
-		if (trans_id == 0) {
-			WARNING("Failed to get the lock for the transaction");
-			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
-			goto end;
-		}
-	}
-
-	bbfdm_set_value(&data);
-
-	if (data.trans_id == 0) {
-		// Internal transaction: need to commit the changes
-		transaction_commit(NULL, trans_id, true);
-		register_instance_refresh_timer(ctx, 100);
-	}
+	fault = bbfdm_set_value(&data);
 
 end:
+	if ((data.bbf_ctx.dm_type == BBFDM_BOTH) && (is_micro_service == false)) {
+		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, true);
+	}
+
+	bbf_cleanup(&data.bbf_ctx);
+	free_pv_list(&pv_list);
+
 	ubus_send_reply(ctx, req, data.bb.head);
 	blob_buf_free(&data.bb);
-	free_pv_list(&pv_list);
-	bbf_cleanup(&data.bbf_ctx);
+
 	return 0;
 }
 
@@ -662,7 +637,6 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	struct blob_attr *tb[__DM_ADD_MAX];
 	char path[PATH_MAX];
 	bbfdm_data_t data;
-	int trans_id = 0;
 	int fault = 0;
 
 	memset(&data, 0, sizeof(bbfdm_data_t));
@@ -687,36 +661,9 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	blob_buf_init(&data.bb, 0);
 	bbf_init(&data.bbf_ctx);
 
-	// no need to process it further since transaction-id is not valid
-	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
-		WARNING("Transaction not started yet");
-		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
-		goto end;
-	} else {
-		data.bbf_ctx.trans_id = data.trans_id;
-	}
-
-	if (data.trans_id == 0) {
-		// Transaction-id is not defined so create an internal transaction
-		cancel_instance_refresh_timer(ctx);
-		trans_id = transaction_start(&data, "INT_ADD", 0);
-		if (trans_id == 0) {
-			ERR("Failed to get the lock for the transaction");
-			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
-			goto end;
-		}
-	}
-
 	fault = create_add_response(&data);
 	if (fault) {
 		ERR("Fault in add path |%s|", data.bbf_ctx.in_param);
-
-		if (data.trans_id == 0) {
-			// Internal transaction: need to abort the changes
-			transaction_abort(NULL, trans_id);
-			register_instance_refresh_timer(ctx, 100);
-		}
-
 		goto end;
 	}
 
@@ -729,13 +676,6 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		if (fault) {
 			ERR("Fault in fill pvlist set path |%s|", path);
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
-
-			if (data.trans_id == 0) {
-				// Internal transaction: need to abort the changes
-				transaction_abort(NULL, trans_id);
-				register_instance_refresh_timer(ctx, 100);
-			}
-
 			free_pv_list(&pv_list);
 			goto end;
 		}
@@ -747,16 +687,16 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 		free_pv_list(&pv_list);
 	}
 
-	if (data.trans_id == 0) {
-		// Internal transaction: need to commit the changes
-		transaction_commit(NULL, trans_id, true);
-		register_instance_refresh_timer(ctx, 100);
+end:
+	if ((data.bbf_ctx.dm_type == BBFDM_BOTH) && (is_micro_service == false)) {
+		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, false);
 	}
 
-end:
+	bbf_cleanup(&data.bbf_ctx);
+
 	ubus_send_reply(ctx, req, data.bb.head);
 	blob_buf_free(&data.bb);
-	bbf_cleanup(&data.bbf_ctx);
+
 	return 0;
 }
 
@@ -773,7 +713,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	struct blob_attr *tb[__DM_DEL_MAX];
 	LIST_HEAD(paths_list);
 	bbfdm_data_t data;
-	int trans_id = 0;
+	int fault = 0;
 
 	memset(&data, 0, sizeof(bbfdm_data_t));
 
@@ -814,121 +754,17 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	data.bbf_ctx.in_param = tb[DM_DEL_PATH] ? blobmsg_get_string(tb[DM_DEL_PATH]) : "";
 
-	// no need to process it further since transaction-id is not valid
-	if (data.trans_id && !is_transaction_valid(data.trans_id)) {
-		WARNING("Transaction not started yet");
-		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
-		goto end;
-	} else {
-		data.bbf_ctx.trans_id = data.trans_id;
+	fault = create_del_response(&data);
+
+	if ((data.bbf_ctx.dm_type == BBFDM_BOTH) && (is_micro_service == false)) {
+		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, true);
 	}
 
-	if (data.trans_id == 0) {
-		// Transaction-id is not defined so create an internal transaction
-		cancel_instance_refresh_timer(ctx);
-		trans_id = transaction_start(&data, "INT_DEL", 0);
-		if (trans_id == 0) {
-			WARNING("Failed to get the lock for the transaction");
-			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
-			goto end;
-		}
-	}
-
-	create_del_response(&data);
-
-	if (data.trans_id == 0) {
-		// Internal transaction: need to commit the changes
-		transaction_commit(NULL, trans_id, true);
-		register_instance_refresh_timer(ctx, 100);
-	}
-
-end:
-	ubus_send_reply(ctx, req, data.bb.head);
-	blob_buf_free(&data.bb);
 	bbf_cleanup(&data.bbf_ctx);
 	free_path_list(&paths_list);
-	return 0;
-}
-
-enum {
-	TRANS_CMD,
-	TRANS_TIMEOUT,
-	TRANS_RESTART,
-	TRANS_OPTIONAL,
-	__TRANS_MAX,
-};
-
-static const struct blobmsg_policy transaction_policy[] = {
-	[TRANS_CMD] = { .name = "cmd", .type = BLOBMSG_TYPE_STRING },
-	[TRANS_TIMEOUT] = { .name = "timeout", .type = BLOBMSG_TYPE_INT32 },
-	[TRANS_RESTART] = { .name = "restart_services", .type = BLOBMSG_TYPE_INT8 },
-	[TRANS_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
-};
-
-static int bbfdm_transaction_handler(struct ubus_context *ctx, struct ubus_object *obj,
-			    struct ubus_request_data *req, const char *method,
-			    struct blob_attr *msg)
-{
-	struct blob_attr *tb[__TRANS_MAX] = {NULL};
-	bbfdm_data_t data;
-
-	bool is_service_restart = true;
-	uint32_t max_timeout = 0;
-	char *trans_cmd = "status";
-	int ret;
-
-	memset(&data, 0, sizeof(bbfdm_data_t));
-
-	if (blobmsg_parse(transaction_policy, __TRANS_MAX, tb, blob_data(msg), blob_len(msg))) {
-		ERR("Failed to parse blob");
-		return UBUS_STATUS_UNKNOWN_ERROR;
-	}
-
-	if (!tb[TRANS_CMD])
-		return UBUS_STATUS_INVALID_ARGUMENT;
-
-	if (tb[TRANS_CMD])
-		trans_cmd = blobmsg_get_string(tb[TRANS_CMD]);
-
-	if (tb[TRANS_TIMEOUT])
-		max_timeout = blobmsg_get_u32(tb[TRANS_TIMEOUT]);
-
-	if (tb[TRANS_RESTART])
-		is_service_restart = blobmsg_get_bool(tb[TRANS_RESTART]);
-
-	fill_optional_data(&data, tb[TRANS_OPTIONAL]);
-
-	INFO("ubus method|%s|, name|%s|, cmd [%s]", method, obj->name, trans_cmd);
-
-	bbf_init(&data.bbf_ctx);
-	blob_buf_init(&data.bb, 0);
-
-	data.ctx = ctx;
-
-	if (is_str_eq(trans_cmd, "start")) {
-		ret = transaction_start(&data, "API", max_timeout);
-		if (ret) {
-			blobmsg_add_u8(&data.bb, "status", true);
-			blobmsg_add_u32(&data.bb, "transaction_id", ret);
-		} else {
-			blobmsg_add_u8(&data.bb, "status", false);
-			transaction_status(&data.bb);
-		}
-	} else if (is_str_eq(trans_cmd, "commit")) {
-		ret = transaction_commit(&data, data.trans_id, is_service_restart);
-		blobmsg_add_u8(&data.bb, "status", (ret == 0));
-	} else if (is_str_eq(trans_cmd, "abort")) {
-		ret = transaction_abort(&data, data.trans_id);
-		blobmsg_add_u8(&data.bb, "status", (ret == 0));
-	} else if (is_str_eq(trans_cmd, "status")) {
-		transaction_status(&data.bb);
-	} else {
-		WARNING("method(%s) not supported", method);
-	}
 
 	ubus_send_reply(ctx, req, data.bb.head);
 	blob_buf_free(&data.bb);
-	bbf_cleanup(&data.bbf_ctx);
 
 	return 0;
 }
@@ -1093,7 +929,6 @@ static struct ubus_method bbf_methods[] = {
 	UBUS_METHOD("operate", bbfdm_operate_handler, dm_operate_policy),
 	UBUS_METHOD("add", bbfdm_add_handler, dm_add_policy),
 	UBUS_METHOD("del", bbfdm_del_handler, dm_del_policy),
-	UBUS_METHOD("transaction", bbfdm_transaction_handler, transaction_policy),
 	UBUS_METHOD("service", bbfdm_service_handler, service_policy),
 	UBUS_METHOD("notify_event", bbfdm_notify_event, dm_notify_event_policy),
 };
@@ -1125,22 +960,14 @@ static void run_schema_updater(struct bbfdm_context *u)
 	}
 }
 
-static void broadcast_add_del_event(const char *method, struct list_head *inst, bool is_add)
+static void broadcast_add_del_event(struct ubus_context *ctx, const char *method, struct list_head *inst, bool is_add)
 {
-	struct ubus_context ctx;
 	struct blob_buf bb;
 	struct pathNode *ptr;
 	char method_name[40];
 	void *a;
-	int ret;
 
 	if (list_empty(inst)) {
-		return;
-	}
-
-	ret = ubus_connect_ctx(&ctx, NULL);
-	if (ret != UBUS_STATUS_OK) {
-		fprintf(stderr, "Failed to connect to ubus\n");
 		return;
 	}
 
@@ -1157,12 +984,11 @@ static void broadcast_add_del_event(const char *method, struct list_head *inst, 
 	snprintf(method_name, sizeof(method_name), "%s.%s", method, is_add ? BBF_ADD_EVENT : BBF_DEL_EVENT);
 
 	if (is_add)
-		ubus_send_event(&ctx, method_name, bb.head);
+		ubus_send_event(ctx, method_name, bb.head);
 	else
-		ubus_send_event(&ctx, method_name, bb.head);
+		ubus_send_event(ctx, method_name, bb.head);
 
 	blob_buf_free(&bb);
-	ubus_shutdown(&ctx);
 }
 
 static void update_instances_list(struct list_head *inst)
@@ -1172,7 +998,7 @@ static void update_instances_list(struct list_head *inst)
 			.in_param = ROOT_NODE,
 			.nextlevel = false,
 			.disable_mservice_browse = true,
-			.dm_type = BBFDM_USP
+			.dm_type = BBFDM_BOTH
 	};
 
 	bbf_init(&bbf_ctx);
@@ -1181,6 +1007,9 @@ static void update_instances_list(struct list_head *inst)
 	if (ret == 0) {
 		struct blob_attr *cur = NULL;
 		size_t rem = 0;
+
+		// Apply all bbfdm changes
+		dmuci_commit_bbfdm();
 
 		blobmsg_for_each_attr(cur, bbf_ctx.bb.head, rem) {
 			struct blob_attr *tb[1] = {0};
@@ -1201,26 +1030,6 @@ static void update_instances_list(struct list_head *inst)
 	bbf_cleanup(&bbf_ctx);
 }
 
-static void instance_fork_done(struct uloop_process *p, int ret)
-{
-	struct bbfdm_async_req *r = container_of(p, struct bbfdm_async_req, process);
-
-	if (r) {
-		INFO("Instance updater(%d) completed, starting a new instance timer", r->process.pid);
-		struct bbfdm_context *u = (struct bbfdm_context *)r->result;
-
-		if (u->config.refresh_time != 0) {
-			u->instance_timer.cb = periodic_instance_updater;
-			uloop_timeout_set(&u->instance_timer, u->config.refresh_time);
-		}
-		free_path_list(&u->old_instances);
-		async_req_free(r);
-	}
-	if (ret) {
-		WARNING("Instance updater cb failed %d", ret);
-	}
-}
-
 static void instance_compare_publish(struct bbfdm_context *daemon_ctx)
 {
 	struct pathNode *ptr;
@@ -1237,7 +1046,7 @@ static void instance_compare_publish(struct bbfdm_context *daemon_ctx)
 			add_path_list(ptr->path, &inst_list);
 		}
 	}
-	broadcast_add_del_event(method, &inst_list, false);
+	broadcast_add_del_event(&daemon_ctx->ubus_ctx, method, &inst_list, false);
 	free_path_list(&inst_list);
 
 	list_for_each_entry(ptr, new_inst, list) {
@@ -1245,63 +1054,8 @@ static void instance_compare_publish(struct bbfdm_context *daemon_ctx)
 			add_path_list(ptr->path, &inst_list);
 		}
 	}
-	broadcast_add_del_event(method, &inst_list, true);
+	broadcast_add_del_event(&daemon_ctx->ubus_ctx, method, &inst_list, true);
 	free_path_list(&inst_list);
-}
-
-static int fork_instance_checker(struct bbfdm_context *u)
-{
-	struct bbfdm_async_req *r = NULL;
-	pid_t child;
-
-	r = async_req_new();
-	if (r == NULL) {
-		ERR("Error allocating instance req");
-		if (u->config.refresh_time != 0) {
-			u->instance_timer.cb = periodic_instance_updater;
-			uloop_timeout_set(&u->instance_timer, u->config.refresh_time);
-		}
-		free_path_list(&u->old_instances);
-		goto err_out;
-	}
-	child = fork();
-	if (child == 0) {
-		char inst_ser[32] = {0};
-
-		snprintf(inst_ser, sizeof(inst_ser), "dm_%s_in", u->config.service_name);
-		INFO("{%s::fork} Instances checker entry", inst_ser);
-		prctl(PR_SET_NAME, inst_ser, NULL, NULL, NULL);
-		// child initialise signal to prevent segfaults
-		signal_init();
-		/* free fd's and memory inherited from parent */
-		uloop_done();
-		ubus_shutdown(&u->ubus_ctx);
-		async_req_free(r);
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
-
-		instance_compare_publish(u);
-		bbfdm_cleanup(u);
-		closelog();
-		INFO("{fork} Instances checker exit");
-		/* write result and exit */
-		exit(EXIT_SUCCESS);
-	}
-
-	// parent
-	INFO("# Creating instance checker process child %d", child);
-	r->result = u;
-	r->process.pid = child;
-	r->process.cb = instance_fork_done;
-	uloop_process_add(&r->process);
-	return 0;
-
-err_out:
-	if (r)
-		async_req_free(r);
-
-	return UBUS_STATUS_UNKNOWN_ERROR;
 }
 
 static void periodic_instance_updater(struct uloop_timeout *t)
@@ -1314,43 +1068,23 @@ static void periodic_instance_updater(struct uloop_timeout *t)
 		return;
 	}
 
-	if (u->config.refresh_time == 0) {
-		return; // periodic refresh disabled
-	}
-
-	if (is_transaction_running()) {
-		DEBUG("Transaction ongoing, schedule refresh timer after 1s");
-		u->instance_timer.cb = periodic_instance_updater;
-		uloop_timeout_set(&u->instance_timer, 1000);
-		return;
-	}
-
 	if (list_empty(&u->instances)) {
 		if (!list_empty(&u->old_instances)) {
 			list_splice_init(&u->old_instances, &u->instances);
 		} else {
 			update_instances_list(&u->instances);
-			DEBUG("Creating timer for instance update checker, init instances");
-			u->instance_timer.cb = periodic_instance_updater;
-			uloop_timeout_set(&u->instance_timer, u->config.refresh_time);
 			return;
 		}
 	}
 
 	free_path_list(&u->old_instances);
 	list_splice_init(&u->instances, &u->old_instances);
-	update_instances_list(&u->instances);
-	if (list_empty(&u->instances)) {
-		update_instances_list(&u->instances);
-		WARNING("Failed to get current instances, restart the timer");
-		u->instance_timer.cb = periodic_instance_updater;
-		uloop_timeout_set(&u->instance_timer, u->config.refresh_time);
-		return;
-	}
 
-	// fork a process and send it to compare, when process completes
-	// delete the old instances and add a new timer
-	fork_instance_checker(u);
+	update_instances_list(&u->instances);
+	if (!list_empty(&u->instances) && !list_empty(&u->old_instances)) {
+		INFO("Comparing instances ...");
+		instance_compare_publish(u);
+	}
 }
 
 static bool register_service(struct ubus_context *ctx)
@@ -1402,22 +1136,6 @@ static int _parse_daemon_config_options(bbfdm_config_t *config, json_object *dae
 		set_debug_level(config->log_level);
 	} else {
 		set_debug_level(BBFDM_DEFAULT_DEBUG_LEVEL);
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "config", "refresh_time");
-	if (DM_STRLEN(opt_val)) {
-		config->refresh_time = (unsigned int) strtoul(opt_val, NULL, 10) * 1000;
-	} else {
-		config->refresh_time = BBF_INSTANCES_UPDATE_TIMEOUT;
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "config", "transaction_timeout");
-	if (DM_STRLEN(opt_val)) {
-		config->transaction_timeout = (int) strtol(opt_val, NULL, 10);
-		configure_transaction_timeout(config->transaction_timeout);
-	} else {
-		config->transaction_timeout = 30;
-		configure_transaction_timeout(30*1000);
 	}
 
 	opt_val = dmjson_get_value(daemon_obj, 2, "config", "subprocess_level");
@@ -1672,7 +1390,6 @@ static void lookup_event_cb(struct ubus_context *ctx,
 void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
 {
 	struct bbfdm_context *u;
-	unsigned refresh_time = 0;
 
 	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
 	if (u == NULL) {
@@ -1680,16 +1397,10 @@ void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
 		return;
 	}
 
-	if (start_in < 0) {
-		refresh_time = u->config.refresh_time;
-	} else {
-		refresh_time = start_in;
-	}
-
-	if (u->config.refresh_time != 0) {
-		INFO("Register instance refresh timer in %d ms...", refresh_time);
+	if (start_in >= 0) {
+		INFO("Register instance refresh timer in %d ms...", start_in);
 		u->instance_timer.cb = periodic_instance_updater;
-		uloop_timeout_set(&u->instance_timer, refresh_time);
+		uloop_timeout_set(&u->instance_timer, start_in);
 	}
 }
 
@@ -1704,9 +1415,7 @@ void cancel_instance_refresh_timer(struct ubus_context *ctx)
 	}
 
 	DEBUG("Cancelling Instance refresh timer");
-	if (u->config.refresh_time != 0) {
-		uloop_timeout_cancel(&u->instance_timer);
-	}
+	uloop_timeout_cancel(&u->instance_timer);
 }
 
 static void bbf_config_change_cb(struct ubus_context *ctx, struct ubus_event_handler *ev,
@@ -1719,8 +1428,10 @@ static void bbf_config_change_cb(struct ubus_context *ctx, struct ubus_event_han
 	if (type && strcmp(type, "bbf.config.change") != 0)
 		return;
 
+	INFO("Config updated, Scheduling instance refresh timers");
+
 	cancel_instance_refresh_timer(ctx);
-	register_instance_refresh_timer(ctx, 100);
+	register_instance_refresh_timer(ctx, 0);
 }
 
 static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)

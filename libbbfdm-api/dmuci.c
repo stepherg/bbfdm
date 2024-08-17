@@ -19,50 +19,62 @@
 static struct uci_context *uci_ctx = NULL;
 static char *db_config = NULL;
 
-NEW_UCI_PATH(bbfdm, BBFDM_CONFIG, BBFDM_SAVEDIR)
-NEW_UCI_PATH(varstate, VARSTATE_CONFDIR, VARSTATE_SAVEDIR)
+NEW_UCI_PATH(bbfdm)
+NEW_UCI_PATH(varstate)
 
-int dmuci_init(void)
+static void bbfdm_uci_init_ctx(struct uci_context **uci_ctx, const char *confdir, const char *savedir)
 {
-	if (uci_ctx == NULL) {
-		uci_ctx = uci_alloc_context();
-		if (!uci_ctx)
-			return -1;
-		uci_set_confdir(uci_ctx, UCI_CONFIG_DIR);
+	*uci_ctx = uci_alloc_context();
+	if (!*uci_ctx) {
+		BBF_ERR("Failed to allocate memory for (%s) && (%s)!!!", confdir, savedir);
+		return;
 	}
 
-	return 0;
+	uci_set_confdir(*uci_ctx, confdir);
+	uci_set_savedir(*uci_ctx, savedir);
 }
 
-void dmuci_exit(void)
+void bbfdm_uci_init(struct dmctx *bbf_ctx)
 {
-	if (uci_ctx)
-		uci_free_context(uci_ctx);
-	uci_ctx = NULL;
-}
+	if (bbf_ctx->dm_type == BBFDM_CWMP) {
+		bbfdm_uci_init_ctx(&bbf_ctx->config_uci_ctx, "/etc/config/", "/tmp/bbfdm/.cwmp/config/");
+		bbfdm_uci_init_ctx(&bbf_ctx->dmmap_uci_ctx, "/etc/bbfdm/dmmap/", "/tmp/bbfdm/.cwmp/dmmap/");
+	} else if (bbf_ctx->dm_type == BBFDM_USP) {
+		bbfdm_uci_init_ctx(&bbf_ctx->config_uci_ctx, "/etc/config/", "/tmp/bbfdm/.usp/config/");
+		bbfdm_uci_init_ctx(&bbf_ctx->dmmap_uci_ctx, "/etc/bbfdm/dmmap/", "/tmp/bbfdm/.usp/dmmap/");
+	} else {
+		bbfdm_uci_init_ctx(&bbf_ctx->config_uci_ctx, "/etc/config/", "/tmp/bbfdm/.bbfdm/config/");
+		bbfdm_uci_init_ctx(&bbf_ctx->dmmap_uci_ctx, "/etc/bbfdm/dmmap/", "/tmp/bbfdm/.bbfdm/dmmap/");
+	}
 
-int dm_uci_init(void)
-{
-	dmuci_init();
+	bbfdm_uci_init_ctx(&bbf_ctx->varstate_uci_ctx, "/var/state/", "/tmp/bbfdm/.varstate/");
 
-	dmuci_init_varstate();
-
-	dmuci_init_bbfdm();
+	uci_ctx = bbf_ctx->config_uci_ctx;
+	uci_ctx_bbfdm = bbf_ctx->dmmap_uci_ctx;
+	uci_ctx_varstate = bbf_ctx->varstate_uci_ctx;
 
 	db_config = ETC_DB_CONFIG;
-
-	return 0;
 }
 
-int dm_uci_exit(void)
+void bbfdm_uci_exit(struct dmctx *bbf_ctx)
 {
-	dmuci_exit();
+	if (bbf_ctx->config_uci_ctx) {
+		uci_free_context(bbf_ctx->config_uci_ctx);
+		bbf_ctx->config_uci_ctx = NULL;
+		uci_ctx = NULL;
+	}
 
-	dmuci_exit_varstate();
+	if (bbf_ctx->dmmap_uci_ctx) {
+		uci_free_context(bbf_ctx->dmmap_uci_ctx);
+		bbf_ctx->dmmap_uci_ctx = NULL;
+		uci_ctx_bbfdm = NULL;
+	}
 
-	dmuci_exit_bbfdm();
-
-	return 0;
+	if (bbf_ctx->varstate_uci_ctx) {
+		uci_free_context(bbf_ctx->varstate_uci_ctx);
+		bbf_ctx->varstate_uci_ctx = NULL;
+		uci_ctx_varstate = NULL;
+	}
 }
 
 char *dmuci_list_to_string(struct uci_list *list, const char *delimitor)
@@ -99,30 +111,6 @@ static inline bool check_section_name(const char *str, bool name)
 			return false;
 	}
 	return true;
-}
-
-static void add_list_package_change(struct list_head *clist, char *package)
-{
-	struct package_change *pc = NULL;
-
-	list_for_each_entry(pc, clist, list) {
-		if (DM_STRCMP(pc->package, package) == 0)
-			return;
-	}
-	pc = calloc(1, sizeof(struct package_change));
-	list_add_tail(&pc->list, clist);
-	pc->package = strdup(package);
-}
-
-void free_all_list_package_change(struct list_head *clist)
-{
-	struct package_change *pc;
-	while (clist->next != clist) {
-		pc = list_entry(clist->next, struct package_change, list);
-		list_del(&pc->list);
-		free(pc->package);
-		free(pc);
-	}
 }
 
 /**** UCI LOOKUP ****/
@@ -461,34 +449,6 @@ int dmuci_revert(void)
 
 	for (p = configs; *p; p++)
 		dmuci_revert_package(*p);
-
-	free(configs);
-	return 0;
-}
-
-/**** UCI CHANGES PACKAGES *****/
-int dmuci_change_packages(struct list_head *clist)
-{
-	char **configs = NULL;
-	char **p;
-
-	if (uci_list_configs(uci_ctx, &configs) != UCI_OK)
-		return -1;
-
-	if (!configs)
-		return -1;
-
-	for (p = configs; *p; p++) {
-		struct uci_ptr ptr = {0};
-
-		if (uci_lookup_ptr(uci_ctx, &ptr, *p, true) != UCI_OK)
-			continue;
-
-		if (uci_list_empty(&ptr.p->delta))
-			continue;
-
-		add_list_package_change(clist, *p);
-	}
 
 	free(configs);
 	return 0;
