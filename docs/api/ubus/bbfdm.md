@@ -886,7 +886,7 @@ All items must be of the type: Unknown type ``.
 
 | Property | Type   | Required     |
 | -------- | ------ | ------------ |
-| `input`  | object | Optional     |
+| `input`  | array  | Optional     |
 | `name`   | string | **Required** |
 
 #### input
@@ -894,15 +894,11 @@ All items must be of the type: Unknown type ``.
 `input`
 
 - is optional
-- type: `object`
+- type: `array`
 
 ##### input Type
 
-`object` with following properties:
-
-| Property | Type | Required |
-| -------- | ---- | -------- |
-| None     | None | None     |
+Array type: `array`
 
 #### name
 
@@ -918,7 +914,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf notify_event {"name":"","input":{}}
+ubus call bbf notify_event {"name":"voluptate sit deserunt ut minim","input":[]}
 ```
 
 ### JSONRPC Example
@@ -928,7 +924,7 @@ ubus call bbf notify_event {"name":"","input":{}}
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": ["<SID>", "bbf", "notify_event", { "name": "", "input": {} }]
+  "params": ["<SID>", "bbf", "notify_event", { "name": "voluptate sit deserunt ut minim", "input": [] }]
 }
 ```
 

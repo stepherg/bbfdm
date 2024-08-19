@@ -690,7 +690,7 @@ static void bb_add_flags_arr(struct blob_buf *bb, uint32_t dm_flags)
 	blobmsg_close_array(bb, flags_arr);
 }
 
-void fill_blob_param(struct blob_buf *bb, char *path, char *data, char *type, uint32_t dm_flags)
+void fill_blob_param(struct blob_buf *bb, const char *path, const char *data, const char *type, uint32_t dm_flags)
 {
 	if (!bb || !path || !data || !type)
 		return;
@@ -705,7 +705,7 @@ void fill_blob_param(struct blob_buf *bb, char *path, char *data, char *type, ui
 	blobmsg_close_table(bb, table);
 }
 
-void fill_blob_event(struct blob_buf *bb, char *path, char *type, void *data)
+void fill_blob_event(struct blob_buf *bb, const char *path, const char *type, void *data)
 {
 	if (!bb || !path || !type)
 		return;
@@ -737,7 +737,7 @@ void fill_blob_event(struct blob_buf *bb, char *path, char *type, void *data)
 	blobmsg_close_table(bb, table);
 }
 
-void fill_blob_operate(struct blob_buf *bb, char *path, char *data, char *type, void *in_out)
+void fill_blob_operate(struct blob_buf *bb, const char *path, const char *data, const char *type, void *in_out)
 {
 	if (!bb || !path || !data || !type)
 		return;
@@ -2710,11 +2710,11 @@ static int mparam_event(DMPARAM_ARGS)
 	dmctx->stop = 1;
 
 	blobmsg_add_string(&dmctx->bb, "name", full_param);
-	void *table = blobmsg_open_table(&dmctx->bb, "input");
+	void *array = blobmsg_open_array(&dmctx->bb, "input");
 
 	fault = (leaf->setvalue)(full_param, dmctx, data, instance, (char *)j_input, EVENT_RUN);
 
-	blobmsg_close_table(&dmctx->bb, table);
+	blobmsg_close_array(&dmctx->bb, array);
 
 end:
 	json_object_put(j_input);

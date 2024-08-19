@@ -889,7 +889,7 @@ enum {
 
 static const struct blobmsg_policy dm_notify_event_policy[] = {
 	[BBF_NOTIFY_NAME] = { .name = "name", .type = BLOBMSG_TYPE_STRING },
-	[BBF_NOTIFY_PRAMS] = { .name = "input", .type = BLOBMSG_TYPE_TABLE },
+	[BBF_NOTIFY_PRAMS] = { .name = "input", .type = BLOBMSG_TYPE_ARRAY },
 };
 
 static int bbfdm_notify_event(struct ubus_context *ctx, struct ubus_object *obj,

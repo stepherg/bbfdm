@@ -21,7 +21,7 @@ else:
 
 ubus.listen(("bbfdm.event", callback))
 
-ubus.call("bbfdm", "notify_event", {"name":"Device.LocalAgent.TransferComplete!", "input":{"param1":"val1", "param2":"val2"}})
+ubus.call("bbfdm", "notify_event", {"name":"Device.LocalAgent.TransferComplete!", "input":[{"path":"Command","data":"Backup()","type":"xsd:string"},{"path":"CommandKey","data":"","type":"xsd:string"}]})
 
 ubus.loop()
 

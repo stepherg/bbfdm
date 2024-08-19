@@ -744,7 +744,7 @@
               "type": "string"
             },
             "input": {
-              "type": "object",
+              "type": "array",
               "properties": {}
             }
           }

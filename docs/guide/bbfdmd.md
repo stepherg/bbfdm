@@ -132,7 +132,7 @@ Following are the ubus methods exposed by `bbfdmd` main process:
         "add":{"path":"String","obj_path":"Table","optional":"Table"}
         "del":{"path":"String","paths":"Array","optional":"Table"}
         "service":{"cmd":"String","name":"String","parent_dm":"String","objects":"Array"}
-        "notify_event":{"name":"String","input":"Table"}
+        "notify_event":{"name":"String","input":"Array"}
 ```
 
 Each datamodel micro-service expose their own ubus object, which is slightly different from main `bbfdm` ubus object, following is an example of ubus methods exposed by datamodel micro-services.

@@ -32,9 +32,9 @@ char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_secti
 char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr);
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 
-void fill_blob_param(struct blob_buf *bb, char *path, char *data, char *type, uint32_t dm_flags);
-void fill_blob_event(struct blob_buf *bb, char *path, char *type, void *data);
-void fill_blob_operate(struct blob_buf *bb, char *path, char *data, char *type, void *in_out);
+void fill_blob_param(struct blob_buf *bb, const char *path, const char *data, const char *type, uint32_t dm_flags);
+void fill_blob_event(struct blob_buf *bb, const char *path, const char *type, void *data);
+void fill_blob_operate(struct blob_buf *bb, const char *path, const char *data, const char *type, void *in_out);
 
 int string_to_bool(char *v, bool *b);
 char *get_value_by_reference(struct dmctx *ctx, char *value);

@@ -386,33 +386,42 @@ static void send_transfer_complete_event(const char *command, const char *obj_pa
 {
 	char start_time[32] = {0};
 	char complete_time[32] = {0};
-	unsigned fault_code = 0;
+	struct blob_buf bb;
 
 	strftime(start_time, sizeof(start_time), "%Y-%m-%dT%H:%M:%SZ", gmtime(&start_t));
 	strftime(complete_time, sizeof(complete_time), "%Y-%m-%dT%H:%M:%SZ", gmtime(&complete_t));
 
-	if (DM_STRLEN(fault_string) != 0)
-		fault_code = USP_FAULT_GENERAL_FAILURE;
+	memset(&bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&bb, 0);
 
-	struct json_object *obj = json_object_new_object();
+	blobmsg_add_string(&bb, "name", "Device.LocalAgent.TransferComplete!");
+	void *arr = blobmsg_open_array(&bb, "input");
 
-	json_object_object_add(obj, "Command", json_object_new_string(command));
+	fill_blob_param(&bb, "Command", command, DMT_TYPE[DMT_STRING], 0);
 	if(commandKey)
-		json_object_object_add(obj, "CommandKey", json_object_new_string(commandKey));
+		fill_blob_param(&bb, "CommandKey", commandKey, DMT_TYPE[DMT_STRING], 0);
 	else
-		json_object_object_add(obj, "CommandKey", json_object_new_string(""));
-	json_object_object_add(obj, "Requestor", json_object_new_string(""));
-	json_object_object_add(obj, "TransferType", json_object_new_string(transfer_type));
-	json_object_object_add(obj, "Affected", json_object_new_string(obj_path));
-	json_object_object_add(obj, "TransferURL", json_object_new_string(transfer_url));
-	json_object_object_add(obj, "StartTime", json_object_new_string(start_time));
-	json_object_object_add(obj, "CompleteTime", json_object_new_string(complete_time));
-	json_object_object_add(obj, "FaultCode", json_object_new_uint64(fault_code));
-	json_object_object_add(obj, "FaultString", json_object_new_string(fault_string));
+		fill_blob_param(&bb, "CommandKey", "", DMT_TYPE[DMT_STRING], 0);
 
-	dmubus_call_set("bbfdm", "notify_event", UBUS_ARGS{{"name", "Device.LocalAgent.TransferComplete!", String}, {"input", json_object_to_json_string(obj), Table}}, 2);
+	fill_blob_param(&bb, "Requestor", "", DMT_TYPE[DMT_STRING], 0);
+	fill_blob_param(&bb, "TransferType", transfer_type, DMT_TYPE[DMT_STRING], 0);
+	fill_blob_param(&bb, "Affected", obj_path, DMT_TYPE[DMT_STRING], 0);
+	fill_blob_param(&bb, "TransferURL", transfer_url, DMT_TYPE[DMT_STRING], 0);
+	fill_blob_param(&bb, "StartTime", start_time, DMT_TYPE[DMT_STRING], 0);
+	fill_blob_param(&bb, "CompleteTime", complete_time, DMT_TYPE[DMT_STRING], 0);
 
-	json_object_put(obj);
+	if (DM_STRLEN(fault_string) == 0) {
+		fill_blob_param(&bb, "FaultCode", "0", DMT_TYPE[DMT_STRING], 0);
+	} else {
+		fill_blob_param(&bb, "FaultCode", "7000", DMT_TYPE[DMT_STRING], 0);
+	}
+
+	fill_blob_param(&bb, "FaultString", fault_string, DMT_TYPE[DMT_STRING], 0);
+	blobmsg_close_array(&bb, arr);
+
+	dmubus_call_blob_msg_set("bbfdm", "notify_event", &bb);
+
+	blob_buf_free(&bb);
 }
 
 const bool validate_file_system_size(const char *file_size)
