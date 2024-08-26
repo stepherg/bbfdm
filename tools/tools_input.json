@@ -74,7 +74,6 @@
       "version": "devel",
       "dm_files": [
         "urlfilter/files/etc/urlfilter/urlfilter.json",
-        "obuspa/files/etc/bbfdm/json/USPAgent.json",
         "icwmp/files/etc/bbfdm/json/CWMPManagementServer.json",
         "ponmngr/files/etc/ponmngr/xpon.json"
       ]
@@ -319,6 +318,14 @@
         "bbf_plugin/mcast_bbf.c",
         "bbf_plugin/x_iopsys_eu_igmp.c",
         "bbf_plugin/x_iopsys_eu_mld.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/obuspa.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/vendor/bbf_plugin/datamodel.c"
       ]
     },
     {
