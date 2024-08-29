@@ -324,8 +324,18 @@
       "repo": "https://dev.iopsys.eu/bbf/obuspa.git",
       "proto": "git",
       "version": "devel",
+      "extra_dependencies": [
+        "-I src/vendor",
+        "-DENABLE_MQTT",
+        "-DENABLE_COAP",
+        "-DENABLE_WEBSOCKETS",
+        "-DENABLE_UDS"
+      ],
       "dm_files": [
-        "src/vendor/bbf_plugin/datamodel.c"
+         "src/vendor/bbf_plugin/common.c",
+         "src/vendor/bbf_plugin/mqtt_dm.c",
+         "src/vendor/bbf_plugin/stomp_dm.c",
+         "src/vendor/bbf_plugin/uspagent_dm.c"
       ]
     },
     {
