@@ -1,8 +1,6 @@
 #ifndef ADD_DEL_H
 #define ADD_DEL_H
 
-#include "bbfdmd.h"
-
 enum {
 	DM_ADD_PATH,
 	DM_ADD_OBJ_PATH,

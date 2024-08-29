@@ -12,7 +12,6 @@
 #include "common.h"
 #include "events.h"
 #include "get_helper.h"
-#include "bbfdmd.h"
 #include <libubus.h>
 
 static char *get_events_dm_path(struct list_head *ev_list, const char *event)
@@ -38,7 +37,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 
 	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
 	if (u == NULL) {
-		ERR("Failed to get the bbfdm context");
+		BBF_ERR("Failed to get the bbfdm context");
 		return;
 	}
 
@@ -81,7 +80,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	snprintf(method_name, sizeof(method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
 
 	ubus_send_event(ctx, method_name, bbf_ctx.bb.head);
-	INFO("Event[%s], for [%s] sent", method_name, dm_path);
+	BBF_INFO("Event[%s], for [%s] sent", method_name, dm_path);
 
 	register_instance_refresh_timer(ctx, 2000);
 
@@ -99,7 +98,7 @@ static void add_ubus_event_handler(struct ubus_event_handler *ev, const char *ev
 	node = (struct ev_handler_node *) malloc(sizeof(struct ev_handler_node));
 
 	if (!node) {
-		ERR("Out of memory!");
+		BBF_ERR("Out of memory!");
 		return;
 	}
 
@@ -150,7 +149,7 @@ int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
 
 			struct ubus_event_handler *ev = (struct ubus_event_handler *)malloc(sizeof(struct ubus_event_handler));
 			if (!ev) {
-				ERR("Out of memory!");
+				BBF_ERR("Out of memory!");
 				err = -1;
 				goto end;
 			}
@@ -159,7 +158,7 @@ int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
 			ev->cb = bbfdm_event_handler;
 
 			if (0 != ubus_register_event_handler(ctx, ev, event_name)) {
-				ERR("Failed to register: %s", event_name);
+				BBF_ERR("Failed to register: %s", event_name);
 				err = -1;
 				goto end;
 			}

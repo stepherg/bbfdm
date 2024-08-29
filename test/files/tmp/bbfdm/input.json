@@ -1,7 +1,7 @@
 {
 	"daemon": {
 		"config": {
-			"loglevel": "4",
+			"loglevel": "3",
 			"subprocess_level": "2"
 		},
 		"input": {

@@ -264,7 +264,7 @@ int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_p
 		goto end;
 	}
 
-	if (is_micro_service == true) { // It's a micro-service instance
+	if (dm_is_micro_service() == true) { // It's a micro-service instance
 
 		if (out_len - len < strlen(base_path) + strlen(key_name) + strlen(key_value) + 9) { // 9 = 'path[key_name==\"key_value\"].'
 			BBF_ERR("Buffer overflow detected. The output buffer is not large enough to hold the additional data!!!");
@@ -395,7 +395,7 @@ int bbfdm_operate_reference_linker(struct dmctx *ctx, char *reference_path, char
 	if (DM_STRLEN(*reference_value) != 0)
 		return 0;
 
-	if (is_micro_service == true) // It's a micro-service instance
+	if (dm_is_micro_service() == true) // It's a micro-service instance
 		*reference_value = bbfdm_get_reference_value(reference_path);
 
 	return 0;

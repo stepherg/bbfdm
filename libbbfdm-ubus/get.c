@@ -9,6 +9,7 @@
  * See LICENSE file for license related information.
  */
 
+#include "common.h"
 #include "get.h"
 #include "get_helper.h"
 #include "pretty_print.h"
@@ -101,7 +102,7 @@ static bool get_next_param(char *qPath, size_t *pos, char *param)
 					break;
 			}
 			if (qPath[++i] != '.') {
-				ERR("No dot after search parameters");
+				BBF_ERR("No dot after search parameters");
 				return false;
 			}
 			// skip the dot
@@ -141,7 +142,7 @@ static bool is_present_in_datamodel(struct dmctx *bbf_ctx, char *path)
 	size_t plen = 0, rem = 0;
 	bool found = false;
 
-	DEBUG("path(%s)", path);
+	BBF_DEBUG("path(%s)", path);
 	plen = DM_STRLEN(path);
 
 	blobmsg_for_each_attr(cur, bbf_ctx->bb.head, rem) {
@@ -255,7 +256,7 @@ static void handle_special_escape_sequence(char *value, char *buff, size_t buff_
 	}
 	buff[j] = '\0';
 
-	DEBUG("value(%s), new_value(%s)", value, buff);
+	BBF_DEBUG("value(%s), new_value(%s)", value, buff);
 }
 
 static bool handle_string(char *v1, char *v2, enum operation op, int *fault)
@@ -542,7 +543,7 @@ static bool check_values(char *val_type, char *val1, char *val2, enum operation 
 {
 	bool result = false;
 
-	DEBUG("type(%s), val1(%s), Val2(%s), Oper(%d)", val_type, val1, val2, oper);
+	BBF_DEBUG("type(%s), val1(%s), Val2(%s), Oper(%d)", val_type, val1, val2, oper);
 	switch (get_dm_type(val_type)) {
 	case DMT_STRING:
 		result = handle_string(val1, val2, oper, fault);
@@ -648,7 +649,7 @@ static int solve_all_filters(struct dmctx *bbf_ctx, char *bPath, char *param, st
 	LIST_HEAD(pv_local);
 	LIST_HEAD(plist_local);
 
-	INFO("## Basepath(%s), param(%s)", bPath, param);
+	BBF_INFO("## Basepath(%s), param(%s)", bPath, param);
 
 	// Use shorter list for rest of the operation
 	blen = DM_STRLEN(bPath);
@@ -682,7 +683,7 @@ static int solve_all_filters(struct dmctx *bbf_ctx, char *bPath, char *param, st
 		if (ret != 0)
 			break;
 
-		INFO("Filter Para(%s), oper(%d), Val(%s)", para, oper, value);
+		BBF_INFO("Filter Para(%s), oper(%d), Val(%s)", para, oper, value);
 
 		if (match(para, "[*]+", 0, NULL))
 			ret = USP_FAULT_INVALID_TYPE;
@@ -743,7 +744,7 @@ static int resolve_path(struct dmctx *bbf_ctx, char *qPath, size_t pos, struct l
 	if (list_empty(resolved_plist))
 		return 0;
 
-	INFO("Entry Len :: %d & qPath :: %s", start, qPath);
+	BBF_INFO("Entry Len :: %zu & qPath :: %s", start, qPath);
 
 	if (strchr(qPath+start, '.') != NULL)
 		non_leaf = true;
@@ -752,7 +753,7 @@ static int resolve_path(struct dmctx *bbf_ctx, char *qPath, size_t pos, struct l
 		return USP_FAULT_INVALID_PATH_SYNTAX;
 
 	plen = DM_STRLEN(param);
-	DEBUG("PARAM ::(%s) pos ::(%d)", param, start);
+	BBF_DEBUG("PARAM ::(%s) pos ::(%zu)", param, start);
 
 	fault = 0;
 	list_for_each_entry(ptr, resolved_plist, list) {
@@ -804,7 +805,7 @@ int get_resolved_paths(struct dmctx *bbf_ctx, char *qpath, struct list_head *res
 		size_t pos = 0;
 
 		pos = strlen(bpath);
-		INFO("Base Path :: |%s| Pos :: |%d|", bpath, pos);
+		BBF_INFO("Base Path :: |%s| Pos :: |%zu|", bpath, pos);
 
 		bbf_ctx->in_param = bpath;
 
@@ -815,12 +816,12 @@ int get_resolved_paths(struct dmctx *bbf_ctx, char *qpath, struct list_head *res
 			fault = resolve_path(bbf_ctx, qpath, pos, resolved_paths);
 		}
 	} else {
-		INFO("Not able to get base path");
+		BBF_INFO("Not able to get base path");
 		fault = bbf_fault_map(bbf_ctx, FAULT_9005);
 	}
 
 	if (fault)
-		WARNING("qpath(%s), fault(%d)", qpath, fault);
+		BBF_WARNING("qpath(%s), fault(%d)", qpath, fault);
 
 	return fault;
 }
@@ -852,7 +853,7 @@ void bbfdm_get_value(bbfdm_data_t *data, void *output)
 			data->bbf_ctx.in_param = pn->path;
 			fill_err_code_table(data, fault);
 		} else {
-			INFO("Preparing result for(%s)", pn->path);
+			BBF_INFO("Preparing result for(%s)", pn->path);
 
 			data->bbf_ctx.in_param = pn->path;
 
@@ -871,7 +872,7 @@ void bbfdm_get_value(bbfdm_data_t *data, void *output)
 		blobmsg_close_array(&data->bb, array);
 
 	if (!validate_msglen(data))
-		ERR("IPC failed for path(%s)", data->bbf_ctx.in_param);
+		BBF_ERR("IPC failed for path(%s)", data->bbf_ctx.in_param);
 
 	if (output)
 		memcpy(output, data->bb.head, blob_pad_len(data->bb.head));

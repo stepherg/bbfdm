@@ -19,7 +19,7 @@ static int bbfdm_add_object(bbfdm_data_t *data)
 {
 	int fault = 0;
 
-	INFO("Req to add object |%s|", data->bbf_ctx.in_param);
+	BBF_INFO("Req to add object |%s|", data->bbf_ctx.in_param);
 
 	void *array = blobmsg_open_array(&data->bb, "results");
 
@@ -50,7 +50,7 @@ static int bbfdm_del_object(bbfdm_data_t *data)
 
 		data->bbf_ctx.in_param = pn->path;
 
-		INFO("Req to delete object |%s|", data->bbf_ctx.in_param);
+		BBF_INFO("Req to delete object |%s|", data->bbf_ctx.in_param);
 
 		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_DEL_OBJECT);
 		if (fault) {

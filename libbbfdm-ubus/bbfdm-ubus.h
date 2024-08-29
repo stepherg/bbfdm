@@ -1,13 +1,20 @@
-#ifndef BBFDMD_H
-#define BBFDMD_H
+#ifndef BBFDM_UBUS_H
+#define BBFDM_UBUS_H
 
 #include <libubus.h>
 #include <libubox/blobmsg.h>
 #include <libubox/list.h>
 
-#include "dmbbf.h"
+#include <libbbfdm-api/dmbbf.h>
 
+#define BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH "/etc/bbfdm/micro_services"
 #define MAX_OBJS 5
+
+#ifndef DAEMON_JSON_INPUT
+#define BBFDM_JSON_INPUT "/tmp/bbfdm/input.json"
+#else
+#define BBFDM_JSON_INPUT DAEMON_JSON_INPUT
+#endif
 
 struct bbfdm_async_req {
 	struct ubus_context *ctx;
@@ -20,7 +27,6 @@ struct bbfdm_async_req {
 typedef struct bbfdm_config {
 	int proto; // Protocol identifier, Possible values: { '0'<both>, '1'<cwmp>, '2'<usp> }
 	int subprocess_level; // Subprocess level
-	uint8_t log_level; // Log level, Possible values: { '1', '2', '3', '4' }
 	uint32_t refresh_time; // Refresh time
 	char service_name[16]; // Service name for micro-service identification
 	char in_type[32]; // Input type, Possible values: { 'JSON', 'DotSo' }
@@ -66,4 +72,11 @@ typedef struct bbfdm_data {
 void register_instance_refresh_timer(struct ubus_context *ctx, int start_sec);
 void cancel_instance_refresh_timer(struct ubus_context *ctx);
 
-#endif /* BBFDMD_H */
+int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx);
+int bbfdm_ubus_regiter_free(struct bbfdm_context *bbfdm_ctx);
+
+void bbfdm_ubus_set_service_name(struct bbfdm_context *bbfdm_ctx, const char *srv_name);
+void bbfdm_ubus_set_log_level(int log_level);
+void bbfdm_ubus_load_data_model(DM_MAP_OBJ *DynamicObj);
+
+#endif /* BBFDM_UBUS_H */

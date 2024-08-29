@@ -33,9 +33,6 @@ extern struct dm_permession_s DMASYNC;
 
 extern char *DMT_TYPE[];
 
-extern unsigned char gLogLevel;
-extern bool is_micro_service;
-
 #ifndef BBF_MAX_OBJECT_INSTANCES
 #define BBF_MAX_OBJECT_INSTANCES (255)
 #endif

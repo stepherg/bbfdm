@@ -1,9 +1,6 @@
 #ifndef SET_H
 #define SET_H
 
-#include "bbfdmd.h"
-#include "common.h"
-
 enum {
 	DM_SET_PATH,
 	DM_SET_VALUE,

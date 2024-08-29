@@ -15,8 +15,7 @@
 #include <libubox/list.h>
 
 #include "dmcommon.h"
-
-#include "bbfdmd.h"
+#include "bbfdm-ubus.h"
 
 #define STRINGIFY(x) #x
 #define TO_STR(x) STRINGIFY(x)
@@ -43,33 +42,17 @@
 #define GLOB_EXPR "[=><]+"
 
 extern DMOBJ *DEAMON_DM_ROOT_OBJ;
+extern DM_MAP_OBJ *INTERNAL_ROOT_TREE;
 
 bool is_str_eq(const char *s1, const char *s2);
 bool is_node_instance(char *path);
 int count_delim(const char *path);
 
-void set_debug_level(unsigned char level);
-void print_error(const char *format, ...);
-void print_warning(const char *format, ...);
-void print_info(const char *format, ...);
-void print_debug(const char *format, ...);
 bool get_boolean_string(char *value);
 bool validate_msglen(bbfdm_data_t *data);
 
 int get_dm_type(char *dm_type);
 int get_proto_type(const char *proto);
-
-#define DEBUG(fmt, args...) \
-	print_debug("[%s:%d]"fmt, __func__, __LINE__, ##args)
-
-#define INFO(fmt, args...) \
-	print_info(fmt, ##args)
-
-#define ERR(fmt, args...) \
-	print_error("[%s:%d] " fmt, __func__, __LINE__, ##args)
-
-#define WARNING(fmt, args...) \
-	print_warning("[%s:%d] " fmt, __func__, __LINE__, ##args)
 
 int get_resolved_paths(struct dmctx *bbf_ctx, char *qpath, struct list_head *resolved_paths);
 void strncpyt(char *dst, const char *src, size_t n);

@@ -9,8 +9,8 @@
  * See LICENSE file for license related information.
  */
 
-#include "set.h"
 #include "get_helper.h"
+#include "set.h"
 
 #include <libubus.h>
 
@@ -116,7 +116,7 @@ blob__table:
 			snprintf(value, MAX_DM_VALUE, "%"PRIu64"", blobmsg_get_u64(attr));
 			break;
 		default:
-			INFO("Unhandled set request type|%x|", blob_id(attr));
+			BBF_INFO("Unhandled set request type|%x|", blob_id(attr));
 			return USP_FAULT_INVALID_ARGUMENT;
 		}
 

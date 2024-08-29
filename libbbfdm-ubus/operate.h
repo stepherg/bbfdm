@@ -1,9 +1,6 @@
 #ifndef OPERATE_H
 #define OPERATE_H
 
-#include "bbfdmd.h"
-#include "common.h"
-
 enum {
 	DM_OPERATE_COMMAND,
 	DM_OPERATE_COMMAND_KEY,

@@ -12,61 +12,6 @@
 #include "common.h"
 #include "get_helper.h"
 
-// Logging utilities
-void set_debug_level(unsigned char level)
-{
-	gLogLevel = level;
-}
-
-void print_error(const char *format, ...)
-{
-	va_list arglist;
-
-	if (gLogLevel < 1)
-		return;
-
-	va_start(arglist, format);
-	vsyslog(LOG_ERR, format, arglist);
-	va_end(arglist);
-}
-
-void print_warning(const char *format, ...)
-{
-	va_list arglist;
-
-	if (gLogLevel < 2)
-		return;
-
-	va_start(arglist, format);
-	vsyslog(LOG_WARNING, format, arglist);
-	va_end(arglist);
-}
-
-void print_info(const char *format, ...)
-{
-	va_list arglist;
-
-	if (gLogLevel < 3)
-		return;
-
-	va_start(arglist, format);
-	vsyslog(LOG_INFO, format, arglist);
-	va_end(arglist);
-}
-
-void print_debug(const char *format, ...)
-{
-	va_list arglist;
-
-	if (gLogLevel < 4)
-		return;
-
-	va_start(arglist, format);
-	vsyslog(LOG_DEBUG, format, arglist);
-	va_end(arglist);
-}
-
-
 bool is_str_eq(const char *s1, const char *s2)
 {
 	if (strcmp(s1, s2) == 0)
@@ -95,7 +40,7 @@ bool is_node_instance(char *path)
 	bool ret = false;
 	char *rb = NULL;
 
-	DEBUG("entry |%s|", path);
+	BBF_DEBUG("entry |%s|", path);
 	if (!path)
 		return false;
 
@@ -138,7 +83,7 @@ bool validate_msglen(bbfdm_data_t *data)
 	size_t data_len = blob_pad_len(data->bbf_ctx.bb.head);
 
 	if (data_len >= DEF_IPC_DATA_LEN) {
-		ERR("Blob exceed max len(%zd), data len(%zd)", DEF_IPC_DATA_LEN, data_len);
+		BBF_ERR("Blob exceed max len(%d), data len(%zd)", DEF_IPC_DATA_LEN, data_len);
 		blob_buf_free(&data->bbf_ctx.bb);
 		blob_buf_init(&data->bbf_ctx.bb, 0);
 		fill_err_code_table(data, FAULT_9002);

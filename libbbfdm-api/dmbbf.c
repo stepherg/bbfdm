@@ -18,11 +18,9 @@
 #include "dmbbf.h"
 
 #define MAX_DM_PATH (1024)
-#define DEFAULT_LOG_LEVEL (2)
 #define SEPARATOR_LIST_VALUES ";"
 
-unsigned char gLogLevel = DEFAULT_LOG_LEVEL;
-bool is_micro_service = false;
+static bool is_micro_service = false;
 
 char *DMT_TYPE[] = {
 	[DMT_STRING] = "xsd:string",
@@ -42,6 +40,16 @@ struct dm_permession_s DMREAD = {"0", NULL};
 struct dm_permession_s DMWRITE = {"1", NULL};
 struct dm_permession_s DMSYNC = {"sync", NULL};
 struct dm_permession_s DMASYNC = {"async", NULL};
+
+bool dm_is_micro_service(void)
+{
+	return is_micro_service;
+}
+
+void dm_set_micro_service(void)
+{
+	is_micro_service = true;
+}
 
 static int dm_browse(struct dmctx *dmctx, DMNODE *parent_node, DMOBJ *entryobj, void *data, char *instance);
 
@@ -819,7 +827,7 @@ static int is64digit(char c)
 
 char *get_value_by_reference(struct dmctx *ctx, char *value)
 {
-	if (is_micro_service == true) // It's a micro-service instance
+	if (dm_is_micro_service() == true) // It's a micro-service instance
 		return value;
 
 	char *pch = NULL, *spch = NULL;

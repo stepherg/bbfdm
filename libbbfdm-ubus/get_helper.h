@@ -1,7 +1,6 @@
 #ifndef GET_HELPER_H
 #define GET_HELPER_H
 
-#include "bbfdmd.h"
 #include "common.h"
 
 #include <libubus.h>

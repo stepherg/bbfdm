@@ -19,6 +19,7 @@
 #include "pretty_print.h"
 
 DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
+DM_MAP_OBJ *INTERNAL_ROOT_TREE = NULL;
 
 static jmp_buf gs_jump_location;
 static bool gs_jump_called_by_bbf = false;
@@ -29,7 +30,7 @@ void handle_pending_signal(int sig)
 		siglongjmp(gs_jump_location, 1);
 	}
 
-	ERR("Exception [%d] not cause by bbf dm, exit with error", sig);
+	BBF_ERR("Exception [%d] not cause by bbf dm, exit with error", sig);
 	exit(1);
 }
 
@@ -44,10 +45,10 @@ int bbfdm_cmd_exec(struct dmctx *bbf_ctx, int cmd)
 		gs_jump_called_by_bbf = true;
 		fault = bbf_entry_method(bbf_ctx, cmd);
 	} else {
-		ERR("PID [%ld]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
+		BBF_ERR("PID [%d]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
 		fault = USP_FAULT_INTERNAL_ERROR;
-		if (is_micro_service) {
-			ERR("Micro-service PID [%ld]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
+		if (dm_is_micro_service()) {
+			BBF_ERR("Micro-service PID [%d]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
 			exit(-1);
 		}
 	}
@@ -55,7 +56,7 @@ int bbfdm_cmd_exec(struct dmctx *bbf_ctx, int cmd)
 	gs_jump_called_by_bbf = false;
 
 	if (fault)
-		WARNING("Fault [%d => %d => %s]", fault, cmd, bbf_ctx->in_param);
+		BBF_WARNING("Fault [%d => %d => %s]", fault, cmd, bbf_ctx->in_param);
 
 	return fault;
 }
@@ -104,7 +105,7 @@ void add_pv_list(char *para, char *val, char *type, struct list_head *pv_list)
 	node = (struct pvNode *) malloc(sizeof(*node));
 
 	if (!node) {
-		ERR("Out of memory!");
+		BBF_ERR("Out of memory!");
 		return;
 	}
 
@@ -138,7 +139,7 @@ void add_path_list(char *param, struct list_head *plist)
 	node = (struct pathNode *)calloc(1, sizeof(*node));
 
 	if (!node) {
-		ERR("Out of memory!");
+		BBF_ERR("Out of memory!");
 		return;
 	}
 

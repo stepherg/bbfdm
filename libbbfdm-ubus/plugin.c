@@ -62,33 +62,38 @@ static void fill_dotso_micro_service_out_args(bbfdm_config_t *config, DMOBJ *ent
 int load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
 {
 	if (!lib_handle || !file_path || !strlen(file_path) || !main_entry) {
-		ERR("Input validation failed\n");
-		return -1;
-	}
-
-	void *handle = dlopen(file_path, RTLD_NOW|RTLD_LOCAL);
-	if (!handle) {
-		ERR("Plugin failed [%s]\n", dlerror());
+		BBF_ERR("Input validation failed\n");
 		return -1;
 	}
 
 	dm_dynamic_initmem(&plugin_mem);
-
-	*lib_handle = handle;
-
-	//Dynamic Object
 	DM_MAP_OBJ *dynamic_obj = NULL;
-	*(void **) (&dynamic_obj) = dlsym(handle, "tDynamicObj");
+
+	if (strcmp(file_path, "internal_dm.so") == 0) {
+		dynamic_obj = INTERNAL_ROOT_TREE;
+	} else {
+		void *handle = dlopen(file_path, RTLD_NOW|RTLD_LOCAL);
+		if (!handle) {
+			BBF_ERR("Plugin failed [%s]\n", dlerror());
+			return -1;
+		}
+
+		*lib_handle = handle;
+
+		//Dynamic Object
+		*(void **) (&dynamic_obj) = dlsym(handle, "tDynamicObj");
+	}
+
 	if (dynamic_obj) {
 		uint8_t obj_num = find_number_of_objects(dynamic_obj);
 		if (obj_num == 0) {
-			ERR("No Object defined in the required DotSo Plugin\n");
+			BBF_ERR("No Object defined in the required DotSo Plugin\n");
 			return -1;
 		}
 
 		DMOBJ *dm_entryobj = (DMOBJ *)dm_dynamic_calloc(&plugin_mem, obj_num + 1, sizeof(DMOBJ));
 		if (dm_entryobj == NULL) {
-			ERR("No Memory exists\n");
+			BBF_ERR("No Memory exists\n");
 			return -1;
 		}
 
@@ -99,12 +104,12 @@ int load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *
 			unsigned int len = strlen(node_obj);
 
 			if (strncmp(node_obj, ROOT_NODE, strlen(ROOT_NODE)) != 0 || node_obj[len-1] != '.') {
-				ERR("Object (%s) not valid\n", node_obj);
+				BBF_ERR("Object (%s) not valid\n", node_obj);
 				return -1;
 			}
 
 			// Fill out arguments if it is running as micro-service
-			if (is_micro_service == true)
+			if (dm_is_micro_service() == true)
 				fill_dotso_micro_service_out_args(config, dynamic_obj[i].root_obj, node_obj, &out_obj_idx);
 
 			node_obj[len-1] = 0;
@@ -118,7 +123,7 @@ int load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *
 
 		*main_entry = dm_entryobj;
 	} else {
-		ERR("Main entry not available");
+		BBF_ERR("Main entry not available");
 		return -1;
 	}
 
@@ -159,13 +164,13 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 	uint8_t idx = 0;
 
 	if (!file_path || !strlen(file_path) || !main_entry) {
-		ERR("Entry validation failed ...");
+		BBF_ERR("Entry validation failed ...");
 		return -1;
 	}
 
 	json_object *json_obj = json_object_from_file(file_path);
 	if (!json_obj) {
-		ERR("Failed to parse json file (%s)", file_path);
+		BBF_ERR("Failed to parse json file (%s)", file_path);
 		return -1;
 	}
 
@@ -181,12 +186,12 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 
 		replace_str(key, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, node_obj, sizeof(node_obj));
 		if (strlen(node_obj) == 0) {
-			ERR("ERROR: Can't get the node object\n");
+			BBF_ERR("ERROR: Can't get the node object\n");
 			return -1;
 		}
 
 		if (strncmp(node_obj, ROOT_NODE, strlen(ROOT_NODE)) != 0 || node_obj[strlen(node_obj) - 1] != '.') {
-			ERR("ERROR: Object (%s) not valid\n", node_obj);
+			BBF_ERR("ERROR: Object (%s) not valid\n", node_obj);
 			return -1;
 		}
 
@@ -195,19 +200,19 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 
 		int obj_prefix_len = strlen(obj_prefix);
 		if (obj_prefix_len == 0) {
-			ERR("ERROR: Obj prefix is empty for (%s) Object\n", node_obj);
+			BBF_ERR("ERROR: Obj prefix is empty for (%s) Object\n", node_obj);
 			return -1;
 		}
 
 		char obj_name[64] = {0};
 		json_plugin_find_current_obj(node_obj, obj_name, sizeof(obj_name));
 		if (strlen(obj_name) == 0) {
-			ERR("ERROR: Obj name is empty for (%s) Object\n", node_obj);
+			BBF_ERR("ERROR: Obj name is empty for (%s) Object\n", node_obj);
 			return -1;
 		}
 
 		// Fill out arguments if it is running as micro-service
-		if (is_micro_service == true)
+		if (dm_is_micro_service() == true)
 			fill_json_micro_service_out_args(config, obj_prefix, obj_name, idx, ms_name, sizeof(ms_name));
 
 		// Remove '.' from object prefix
@@ -216,7 +221,7 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 
 		dm_entryobj = (DMOBJ *)dm_dynamic_realloc(json_memhead, dm_entryobj, (idx + 2) * sizeof(DMOBJ));
 		if (dm_entryobj == NULL) {
-			ERR("ERROR: No Memory exists\n");
+			BBF_ERR("ERROR: No Memory exists\n");
 			return -1;
 		}
 

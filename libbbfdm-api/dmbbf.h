@@ -27,6 +27,9 @@
 #include "dmmem.h"
 #include "dmapi.h"
 
+bool dm_is_micro_service(void);
+void dm_set_micro_service(void);
+
 int get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int (*browseinstobj)(struct dmctx *ctx, struct dmnode *node, void *data, char *instance));
 char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt);
 char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr);
@@ -68,27 +71,19 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
 
 // Macros for different log levels
 #define BBF_ERR(MESSAGE, ...) do { \
-    if (gLogLevel >= 1) { \
-        syslog(LOG_ERR, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-    } \
+	syslog(LOG_ERR, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
 } while(0)
 
 #define BBF_WARNING(MESSAGE, ...) do { \
-    if (gLogLevel >= 2) { \
-        syslog(LOG_WARNING, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-    } \
+	syslog(LOG_WARNING, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
 } while(0)
 
 #define BBF_INFO(MESSAGE, ...) do { \
-    if (gLogLevel >= 3) { \
-        syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-    } \
+	syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
 } while(0)
 
 #define BBF_DEBUG(MESSAGE, ...) do { \
-    if (gLogLevel >= 4) { \
-        syslog(LOG_DEBUG, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-    } \
+	syslog(LOG_DEBUG, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
 } while(0)
 
 

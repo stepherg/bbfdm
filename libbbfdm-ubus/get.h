@@ -1,9 +1,6 @@
 #ifndef GET_H
 #define GET_H
 
-#include "bbfdmd.h"
-#include "common.h"
-
 enum {
 	DM_GET_PATH,
 	DM_GET_PATHS,

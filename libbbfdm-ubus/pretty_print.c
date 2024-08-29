@@ -21,7 +21,7 @@ struct resultstack {
 
 static bool is_search_by_reference(char *path)
 {
-	DEBUG("Entry |%s|", path);
+	BBF_DEBUG("Entry |%s|", path);
 	if (match(path, "[+]+", 0, NULL)) {
 		size_t pindex = 0, bindex = 0;
 		char *last_plus, *last_bracket;
@@ -46,7 +46,7 @@ static bool is_search_by_reference(char *path)
 static bool is_res_required(char *str, size_t *start, size_t *len)
 {
 
-	DEBUG("Entry |%s|", str);
+	BBF_DEBUG("Entry |%s|", str);
 	if (match(str, GLOB_CHAR, 0, NULL)) {
 		size_t s_len, b_len, p_len;
 		char *star, *b_start, *b_end, *plus;
@@ -106,7 +106,7 @@ static size_t get_glob_len(char *path)
 	char temp_name[MAX_DM_KEY_LEN] = {'\0'};
 	char *end = NULL;
 
-	DEBUG("Entry");
+	BBF_DEBUG("Entry");
 	if (is_res_required(path, &m_index, &m_len)) {
 		if (m_index <= MAX_DM_KEY_LEN)
 			snprintf(temp_name, m_index, "%s", path);
@@ -190,7 +190,7 @@ static void add_data_blob(struct blob_buf *bb, char *param, char *value, char *t
 	if (param == NULL || value == NULL || type == NULL)
 		return;
 
-	DEBUG("# Adding BLOB (%s)::(%s)", param, value);
+	BBF_DEBUG("# Adding BLOB (%s)::(%s)", param, value);
 	switch (get_dm_type(type)) {
 	case DMT_UNINT:
 		blobmsg_add_u64(bb, param, (uint32_t)strtoul(value, NULL, 10));
@@ -230,7 +230,7 @@ static void free_result_list(struct list_head *head)
 static void free_result_node(struct resultstack *rnode)
 {
 	if (rnode) {
-		DEBUG("## ResStack DEL(%s)", rnode->key);
+		BBF_DEBUG("## ResStack DEL(%s)", rnode->key);
 		free(rnode->key);
 		list_del(&rnode->list);
 		free(rnode);
@@ -243,13 +243,13 @@ static void add_result_node(struct list_head *rlist, char *key, char *cookie)
 
 	rnode = (struct resultstack *) malloc(sizeof(*rnode));
 	if (!rnode) {
-		ERR("Out of memory!");
+		BBF_ERR("Out of memory!");
 		return;
 	}
 
 	rnode->key = (key) ? strdup(key) : strdup("");
 	rnode->cookie = cookie;
-	DEBUG("## ResSTACK ADD (%s) ##", rnode->key);
+	BBF_DEBUG("## ResSTACK ADD (%s) ##", rnode->key);
 
 	INIT_LIST_HEAD(&rnode->list);
 	list_add(&rnode->list, rlist);
@@ -362,7 +362,7 @@ void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 		pv = &sortedPV[i];
 		ptr = pv->param;
 		if (list_empty(&result_stack)) {
-			DEBUG("stack empty Processing (%s)", ptr);
+			BBF_DEBUG("stack empty Processing (%s)", ptr);
 			add_paths_to_stack(bb, pv->param, 0, pv, &result_stack);
 		} else {
 			bool is_done = false;
@@ -373,12 +373,12 @@ void prepare_result_blob(struct blob_buf *bb, struct list_head *pv_list)
 					len = DM_STRLEN(rnode->key);
 					ptr = ptr + len;
 
-					DEBUG("GROUP (%s), ptr(%s), len(%d)", pv->param, ptr, len);
+					BBF_DEBUG("GROUP (%s), ptr(%s), len(%zu)", pv->param, ptr, len);
 					add_paths_to_stack(bb, pv->param, len, pv, &result_stack);
 					is_done = true;
 				} else {
 					// Get the latest entry before deleting it
-					DEBUG("DIFF GROUP pv(%s), param(%s)", pv->param, ptr);
+					BBF_DEBUG("DIFF GROUP pv(%s), param(%s)", pv->param, ptr);
 					blobmsg_close_table(bb, rnode->cookie);
 					free_result_node(rnode);
 					if (list_empty(&result_stack)) {
@@ -432,12 +432,12 @@ void prepare_pretty_result(uint8_t maxdepth, struct blob_buf *bb, struct dmctx *
 
 	LIST_HEAD(pv_local);
 
-	DEBUG("################### DATA to PROCESS ##################");
+	BBF_DEBUG("################### DATA to PROCESS ##################");
 	list_for_each_entry(iter, rslvd, list) {
-		DEBUG("## %s ##", iter->path);
+		BBF_DEBUG("## %s ##", iter->path);
 		resulting(maxdepth, iter->path, bbf_ctx, &pv_local);
 	}
-	DEBUG("######################################################");
+	BBF_DEBUG("######################################################");
 
 	prepare_result_blob(bb, &pv_local);
 

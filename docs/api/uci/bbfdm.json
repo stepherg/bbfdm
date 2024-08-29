@@ -30,8 +30,8 @@
           "name": "loglevel",
           "type": "integer",
           "required": "no",
-          "default": "1",
-          "description": "Internal loglevel for debugging {0: No Logs; 1: Errors only; 2: Errors and warnings; 3: Error, warning and info; 4: Everything}"
+          "default": "3",
+          "description": "Internal loglevel for debugging {0: No Logs; 1: Alert; 2: Critical; 3: Error; 4: Warning; 5: Notice; 6: Info; 7: Debug}"
         },
         {
           "name": "subprocess_level",
