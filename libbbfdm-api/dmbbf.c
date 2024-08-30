@@ -1495,6 +1495,8 @@ static void __get_ubus_name(struct ubus_request *req, int type, struct blob_attr
 		if (tb[1]) {
 			dmctx->faultcode = blobmsg_get_u32(tb[1]);
 			return;
+		} else {
+			dmctx->faultcode = 0;
 		}
 
 		dmctx->findparam = 1;
@@ -1532,9 +1534,15 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 	blobmsg_add_u8(&blob, "first_level", dmctx->nextlevel);
 	prepare_optional_table(dmctx, &blob);
 
-	ubus_call_blob_msg(ubus_name, "schema", &blob, 5000, __get_ubus_name, dmctx);
+	int res = ubus_call_blob_msg(ubus_name, "schema", &blob, 5000, __get_ubus_name, dmctx);
 
 	blob_buf_free(&blob);
+
+	if (res)
+		return FAULT_9005;
+
+	if (dmctx->faultcode)
+		return dmctx->faultcode;
 
 	return 0;
 }
