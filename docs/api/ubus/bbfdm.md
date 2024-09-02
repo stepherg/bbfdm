@@ -109,7 +109,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf add {"path":"voluptate veniam","obj_path":{}}
+ubus call bbf add {"path":"anim consequat","obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -119,7 +119,7 @@ ubus call bbf add {"path":"voluptate veniam","obj_path":{}}
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": ["<SID>", "bbf", "add", { "path": "voluptate veniam", "obj_path": {} }]
+  "params": ["<SID>", "bbf", "add", { "path": "anim consequat", "obj_path": {} }]
 }
 ```
 
@@ -183,16 +183,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{
-  "results": [
-    {
-      "path": "laborum",
-      "data": "occaecat tempor fugiat sit",
-      "fault": 9015,
-      "fault_msg": "cillum deserunt incididunt "
-    }
-  ]
-}
+{ "results": [{ "path": "dolor in sunt eiusmod", "data": "sunt pariatur", "fault": 8972, "fault_msg": "ea culpa" }] }
 ```
 
 ## del
@@ -293,7 +284,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf del {"path":"elit sit Ut magna","paths":["dolor irure"]}
+ubus call bbf del {"path":"eu venia","paths":["adipisicing ad dolor do"]}
 ```
 
 ### JSONRPC Example
@@ -303,7 +294,7 @@ ubus call bbf del {"path":"elit sit Ut magna","paths":["dolor irure"]}
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": ["<SID>", "bbf", "del", { "path": "elit sit Ut magna", "paths": ["dolor irure"] }]
+  "params": ["<SID>", "bbf", "del", { "path": "eu venia", "paths": ["adipisicing ad dolor do"] }]
 }
 ```
 
@@ -370,10 +361,10 @@ All items must be of the type: Unknown type ``.
 {
   "results": [
     {
-      "path": "fugiat consequat dolor culpa",
-      "data": "Lorem et veniam laboris nulla",
-      "fault": 8956,
-      "fault_msg": "dolor"
+      "path": "incididunt laborum Duis",
+      "data": "nostrud aliquip velit",
+      "fault": 7729,
+      "fault_msg": "culpa nisi adipisicing dolore eiusmod"
     }
   ]
 }
@@ -555,7 +546,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf get {"path":"amet elit occaecat mag","paths":["in nisi"],"maxdepth":54340400,"optional":{"format":"pretty","proto":"both"}}
+ubus call bbf get {"path":"veniam sunt","paths":["nisi ad et veniam"],"maxdepth":-3902100,"optional":{"format":"raw","proto":"both"}}
 ```
 
 ### JSONRPC Example
@@ -570,10 +561,10 @@ ubus call bbf get {"path":"amet elit occaecat mag","paths":["in nisi"],"maxdepth
     "bbf",
     "get",
     {
-      "path": "amet elit occaecat mag",
-      "paths": ["in nisi"],
-      "maxdepth": 54340400,
-      "optional": { "format": "pretty", "proto": "both" }
+      "path": "veniam sunt",
+      "paths": ["nisi ad et veniam"],
+      "maxdepth": -3902100,
+      "optional": { "format": "raw", "proto": "both" }
     }
   ]
 }
@@ -644,13 +635,7 @@ All items must be of the type: Unknown type ``.
 ```json
 {
   "results": [
-    {
-      "path": "do laborum culpa ad",
-      "data": "anim minim sint pariatur",
-      "type": "xsd:object",
-      "fault": 8594,
-      "fault_msg": "con"
-    }
+    { "path": "anim consectetur", "data": "dolore d", "type": "xsd:command", "fault": 8024, "fault_msg": "quis minim" }
   ]
 }
 ```
@@ -782,7 +767,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf instances {"path":"in Lor","first_level":true,"optional":{"proto":"both"}}
+ubus call bbf instances {"path":"veniam mollit occaecat cillum","first_level":true,"optional":{"proto":"cwmp"}}
 ```
 
 ### JSONRPC Example
@@ -792,7 +777,12 @@ ubus call bbf instances {"path":"in Lor","first_level":true,"optional":{"proto":
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": ["<SID>", "bbf", "instances", { "path": "in Lor", "first_level": true, "optional": { "proto": "both" } }]
+  "params": [
+    "<SID>",
+    "bbf",
+    "instances",
+    { "path": "veniam mollit occaecat cillum", "first_level": true, "optional": { "proto": "cwmp" } }
+  ]
 }
 ```
 
@@ -853,7 +843,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "in eiusmod dolore mollit", "fault": 8737, "fault_msg": "eu dolore ipsum" }] }
+{ "results": [{ "path": "labore occaecat a", "fault": 9010, "fault_msg": "Lorem" }] }
 ```
 
 ## notify_event
@@ -914,7 +904,7 @@ Array type: `array`
 ### Ubus CLI Example
 
 ```
-ubus call bbf notify_event {"name":"voluptate sit deserunt ut minim","input":[]}
+ubus call bbf notify_event {"name":"eu laboris anim","input":[]}
 ```
 
 ### JSONRPC Example
@@ -924,7 +914,7 @@ ubus call bbf notify_event {"name":"voluptate sit deserunt ut minim","input":[]}
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": ["<SID>", "bbf", "notify_event", { "name": "voluptate sit deserunt ut minim", "input": [] }]
+  "params": ["<SID>", "bbf", "notify_event", { "name": "eu laboris anim", "input": [] }]
 }
 ```
 
@@ -959,6 +949,10 @@ Unknown type ``.
     "boolean_t": {
       "type": "string",
       "enum": ["0", "1"]
+    },
+    "datatype_t": {
+      "type": "string",
+      "enum": ["int", "unsignedInt", "long", "unsignedLong", "string", "boolean", "dateTime", "base64", "hexBinary"]
     },
     "operate_path_t": {
       "description": "Datamodel object schema path",
@@ -1026,7 +1020,7 @@ Unknown type ``.
       "enum": ["raw", "pretty"]
     }
   },
-  "out": "{\"definitions\":{\"path_t\":{\"description\":\"Complete object element path as per TR181\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.1.\",\"Device.WiFi.\"]},\"schema_path_t\":{\"description\":\"Datamodel object schema path\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.Bridging.Bridge.{i}.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.{i}.SSID\"]},\"boolean_t\":{\"type\":\"string\",\"enum\":[\"0\",\"1\"]},\"operate_path_t\":{\"description\":\"Datamodel object schema path\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.IP.Diagnostics.IPPing()\",\"Device.DHCPv4.Client.{i}.Renew()\",\"Device.FactoryReset()\"]},\"query_path_t\":{\"description\":\"DM object path with search queries\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.1.BSSID\",\"Device.WiFi.SSID.*.BSSID\",\"Device.WiFi.\"]},\"instance_t\":{\"description\":\"Multi object instances\",\"type\":\"string\",\"minLength\":6,\"maxLength\":256},\"proto_t\":{\"type\":\"string\",\"default\":\"both\",\"enum\":[\"usp\",\"cwmp\",\"both\"]},\"type_t\":{\"type\":\"string\",\"enum\":[\"xsd:string\",\"xsd:unsignedInt\",\"xsd:int\",\"xsd:unsignedLong\",\"xsd:long\",\"xsd:boolean\",\"xsd:dateTime\",\"xsd:hexBinary\",\"xsd:object\",\"xsd:command\",\"xsd:event\"]},\"fault_t\":{\"type\":\"integer\",\"minimum\":7000,\"maximum\":9050},\"trans_type_t\":{\"type\":\"string\",\"enum\":[\"start\",\"commit\",\"abort\",\"status\"]},\"srv_type_t\":{\"type\":\"string\",\"enum\":[\"register\",\"list\"]},\"format_t\":{\"type\":\"string\",\"default\":\"pretty\",\"enum\":[\"raw\",\"pretty\"]}}}",
+  "out": "{\"definitions\":{\"path_t\":{\"description\":\"Complete object element path as per TR181\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.1.\",\"Device.WiFi.\"]},\"schema_path_t\":{\"description\":\"Datamodel object schema path\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.Bridging.Bridge.{i}.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.{i}.SSID\"]},\"boolean_t\":{\"type\":\"string\",\"enum\":[\"0\",\"1\"]},\"datatype_t\":{\"type\":\"string\",\"enum\":[\"int\",\"unsignedInt\",\"long\",\"unsignedLong\",\"string\",\"boolean\",\"dateTime\",\"base64\",\"hexBinary\"]},\"operate_path_t\":{\"description\":\"Datamodel object schema path\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.IP.Diagnostics.IPPing()\",\"Device.DHCPv4.Client.{i}.Renew()\",\"Device.FactoryReset()\"]},\"query_path_t\":{\"description\":\"DM object path with search queries\",\"type\":\"string\",\"minLength\":6,\"maxLength\":1024,\"examples\":[\"Device.\",\"Device.DeviceInfo.Manufacturer\",\"Device.WiFi.SSID.1.BSSID\",\"Device.WiFi.SSID.*.BSSID\",\"Device.WiFi.\"]},\"instance_t\":{\"description\":\"Multi object instances\",\"type\":\"string\",\"minLength\":6,\"maxLength\":256},\"proto_t\":{\"type\":\"string\",\"default\":\"both\",\"enum\":[\"usp\",\"cwmp\",\"both\"]},\"type_t\":{\"type\":\"string\",\"enum\":[\"xsd:string\",\"xsd:unsignedInt\",\"xsd:int\",\"xsd:unsignedLong\",\"xsd:long\",\"xsd:boolean\",\"xsd:dateTime\",\"xsd:hexBinary\",\"xsd:object\",\"xsd:command\",\"xsd:event\"]},\"fault_t\":{\"type\":\"integer\",\"minimum\":7000,\"maximum\":9050},\"trans_type_t\":{\"type\":\"string\",\"enum\":[\"start\",\"commit\",\"abort\",\"status\"]},\"srv_type_t\":{\"type\":\"string\",\"enum\":[\"register\",\"list\"]},\"format_t\":{\"type\":\"string\",\"default\":\"pretty\",\"enum\":[\"raw\",\"pretty\"]}}}",
   "simpletype": "complex"
 }
 ```
@@ -1051,6 +1045,10 @@ Unknown type ``.
       "examples": ["Device.Bridging.Bridge.{i}.", "Device.DeviceInfo.Manufacturer", "Device.WiFi.SSID.{i}.SSID"]
     },
     "boolean_t": { "type": "string", "enum": ["0", "1"] },
+    "datatype_t": {
+      "type": "string",
+      "enum": ["int", "unsignedInt", "long", "unsignedLong", "string", "boolean", "dateTime", "base64", "hexBinary"]
+    },
     "operate_path_t": {
       "description": "Datamodel object schema path",
       "type": "string",
@@ -1260,7 +1258,7 @@ The value of this property **must** be equal to one of the [known values below](
 ### Ubus CLI Example
 
 ```
-ubus call bbf operate {"command":"minim tempor dolor ut","command_key":"cillum elit","input":{},"optional":{"format":"raw","proto":"both"}}
+ubus call bbf operate {"command":"velit magna laboris aliquip culpa","command_key":"voluptate ad cupidatat","input":{},"optional":{"format":"pretty","proto":"usp"}}
 ```
 
 ### JSONRPC Example
@@ -1275,10 +1273,10 @@ ubus call bbf operate {"command":"minim tempor dolor ut","command_key":"cillum e
     "bbf",
     "operate",
     {
-      "command": "minim tempor dolor ut",
-      "command_key": "cillum elit",
+      "command": "velit magna laboris aliquip culpa",
+      "command_key": "voluptate ad cupidatat",
       "input": {},
-      "optional": { "format": "raw", "proto": "both" }
+      "optional": { "format": "pretty", "proto": "usp" }
     }
   ]
 }
@@ -1366,11 +1364,11 @@ All items must be of the type: Unknown type ``.
 {
   "results": [
     {
-      "path": "sit dolor dolore Lorem eiusmod",
-      "data": "0",
-      "fault": 8955,
-      "fault_msg": "elit occaecat tempor",
-      "output": [{ "path": "in qui cillum", "data": "0", "type": "xsd:int" }]
+      "path": "commodo dolor laboris",
+      "data": "1",
+      "fault": 7192,
+      "fault_msg": "non Lorem",
+      "output": [{ "path": "fugiat in qui", "data": "0", "type": "xsd:string" }]
     }
   ]
 }
@@ -1572,7 +1570,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf schema {"path":"velit aliquip","paths":["volupta"],"first_level":true,"commands":false,"events":true,"params":true,"optional":{"proto":"cwmp"}}
+ubus call bbf schema {"path":"qui dolor nisi","paths":["veniam in dolor deserunt"],"first_level":true,"commands":true,"events":false,"params":false,"optional":{"proto":"cwmp"}}
 ```
 
 ### JSONRPC Example
@@ -1587,12 +1585,12 @@ ubus call bbf schema {"path":"velit aliquip","paths":["volupta"],"first_level":t
     "bbf",
     "schema",
     {
-      "path": "velit aliquip",
-      "paths": ["volupta"],
+      "path": "qui dolor nisi",
+      "paths": ["veniam in dolor deserunt"],
       "first_level": true,
-      "commands": false,
-      "events": true,
-      "params": true,
+      "commands": true,
+      "events": false,
+      "params": false,
       "optional": { "proto": "cwmp" }
     }
   ]
@@ -1703,13 +1701,13 @@ All items must be of the type: Unknown type ``.
 {
   "results": [
     {
-      "path": "aliquip nisi ven",
-      "data": "0",
-      "type": "xsd:object",
-      "fault": 8719,
-      "fault_msg": "mollit",
-      "input": [{ "path": "tempor Ut consectetu", "data": "1", "type": "xsd:long" }],
-      "output": [{ "path": "velit ipsum e", "data": "1", "type": "xsd:dateTime" }]
+      "path": "pariatur ",
+      "data": "1",
+      "type": "xsd:boolean",
+      "fault": 7493,
+      "fault_msg": "mollit ",
+      "input": [{ "path": "aliquip", "data": "1", "type": "xsd:int" }],
+      "output": [{ "path": "elit est dolor do", "data": "1", "type": "xsd:int" }]
     }
   ]
 }
@@ -1812,7 +1810,7 @@ Object path where the micro-service object will be added
 ### Ubus CLI Example
 
 ```
-ubus call bbf service {"cmd":"register","name":"sit dolore et qui in","parent_dm":"reprehenderit pariatur Excepteur","object":"enim non ex in"}
+ubus call bbf service {"cmd":"list","name":"ex fugiat","parent_dm":"esse ipsum dolore Ut et","object":"sed amet Duis"}
 ```
 
 ### JSONRPC Example
@@ -1826,12 +1824,7 @@ ubus call bbf service {"cmd":"register","name":"sit dolore et qui in","parent_dm
     "<SID>",
     "bbf",
     "service",
-    {
-      "cmd": "register",
-      "name": "sit dolore et qui in",
-      "parent_dm": "reprehenderit pariatur Excepteur",
-      "object": "enim non ex in"
-    }
+    { "cmd": "list", "name": "ex fugiat", "parent_dm": "esse ipsum dolore Ut et", "object": "sed amet Duis" }
   ]
 }
 ```
@@ -1877,7 +1870,7 @@ ubus call bbf service {"cmd":"register","name":"sit dolore et qui in","parent_dm
 ### Output Example
 
 ```json
-{ "status": false, "error": "magna nostrud Lorem" }
+{ "status": true, "error": "eu aliq" }
 ```
 
 ## set
@@ -1912,9 +1905,77 @@ Set values of datamodel object element
 
 | Property   | Type   | Required     |
 | ---------- | ------ | ------------ |
+| `datatype` | string | Optional     |
 | `obj_path` | object | Optional     |
 | `path`     | string | **Required** |
 | `value`    | string | **Required** |
+
+#### datatype
+
+datatype of the object element provided in path
+
+`datatype`
+
+- is optional
+- type: reference
+
+##### datatype Type
+
+`string`
+
+The value of this property **must** be equal to one of the [known values below](#set-known-values).
+
+##### datatype Known Values
+
+| Value        |
+| ------------ |
+| int          |
+| unsignedInt  |
+| long         |
+| unsignedLong |
+| string       |
+| boolean      |
+| dateTime     |
+| base64       |
+| hexBinary    |
+
+##### datatype Examples
+
+```json
+{ "path": "Device.WiFi.SSID.1.SSID", "value": "test_ssid", "datatype": "string" }
+```
+
+```json
+{ "path": "Device.WiFi.SSID.2.Enable", "value": "true", "datatype": "boolean" }
+```
+
+```json
+{ "path": "Device.DHCPv4.Relay.Forwarding.1.ClientID", "value": "0103060C", "datatype": "hexBinary" }
+```
+
+```json
+{ "path": "Device.DHCPv4.Server.Pool.1.LeaseTime", "value": "120", "datatype": "int" }
+```
+
+```json
+{ "path": "Device.DHCPv4.Relay.Forwarding.1.Order", "value": "1", "datatype": "unsignedInt" }
+```
+
+```json
+{ "path": "Device.QoS.Queue.1.ShapingRate", "value": "1002", "datatype": "long" }
+```
+
+```json
+{ "path": "Device.IP.Diagnostics.UploadDiagnostics.TestFileLength", "value": "1002", "datatype": "unsignedLong" }
+```
+
+```json
+{ "path": "Device.USPAgent.ControllerTrust.Challenge.1.Value", "value": "01Z3A6YC", "datatype": "base64" }
+```
+
+```json
+{ "path": "Device.ManagementServer.ScheduleReboot", "value": "2024-08-23T23:59:59Z", "datatype": "dateTime" }
+```
 
 #### obj_path
 
@@ -2011,7 +2072,7 @@ value of the object element provided in path, path should contains valid writabl
 ### Ubus CLI Example
 
 ```
-ubus call bbf set {"path":"aliqua","value":"ullamco eu adipisicing tempor","obj_path":{}}
+ubus call bbf set {"path":"occaecat veniam consequa","value":"et Excepteur occaecat fugiat","datatype":"dateTime","obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -2021,7 +2082,17 @@ ubus call bbf set {"path":"aliqua","value":"ullamco eu adipisicing tempor","obj_
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": ["<SID>", "bbf", "set", { "path": "aliqua", "value": "ullamco eu adipisicing tempor", "obj_path": {} }]
+  "params": [
+    "<SID>",
+    "bbf",
+    "set",
+    {
+      "path": "occaecat veniam consequa",
+      "value": "et Excepteur occaecat fugiat",
+      "datatype": "dateTime",
+      "obj_path": {}
+    }
+  ]
 }
 ```
 
@@ -2085,5 +2156,5 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "ea sed Ut aute", "data": "0", "fault": 7846, "fault_msg": "magna veniam eu fugiat id" }] }
+{ "results": [{ "path": "cillum Ut laborum proident", "data": "0", "fault": 7277, "fault_msg": "dolore ut aliquip" }] }
 ```

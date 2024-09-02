@@ -30,6 +30,20 @@
         "1"
       ]
     },
+    "datatype_t": {
+      "type": "string",
+      "enum": [
+        "int",
+        "unsignedInt",
+        "long",
+        "unsignedLong",
+        "string",
+        "boolean",
+        "dateTime",
+        "base64",
+        "hexBinary"
+      ]
+    },
     "operate_path_t": {
       "description": "Datamodel object schema path",
       "type": "string",
@@ -537,6 +551,21 @@
                 "{\"path\":\"Device.WiFi.SSID.1.SSID\", \"value\":\"test_ssid\"}",
                 "{\"path\":\"Device.WiFi.SSID.2.Enable\", \"value\":\"true\"}",
                 "{\"path\":\"Device.WiFi.SSID.1.Enable\", \"value\":\"0\"}"
+              ]
+            },
+            "datatype": {
+              "description": "datatype of the object element provided in path",
+              "$ref": "#/definitions/datatype_t",
+              "examples": [
+                "{\"path\":\"Device.WiFi.SSID.1.SSID\", \"value\":\"test_ssid\", \"datatype\":\"string\"}",
+                "{\"path\":\"Device.WiFi.SSID.2.Enable\", \"value\":\"true\", \"datatype\":\"boolean\"}",
+                "{\"path\":\"Device.DHCPv4.Relay.Forwarding.1.ClientID\", \"value\":\"0103060C\", \"datatype\":\"hexBinary\"}",
+                "{\"path\":\"Device.DHCPv4.Server.Pool.1.LeaseTime\", \"value\":\"120\", \"datatype\":\"int\"}",
+                "{\"path\":\"Device.DHCPv4.Relay.Forwarding.1.Order\", \"value\":\"1\", \"datatype\":\"unsignedInt\"}",
+                "{\"path\":\"Device.QoS.Queue.1.ShapingRate\", \"value\":\"1002\", \"datatype\":\"long\"}",
+                "{\"path\":\"Device.IP.Diagnostics.UploadDiagnostics.TestFileLength\", \"value\":\"1002\", \"datatype\":\"unsignedLong\"}",
+                "{\"path\":\"Device.USPAgent.ControllerTrust.Challenge.1.Value\", \"value\":\"01Z3A6YC\", \"datatype\":\"base64\"}",
+                "{\"path\":\"Device.ManagementServer.ScheduleReboot\", \"value\":\"2024-08-23T23:59:59Z\", \"datatype\":\"dateTime\"}"
               ]
             },
             "obj_path": {

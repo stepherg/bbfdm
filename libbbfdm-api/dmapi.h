@@ -181,6 +181,7 @@ struct dmctx {
 	int setaction;
 	char *in_param;
 	char *in_value;
+	char *in_type;
 	char *addobj_instance;
 	char *linker;
 	char *linker_param;
@@ -361,6 +362,7 @@ enum dmt_type_enum {
 	DMT_BASE64,
 	DMT_COMMAND,
 	DMT_EVENT,
+	__DMT_INVALID
 };
 
 enum bbfdm_type_enum {

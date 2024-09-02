@@ -25,6 +25,7 @@ int bbfdm_set_value(bbfdm_data_t *data)
 	list_for_each_entry(pv, data->plist, list) {
 		data->bbf_ctx.in_param = pv->param;
 		data->bbf_ctx.in_value = pv->val;
+		data->bbf_ctx.in_type = pv->type;
 
 		fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_SET_VALUE);
 		if (fault) {
@@ -42,7 +43,7 @@ int bbfdm_set_value(bbfdm_data_t *data)
 	return fault;
 }
 
-static int set_resolved_paths(bbfdm_data_t *data, char *path, char *value, struct list_head *pv_list)
+static int set_resolved_paths(bbfdm_data_t *data, char *path, char *value, char *type, struct list_head *pv_list)
 {
 	int fault = 0;
 
@@ -58,7 +59,7 @@ static int set_resolved_paths(bbfdm_data_t *data, char *path, char *value, struc
 		struct pathNode *p;
 
 		list_for_each_entry(p, &resolved_paths, list) {
-			add_pv_list(p->path, value, NULL, pv_list);
+			add_pv_list(p->path, value, type, pv_list);
 		}
 	}
 
@@ -68,7 +69,7 @@ static int set_resolved_paths(bbfdm_data_t *data, char *path, char *value, struc
 	return fault;
 }
 
-int fill_pvlist_set(bbfdm_data_t *data, char *param_name, char *param_value, struct blob_attr *blob_table, struct list_head *pv_list)
+int fill_pvlist_set(bbfdm_data_t *data, char *param_name, char *param_value, char *type, struct blob_attr *blob_table, struct list_head *pv_list)
 {
 	struct blob_attr *attr;
 	struct blobmsg_hdr *hdr;
@@ -85,7 +86,7 @@ int fill_pvlist_set(bbfdm_data_t *data, char *param_name, char *param_value, str
 	if (param_name[plen - 1] == '.')
 		return USP_FAULT_INVALID_PATH;
 
-	fault = set_resolved_paths(data, param_name, param_value, pv_list);
+	fault = set_resolved_paths(data, param_name, param_value, type, pv_list);
 	if (fault)
 		return fault;
 
@@ -121,7 +122,7 @@ blob__table:
 		}
 
 		snprintf(path, MAX_DM_PATH, "%s%s", param_name, (char *)hdr->name);
-		fault = set_resolved_paths(data, path, value, pv_list);
+		fault = set_resolved_paths(data, path, value, NULL, pv_list);
 		if (fault)
 			return fault;
 	}

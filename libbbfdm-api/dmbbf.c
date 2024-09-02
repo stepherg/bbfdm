@@ -1430,9 +1430,10 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 			UBUS_ARGS{
 						{"path", dmctx->in_param, String},
 						{"value", param_value, String},
+						{"datatype", dmctx->in_type ? dmctx->in_type : "", String},
 						{"optional", json_object_to_json_string(in_args), Table}
 			},
-			3, &res);
+			4, &res);
 	json_object_put(in_args);
 
 	if (!res)
@@ -2341,6 +2342,44 @@ static int mobj_set_value(DMOBJECT_ARGS)
 	return FAULT_9005;
 }
 
+static int get_datatype(char *type)
+{
+	if (DM_STRLEN(type) == 0)
+		return __DMT_INVALID;
+
+	if (strcmp(type, "int") == 0)
+		return DMT_INT;
+
+	if (strcmp(type, "long") == 0)
+		return DMT_LONG;
+
+	if (strcmp(type, "unsignedInt") == 0)
+		return DMT_UNINT;
+
+	if (strcmp(type, "unsignedLong") == 0)
+		return DMT_UNLONG;
+
+	if (strcmp(type, "decimal") == 0)
+		return DMT_STRING;
+
+	if (strcmp(type, "hexBinary") == 0)
+		return DMT_HEXBIN;
+
+	if (strcmp(type, "dateTime") == 0)
+		return DMT_TIME;
+
+	if (strcmp(type, "boolean") == 0)
+		return DMT_BOOL;
+
+	if (strcmp(type, "base64") == 0)
+		return DMT_BASE64;
+
+	if (strcmp(type, "string") == 0)
+		return DMT_STRING;
+
+	return __DMT_INVALID;
+}
+
 static int mparam_set_value(DMPARAM_ARGS)
 {
 	if (node->is_ubus_service) {
@@ -2363,6 +2402,15 @@ static int mparam_set_value(DMPARAM_ARGS)
 
 		if (perm[0] == '0' || !leaf->setvalue)
 			return FAULT_9008;
+
+		// If type is not defined then bypass this check
+		if (DM_STRLEN(dmctx->in_type) != 0) {
+			int type = get_datatype(dmctx->in_type);
+
+			if (type != leaf->type) {
+				return FAULT_9006;
+			}
+		}
 
 		(leaf->getvalue)(refparam, dmctx, data, instance, &value);
 

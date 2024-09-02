@@ -463,6 +463,7 @@ static int bbfdm_instances_handler(struct ubus_context *ctx, struct ubus_object 
 static const struct blobmsg_policy dm_set_policy[] = {
 	[DM_SET_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
 	[DM_SET_VALUE] = { .name = "value", .type = BLOBMSG_TYPE_STRING },
+	[DM_SET_TYPE] = { .name = "datatype", .type = BLOBMSG_TYPE_STRING },
 	[DM_SET_OBJ_PATH] = { .name = "obj_path", .type = BLOBMSG_TYPE_TABLE },
 	[DM_SET_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
@@ -502,7 +503,10 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	data.ctx = ctx;
 	data.bbf_ctx.in_param = path;
 
-	fault = fill_pvlist_set(&data, path, tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL, tb[DM_SET_OBJ_PATH], &pv_list);
+	char *value = tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL;
+	char *type = tb[DM_SET_TYPE] ? blobmsg_get_string(tb[DM_SET_TYPE]) : NULL;
+
+	fault = fill_pvlist_set(&data, path, value, type, tb[DM_SET_OBJ_PATH], &pv_list);
 	if (fault) {
 		BBF_ERR("Fault in fill pvlist set path |%s| : |%d|", data.bbf_ctx.in_param, fault);
 		fill_err_code_array(&data, fault);
@@ -635,7 +639,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 		snprintf(path, PATH_MAX, "%s%s.", (char *)blobmsg_data(tb[DM_ADD_PATH]), data.bbf_ctx.addobj_instance);
 
-		fault = fill_pvlist_set(&data, path, NULL, tb[DM_ADD_OBJ_PATH], &pv_list);
+		fault = fill_pvlist_set(&data, path, NULL, NULL, tb[DM_ADD_OBJ_PATH], &pv_list);
 		if (fault) {
 			BBF_ERR("Fault in fill pvlist set path |%s|", path);
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
