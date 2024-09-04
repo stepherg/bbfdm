@@ -8,7 +8,7 @@
 #include <libbbfdm-api/dmbbf.h>
 
 #define BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH "/etc/bbfdm/micro_services"
-#define MAX_OBJS 5
+#define MAX_OBJS 7
 
 #ifndef DAEMON_JSON_INPUT
 #define BBFDM_JSON_INPUT "/tmp/bbfdm/input.json"
