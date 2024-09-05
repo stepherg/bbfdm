@@ -91,14 +91,16 @@ static void parse_tcp_line(const char* line, int is_ipv6, ActivePort* port)
 	port->state = state;
 }
 
-static void browse_ip_port(struct dmctx *dmctx, DMNODE *parent_node, bool is_ipv6, const char *proc_path, int *id, char *inst)
+static bool browse_ip_port(struct dmctx *dmctx, DMNODE *parent_node, bool is_ipv6, const char *proc_path, int *id)
 {
+	bool is_instance = false;
+
 	if (proc_path == NULL || DM_STRLEN(proc_path) == 0)
-		return;
+		return is_instance;
 
 	FILE* fp = fopen(proc_path, "r");
 	if (fp == NULL) {
-		return;
+		return is_instance;
 	}
 
 	char line[256] = {0};
@@ -116,13 +118,17 @@ static void browse_ip_port(struct dmctx *dmctx, DMNODE *parent_node, bool is_ipv
 			continue;
 
 		curr_data.additional_data = (void *)(&port);
-		inst = handle_instance_without_section(dmctx, parent_node, ++(*id));
+		char *inst = handle_instance_without_section(dmctx, parent_node, ++(*id));
 
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP) {
+			is_instance = true;
 			break;
+		}
 	}
 
 	fclose(fp);
+
+	return is_instance;
 }
 
 static int get_sysctl_disable_ipv6_per_device(const char *device, char **value)
@@ -897,11 +903,14 @@ end:
 
 static int browseIPActivePortInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	char *inst = NULL;
+	bool is_instance = false;
 	int id = 0;
 
-	browse_ip_port(dmctx, parent_node, 0, "/proc/net/tcp", &id, inst);
-	browse_ip_port(dmctx, parent_node, 1, "/proc/net/tcp6", &id, inst);
+	is_instance = browse_ip_port(dmctx, parent_node, 0, "/proc/net/tcp", &id);
+	if (is_instance)
+		return 0;
+
+	browse_ip_port(dmctx, parent_node, 1, "/proc/net/tcp6", &id);
 
 	return 0;
 }
