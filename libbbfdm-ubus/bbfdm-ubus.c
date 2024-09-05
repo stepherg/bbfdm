@@ -965,7 +965,7 @@ static void update_instances_list(struct list_head *inst)
 			.in_param = ROOT_NODE,
 			.nextlevel = false,
 			.disable_mservice_browse = true,
-			.dm_type = BBFDM_BOTH
+			.dm_type = BBFDM_USP
 	};
 
 	bbf_init(&bbf_ctx);
