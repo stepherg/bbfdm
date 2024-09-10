@@ -7,11 +7,11 @@
 #include <libbbfdm-api/dmapi.h>
 #include <libbbfdm-api/dmentry.h>
 
-#include "../../libbbfdm/dmtree/tr181/device.h"
+#include "../../libbbfdm/device.h"
 
 static DMOBJ TR181_ROOT_TREE[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceObj, tDeviceParams, NULL, BBFDM_BOTH},
+{"Device", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDMRootObj, tDMRootParams, NULL, BBFDM_BOTH},
 {0}
 };
 

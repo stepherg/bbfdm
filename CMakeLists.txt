@@ -6,6 +6,7 @@ add_subdirectory(libbbfdm-api)
 add_subdirectory(libbbfdm-ubus)
 add_subdirectory(libbbfdm)
 add_subdirectory(bbfdmd)
+add_subdirectory(dm-service)
 
 # Capture the environment variables
 set(MY_CC "$ENV{CC}")

@@ -25,27 +25,6 @@
           "required": "no",
           "default": "",
           "description": "Path for ubus socket to register bbfdmd services"
-        },
-        {
-          "name": "loglevel",
-          "type": "integer",
-          "required": "no",
-          "default": "3",
-          "description": "Internal loglevel for debugging {0: No Logs; 1: Alert; 2: Critical; 3: Error; 4: Warning; 5: Notice; 6: Info; 7: Debug}"
-        },
-        {
-          "name": "subprocess_level",
-          "type": "integer",
-          "required": "no",
-          "default": "2",
-          "description": "This parameter configures when subprocess can be used for get operation. Level here denotes the Datamodel object depth up-to which subprocess will be used to collect the get data. For example, if this is configured to 1, then only get for 'Device.' shall be called within the subprocess. If configured as level 2, then all the get with up-to depth 2 like 'Device.WiFi.', 'Device.IP.' shall be called in subprocess."
-        },
-        {
-          "name": "refresh_time",
-          "type": "integer",
-          "required": "no",
-          "default": "5",
-          "description": "The time period in seconds after which bbfdmd will refresh the datamodel instances in a periodic manner. If configured to '0' then instance updater will be disabled. If not configured at all then after every 5 seconds datamodel instances will be refreshed."
         }
       ]
     },

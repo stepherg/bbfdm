@@ -7,7 +7,6 @@ import sys
 import os
 import subprocess
 import shutil
-import json
 import glob
 
 # Constants
@@ -16,7 +15,7 @@ CURRENT_PATH = os.getcwd()
 BBF_PLUGIN_DIR = "/usr/share/bbfdm/plugins/"
 BBF_MS_DIR = "/usr/share/bbfdm/micro_services/"
 
-DM_JSON_FILE = os.path.join(CURRENT_PATH, "libbbfdm", "dmtree", "json", "datamodel.json")
+DM_JSON_FILE = os.path.join(CURRENT_PATH, "tools", "datamodel.json")
 
 LIST_SUPPORTED_USP_DM = []
 LIST_SUPPORTED_CWMP_DM = []
@@ -97,15 +96,6 @@ def obj_has_param(value):
     return False
 
 
-def get_vendor_list(val):
-    vendor_list = ""
-    if isinstance(val, list):
-        for vendor in val:
-            vendor_list = vendor if not vendor_list else (
-                vendor_list + "," + vendor)
-    return vendor_list
-
-
 def get_option_value(value, option, default=None):
     if isinstance(value, dict):
         for obj, val in value.items():
@@ -184,7 +174,7 @@ def generate_shared_library(dm_name, source_files, vendor_prefix, extra_dependen
         return False
 
 
-def build_and_install_bbfdm(vendor_prefix, vendor_list):
+def build_and_install_bbfdm(vendor_prefix):
     print("Compiling and installing bbfdmd in progress ...")
 
     create_folder(os.path.join(CURRENT_PATH, "build"))
@@ -196,18 +186,11 @@ def build_and_install_bbfdm(vendor_prefix, vendor_list):
     else:
         VENDOR_PREFIX = "X_IOPSYS_EU_"
 
-    # Set vendor list
-    if vendor_list is None:
-        VENDOR_LIST = "iopsys"
-    else:
-        VENDOR_LIST = get_vendor_list(vendor_list)
-
     # Build and install bbfdm
     cmake_command = [
         "cmake",
         "../",
         "-DBBF_SCHEMA_FULL_TREE=ON",
-        f"-DBBF_VENDOR_LIST={VENDOR_LIST}",
         f"-DBBF_VENDOR_PREFIX={VENDOR_PREFIX}",
         "-DBBF_MAX_OBJECT_INSTANCES=255",
         "-DBBFDMD_MAX_MSG_LEN=1048576",
@@ -229,41 +212,52 @@ def build_and_install_bbfdm(vendor_prefix, vendor_list):
     print('Compiling and installing bbfdmd done')
 
 
-def create_bbfdm_input_json_file(proto, dm_name=None):
-    data = {
-        "daemon": {
-        },
-        "cli": {
-            "config": {
-                "proto": proto
-            },
-            "input": {
-                "type": "DotSo",
-                "name": "/usr/share/bbfdm/libbbfdm.so",
-                "plugin_dir": "/usr/share/bbfdm/plugins"
-            },
-            "output": {
-                "type": "CLI"
-            }
-        }
-    }
+def build_and_install_dmcli():
+    print("Compiling and installing dm-cli in progress ...")
 
+    create_folder(os.path.join(CURRENT_PATH, "build"))
+    cd_dir(os.path.join(CURRENT_PATH, "build"))
+
+    # GCC command to compile dm-cli
+    gcc_command = [
+        "gcc",
+        "../test/tools/dm-cli.c",
+        "-lbbfdm-api",
+        "-lbbfdm-ubus",
+        "-lubox",
+        "-lblobmsg_json",
+        "-lbbfdm",
+        "-ljson-c",
+        "-lssl",
+        "-lcrypto",
+        "-o", "dm-cli"
+    ]
+
+    try:
+        subprocess.check_call(gcc_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.check_call(["mv", "dm-cli", "/usr/sbin/dm-cli"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running commands: {e}")
+        sys.exit(1)
+
+    cd_dir(CURRENT_PATH)
+    remove_folder(os.path.join(CURRENT_PATH, "build"))
+    print('Compiling and installing dm-cli done')
+
+
+def fill_list_dm(proto, dm_list, dm_name=None):
+    # Determine the base command depending on the presence of dm_name
     if dm_name:
-        del data["cli"]["input"]["plugin_dir"]
-        data["cli"]["input"]["name"] = dm_name
+        command = f"dm-cli -l {dm_name}"
+    else:
+        command = "dm-cli -p /usr/share/bbfdm/plugins"
 
-    file_path = '/tmp/bbfdm/input.json'
-    
-    # Ensure the directory exists
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    # Add the appropriate flag (-c or -u) based on the proto value
+    if proto == "cwmp":
+        command += " -c Device."
+    elif proto == "usp":
+        command += " -u Device."
 
-    # Open the file in 'w' mode (create or truncate)
-    with open(file_path, 'w', encoding='utf-8') as json_file:
-        json.dump(data, json_file, indent=4)
-
-
-def fill_list_dm(dm_list):
-    command = "bbfdmd -c schema Device."
     try:
         # Run the command
         result = subprocess.run(command, shell=True, text=True, capture_output=True, check=True)
@@ -308,8 +302,7 @@ def remove_duplicate_elements(input_list):
 
 def fill_list_supported_dm():
     for proto, DB in [("usp", LIST_SUPPORTED_USP_DM), ("cwmp", LIST_SUPPORTED_CWMP_DM)]:
-        create_bbfdm_input_json_file(proto)
-        fill_list_dm(DB)
+        fill_list_dm(proto, DB)
         DB.sort(key=lambda x: x['param'], reverse=False)
         DB[:] = remove_duplicate_elements(DB)
 
@@ -318,8 +311,7 @@ def fill_list_supported_dm():
 
         if os.path.isfile(f):
             for proto, DB in [("usp", LIST_SUPPORTED_USP_DM), ("cwmp", LIST_SUPPORTED_CWMP_DM)]:
-                create_bbfdm_input_json_file(proto, f)
-                fill_list_dm(DB)
+                fill_list_dm(proto, DB, f)
                 DB.sort(key=lambda x: x['param'], reverse=False)
                 DB[:] = remove_duplicate_elements(DB)
 
@@ -428,18 +420,20 @@ def download_and_build_plugins(plugins, vendor_prefix):
     print('Generating plugins completed.')
 
 
-def generate_supported_dm(vendor_prefix=None, vendor_list=None, plugins=None):
+def generate_supported_dm(vendor_prefix=None, plugins=None):
     '''
     Generates supported data models and performs necessary actions.
 
     Args:
         vendor_prefix (str, optional): Vendor prefix for shared libraries.
-        vendor_list (list, optional): List of vendor data models.
         plugins (list, optional): List of plugin configurations.
     '''
 
     # Build && Install bbfdm
-    build_and_install_bbfdm(vendor_prefix, vendor_list)
+    build_and_install_bbfdm(vendor_prefix)
+
+    # Build && Install dm-cli
+    build_and_install_dmcli()
 
     # Download && Build Plugins Data Models
     download_and_build_plugins(plugins, vendor_prefix)

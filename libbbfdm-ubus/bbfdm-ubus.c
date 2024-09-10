@@ -28,14 +28,10 @@
 #include "get_helper.h"
 #include "plugin.h"
 
+#define BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH "/etc/bbfdm/micro_services"
 #define BBFDM_DEFAULT_MODULES_PATH "/usr/share/bbfdm"
 #define BBFDM_DEFAULT_PLUGINS_PATH BBFDM_DEFAULT_MODULES_PATH"/plugins"
 #define BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH BBFDM_DEFAULT_MODULES_PATH"/micro_services"
-#define BBFDM_DEFAULT_UBUS_OBJ "bbfdm"
-
-extern struct list_head loaded_json_files;
-extern struct list_head json_list;
-extern struct list_head json_memhead;
 
 LIST_HEAD(head_registered_service);
 
@@ -51,6 +47,7 @@ static void bbfdm_ctx_cleanup(struct bbfdm_context *u)
 
 	free_path_list(&u->instances);
 	free_path_list(&u->old_instances);
+	free_path_list(&u->config.list_objs);
 
 	/* Main daemon */
 	if (dm_is_micro_service() == false) {
@@ -58,31 +55,15 @@ static void bbfdm_ctx_cleanup(struct bbfdm_context *u)
 	}
 
 	/* DotSo Plugin */
-	free_dotso_plugin(deamon_lib_handle);
-	deamon_lib_handle = NULL;
+	bbfdm_free_dotso_plugin(&deamon_lib_handle);
 
 	/* JSON Plugin */
-	free_json_plugin();
+	bbfdm_free_json_plugin();
 }
 
 static bool is_sync_operate_cmd(bbfdm_data_t *data __attribute__((unused)))
 {
 	return false;
-}
-
-static bool is_subprocess_required(int subprocess_level, const char *path)
-{
-	bool ret = false;
-	size_t len = DM_STRLEN(path);
-	if (len == 0)
-		return ret;
-
-	if (count_delim(path) < subprocess_level) {
-		if (path[len - 1] == '.')
-			ret = true;
-	}
-
-	return ret;
 }
 
 static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
@@ -269,7 +250,6 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 	LIST_HEAD(paths_list);
 	bbfdm_data_t data;
 	uint8_t maxdepth = 0;
-	bool is_subprocess_needed = false;
 	struct bbfdm_context *u;
 
 	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
@@ -291,7 +271,6 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 	if (tb[DM_GET_PATH]) {
 		char *path = blobmsg_get_string(tb[DM_GET_PATH]);
 		add_path_list(path, &paths_list);
-		is_subprocess_needed = is_subprocess_required(u->config.subprocess_level, path);
 	}
 
 	if (tb[DM_GET_PATHS]) {
@@ -303,8 +282,6 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 			char *path_str = blobmsg_get_string(path);
 
 			add_path_list(path_str, &paths_list);
-			if (!is_subprocess_needed)
-				is_subprocess_needed = is_subprocess_required(u->config.subprocess_level, path_str);
 		}
 	}
 
@@ -318,12 +295,7 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 
 	fill_optional_data(&data, tb[DM_GET_OPTIONAL]);
 
-	if (is_subprocess_needed) {
-		BBF_INFO("Creating subprocess for get method");
-		bbfdm_start_deferred(&data, bbfdm_get_value, false);
-	} else {
-		bbfdm_get_value(&data, NULL);
-	}
+	bbfdm_get_value(&data, NULL);
 
 	free_path_list(&paths_list);
 	return 0;
@@ -1059,6 +1031,7 @@ static int register_service(struct ubus_context *ctx)
 	struct blob_buf bb = {0};
 	uint32_t ubus_id;
 	struct bbfdm_context *u;
+	struct pathNode *pn = NULL;
 
 	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
 	if (u == NULL) {
@@ -1078,8 +1051,11 @@ static int register_service(struct ubus_context *ctx)
 	blobmsg_add_string(&bb, "parent_dm", u->config.out_parent_dm);
 
 	void *arr = blobmsg_open_array(&bb, "objects");
-	for (int i = 0; i < MAX_OBJS && DM_STRLEN(u->config.out_objects[i]) != 0; i++)
-		blobmsg_add_string(&bb, NULL, u->config.out_objects[i]);
+
+	list_for_each_entry(pn, &u->config.list_objs, list) {
+		blobmsg_add_string(&bb, NULL, pn->path);
+	}
+
 	blobmsg_close_array(&bb, arr);
 
 	ubus_invoke(ctx, ubus_id, "service", bb.head, NULL, NULL, 5000);
@@ -1088,162 +1064,85 @@ static int register_service(struct ubus_context *ctx)
 	return 0;
 }
 
-static int _parse_daemon_config_options(bbfdm_config_t *config, json_object *daemon_obj)
-{
-	char *opt_val = NULL;
-
-	if (!config || !daemon_obj) {
-		fprintf(stderr, "Invalid input options \n");
-		return -1;
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "config", "loglevel");
-	if (DM_STRLEN(opt_val)) {
-		int log_level = (int) strtoul(opt_val, NULL, 10);
-		bbfdm_ubus_set_log_level(log_level);
-	} else {
-		bbfdm_ubus_set_log_level(LOG_ERR);
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "config", "subprocess_level");
-	if (DM_STRLEN(opt_val)) {
-		config->subprocess_level = (unsigned int) strtoul(opt_val, NULL, 10);
-	} else {
-		config->subprocess_level = 0;
-	}
-	return 0;
-}
-
-static int _parse_daemon_input_options(bbfdm_config_t *config, json_object *daemon_obj)
-{
-	char *opt_val = NULL;
-
-	if (!config || !daemon_obj) {
-		fprintf(stderr, "Invalid input options \n");
-		return -1;
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "input", "plugin_dir");
-	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
-	} else if(dm_is_micro_service() == false) {
-		strncpyt(config->in_plugin_dir, BBFDM_DEFAULT_PLUGINS_PATH, sizeof(config->in_plugin_dir));
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "input", "name");
-	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->in_name, opt_val, sizeof(config->in_name));
-
-		opt_val = strrchr(opt_val, '/');
-		if (opt_val) {
-			strncpyt(config->service_name, opt_val + 1, sizeof(config->service_name));
-		}
-	} else if (dm_is_micro_service() == false) { // default value for main process
-		snprintf(config->in_name, sizeof(config->in_name), "%s/libbbfdm.so", BBFDM_DEFAULT_MODULES_PATH);
-		strncpyt(config->service_name, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->service_name));
-	}
-	return 0;
-}
-
-static int _fill_daemon_input_option(bbfdm_config_t *config, char *sname)
+static int _fill_daemon_input_option(json_object *daemon_obj, bbfdm_config_t *config)
 {
 	char opt_val[MAX_DM_PATH] = {0};
 
-	if (!config || !sname || strlen(sname) == 0) {
-		fprintf(stderr, "Invalid input options for service name \n");
+	if (!config || strlen(config->service_name) == 0) {
+		BBF_ERR("Invalid input options for service name \n");
 		return -1;
 	}
 
-	strncpyt(config->service_name, sname, sizeof(config->service_name));
+	if (strchr(config->service_name, '/')) { // absolute path
+		char *srv_name = dmjson_get_value(daemon_obj, 1, "service_name");
+		if (strlen(srv_name)) {
+			strncpyt(config->service_name, srv_name, sizeof(config->service_name));
+		}
+	}
 
 	// check if the service plugin is DotSO plugin
-	snprintf(opt_val, MAX_DM_PATH, "%s/%s.so", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, sname);
+	snprintf(opt_val, MAX_DM_PATH, "%s/%s.so", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
 	if (!file_exists(opt_val)) {
-		snprintf(opt_val, MAX_DM_PATH, "%s/%s.json", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, sname);
+		snprintf(opt_val, MAX_DM_PATH, "%s/%s.json", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
 	}
 
 	if (!file_exists(opt_val)) {
-		fprintf(stderr, "Failed to load service plugin %s opt_val=%s\n", sname, opt_val);
+		BBF_ERR("Failed to load service plugin %s opt_val=%s\n", config->service_name, opt_val);
 		return -1;
 	}
 
 	strncpyt(config->in_name, opt_val, sizeof(config->in_name));
-
-	snprintf(opt_val, MAX_DM_PATH, "%s/%s", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, sname);
-	if (folder_exists(opt_val)) {
-		strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
-	}
-
-	return 0;
-}
-
-static int _parse_daemon_output_options(bbfdm_config_t *config, json_object *daemon_obj)
-{
-	char *opt_val = NULL;
-
-	if (!config || !daemon_obj) {
-		fprintf(stderr, "Invalid input options \n");
-		return -1;
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "output", "root_obj");
-	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->out_root_obj, opt_val, sizeof(config->out_root_obj));
-	} else if (dm_is_micro_service() == true) { // for main process, there is no root obj
-		strncpyt(config->out_root_obj, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_root_obj));
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "output", "name");
-	if (strlen(opt_val)) {
-		snprintf(config->out_name, sizeof(config->out_name), "%s%s%s",
-					dm_is_micro_service() ? config->out_root_obj : opt_val,
-					dm_is_micro_service() ? "." : "",
-					dm_is_micro_service() ? opt_val : "");
-	} else {
-		snprintf(config->out_name, sizeof(config->out_name), "%s", dm_is_micro_service() ? "" : BBFDM_DEFAULT_UBUS_OBJ);
-	}
-
-	return 0;
-}
-
-static int _parse_daemon_internal_data_model(bbfdm_config_t *config)
-{
-	char opt_val[MAX_DM_PATH] = {0};
-
-	if (!config || !strlen(config->service_name))
-		return -1;
-
-	strncpyt(config->in_name, "internal_dm.so", sizeof(config->in_name));
 
 	snprintf(opt_val, MAX_DM_PATH, "%s/%s", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
 	if (folder_exists(opt_val)) {
 		strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
 	}
 
-	strncpyt(config->out_root_obj, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_root_obj));
+	return 0;
+}
+
+static int _fill_daemon_output_options(json_object *daemon_obj, bbfdm_config_t *config)
+{
+	char *opt_val = NULL;
+
+	if (!config || !daemon_obj) {
+		BBF_ERR("Invalid input options \n");
+		return -1;
+	}
+
+	opt_val = dmjson_get_value(daemon_obj, 2, "output", "root_obj");
+	if (DM_STRLEN(opt_val)) {
+		strncpyt(config->out_root_obj, opt_val, sizeof(config->out_root_obj));
+	} else { // for main process, there is no root obj
+		strncpyt(config->out_root_obj, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_root_obj));
+	}
+
+	opt_val = dmjson_get_value(daemon_obj, 2, "output", "name");
+	if (strlen(opt_val)) {
+		snprintf(config->out_name, sizeof(config->out_name), "%s.%s", BBFDM_DEFAULT_UBUS_OBJ, opt_val);
+	}
 
 	return 0;
 }
 
-static int bbfdm_load_deamon_config(bbfdm_config_t *config)
+static int daemon_load_config_external_plugin(bbfdm_config_t *config)
 {
 	json_object *json_obj = NULL;
 	char json_path[MAX_DM_PATH] = {0};
 	int err = 0;
 
-	if (INTERNAL_ROOT_TREE) { // internal data model
-		return _parse_daemon_internal_data_model(config);
-	}
+	if (!config || !strlen(config->service_name))
+		return -1;
 
-	if (dm_is_micro_service() == false) { // Main daemon
-		strncpyt(json_path, BBFDM_JSON_INPUT, MAX_DM_PATH);
-	} else { // Micro-services
+	if (strchr(config->service_name, '/')) { // absolute path
+		strncpyt(json_path, config->service_name, MAX_DM_PATH);
+	} else {
 		snprintf(json_path, MAX_DM_PATH, "%s/%s.json", BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH, config->service_name);
 	}
 
 	json_obj = json_object_from_file(json_path);
 	if (!json_obj) {
-		fprintf(stderr, "Failed to read input %s file \n", json_path);
+		BBF_ERR("Failed to read input %s file \n", json_path);
 		return -1;
 	}
 
@@ -1253,23 +1152,13 @@ static int bbfdm_load_deamon_config(bbfdm_config_t *config)
 		goto exit;
 	}
 
-	_parse_daemon_config_options(config, daemon_obj);
-
-	char *opt_val = dmjson_get_value(daemon_obj, 1, "service_name");
-	if (strlen(opt_val)) {
-		err = _fill_daemon_input_option(config, opt_val);
-	} else {
-		err = _parse_daemon_input_options(config, daemon_obj);
-	}
-
+	err = _fill_daemon_input_option(daemon_obj, config);
 	if (err == -1) {
 		goto exit;
 	}
 
-	_parse_daemon_output_options(config, daemon_obj);
+	err = _fill_daemon_output_options(daemon_obj, config);
 
-	json_object_put(json_obj);
-	return err;
 exit:
 	if (json_obj) {
 		json_object_put(json_obj);
@@ -1278,7 +1167,51 @@ exit:
 	return err;
 }
 
-static int bbfdm_regiter_ubus(struct ubus_context *ctx)
+static int daemon_load_config_internal_plugin(bbfdm_config_t *config)
+{
+	char opt_val[MAX_DM_PATH] = {0};
+
+	if (strlen(config->service_name) == 0 && dm_is_micro_service() == false) { // default value for main process
+		strncpyt(config->service_name, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->service_name));
+	}
+
+	if (!config || strlen(config->service_name) == 0) {
+		BBF_ERR("Invalid input options for service name \n");
+		return -1;
+	}
+
+	if(dm_is_micro_service() == false) {
+		strncpyt(config->in_plugin_dir, BBFDM_DEFAULT_PLUGINS_PATH, sizeof(config->in_plugin_dir));
+		snprintf(config->out_name, sizeof(config->out_name), "%s", BBFDM_DEFAULT_UBUS_OBJ);
+	} else {
+		snprintf(opt_val, MAX_DM_PATH, "%s/%s", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
+		if (folder_exists(opt_val)) {
+			strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
+		}
+
+		strncpyt(config->out_root_obj, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_root_obj));
+	}
+
+	return 0;
+}
+
+static int daemon_load_config(bbfdm_config_t *config)
+{
+	int err = -1;
+
+	if (INTERNAL_ROOT_TREE) {
+		err = daemon_load_config_internal_plugin(config);
+		BBF_INFO("Loading Config Internal plugin (%s)", config->service_name);
+	} else {
+		// This API will only be called with micro-services
+		err = daemon_load_config_external_plugin(config);
+		BBF_INFO("Loading Config External plugin (%s)", config->service_name);
+	}
+
+	return err;
+}
+
+static int regiter_ubus_object(struct ubus_context *ctx)
 {
 	int ret;
 	struct bbfdm_context *u;
@@ -1385,37 +1318,26 @@ static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 	INIT_LIST_HEAD(&bbfdm_ctx->instances);
 	INIT_LIST_HEAD(&bbfdm_ctx->old_instances);
 	INIT_LIST_HEAD(&bbfdm_ctx->event_handlers);
+	INIT_LIST_HEAD(&bbfdm_ctx->config.list_objs);
 }
 
-static int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
+static int daemon_load_data_model(struct bbfdm_context *daemon_ctx)
 {
 	int err = -1;
-	char *file_path = daemon_ctx->config.in_name;
 
-	if (DM_STRLEN(file_path) == 0) {
-		BBF_ERR("Input type/name not supported or defined");
-		return -1;
-	}
-
-	char *ext = strrchr(file_path, '.');
-	if (ext == NULL) {
-		BBF_ERR("Input file without extension");
-	} else if (strcasecmp(ext, ".json") == 0) {
-		BBF_INFO("Loading JSON plugin %s", file_path);
-		err = load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
-	} else if (strcasecmp(ext, ".so") == 0) {
-		BBF_INFO("Loading DotSo plugin %s", file_path);
-		err = load_dotso_plugin(&deamon_lib_handle, file_path, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
+	if (INTERNAL_ROOT_TREE) {
+		BBF_INFO("Loading Data Model Internal plugin (%s)", daemon_ctx->config.service_name);
+		err = bbfdm_load_internal_plugin(INTERNAL_ROOT_TREE, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
 	} else {
-		BBF_ERR("Input type %s not supported", ext);
+		BBF_INFO("Loading Data Model External plugin (%s)", daemon_ctx->config.service_name);
+		err = bbfdm_load_external_plugin(daemon_ctx->config.in_name, &deamon_lib_handle, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
 	}
 
-	if (!err) {
-		BBF_INFO("Loading sub-modules %s", daemon_ctx->config.in_plugin_dir);
-		bbf_global_init(DEAMON_DM_ROOT_OBJ, daemon_ctx->config.in_plugin_dir);
-	} else {
-		BBF_ERR("Failed loading %s", file_path);
-	}
+	if (err)
+		return err;
+
+	BBF_INFO("Loading sub-modules %s", daemon_ctx->config.in_plugin_dir);
+	bbf_global_init(DEAMON_DM_ROOT_OBJ, daemon_ctx->config.in_plugin_dir);
 
 	if (DM_STRLEN(daemon_ctx->config.out_name) == 0) {
 		BBF_ERR("output name not defined");
@@ -1428,7 +1350,7 @@ static int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 			return -1;
 		}
 
-		if (DM_STRLEN(daemon_ctx->config.out_objects[0]) == 0) {
+		if (list_empty(&daemon_ctx->config.list_objs)) {
 			BBF_ERR("output objects is not defined");
 			return -1;
 		}
@@ -1437,14 +1359,9 @@ static int daemon_load_datamodel(struct bbfdm_context *daemon_ctx)
 			BBF_ERR("output root obj not defined");
 			return -1;
 		}
-
-		if (DM_STRLEN(daemon_ctx->config.out_name) == 0) {
-			BBF_ERR("output name obj not defined");
-			return -1;
-		}
 	}
 
-	return err;
+	return 0;
 }
 
 static struct ubus_event_handler add_event = { .cb = lookup_event_cb };
@@ -1456,8 +1373,8 @@ int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 
 	err = ubus_connect_ctx(&bbfdm_ctx->ubus_ctx, NULL);
 	if (err != UBUS_STATUS_OK) {
-		fprintf(stderr, "Failed to connect to ubus");
-		return err;
+		BBF_ERR("Failed to connect to ubus");
+		return -5;  // Error code -5 indicating that ubus_ctx is connected
 	}
 
 	uloop_init();
@@ -1465,19 +1382,19 @@ int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 
 	bbfdm_ctx_init(bbfdm_ctx);
 
-	err = bbfdm_load_deamon_config(&bbfdm_ctx->config);
+	err = daemon_load_config(&bbfdm_ctx->config);
 	if (err) {
-		fprintf(stderr, "Failed to load %s deamon config\n", bbfdm_ctx->config.service_name);
+		BBF_ERR("Failed to load config");
 		return err;
 	}
 
-	err = daemon_load_datamodel(bbfdm_ctx);
+	err = daemon_load_data_model(bbfdm_ctx);
 	if (err) {
-		BBF_ERR("Failed to load datamodel");
+		BBF_ERR("Failed to load data_model");
 		return err;
 	}
 
-	err = bbfdm_regiter_ubus(&bbfdm_ctx->ubus_ctx);
+	err = regiter_ubus_object(&bbfdm_ctx->ubus_ctx);
 	if (err != UBUS_STATUS_OK)
 		return -1;
 

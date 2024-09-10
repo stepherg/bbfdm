@@ -5,12 +5,9 @@
   "product_class": "DG400PRIME",
   "model_name": "DG400PRIME-A",
   "software_version": "1.2.3.4",
-  "vendor_list": [
-    "iopsys"
-  ],
   "dm_json_files": [
-    "libbbfdm/dmtree/json/datamodel.json",
-    "libbbfdm/dmtree/vendor/iopsys/vendor.json"
+    "tools/datamodel.json",
+    "libbbfdm/vendor/vendor.json"
   ],
   "vendor_prefix": "X_IOPSYS_EU_",
   "plugins": [

@@ -30,7 +30,7 @@ As per TR181, the root of the tree is 'Device.', which can be defined by using b
 
 ```bash
 DM_MAP_OBJ tDynamicObj[] = {
-{"Device.", tDeviceObj, tDeviceParams},
+{"Device.", tDMRootObj, tDMRootParams},
 {0}
 };
 ```
@@ -74,7 +74,7 @@ Each object in the **DMOBJ** table contains the following arguments:
 example:
 ```bash
 /* *** Device. *** */
-DMOBJ tDeviceObj[] = {
+DMOBJ tDMRootObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type*/
 {"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH, NULL},
 {0}
@@ -209,7 +209,7 @@ DMLEAF tWiFiDataElementsAssociationEventParams[] = {
 More leaf Example(s):
 
 ```bash
-DMLEAF tDeviceParams[] = {
+DMLEAF tDMRootParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"RootDataModelVersion", &DMREAD, DMT_STRING, get_Device_RootDataModelVersion, NULL, BBFDM_BOTH},
 {"Reboot()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_Reboot, BBFDM_USP},

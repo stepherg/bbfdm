@@ -25,7 +25,6 @@ if len(sys.argv) < 2:
     print_dm_usage()
 
 VENDOR_PREFIX = None
-VENDOR_LIST = None
 PLUGINS = None
 OUTPUT = None
 DM_JSON_FILES = None
@@ -67,10 +66,6 @@ for option, value in json_data.items():
         VENDOR_PREFIX = value
         continue
 
-    elif option == "vendor_list":
-        VENDOR_LIST = value
-        continue
-
     elif option == "dm_json_files":
         DM_JSON_FILES = value
         continue
@@ -90,7 +85,7 @@ for option, value in json_data.items():
 if OUTPUT is None:
     bbf.download_and_build_plugins(PLUGINS, VENDOR_PREFIX)
 else:
-    bbf.generate_supported_dm(VENDOR_PREFIX, VENDOR_LIST, PLUGINS)
+    bbf.generate_supported_dm(VENDOR_PREFIX, PLUGINS)
 
     file_format = bbf.get_option_value(OUTPUT, "file_format", ['xml'])
     output_file_prefix = bbf.get_option_value(OUTPUT, "output_file_prefix", "datamodel")

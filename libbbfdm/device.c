@@ -48,12 +48,12 @@ static int operate_Device_FactoryReset(char *refparam, struct dmctx *ctx, void *
 /* *** BBFDM *** */
 DM_MAP_OBJ tDynamicObj[] = {
 /* parentobj, nextobject, parameter */
-{"Device.", tDeviceObj, tDeviceParams},
+{"Device.", tDMRootObj, tDMRootParams},
 {0}
 };
 
 /* *** Device. *** */
-DMOBJ tDeviceObj[] = {
+DMOBJ tDMRootObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
 {"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH, NULL},
 {"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH, NULL},
@@ -63,7 +63,7 @@ DMOBJ tDeviceObj[] = {
 {0}
 };
 
-DMLEAF tDeviceParams[] = {
+DMLEAF tDMRootParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
 {"RootDataModelVersion", &DMREAD, DMT_STRING, get_Device_RootDataModelVersion, NULL, BBFDM_BOTH},
 {"Reboot()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_Reboot, BBFDM_USP},

@@ -93,7 +93,7 @@ This tool helps in validating the json schema, which is very helpful in the deve
 
 ```bash
 $ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
-$ ./tools/validate_json_plugin.py dmtree/json/datamodel.json
+$ ./tools/validate_json_plugin.py tools/datamodel.json
 ```
 
 More examples available in [this path](../test/files/usr/share/bbfdm/plugins).
@@ -135,7 +135,6 @@ The parameters/keys used in tools_input.json file are mostly self-explanatory bu
 | product_class" | The product class, e.g., "DG400PRIME" |
 | model_name | The model name, e.g., "DG400PRIME-A" |
 | software_version | The software version, e.g., "1.2.3.4" |
-| vendor_list | This option should have the same name of the vendor directory names, e.g., ["iopsys"] |
 | dm_json_files | This should contain the list of json file path, where each file contains the definition of DM objects/parameters |
 | vendor_prefix | The prefix used by vendor for vendor extension in DM objects/parameters, e.g., "X_IOPSYS_EU_" |
 | plugins | A list of plugins with associated repositories and data model files |
@@ -153,7 +152,7 @@ The parameters/keys used in tools_input.json file are mostly self-explanatory bu
 
 
 > Note:
-> To add more description about the vendor extended DM objects/parameters, it is required to add the definition of the required/related DM objects/parameters in a json file (The json structure should follow same format as given in [datamodel.json](../libbbfdm/dmtree/json/datamodel.json)), The same json file need to be defined in dm_json_files list.
+> To add more description about the vendor extended DM objects/parameters, it is required to add the definition of the required/related DM objects/parameters in a json file (The json structure should follow same format as given in [datamodel.json](datamodel.json)), The same json file need to be defined in dm_json_files list.
 
 
 The input json file should be defined as follow:
@@ -166,12 +165,8 @@ The input json file should be defined as follow:
 	"product_class": "DG400PRIME",
 	"model_name": "DG400PRIME-A",
 	"software_version": "1.2.3.4",
-	"vendor_list": [
-		"iopsys",
-		"test"
-	],
 	"dm_json_files": [
-		"../libbbfdm/dmtree/json/datamodel.json"
+		"tools/datamodel.json"
 	]
 	"vendor_prefix": "X_IOPSYS_EU_",
 	"plugins": [

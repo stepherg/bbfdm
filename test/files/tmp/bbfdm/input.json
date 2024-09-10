@@ -1,19 +1,4 @@
 {
-	"daemon": {
-		"config": {
-			"loglevel": "3",
-			"subprocess_level": "2"
-		},
-		"input": {
-			"type": "DotSo",
-			"name": "/usr/share/bbfdm/libbbfdm.so",
-			"plugin_dir": "/usr/share/bbfdm/plugins"
-		},
-		"output": {
-			"type": "UBUS",
-			"name": "bbfdm"
-		}
-	},
 	"cli": {
 		"config": {
 			"proto": "both"

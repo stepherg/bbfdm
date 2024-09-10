@@ -12,13 +12,8 @@
 {
   "daemon": {
     "config": {
-      "loglevel": "1",
-      "refresh_time": "120",
-      "subprocess_level": "2"
     },
     "input": {
-      "type": "DotSo",
-      "name": "/usr/share/bbfdm/libbbfdm.so",
       "plugin_dir": "/usr/share/bbfdm/plugins"
     },
     "output": {
@@ -260,8 +255,6 @@ Some datamodel operations takes less time to execute compared to other, like
 executing/serializing operations simplifies the code from developer perspective, but its not suitable for deployments. To make it suitable `bbfdmd` support parallel calls.
 
 - All datamodel `operate` commands are running in parallel
-- `get` calls depends on uci option 'bbfdm.bbfdmd.subprocess_level' (default: 2)
-
 
 example(s):
 

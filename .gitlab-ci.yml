@@ -2,7 +2,7 @@ variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
   FLAWFINDER_OPTIONS: "-m 4 --error-level=5"
-  CPPCHECK_OPTIONS: "--enable=all --suppress=variableScope --suppress=unusedFunction --suppress=constParameter --suppress=knownConditionTrueFalse -DBBF_VENDOR_PREFIX=X_IOPSYS_EU_ -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBFDM_ENABLE_DOTSO_PLUGIN -DBBF_TR181 -DBBF_VENDOR_IOPSYS -i test/"
+  CPPCHECK_OPTIONS: "--enable=all --suppress=variableScope --suppress=unusedFunction --suppress=constParameter --suppress=knownConditionTrueFalse -DBBF_VENDOR_PREFIX=X_IOPSYS_EU_ -i test/"
 
 include:
   - project: 'iopsys/gitlab-ci-pipeline'

@@ -15,7 +15,7 @@ exec_cmd_verbose pylint -d R,C,W0603 tools/*.py
 echo "********* Validate JSON Plugin *********"
 
 echo "Validate BBF Data Model JSON Plugin"
-./tools/validate_json_plugin.py libbbfdm/dmtree/json/datamodel.json
+./tools/validate_json_plugin.py tools/datamodel.json
 check_ret $?
 
 echo "Validating plugins"

@@ -1,9 +1,8 @@
 /*
- * bbfdmd.c: BBFDMD deamon
+ * dm_service.c: dm-service deamon
  *
- * Copyright (C) 2023-2024 IOPSYS Software Solutions AB. All rights reserved.
+ * Copyright (C) 2024 IOPSYS Software Solutions AB. All rights reserved.
  *
- * Author: Vivek Dutta <vivek.dutta@iopsys.eu>
  * Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *
  * See LICENSE file for license related information.
@@ -13,16 +12,13 @@
 
 #include "common.h"
 #include "bbfdm-ubus.h"
-#include "cli.h"
-
-#include "libbbfdm/device.h"
 
 static void usage(char *prog)
 {
 	fprintf(stderr, "Usage: %s [options]\n", prog);
 	fprintf(stderr, "\n");
 	fprintf(stderr, "options:\n");
-	fprintf(stderr, "    -c <command input>  Run cli command\n");
+	fprintf(stderr, "    -m <ms name>        micro-service name\n");
 	fprintf(stderr, "    -l <loglevel>       log verbosity value as per standard syslog\n");
 	fprintf(stderr, "    -h                  Displays this help\n");
 	fprintf(stderr, "\n");
@@ -31,19 +27,16 @@ static void usage(char *prog)
 int main(int argc, char **argv)
 {
 	struct bbfdm_context bbfdm_ctx = {0};
-	char *cli_argv[4] = {0};
+	char proc_name[32] = {0};
 	int log_level = 3; // Default is LOG_ERR
-	int err = 0, ch, cli_argc = 0, i;
+	int err = 0, ch;
 
 	memset(&bbfdm_ctx, 0, sizeof(struct bbfdm_context));
 
-	while ((ch = getopt(argc, argv, "hc:l:")) != -1) {
+	while ((ch = getopt(argc, argv, "hl:m:")) != -1) {
 		switch (ch) {
-		case 'c':
-			cli_argc = argc-optind+1;
-			for (i = 0; i < cli_argc; i++) {
-				cli_argv[i] = argv[optind - 1 + i];
-			}
+		case 'm':
+			bbfdm_ubus_set_service_name(&bbfdm_ctx, optarg);
 			break;
 		case 'l':
 			if (optarg) {
@@ -60,18 +53,24 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (cli_argc) {
-		return bbfdm_cli_exec_command(cli_argc, cli_argv);
+	if (dm_is_micro_service() == false) {
+		fprintf(stderr, "Failed to start micro-service without providing the name using '-m' option\n");
+		exit(-1);
 	}
 
 	bbfdm_ubus_set_log_level(log_level);
-	bbfdm_ubus_load_data_model(tDynamicObj);
 
-	openlog(BBFDM_DEFAULT_UBUS_OBJ, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	openlog(bbfdm_ctx.config.service_name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
 	err = bbfdm_ubus_regiter_init(&bbfdm_ctx);
 	if (err != 0)
 		goto exit;
+
+	// Create process name using service name and prefix "dm_"
+	snprintf(proc_name, sizeof(proc_name), "dm_%s", bbfdm_ctx.config.service_name);
+
+	// Set process name for the current process
+	prctl(PR_SET_NAME, proc_name, NULL, NULL, NULL);
 
 	BBF_INFO("Waiting on uloop....");
 	uloop_run();

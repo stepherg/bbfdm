@@ -84,57 +84,6 @@
                                             <div class="td_row_even">Path for ubus socket to register bbfdmd services</div>
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">loglevel</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">integer</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">no</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">1</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">Internal loglevel for debugging {0: No Logs; 1: Alert; 2: Critical; 3: Error; 4: Warning; 5: Notice; 6: Info; 7: Debug}</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">subprocess_level</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">integer</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">no</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">2</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">This parameter configures when subprocess can be used for get operation. Level here denotes the Datamodel object depth up-to which subprocess will be used to collect the get data. For example, if this is configured to 1, then only get for 'Device.' shall be called within the subprocess. If configured as level 2, then all the get with up-to depth 2 like 'Device.WiFi.', 'Device.IP.' shall be called in subprocess.</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">refresh_time</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">integer</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">no</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">5</div>
-                                        </td>
-                                        <td class="td_row_even">
-                                            <div class="td_row_even">The time period in seconds after which bbfdmd will refresh the datamodel instances in a periodic manner. If configured to '0' then instance updater will be disabled. If not configured at all then after every 5 seconds datamodel instances will be refreshed.</div>
-                                        </td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </td>

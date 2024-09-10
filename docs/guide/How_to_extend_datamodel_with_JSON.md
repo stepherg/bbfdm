@@ -2,7 +2,7 @@
 
 `bbfdm` provides tools to convert Broadband-forum's xml datamodel definition for cwmp and usp to a combined JSON file.
 
-JSON definition of datamodel with latest release available in [datamodel.json](../../libbbfdm/dmtree/json/datamodel.json)
+JSON definition of datamodel with latest release available in [datamodel.json](../../tools/datamodel.json)
 
 Now, a partial node from this file can be used to create a JSON datamodel definition, provided user adds a mapping to all LEAF parameters and multi-instance object.
 

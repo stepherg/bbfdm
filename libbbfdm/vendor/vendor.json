@@ -1,0 +1,47 @@
+{
+	"json_plugin_version": 2,
+	"Device.DeviceInfo.": {
+		"type": "object",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"description": "This object contains general device information.",
+		"access": false,
+		"array": false,
+		"{BBF_VENDOR_PREFIX}BaseMACAddress": {
+			"type": "string",
+			"read": true,
+			"write": false,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "The MAC Address of the device.",
+			"datatype": "MACAddress",
+			"range": [
+				{
+					"max": 17
+				}
+			],
+			"pattern": [
+				"",
+				"([0-9A-Fa-f][0-9A-Fa-f]:){5}([0-9A-Fa-f][0-9A-Fa-f])"
+			],
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "/etc/board-db/config/device",
+						"section": {
+							"name": "deviceinfo"
+						},
+						"option": {
+							"name":"BaseMACAddress"
+						}
+					}
+				}
+			]
+		}
+	}
+}

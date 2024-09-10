@@ -13,8 +13,13 @@
 #include <dlfcn.h>
 
 #include "common.h"
+#include "get_helper.h"
 
 #include "plugin/json_plugin.h"
+
+extern struct list_head loaded_json_files;
+extern struct list_head json_list;
+extern struct list_head json_memhead;
 
 static LIST_HEAD(plugin_mem);
 
@@ -31,21 +36,18 @@ static uint8_t find_number_of_objects(DM_MAP_OBJ *dynamic_obj)
 	return len;
 }
 
-static void fill_dotso_micro_service_out_args(bbfdm_config_t *config, DMOBJ *entryobj, char *parent_dm, int *idx)
+static void fill_dotso_micro_service_out_args(bbfdm_config_t *config, DMOBJ *entryobj, char *parent_dm)
 {
 	char ms_name[128] = {0};
 
-	if (!config || !entryobj || !parent_dm || !idx || *idx >= MAX_OBJS)
+	if (!config || !entryobj || !parent_dm)
 		return;
 
 	strncpyt(config->out_parent_dm, parent_dm, sizeof(config->out_parent_dm));
 
 	for (; (entryobj && entryobj->obj); entryobj++) {
 
-		if (*idx >= MAX_OBJS)
-			break;
-
-		strncpyt(config->out_objects[(*idx)++], entryobj->obj, sizeof(config->out_objects[0]));
+		add_path_list(entryobj->obj, &config->list_objs);
 
 		int len = DM_STRLEN(ms_name);
 		if (len == 0) {
@@ -59,93 +61,94 @@ static void fill_dotso_micro_service_out_args(bbfdm_config_t *config, DMOBJ *ent
 		strncpyt(config->out_name, ms_name, sizeof(config->out_name));
 }
 
-int load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
+int bbfdm_load_internal_plugin(DM_MAP_OBJ *dynamic_obj, bbfdm_config_t *config, DMOBJ **main_entry)
 {
-	if (!lib_handle || !file_path || !strlen(file_path) || !main_entry) {
-		BBF_ERR("Input validation failed\n");
+	if (!dynamic_obj || !config || !main_entry) {
+		BBF_ERR("Input validation failed");
+		return -1;
+	}
+
+	uint8_t obj_num = find_number_of_objects(dynamic_obj);
+	if (obj_num == 0) {
+		BBF_ERR("No Object defined in the required DotSo Plugin\n");
 		return -1;
 	}
 
 	dm_dynamic_initmem(&plugin_mem);
-	DM_MAP_OBJ *dynamic_obj = NULL;
 
-	if (strcmp(file_path, "internal_dm.so") == 0) {
-		dynamic_obj = INTERNAL_ROOT_TREE;
-	} else {
-		void *handle = dlopen(file_path, RTLD_NOW|RTLD_LOCAL);
-		if (!handle) {
-			BBF_ERR("Plugin failed [%s]\n", dlerror());
-			return -1;
-		}
-
-		*lib_handle = handle;
-
-		//Dynamic Object
-		*(void **) (&dynamic_obj) = dlsym(handle, "tDynamicObj");
-	}
-
-	if (dynamic_obj) {
-		uint8_t obj_num = find_number_of_objects(dynamic_obj);
-		if (obj_num == 0) {
-			BBF_ERR("No Object defined in the required DotSo Plugin\n");
-			return -1;
-		}
-
-		DMOBJ *dm_entryobj = (DMOBJ *)dm_dynamic_calloc(&plugin_mem, obj_num + 1, sizeof(DMOBJ));
-		if (dm_entryobj == NULL) {
-			BBF_ERR("No Memory exists\n");
-			return -1;
-		}
-
-		int out_obj_idx = 0;
-
-		for (int i = 0; dynamic_obj[i].path; i++) {
-			char *node_obj = dm_dynamic_strdup(&plugin_mem, dynamic_obj[i].path);
-			unsigned int len = strlen(node_obj);
-
-			if (strncmp(node_obj, ROOT_NODE, strlen(ROOT_NODE)) != 0 || node_obj[len-1] != '.') {
-				BBF_ERR("Object (%s) not valid\n", node_obj);
-				return -1;
-			}
-
-			// Fill out arguments if it is running as micro-service
-			if (dm_is_micro_service() == true)
-				fill_dotso_micro_service_out_args(config, dynamic_obj[i].root_obj, node_obj, &out_obj_idx);
-
-			node_obj[len-1] = 0;
-
-			dm_entryobj[i].obj = node_obj;
-			dm_entryobj[i].permission = &DMREAD;
-			dm_entryobj[i].nextobj = dynamic_obj[i].root_obj;
-			dm_entryobj[i].leaf = dynamic_obj[i].root_leaf;
-			dm_entryobj[i].bbfdm_type = BBFDM_BOTH;
-		}
-
-		*main_entry = dm_entryobj;
-	} else {
-		BBF_ERR("Main entry not available");
+	DMOBJ *dm_entryobj = (DMOBJ *)dm_dynamic_calloc(&plugin_mem, obj_num + 1, sizeof(DMOBJ));
+	if (dm_entryobj == NULL) {
+		BBF_ERR("No Memory exists\n");
 		return -1;
 	}
 
+	for (int i = 0; dynamic_obj[i].path; i++) {
+		char *node_obj = dm_dynamic_strdup(&plugin_mem, dynamic_obj[i].path);
+		unsigned int len = strlen(node_obj);
+
+		if (strncmp(node_obj, ROOT_NODE, strlen(ROOT_NODE)) != 0 || node_obj[len-1] != '.') {
+			BBF_ERR("Object (%s) not valid\n", node_obj);
+			return -1;
+		}
+
+		// Fill out arguments if it is running as micro-service
+		if (dm_is_micro_service() == true)
+			fill_dotso_micro_service_out_args(config, dynamic_obj[i].root_obj, node_obj);
+
+		node_obj[len-1] = 0;
+
+		dm_entryobj[i].obj = node_obj;
+		dm_entryobj[i].permission = &DMREAD;
+		dm_entryobj[i].nextobj = dynamic_obj[i].root_obj;
+		dm_entryobj[i].leaf = dynamic_obj[i].root_leaf;
+		dm_entryobj[i].bbfdm_type = BBFDM_BOTH;
+	}
+
+	*main_entry = dm_entryobj;
 	return 0;
 }
 
-int free_dotso_plugin(void *lib_handle)
+int bbfdm_load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
 {
-	if (lib_handle)
-		dlclose(lib_handle);
+	if (!lib_handle || !file_path || !strlen(file_path) || !config || !main_entry) {
+		BBF_ERR("Input validation failed");
+		return -1;
+	}
+
+	DM_MAP_OBJ *dynamic_obj = NULL;
+
+	void *handle = dlopen(file_path, RTLD_NOW|RTLD_LOCAL);
+	if (!handle) {
+		BBF_ERR("Plugin failed [%s]\n", dlerror());
+		return -1;
+	}
+
+	*lib_handle = handle;
+
+	//Dynamic Object
+	*(void **) (&dynamic_obj) = dlsym(handle, "tDynamicObj");
+
+	return bbfdm_load_internal_plugin(dynamic_obj, config, main_entry);
+}
+
+int bbfdm_free_dotso_plugin(void **lib_handle)
+{
+	if (*lib_handle) {
+		dlclose(*lib_handle);
+		*lib_handle = NULL;
+	}
 
 	dm_dynamic_cleanmem(&plugin_mem);
 	return 0;
 }
 
-static void fill_json_micro_service_out_args(bbfdm_config_t *config, char *parent_dm, char *obj, int idx, char *ms_name, size_t ms_name_len)
+static void fill_json_micro_service_out_args(bbfdm_config_t *config, char *parent_dm, char *obj, char *ms_name, size_t ms_name_len)
 {
-	if (!config || !obj || idx >= MAX_OBJS)
+	if (!config || !obj)
 		return;
 
 	strncpyt(config->out_parent_dm, parent_dm, sizeof(config->out_parent_dm));
-	strncpyt(config->out_objects[idx], obj, sizeof(config->out_objects[idx]));
+	add_path_list(obj, &config->list_objs);
 
 	int len = DM_STRLEN(ms_name);
 	if (len == 0) {
@@ -155,7 +158,7 @@ static void fill_json_micro_service_out_args(bbfdm_config_t *config, char *paren
 	}
 }
 
-int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list, struct list_head *json_memhead,
+int bbfdm_load_json_plugin(struct list_head *json_plugin, struct list_head *json_list, struct list_head *json_memhead,
 		const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
 {
 	DMOBJ *dm_entryobj = NULL;
@@ -213,7 +216,7 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 
 		// Fill out arguments if it is running as micro-service
 		if (dm_is_micro_service() == true)
-			fill_json_micro_service_out_args(config, obj_prefix, obj_name, idx, ms_name, sizeof(ms_name));
+			fill_json_micro_service_out_args(config, obj_prefix, obj_name, ms_name, sizeof(ms_name));
 
 		// Remove '.' from object prefix
 		if (obj_prefix[obj_prefix_len - 1] == '.')
@@ -248,7 +251,32 @@ int load_json_plugin(struct list_head *json_plugin, struct list_head *json_list,
 	return 0;
 }
 
-int free_json_plugin(void)
+int bbfdm_free_json_plugin(void)
 {
 	return free_json_plugins();
+}
+
+int bbfdm_load_external_plugin(const char *file_path, void **lib_handle, bbfdm_config_t *config, DMOBJ **main_entry)
+{
+	int err = -1;
+
+	if (DM_STRLEN(file_path) == 0) {
+		BBF_ERR("Input type/name not supported or defined");
+		return -1;
+	}
+
+	char *ext = strrchr(file_path, '.');
+	if (ext == NULL) {
+		BBF_ERR("Input file without extension");
+	} else if (strcasecmp(ext, ".json") == 0) {
+		BBF_INFO("Loading JSON plugin %s", file_path);
+		err = bbfdm_load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path, config, main_entry);
+	} else if (strcasecmp(ext, ".so") == 0) {
+		BBF_INFO("Loading DotSo plugin %s", file_path);
+		err = bbfdm_load_dotso_plugin(lib_handle, file_path, config, main_entry);
+	} else {
+		BBF_ERR("Input type %s not supported", ext);
+	}
+
+	return err;
 }

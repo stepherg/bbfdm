@@ -7,14 +7,7 @@
 
 #include <libbbfdm-api/dmbbf.h>
 
-#define BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH "/etc/bbfdm/micro_services"
-#define MAX_OBJS 7
-
-#ifndef DAEMON_JSON_INPUT
-#define BBFDM_JSON_INPUT "/tmp/bbfdm/input.json"
-#else
-#define BBFDM_JSON_INPUT DAEMON_JSON_INPUT
-#endif
+#define BBFDM_DEFAULT_UBUS_OBJ "bbfdm"
 
 struct bbfdm_async_req {
 	struct ubus_context *ctx;
@@ -25,21 +18,14 @@ struct bbfdm_async_req {
 };
 
 typedef struct bbfdm_config {
-	int proto; // Protocol identifier, Possible values: { '0'<both>, '1'<cwmp>, '2'<usp> }
-	int subprocess_level; // Subprocess level
-	uint32_t refresh_time; // Refresh time
+	struct list_head list_objs; // Micro-service list of objects to expose
 	char service_name[16]; // Service name for micro-service identification
 	char in_type[32]; // Input type, Possible values: { 'JSON', 'DotSo' }
 	char in_name[128]; // plugin path
 	char in_plugin_dir[128];  // extra plugin directory path
 	char out_name[128]; // Ubus name to use
 	char out_parent_dm[32]; // Parent device for micro-service
-	char out_objects[MAX_OBJS][32]; // Micro-service objects to expose
 	char out_root_obj[32]; // Ubus name to use as root data model
-	char cli_in_type[32]; // CLI input type, Possible values: { 'UBUS', 'JSON', 'DotSo' }
-	char cli_in_name[128]; // CLI input name
-	char cli_in_plugin_dir[128]; // CLI input plugin directory
-	char cli_out_type[32]; // CLI output type, Possible values: { 'CLI' }
 } bbfdm_config_t;
 
 struct bbfdm_context {
