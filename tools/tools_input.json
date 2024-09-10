@@ -45,6 +45,7 @@
       "repo": "https://dev.iopsys.eu/bbf/udpecho.git",
       "proto": "git",
       "version": "devel",
+      "is_microservice": true,
       "dm_files": [
         "src/datamodel.c"
       ]
@@ -53,6 +54,7 @@
       "repo": "https://dev.iopsys.eu/bbf/twamp-light.git",
       "proto": "git",
       "version": "devel",
+      "is_microservice": true,
       "dm_files": [
         "src/datamodel.c"
       ]
@@ -123,7 +125,8 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "src/times.c"
+        "src/times.c",
+        "src/helper.c"
       ],
       "dm_info_file": "src/datamodel_description.json"
     },
@@ -131,6 +134,7 @@
       "repo": "https://dev.iopsys.eu/bbf/timemngr.git",
       "proto": "git",
       "version": "devel",
+      "is_microservice": true,
       "dm_files": [
         "src/vendor.c"
       ]
@@ -167,7 +171,17 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "src/dnsmngr.c"
+        "src/dnsmngr.c",
+        "src/dnsmasq_backend.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/dnsmngr.git",
+      "proto": "git",
+      "version": "devel",
+      "is_microservice": true,
+      "dm_files": [
+        "src/dns_sd.c"
       ]
     },
     {
