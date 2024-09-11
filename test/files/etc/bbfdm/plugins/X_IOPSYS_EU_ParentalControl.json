@@ -1,0 +1,833 @@
+{
+	"json_plugin_version": 1,
+	"Device.{BBF_VENDOR_PREFIX}ParentalControl.": {
+		"type": "object",
+		"protocols": [
+			"cwmp",
+			"usp"
+		],
+		"access": false,
+		"description": "This object contains the information about all parental control features.",
+		"array": false,
+		"ProfileNumberOfEntries": {
+			"type": "unsignedInt",
+			"read": true,
+			"write": false,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "unsignedInt",
+			"description": "<<numentries>>",
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "parentalcontrol",
+						"section": {
+							"type": "profile"
+						},
+						"option": {
+							"name": "@Count"
+						}
+					}
+				}
+			]
+		},
+		"URLBundleNumberOfEntries": {
+			"type": "unsignedInt",
+			"read": true,
+			"write": false,
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"datatype": "unsignedInt",
+			"description": "<<numentries>>",
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "parentalcontrol",
+						"section": {
+							"type": "urlbundle"
+						},
+						"option": {
+							"name": "@Count"
+						}
+					}
+				}
+			]
+		},
+		"Device.{BBF_VENDOR_PREFIX}ParentalControl.URLBundle.{i}.": {
+			"type": "object",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"access": true,
+			"array": true,
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "parentalcontrol",
+						"section": {
+							"type": "urlbundle"
+						},
+						"dmmapfile": "dmmap_parentalcontrol"
+					}
+				}
+			],
+			"Name": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Uniquely identifiable name of the URL bundle instance.",
+				"datatype": "string",
+				"range": [
+					{
+						"max": 32
+					}
+				],
+				"flags": [
+					"Unique",
+					"Linker"
+				],
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "parentalcontrol",
+							"section": {
+								"type": "urlbundle",
+								"index": "@i-1"
+							},
+							"option": {
+								"name": "name"
+							}
+						}
+					}
+				]
+			},
+			"DownloadURL": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "string",
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "parentalcontrol",
+							"section": {
+								"type": "urlbundle",
+								"index": "@i-1"
+							},
+							"option": {
+								"name": "download_url"
+							}
+						}
+					}
+				]
+			},
+			"CustomURL": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"list": {
+					"datatype": "string"
+				},
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "parentalcontrol",
+							"section": {
+								"type": "urlbundle",
+								"index": "@i-1"
+							},
+							"option": {
+								"name": "custom_url"
+							}
+						}
+					}
+				]
+			}
+		},
+		"Device.{BBF_VENDOR_PREFIX}ParentalControl.Profile.{i}.": {
+			"type": "object",
+			"protocols": [
+				"cwmp",
+				"usp"
+			],
+			"description": "Table contain details of the access profiles.",
+			"uniqueKeys": [
+				"Name"
+			],
+			"access": true,
+			"array": true,
+			"mapping": [
+				{
+					"type": "uci",
+					"uci": {
+						"file": "parentalcontrol",
+						"section": {
+							"type": "profile"
+						},
+						"dmmapfile": "dmmap_parentalcontrol"
+					}
+				}
+			],
+			"Alias": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "Alias",
+				"range": [
+					{
+						"max": 64
+					}
+				],
+				"flags": [
+					"unique"
+				],
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "parentalcontrol",
+							"section": {
+								"type": "profile",
+								"index": "@i-1"
+							},
+							"option": {
+								"name": "alias"
+							}
+						}
+					}
+				]
+			},
+			"Name": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Name of the profile. This should be unique for each entry in the table.",
+				"datatype": "string",
+				"range": [
+					{
+						"max": 64
+					}
+				],
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "parentalcontrol",
+							"section": {
+								"type": "profile",
+								"index": "@i-1"
+							},
+							"option": {
+								"name": "name"
+							}
+						}
+					}
+				]
+			},
+			"HostList": {
+				"type": "string",
+				"read": true,
+				"write": true,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"description": "Comma separated list of hostnames or MAC addresses.",
+				"list": {
+					"datatype": "string"
+				},
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "parentalcontrol",
+							"section": {
+								"type": "profile",
+								"index": "@i-1"
+							},
+							"option": {
+								"name": "host"
+							}
+						}
+					}
+				]
+			},
+			"URLFilterNumberOfEntries": {
+				"type": "unsignedInt",
+				"read": true,
+				"write": false,
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"datatype": "unsignedInt",
+				"description": "<<numentries>>",
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "parentalcontrol",
+							"section": {
+								"type": "profile_urlfilter"
+							},
+							"option": {
+								"name": "@Count"
+							}
+						}
+					}
+				]
+			},
+			"Device.{BBF_VENDOR_PREFIX}ParentalControl.Profile.{i}.URLFilter.{i}.": {
+				"type": "object",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"access": true,
+				"array": true,
+				"mapping": [
+					{
+						"type": "uci",
+						"uci": {
+							"file": "parentalcontrol",
+							"section": {
+								"type": "profile_urlfilter"
+							},
+							"dmmapfile": "dmmap_parentalcontrol"
+						}
+					}
+				],
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean",
+					"description": "Enable or disable this filter instance on the CPE.",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile_urlfilter",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "enable"
+								}
+							}
+						}
+					]
+				},
+				"AccessPolicy": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"default": "Allow",
+					"enumerations": [
+						"Allow",
+						"Deny"
+					],
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile_urlfilter",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "access"
+								}
+							}
+						}
+					]
+				},
+				"Order": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Priority order of applying the policy",
+					"datatype": "unsignedInt",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile_urlfilter",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "order"
+								}
+							}
+						}
+					]
+				},
+				"FilterText": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "string",
+					"range": [
+						{
+							"max": 256
+						}
+					],
+					"description": "Comma separated list of URL or sub-part of the URL used for filter",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile_urlfilter",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "filtertext"
+								}
+							}
+						}
+					]
+				},
+				"URLBundleRef": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"flags": [
+						"Reference"
+					],
+					"description": "Reference to URLBundle which has list of URLs defined based on Category",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile_urlfilter",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "profile_urlbundle"
+								}
+							},
+							"linker_obj": "Device.{BBF_VENDOR_PREFIX}ParentalControl.URLBundle.*.Name"
+						}
+					]
+				},
+				"ScheduleRef": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"flags": [
+						"Reference"
+					],
+					"description": "Reference to the schedule attached to this url filter instance",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile_urlfilter",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "profile_bedtime_schedule"
+								}
+							},
+							"linker_obj": "Device.Schedules.Schedule.*.Alias"
+						}
+					]
+				}
+			},
+			"Device.{BBF_VENDOR_PREFIX}ParentalControl.Profile.{i}.BedTime.": {
+				"type": "object",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"access": false,
+				"array": false,
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "bedtime_enable"
+								}
+							}
+						}
+					]
+				},
+				"ScheduleNumberOfEntries": {
+					"type": "unsignedInt",
+					"read": true,
+					"write": false,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "unsignedInt",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile_bedtime_schedule"
+								},
+								"option": {
+									"name": "@Count"
+								}
+							}
+						}
+					]
+				},
+				"Device.{BBF_VENDOR_PREFIX}ParentalControl.Profile.{i}.BedTime.Schedule.{i}.": {
+					"type": "object",
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"access": true,
+					"array": true,
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile_bedtime_schedule"
+								},
+								"dmmapfile": "dmmap_parentalcontrol"
+							}
+						}
+					],
+					"Alias": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "Alias",
+						"range": [
+							{
+								"max": 64
+							}
+						],
+						"flags": [
+							"unique"
+						],
+						"mapping": [
+							{
+								"type": "uci",
+								"uci": {
+									"file": "parentalcontrol",
+									"section": {
+										"type": "profile_bedtime_schedule",
+										"index": "@i-1"
+									},
+									"option": {
+										"name": "alias"
+									}
+								}
+							}
+						]
+					},
+					"Name": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"description": "Name of this schedule instance.",
+						"mapping": [
+							{
+								"type": "uci",
+								"uci": {
+									"file": "parentalcontrol",
+									"section": {
+										"type": "profile_bedtime_schedule",
+										"index": "@i-1"
+									},
+									"option": {
+										"name": "name"
+									}
+								}
+							}
+						]
+					},
+					"Days": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"list": {
+							"datatype": "string",
+							"enumerations": [
+								"Monday",
+								"Tuesday",
+								"Wednesday",
+								"Thursday",
+								"Friday",
+								"Saturday",
+								"Sunday"
+							]
+						},
+						"mapping": [
+							{
+								"type": "uci",
+								"uci": {
+									"file": "parentalcontrol",
+									"section": {
+										"type": "profile_bedtime_schedule",
+										"index": "@i-1"
+									},
+									"option": {
+										"name": "days"
+									}
+								}
+							}
+						]
+					},
+					"StartTime": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 5
+							}
+						],
+						"mapping": [
+							{
+								"type": "uci",
+								"uci": {
+									"file": "parentalcontrol",
+									"section": {
+										"type": "profile_bedtime_schedule",
+										"index": "@i-1"
+									},
+									"option": {
+										"name": "start_time"
+									}
+								}
+							}
+						]
+					},
+					"EndTime": {
+						"type": "string",
+						"read": true,
+						"write": true,
+						"protocols": [
+							"cwmp",
+							"usp"
+						],
+						"datatype": "string",
+						"range": [
+							{
+								"max": 5
+							}
+						],
+						"mapping": [
+							{
+								"type": "uci",
+								"uci": {
+									"file": "parentalcontrol",
+									"section": {
+										"type": "profile_bedtime_schedule",
+										"index": "@i-1"
+									},
+									"option": {
+										"name": "end_time"
+									}
+								}
+							}
+						]
+					}
+				}
+			},
+			"Device.{BBF_VENDOR_PREFIX}ParentalControl.Profile.{i}.InternetAccess.": {
+				"type": "object",
+				"protocols": [
+					"cwmp",
+					"usp"
+				],
+				"access": false,
+				"array": false,
+				"Enable": {
+					"type": "boolean",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"datatype": "boolean",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "internet_access_enable"
+								}
+							}
+						}
+					]
+				},
+				"AccessPolicy": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"description": "Set Deny to stop internet access, set Allow to allow access based on Schedule",
+					"datatype": "string",
+					"default": "Allow",
+					"enumerations": [
+						"Allow",
+						"Deny"
+					],
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "internet_access_policy"
+								}
+							}
+						}
+					]
+				},
+				"ScheduleRef": {
+					"type": "string",
+					"read": true,
+					"write": true,
+					"protocols": [
+						"cwmp",
+						"usp"
+					],
+					"flags": [
+						"Reference"
+					],
+					"description": "Reference to the schedule instance",
+					"mapping": [
+						{
+							"type": "uci",
+							"uci": {
+								"file": "parentalcontrol",
+								"section": {
+									"type": "profile",
+									"index": "@i-1"
+								},
+								"option": {
+									"name": "internet_access_schedule"
+								}
+							},
+							"linker_obj": "Device.Schedules.Schedule.*.Alias"
+						}
+					]
+				}
+			}
+		}
+	}
+}
+
