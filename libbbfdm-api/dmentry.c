@@ -257,14 +257,12 @@ int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *referenc
 	for (; *objects; objects++) {
 
 		if (match(reference->path, *objects, 0, NULL)) {
+			if (DM_STRLEN(reference->value))
+				return 0;
 
-			if (dm_is_micro_service()) {
-				if (DM_STRLEN(reference->value))
-					return 0;
-			} else {
-				if (adm_entry_object_exists(ctx, reference->path))
-					return 0;
-			}
+			// In some cases, the reference value might be empty, but this doesn't mean the reference path is invalid.
+			if (reference->is_valid_path)
+				return 0;
 		}
 	}
 

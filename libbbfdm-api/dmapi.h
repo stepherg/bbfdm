@@ -159,6 +159,7 @@ typedef struct dm_map_obj {
 struct dm_reference {
 	char *path;
 	char *value;
+	bool is_valid_path;
 };
 
 struct dmctx {

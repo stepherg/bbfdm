@@ -308,6 +308,12 @@ int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct d
 
 	reference_args->value = separator + 2;
 
+	char *valid_path = strstr(separator + 2, "##");
+	if (valid_path) {
+		reference_args->is_valid_path = true;
+		*valid_path = 0;
+	}
+
 	return 0;
 }
 

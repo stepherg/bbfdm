@@ -995,7 +995,7 @@ static void get_reference_paramater_value(struct dmctx *dmctx, char *in_value, c
 
 		adm_entry_get_reference_value(dmctx, pch, &linker);
 
-		pos += snprintf((char *)str + pos, size - pos, "%s=>%s,", pch, linker ? linker : "");
+		pos += snprintf((char *)str + pos, size - pos, "%s=>%s%s,", pch, linker ? linker : "", linker ? "##" : "");
 	}
 
 	if (pos)
