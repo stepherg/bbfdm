@@ -23,7 +23,7 @@ case "$1" in
 		# Check if 'data' is provided
 		if [ -z "${data}" ]; then
 			echo '{ "error": "Data should be defined !!!" }'
-			return
+			exit 0
 		fi
 
 		# Check if private key exists
@@ -37,7 +37,7 @@ case "$1" in
 					if [ ! -f "${PUBLIC_KEY_CERT}" ]; then
 						openssl rsa -pubout -in "${PRIVATE_KEY_CERT}" -out "${PUBLIC_KEY_CERT}" || {
 							 echo '{ "error": "Cannot generate public key !!!" }'
-							 return
+							 exit 0
 						}
 					fi
 					
@@ -55,7 +55,7 @@ case "$1" in
 			BBF_HASH=$(cat /etc/bbfdm/.secure_hash)
 			if [ -z "${BBF_HASH}" ]; then
 				echo '{ "error": "bbf hash should not be blank !!!" }'
-				return
+				exit 0
 			fi
 	
 			case "$2" in
