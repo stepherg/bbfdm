@@ -44,6 +44,7 @@
 #include "userinterface.h"
 #include "packetcapture.h"
 #include "selftest.h"
+#include "schedules.h"
 
 /*************************************************************
 * GET & SET PARAM
@@ -172,6 +173,7 @@ DMOBJ tDeviceObj[] = {
 #ifdef BBFDM_TR181_LANCONFSEC
 {"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH, NULL},
 #endif
+{"Schedules", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSchedulesObj, tSchedulesParams, NULL, BBFDM_BOTH, NULL},
 #ifdef BBFDM_TR181_SECURITY
 #if defined(LOPENSSL) || defined(LMBEDTLS) || defined(LWOLFSSL)
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH, NULL},
