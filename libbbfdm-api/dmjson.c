@@ -12,7 +12,7 @@
 
 #include "dmjson.h"
 
-static json_object *dmjson_select_obj(json_object *jobj, char *argv[])
+static json_object *dmjson_select_obj(json_object *jobj, const char *argv[])
 {
 	int i;
 	for (i = 0; argv[i]; i++) {
@@ -45,7 +45,7 @@ static char *dmjson_print_value(json_object *jobj)
 	return ret;
 }
 
-static char *____dmjson_get_value_in_obj(json_object *mainjobj, char *argv[])
+static char *____dmjson_get_value_in_obj(json_object *mainjobj, const char *argv[])
 {
 	json_object *jobj = dmjson_select_obj(mainjobj, argv);
 	return dmjson_print_value(jobj);
@@ -54,7 +54,7 @@ static char *____dmjson_get_value_in_obj(json_object *mainjobj, char *argv[])
 char *__dmjson_get_value_in_obj(json_object *mainjobj, int argc, ...)
 {
 	va_list arg;
-	char *argv[64];
+	const char *argv[64];
 	int i;
 
 	if (!mainjobj)
@@ -72,7 +72,7 @@ char *__dmjson_get_value_in_obj(json_object *mainjobj, int argc, ...)
 json_object *__dmjson_get_obj(json_object *mainjobj, int argc, ...)
 {
 	va_list arg;
-	char *argv[64];
+	const char *argv[64];
 	int i;
 
 	va_start(arg, argc);
@@ -84,7 +84,7 @@ json_object *__dmjson_get_obj(json_object *mainjobj, int argc, ...)
 	return dmjson_select_obj(mainjobj, argv);
 }
 
-static json_object *____dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object **arrobj, int index, char *argv[])
+static json_object *____dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object **arrobj, int index, const char *argv[])
 {
 	json_object *jobj = NULL;
 
@@ -110,7 +110,7 @@ json_object *__dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object
 {
 	va_list arg;
 	json_object *jobj;
-	char *argv[64];
+	const char *argv[64];
 	int i;
 
 	if (mainjobj == NULL)
@@ -129,7 +129,7 @@ json_object *__dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object
 	return jobj;
 }
 
-static char *____dmjson_get_value_in_array_idx(json_object *mainjobj, json_object **arrobj, int index, char *argv[])
+static char *____dmjson_get_value_in_array_idx(json_object *mainjobj, json_object **arrobj, int index, const char *argv[])
 {
 	json_object *jobj = NULL;
 	char *value = NULL;
@@ -158,7 +158,8 @@ static char *____dmjson_get_value_in_array_idx(json_object *mainjobj, json_objec
 char *__dmjson_get_value_in_array_idx(json_object *mainjobj, json_object **arrobj, char *defret, int index, int argc, ...)
 {
 	va_list arg;
-	char *argv[64], *v;
+	const char *argv[64];
+	char *v = NULL;
 	int i;
 
 	if (mainjobj == NULL)
@@ -174,13 +175,12 @@ char *__dmjson_get_value_in_array_idx(json_object *mainjobj, json_object **arrob
 	return (v ? v : defret) ;
 }
 
-static char *____dmjson_get_value_array_all(json_object *mainjobj, char *delim, char *argv[])
+static char *____dmjson_get_value_array_all(json_object *mainjobj, const char *delim, const char *argv[])
 {
 	json_object *arrobj;
 	char *v, *ret = "";
 	int i, dlen, rlen;
 
-	delim = (delim) ? delim : ",";
 	dlen = (delim) ? DM_STRLEN(delim) : 1;
 
 	for (i = 0, arrobj = NULL, v = ____dmjson_get_value_in_array_idx(mainjobj, &arrobj, i, argv);
@@ -192,15 +192,15 @@ static char *____dmjson_get_value_array_all(json_object *mainjobj, char *delim, 
 		} else if (*v) {
 			rlen = strlen(ret);
 			ret = dmrealloc(ret, rlen + dlen + strlen(v) + 1);
-			snprintf(&ret[rlen], dlen + strlen(v) + 1, "%s%s", delim, v);
+			snprintf(&ret[rlen], dlen + strlen(v) + 1, "%s%s", delim ? delim : ",", v);
 		}
 	}
 	return ret;
 }
 
-char *__dmjson_get_value_array_all(json_object *mainjobj, char *delim, int argc, ...)
+char *__dmjson_get_value_array_all(json_object *mainjobj, const char *delim, int argc, ...)
 {
-	char *argv[64], *ret;
+	const char *argv[64];
 	va_list arg;
 	int i;
 
@@ -210,6 +210,5 @@ char *__dmjson_get_value_array_all(json_object *mainjobj, char *delim, int argc,
 	}
 	argv[argc] = NULL;
 	va_end(arg);
-	ret = ____dmjson_get_value_array_all(mainjobj, delim, argv);
-	return ret;
+	return ____dmjson_get_value_array_all(mainjobj, delim, argv);
 }

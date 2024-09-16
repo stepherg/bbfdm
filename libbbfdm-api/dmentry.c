@@ -293,7 +293,7 @@ int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, 
 	return 0;
 }
 
-int adm_entry_get_reference_value(struct dmctx *ctx, char *param, char **value)
+int adm_entry_get_reference_value(struct dmctx *ctx, const char *param, char **value)
 {
 	struct dmctx dmctx = {0};
 	char linker[256] = {0};
@@ -316,7 +316,7 @@ int adm_entry_get_reference_value(struct dmctx *ctx, char *param, char **value)
 	return 0;
 }
 
-bool adm_entry_object_exists(struct dmctx *ctx, char *param) // To be removed later!!!!!!!!!!!! (After moving all Objects outside bbfdm core)
+bool adm_entry_object_exists(struct dmctx *ctx, const char *param) // To be removed later!!!!!!!!!!!! (After moving all Objects outside bbfdm core)
 {
 	struct dmctx dmctx = {0};
 	char linker[256] = {0};

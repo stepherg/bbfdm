@@ -318,7 +318,7 @@ int bbf_uci_get_section_name(char *sec_name, char **value);
 int bbf_uci_set_section_name(char *sec_name, char *str, size_t size);
 
 
-struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, void *arg2, int cmp, int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
+struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, void *arg2, int cmp, int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk);
 
 
 /*******************
@@ -650,7 +650,7 @@ int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct d
 **
 ** Note: This API is only allowed to be used during operate command
 **************************************************************************/
-int bbfdm_operate_reference_linker(struct dmctx *ctx, char *reference_path, char **reference_value);
+int bbfdm_operate_reference_linker(struct dmctx *ctx, const char *reference_path, char **reference_value);
 
 /*********************************************************************//**
 **
@@ -667,7 +667,7 @@ int bbfdm_operate_reference_linker(struct dmctx *ctx, char *reference_path, char
 ** \return  0 if the string value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_string(struct dmctx *ctx, char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
+int bbfdm_validate_string(struct dmctx *ctx, const char *value, int min_length, int max_length, char *enumeration[], char *pattern[]);
 
 /*********************************************************************//**
 **
@@ -681,7 +681,7 @@ int bbfdm_validate_string(struct dmctx *ctx, char *value, int min_length, int ma
 ** \return  0 if the bool value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_boolean(struct dmctx *ctx, char *value);
+int bbfdm_validate_boolean(struct dmctx *ctx, const char *value);
 
 /*********************************************************************//**
 **
@@ -696,7 +696,7 @@ int bbfdm_validate_boolean(struct dmctx *ctx, char *value);
 ** \return  0 if the unsigned int value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_unsignedInt(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedInt(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
@@ -711,7 +711,7 @@ int bbfdm_validate_unsignedInt(struct dmctx *ctx, char *value, struct range_args
 ** \return  0 if the int value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_int(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_int(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
@@ -726,7 +726,7 @@ int bbfdm_validate_int(struct dmctx *ctx, char *value, struct range_args r_args[
 ** \return  0 if the unsigned long value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_unsignedLong(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedLong(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
@@ -741,7 +741,7 @@ int bbfdm_validate_unsignedLong(struct dmctx *ctx, char *value, struct range_arg
 ** \return  0 if the long value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_long(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_long(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
@@ -754,7 +754,7 @@ int bbfdm_validate_long(struct dmctx *ctx, char *value, struct range_args r_args
 ** \return  0 if the date time value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_dateTime(struct dmctx *ctx, char *value);
+int bbfdm_validate_dateTime(struct dmctx *ctx, const char *value);
 
 /*********************************************************************//**
 **
@@ -769,7 +769,7 @@ int bbfdm_validate_dateTime(struct dmctx *ctx, char *value);
 ** \return  0 if the hexbinary value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_hexBinary(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_hexBinary(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
@@ -789,7 +789,7 @@ int bbfdm_validate_hexBinary(struct dmctx *ctx, char *value, struct range_args r
 ** \return  0 if the list of string value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_string_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
+int bbfdm_validate_string_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
 
 /*********************************************************************//**
 **
@@ -807,7 +807,7 @@ int bbfdm_validate_string_list(struct dmctx *ctx, char *value, int min_item, int
 ** \return  0 if the list of unsigned int value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_unsignedInt_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedInt_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
@@ -825,7 +825,7 @@ int bbfdm_validate_unsignedInt_list(struct dmctx *ctx, char *value, int min_item
 ** \return  0 if the list of int value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_int_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_int_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
@@ -843,7 +843,7 @@ int bbfdm_validate_int_list(struct dmctx *ctx, char *value, int min_item, int ma
 ** \return  0 if the list of unsigned long value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
@@ -861,7 +861,7 @@ int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, char *value, int min_ite
 ** \return  0 if the list of long value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_long_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_long_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **
@@ -879,7 +879,7 @@ int bbfdm_validate_long_list(struct dmctx *ctx, char *value, int min_item, int m
 ** \return  0 if the list of hexBinary value is valid, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
+int bbfdm_validate_hexBinary_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 
 /*********************************************************************//**
 **

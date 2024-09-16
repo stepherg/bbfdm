@@ -114,7 +114,7 @@ static inline bool check_section_name(const char *str, bool name)
 }
 
 /**** UCI LOOKUP ****/
-int dmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value)
+int dmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, const char *package, const char *section, const char *option, const char *value)
 {
 	/*value*/
 	ptr->value = value;
@@ -149,7 +149,7 @@ lookup:
 }
 
 /**** UCI GET *****/
-int dmuci_get_section_type(char *package, char *section, char **value)
+int dmuci_get_section_type(const char *package, const char *section, char **value)
 {
 	struct uci_ptr ptr = {0};
 
@@ -166,7 +166,7 @@ int dmuci_get_section_type(char *package, char *section, char **value)
 	return 0;
 }
 
-int dmuci_get_option_value_string(char *package, char *section, char *option, char **value)
+int dmuci_get_option_value_string(const char *package, const char *section, const char *option, char **value)
 {
 	struct uci_ptr ptr = {0};
 
@@ -185,18 +185,18 @@ int dmuci_get_option_value_string(char *package, char *section, char *option, ch
 	return 0;
 }
 
-char *dmuci_get_option_value_fallback_def(char *package, char *section, char *option, char *default_value)
+char *dmuci_get_option_value_fallback_def(const char *package, const char *section, const char *option, const char *default_value)
 {
 	char *value = "";
 
 	dmuci_get_option_value_string(package, section, option, &value);
 	if (*value == '\0')
-		value = default_value;
+		value = dmstrdup(default_value);
 
 	return value;
 }
 
-int dmuci_get_option_value_list(char *package, char *section, char *option, struct uci_list **value)
+int dmuci_get_option_value_list(const char *package, const char *section, const char *option, struct uci_list **value)
 {
 	struct uci_element *e = NULL;
 	struct uci_ptr ptr = {0};
@@ -237,7 +237,7 @@ int dmuci_get_option_value_list(char *package, char *section, char *option, stru
 	return 0;
 }
 
-static struct uci_option *dmuci_get_option_ptr(char *cfg_path, char *package, char *section, char *option)
+static struct uci_option *dmuci_get_option_ptr(char *cfg_path, const char *package, const char *section, const char *option)
 {
 	struct uci_option *o = NULL;
 	struct uci_element *e = NULL;
@@ -264,7 +264,7 @@ end:
 }
 
 /**** UCI IMPORT *****/
-int dmuci_import(char *package_name, const char *input_path)
+int dmuci_import(const char *package_name, const char *input_path)
 {
 	struct uci_package *package = NULL;
 	struct uci_element *e = NULL;
@@ -455,7 +455,7 @@ int dmuci_revert(void)
 }
 
 /**** UCI SET *****/
-int dmuci_set_value(char *package, char *section, char *option, char *value)
+int dmuci_set_value(const char *package, const char *section, const char *option, const char *value)
 {
 	struct uci_ptr ptr = {0};
 
@@ -469,7 +469,7 @@ int dmuci_set_value(char *package, char *section, char *option, char *value)
 }
 
 /**** UCI ADD LIST *****/
-int dmuci_add_list_value(char *package, char *section, char *option, char *value)
+int dmuci_add_list_value(const char *package, const char *section, const char *option, const char *value)
 {
 	struct uci_ptr ptr = {0};
 
@@ -483,7 +483,7 @@ int dmuci_add_list_value(char *package, char *section, char *option, char *value
 }
 
 /**** UCI DEL LIST *****/
-int dmuci_del_list_value(char *package, char *section, char *option, char *value)
+int dmuci_del_list_value(const char *package, const char *section, const char *option, const char *value)
 {
 	struct uci_ptr ptr = {0};
 
@@ -497,7 +497,7 @@ int dmuci_del_list_value(char *package, char *section, char *option, char *value
 }
 
 /****** UCI ADD *******/
-int dmuci_add_section(char *package, char *stype, struct uci_section **s)
+int dmuci_add_section(const char *package, const char *stype, struct uci_section **s)
 {
 	struct uci_ptr ptr = {0};
 	char fname[128];
@@ -523,7 +523,7 @@ int dmuci_add_section(char *package, char *stype, struct uci_section **s)
 }
 
 /**** UCI DELETE *****/
-int dmuci_delete(char *package, char *section, char *option, char *value)
+int dmuci_delete(const char *package, const char *section, const char *option, const char *value)
 {
 	struct uci_ptr ptr = {0};
 
@@ -537,7 +537,7 @@ int dmuci_delete(char *package, char *section, char *option, char *value)
 }
 
 /**** UCI RENAME SECTION *****/
-int dmuci_rename_section(char *package, char *section, char *value)
+int dmuci_rename_section(const char *package, const char *section, const char *value)
 {
 	struct uci_ptr ptr = {0};
 
@@ -551,7 +551,7 @@ int dmuci_rename_section(char *package, char *section, char *value)
 }
 
 /**** UCI LOOKUP by section pointer ****/
-static int dmuci_lookup_ptr_by_section(struct uci_context *ctx, struct uci_ptr *ptr, struct uci_section *s, char *option, char *value)
+static int dmuci_lookup_ptr_by_section(struct uci_context *ctx, struct uci_ptr *ptr, struct uci_section *s, const char *option, const char *value)
 {
 	if (s == NULL || s->package == NULL)
 		return -1;
@@ -583,7 +583,7 @@ lookup:
 }
 
 /**** UCI GET by section pointer*****/
-int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char **value)
+int dmuci_get_value_by_section_string(struct uci_section *s, const char *option, char **value)
 {
 	struct uci_element *e = NULL;
 	struct uci_option *o;
@@ -608,18 +608,18 @@ not_found:
 	return -1;
 }
 
-char *dmuci_get_value_by_section_fallback_def(struct uci_section *s, char *option, char *default_value)
+char *dmuci_get_value_by_section_fallback_def(struct uci_section *s, const char *option, const char *default_value)
 {
 	char *value = "";
 
 	dmuci_get_value_by_section_string(s, option, &value);
 	if (*value == '\0')
-		value = default_value;
+		value = dmstrdup(default_value);
 
 	return value;
 }
 
-int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct uci_list **value)
+int dmuci_get_value_by_section_list(struct uci_section *s, const char *option, struct uci_list **value)
 {
 	struct uci_element *e = NULL;
 	struct uci_option *o;
@@ -662,7 +662,7 @@ int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct 
 }
 
 /**** UCI SET by section pointer ****/
-int dmuci_set_value_by_section(struct uci_section *s, char *option, char *value)
+int dmuci_set_value_by_section(struct uci_section *s, const char *option, const char *value)
 {
 	struct uci_ptr up = {0};
 
@@ -676,7 +676,7 @@ int dmuci_set_value_by_section(struct uci_section *s, char *option, char *value)
 }
 
 /**** UCI DELETE by section pointer *****/
-int dmuci_delete_by_section(struct uci_section *s, char *option, char *value)
+int dmuci_delete_by_section(struct uci_section *s, const char *option, const char *value)
 {
 	struct uci_ptr up = {0};
 	uci_ctx->flags |= UCI_FLAG_EXPORT_NAME;
@@ -690,7 +690,7 @@ int dmuci_delete_by_section(struct uci_section *s, char *option, char *value)
 	return 0;
 }
 
-int dmuci_delete_by_section_unnamed(struct uci_section *s, char *option, char *value)
+int dmuci_delete_by_section_unnamed(struct uci_section *s, const char *option, const char *value)
 {
 	struct uci_ptr up = {0};
 
@@ -704,7 +704,7 @@ int dmuci_delete_by_section_unnamed(struct uci_section *s, char *option, char *v
 }
 
 /**** UCI ADD LIST by section pointer *****/
-int dmuci_add_list_value_by_section(struct uci_section *s, char *option, char *value)
+int dmuci_add_list_value_by_section(struct uci_section *s, const char *option, const char *value)
 {
 	struct uci_ptr up = {0};
 
@@ -718,7 +718,7 @@ int dmuci_add_list_value_by_section(struct uci_section *s, char *option, char *v
 }
 
 /**** UCI DEL LIST by section pointer *****/
-int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *value)
+int dmuci_del_list_value_by_section(struct uci_section *s, const char *option, const char *value)
 {
 	struct uci_ptr up = {0};
 
@@ -732,7 +732,7 @@ int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *v
 }
 
 /**** UCI RENAME SECTION by section pointer *****/
-int dmuci_rename_section_by_section(struct uci_section *s, char *value)
+int dmuci_rename_section_by_section(struct uci_section *s, const char *value)
 {
 	struct uci_ptr up = {0};
 
@@ -760,7 +760,7 @@ int dmuci_reoder_section_by_section(struct uci_section *s, char *pos)
 }
 
 /**** UCI WALK SECTIONS *****/
-struct uci_section *dmuci_walk_section (char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk)
+struct uci_section *dmuci_walk_section (const char *package, const char *stype, const void *arg1, const void *arg2, int cmp , int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk)
 {
 	struct uci_section *s = NULL;
 	struct uci_element *e, *m = NULL;
@@ -786,17 +786,17 @@ struct uci_section *dmuci_walk_section (char *package, char *stype, void *arg1, 
 				case CMP_SECTION:
 					goto end;
 				case CMP_OPTION_EQUAL:
-					dmuci_get_value_by_section_string(s, (char *)arg1, &value);
+					dmuci_get_value_by_section_string(s, (const char *)arg1, &value);
 					if (DM_STRCMP(value, (char *)arg2) == 0)
 						goto end;
 					break;
 				case CMP_OPTION_CONTAINING:
-					dmuci_get_value_by_section_string(s, (char *)arg1, &value);
+					dmuci_get_value_by_section_string(s, (const char *)arg1, &value);
 					if (DM_STRSTR(value, (char *)arg2))
 						goto end;
 					break;
 				case CMP_OPTION_CONT_WORD:
-					dmuci_get_value_by_section_string(s, (char *)arg1, &value);
+					dmuci_get_value_by_section_string(s, (const char *)arg1, &value);
 					dup = dmstrdup(value);
 					pch = strtok_r(dup, " ", &spch);
 					while (pch != NULL) {
@@ -809,7 +809,7 @@ struct uci_section *dmuci_walk_section (char *package, char *stype, void *arg1, 
 					dmfree(dup);
 					break;
 				case CMP_LIST_CONTAINING:
-					dmuci_get_value_by_section_list(s, (char *)arg1, &list_value);
+					dmuci_get_value_by_section_list(s, (const char *)arg1, &list_value);
 					if (list_value != NULL) {
 						uci_foreach_element(list_value, m) {
 							if (DM_STRCMP(m->name, (char *)arg2) == 0)
@@ -832,7 +832,7 @@ end:
 	return s;
 }
 
-struct uci_section *dmuci_walk_all_sections(char *package, struct uci_section *prev_section, int walk)
+struct uci_section *dmuci_walk_all_sections(const char *package, struct uci_section *prev_section, int walk)
 {
 	struct uci_element *e = NULL;
 	struct uci_list *list_section;
@@ -853,7 +853,7 @@ struct uci_section *dmuci_walk_all_sections(char *package, struct uci_section *p
 }
 
 /**** UCI GET db config *****/
-int db_get_value_string(char *package, char *section, char *option, char **value)
+int db_get_value_string(const char *package, const char *section, const char *option, char **value)
 {
 	struct uci_option *o;
 
@@ -871,12 +871,13 @@ void commit_and_free_uci_ctx_bbfdm(char *dmmap_config)
 {
 	dmuci_commit_package_bbfdm(dmmap_config);
 
-	if (uci_ctx_bbfdm)
+	if (uci_ctx_bbfdm) {
 		uci_free_context(uci_ctx_bbfdm);
-	uci_ctx_bbfdm = NULL;
+		uci_ctx_bbfdm = NULL;
+	}
 }
 
-bool dmuci_string_to_boolean(char *value)
+bool dmuci_string_to_boolean(const char *value)
 {
 	if (!value)
 		return false;
@@ -891,7 +892,7 @@ bool dmuci_string_to_boolean(char *value)
 	return false;
 }
 
-bool dmuci_is_option_value_empty(struct uci_section *s, char *option_name)
+bool dmuci_is_option_value_empty(struct uci_section *s, const char *option_name)
 {
 	char *option_value = NULL;
 
@@ -903,7 +904,7 @@ bool dmuci_is_option_value_empty(struct uci_section *s, char *option_name)
 	return (DM_STRLEN(option_value) == 0) ? true : false;
 }
 
-int dmuci_get_section_name(char *sec_name, char **value)
+int dmuci_get_section_name(const char *sec_name, char **value)
 {
 	if (!sec_name)
 		return -1;
@@ -924,7 +925,7 @@ int dmuci_get_section_name(char *sec_name, char **value)
 	return 0;
 }
 
-int dmuci_set_section_name(char *sec_name, char *str, size_t size)
+int dmuci_set_section_name(const char *sec_name, char *str, size_t size)
 {
 	if (!sec_name || !str || size == 0)
 		return -1;

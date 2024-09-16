@@ -793,7 +793,7 @@ void fill_blob_operate(struct blob_buf *bb, const char *path, const char *data, 
 	blobmsg_close_table(bb, op_table);
 }
 
-int string_to_bool(char *v, bool *b)
+int string_to_bool(const char *v, bool *b)
 {
 	if (v[0] == '1' && v[1] == '\0') {
 		*b = true;

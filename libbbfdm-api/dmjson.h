@@ -31,7 +31,7 @@ json_object *__dmjson_get_obj(json_object *mainjobj, int argc, ...);
 char *__dmjson_get_value_in_obj(json_object *mainjobj, int argc, ...);
 char *__dmjson_get_value_in_array_idx(json_object *mainjobj, json_object **arrobj, char *defret, int index, int argc, ...);
 json_object *__dmjson_select_obj_in_array_idx(json_object *mainjobj, json_object **arrobj, int index, int argc, ...);
-char *__dmjson_get_value_array_all(json_object *mainjobj, char *delim, int argc, ...);
+char *__dmjson_get_value_array_all(json_object *mainjobj, const char *delim, int argc, ...);
 
 #define dmjson_get_value(JOBJ,ARGC,args...) \
 	__dmjson_get_value_in_obj(JOBJ, ARGC, ##args)

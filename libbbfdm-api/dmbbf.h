@@ -39,7 +39,7 @@ void fill_blob_param(struct blob_buf *bb, const char *path, const char *data, co
 void fill_blob_event(struct blob_buf *bb, const char *path, const char *type, void *data);
 void fill_blob_operate(struct blob_buf *bb, const char *path, const char *data, const char *type, void *in_out);
 
-int string_to_bool(char *v, bool *b);
+int string_to_bool(const char *v, bool *b);
 char *get_value_by_reference(struct dmctx *ctx, char *value);
 int dm_entry_get_value(struct dmctx *dmctx);
 int dm_entry_get_name(struct dmctx *ctx);

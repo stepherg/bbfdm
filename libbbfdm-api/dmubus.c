@@ -34,7 +34,7 @@ struct dm_ubus_hash_req {
 
 
 struct ubus_struct {
-	char *ubus_method_name;
+	const char *ubus_method_name;
 	bool ubus_method_exists;
 };
 
@@ -67,7 +67,7 @@ static void prepare_blob_message(struct blob_buf *b, const struct ubus_arg u_arg
 			blobmsg_add_u32(b, u_args[i].key, DM_STRTOL(u_args[i].val));
 		} else if (u_args[i].type == Boolean) {
 			bool val = false;
-			string_to_bool((char *)u_args[i].val, &val);
+			string_to_bool(u_args[i].val, &val);
 			blobmsg_add_u8(b, u_args[i].key, val);
 		} else if (u_args[i].type == Table) {
 			json_object *jobj = json_tokener_parse(u_args[i].val);
@@ -130,7 +130,7 @@ static int __ubus_call_blocking(const char *obj, const char *method, struct blob
 	return __dm_ubus_call_internal(obj, method, UBUS_MAX_BLOCK_TIME, attr);
 }
 
-int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size)
+int dmubus_call_set(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size)
 {
 	struct blob_buf b;
 
@@ -215,13 +215,13 @@ end:
 	return;
 }
 
-static inline json_object *ubus_call_req(char *obj, char *method, struct blob_attr *attr)
+static inline json_object *ubus_call_req(const char *obj, const char *method, struct blob_attr *attr)
 {
 	__dm_ubus_call(obj, method, attr);
 	return json_res;
 }
 
-static int dmubus_call_blob_internal(char *obj, char *method, void *value, int timeout, json_object **resp)
+static int dmubus_call_blob_internal(const char *obj, const char *method, json_object *value, int timeout, json_object **resp)
 {
 	uint32_t id;
 	struct blob_buf blob;
@@ -242,7 +242,7 @@ static int dmubus_call_blob_internal(char *obj, char *method, void *value, int t
 	blob_buf_init(&blob, 0);
 
 	if (value != NULL) {
-		if (!blobmsg_add_object(&blob, (json_object *)value)) {
+		if (!blobmsg_add_object(&blob, value)) {
 			blob_buf_free(&blob);
 			return rc;
 		}
@@ -258,17 +258,17 @@ static int dmubus_call_blob_internal(char *obj, char *method, void *value, int t
 	return rc;
 }
 
-int dmubus_call_blob(char *obj, char *method, void *value, json_object **resp)
+int dmubus_call_blob(const char *obj, const char *method, json_object *value, json_object **resp)
 {
 	return dmubus_call_blob_internal(obj, method, value, UBUS_TIMEOUT, resp);
 }
 
-int dmubus_call_blob_blocking(char *obj, char *method, void *value, json_object **resp)
+int dmubus_call_blob_blocking(const char *obj, const char *method, json_object *value, json_object **resp)
 {
 	return dmubus_call_blob_internal(obj, method, value, UBUS_MAX_BLOCK_TIME, resp);
 }
 
-int dmubus_call_blob_set(char *obj, char *method, void *value)
+int dmubus_call_blob_set(const char *obj, const char *method, json_object *value)
 {
 	int rc = dmubus_call_blob_internal(obj, method, value, UBUS_TIMEOUT, NULL);
 
@@ -280,7 +280,7 @@ int dmubus_call_blob_set(char *obj, char *method, void *value)
 	return rc;
 }
 
-static int dmubus_call_blob_msg_internal(char *obj, char *method, struct blob_buf *data, int timeout, json_object **resp)
+static int dmubus_call_blob_msg_internal(const char *obj, const char *method, struct blob_buf *data, int timeout, json_object **resp)
 {
 	uint32_t id = 0;
 	int rc = -1;
@@ -309,7 +309,7 @@ static int dmubus_call_blob_msg_internal(char *obj, char *method, struct blob_bu
 	return rc;
 }
 
-int dmubus_call_blob_msg_set(char *obj, char *method, struct blob_buf *data)
+int dmubus_call_blob_msg_set(const char *obj, const char *method, struct blob_buf *data)
 {
 	int rc = dmubus_call_blob_msg_internal(obj, method, data, UBUS_TIMEOUT, NULL);
 
@@ -388,7 +388,7 @@ static void dm_ubus_cache_entry_free(struct dm_ubus_cache_entry *entry)
 	FREE(entry);
 }
 
-int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
+int dmubus_call(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
 {
 	struct blob_buf bmsg;
 
@@ -417,7 +417,7 @@ int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_si
 	return 0;
 }
 
-int dmubus_call_blocking(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
+int dmubus_call_blocking(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
 {
 	int rc = 0;
 	struct blob_buf bmsg;

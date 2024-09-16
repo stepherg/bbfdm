@@ -36,15 +36,15 @@ typedef void (*CB_FUNC_PTR)(struct ubus_context *ctx, struct ubus_event_handler 
 void dmubus_wait_for_event(const char *event, int timeout, void *ev_data, CB_FUNC_PTR ev_callback,
 			struct dmubus_ev_subtask *subtask);
 
-int dmubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
-int dmubus_call_blocking(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
-int dmubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size);
+int dmubus_call(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
+int dmubus_call_blocking(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
+int dmubus_call_set(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size);
 
-int dmubus_call_blob(char *obj, char *method, void *value, json_object **resp);
-int dmubus_call_blob_blocking(char *obj, char *method, void *value, json_object **resp);
-int dmubus_call_blob_set(char *obj, char *method, void *value);
+int dmubus_call_blob(const char *obj, const char *method, json_object *value, json_object **resp);
+int dmubus_call_blob_blocking(const char *obj, const char *method, json_object *value, json_object **resp);
+int dmubus_call_blob_set(const char *obj, const char *method, json_object *value);
 
-int dmubus_call_blob_msg_set(char *obj, char *method, struct blob_buf *blob_msg);
+int dmubus_call_blob_msg_set(const char *obj, const char *method, struct blob_buf *blob_msg);
 
 void dmubus_free();
 

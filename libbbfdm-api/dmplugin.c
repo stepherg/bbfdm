@@ -24,7 +24,7 @@ struct service
 	char *object;
 };
 
-static bool add_service_to_main_tree(DMOBJ *main_dm, char *srv_name, char *srv_parent_dm, char *srv_obj)
+static bool add_service_to_main_tree(DMOBJ *main_dm, const char *srv_name, const char *srv_parent_dm, const char *srv_obj)
 {
 	DMOBJ *dm_entryobj = find_entry_obj(main_dm, srv_parent_dm);
 	if (!dm_entryobj)
@@ -59,7 +59,7 @@ static bool add_service_to_main_tree(DMOBJ *main_dm, char *srv_name, char *srv_p
 	return true;
 }
 
-static bool is_service_registered(struct list_head *srvlist, char *srv_name, char *srv_parent_dm, char *srv_obj)
+static bool is_service_registered(struct list_head *srvlist, const char *srv_name, const char *srv_parent_dm, const char *srv_obj)
 {
 	struct service *srv = NULL;
 
@@ -73,7 +73,7 @@ static bool is_service_registered(struct list_head *srvlist, char *srv_name, cha
 	return false;
 }
 
-static void add_service_to_list(struct list_head *srvlist, char *srv_name, char *srv_parent_dm, char *srv_object)
+static void add_service_to_list(struct list_head *srvlist, const char *srv_name, const char *srv_parent_dm, const char *srv_object)
 {
 	struct service *srv = NULL;
 
@@ -99,7 +99,7 @@ void free_services_from_list(struct list_head *clist)
 	}
 }
 
-bool load_service(DMOBJ *main_dm, struct list_head *srv_list, char *srv_name, char *srv_parent_dm, char *srv_obj)
+bool load_service(DMOBJ *main_dm, struct list_head *srv_list, const char *srv_name, const char *srv_parent_dm, const char *srv_obj)
 {
 	if (!main_dm || !srv_list || !srv_name || !srv_parent_dm || !srv_obj) {
 		BBF_ERR("Invalid arguments: main_dm, srv_list, srv_name, srv_parent_dm, and srv_obj must not be NULL.");
@@ -170,7 +170,7 @@ static void free_all_dynamic_nodes(DMOBJ *entryobj)
 	}
 }
 
-static int plugin_obj_match(char *in_param, struct dmnode *node)
+static int plugin_obj_match(const char *in_param, struct dmnode *node)
 {
 	if (node->matched)
 		return 0;
@@ -186,8 +186,8 @@ static int plugin_obj_match(char *in_param, struct dmnode *node)
 	return FAULT_9005;
 }
 
-static void dm_check_dynamic_obj(struct list_head *mem_list, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry);
-static void dm_check_dynamic_obj_entry(struct list_head *mem_list, DMNODE *parent_node, DMOBJ *entryobj, char *parent_obj, char *full_obj, DMOBJ **root_entry)
+static void dm_check_dynamic_obj(struct list_head *mem_list, DMNODE *parent_node, DMOBJ *entryobj, const char *full_obj, DMOBJ **root_entry);
+static void dm_check_dynamic_obj_entry(struct list_head *mem_list, DMNODE *parent_node, DMOBJ *entryobj, const char *parent_obj, const char *full_obj, DMOBJ **root_entry)
 {
 	DMNODE node = {0};
 	node.obj = entryobj;
@@ -209,7 +209,7 @@ static void dm_check_dynamic_obj_entry(struct list_head *mem_list, DMNODE *paren
 		dm_check_dynamic_obj(mem_list, &node, entryobj->nextobj, full_obj, root_entry);
 }
 
-static void dm_check_dynamic_obj(struct list_head *mem_list, DMNODE *parent_node, DMOBJ *entryobj, char *full_obj, DMOBJ **root_entry)
+static void dm_check_dynamic_obj(struct list_head *mem_list, DMNODE *parent_node, DMOBJ *entryobj, const char *full_obj, DMOBJ **root_entry)
 {
 	char *parent_obj = parent_node->current_object;
 
@@ -238,7 +238,7 @@ static void dm_check_dynamic_obj(struct list_head *mem_list, DMNODE *parent_node
 	}
 }
 
-DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path)
+DMOBJ *find_entry_obj(DMOBJ *entryobj, const char *obj_path)
 {
 	if (!entryobj || !obj_path)
 		return NULL;
@@ -259,7 +259,7 @@ DMOBJ *find_entry_obj(DMOBJ *entryobj, char *obj_path)
 	return obj;
 }
 
-void disable_entry_obj(DMOBJ *entryobj, char *obj_path, const char *parent_obj, const char *plugin_path)
+void disable_entry_obj(DMOBJ *entryobj, const char *obj_path, const char *parent_obj, const char *plugin_path)
 {
 	if (!entryobj || !plugin_path || DM_STRLEN(obj_path) == 0)
 		return;
@@ -281,7 +281,7 @@ void disable_entry_obj(DMOBJ *entryobj, char *obj_path, const char *parent_obj, 
 	}
 }
 
-void disable_entry_leaf(DMOBJ *entryobj, char *leaf_path, const char *parent_obj, const char *plugin_path)
+void disable_entry_leaf(DMOBJ *entryobj, const char *leaf_path, const char *parent_obj, const char *plugin_path)
 {
 	if (!entryobj || !plugin_path || DM_STRLEN(leaf_path) == 0)
 		return;

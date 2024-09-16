@@ -91,7 +91,7 @@ int bbf_uci_set_section_name(char *sec_name, char *str, size_t size)
 	return dmuci_set_section_name(sec_name, str, size);
 }
 
-struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, void *arg2, int cmp, int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk)
+struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, void *arg2, int cmp, int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk)
 {
 	return dmuci_walk_section(package, type, arg1, arg2, cmp, filter, prev_section, walk);
 
@@ -317,7 +317,7 @@ int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct d
 	return 0;
 }
 
-static char *bbfdm_get_reference_value(char *reference_path)
+static char *bbfdm_get_reference_value(const char *reference_path)
 {
 	unsigned int reference_path_dot_num = count_occurrences(reference_path, '.');
 	json_object *res = NULL;
@@ -379,7 +379,7 @@ static char *bbfdm_get_reference_value(char *reference_path)
 	return NULL;
 }
 
-int bbfdm_operate_reference_linker(struct dmctx *ctx, char *reference_path, char **reference_value)
+int bbfdm_operate_reference_linker(struct dmctx *ctx, const char *reference_path, char **reference_value)
 {
 	if (!ctx) {
 		BBF_ERR("%s: ctx should not be null", __func__);

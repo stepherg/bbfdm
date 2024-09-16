@@ -147,7 +147,7 @@ static inline void uci_list_init(struct uci_list *ptr)
 
 #define NEW_UCI_PATH(UCI_PATH)		\
 struct uci_context *uci_ctx_##UCI_PATH = NULL;			\
-int dmuci_get_section_type_##UCI_PATH(char *package, char *section,char **value)	\
+int dmuci_get_section_type_##UCI_PATH(const char *package, const char *section,char **value)	\
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -156,7 +156,7 @@ int dmuci_get_section_type_##UCI_PATH(char *package, char *section,char **value)
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_get_option_value_string_##UCI_PATH(char *package, char *section, char *option, char **value)	\
+int dmuci_get_option_value_string_##UCI_PATH(const char *package, const char *section, const char *option, char **value)	\
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -165,7 +165,7 @@ int dmuci_get_option_value_string_##UCI_PATH(char *package, char *section, char 
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_get_option_value_list_##UCI_PATH(char *package, char *section, char *option, struct uci_list **value) \
+int dmuci_get_option_value_list_##UCI_PATH(const char *package, const char *section, const char *option, struct uci_list **value) \
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -174,7 +174,7 @@ int dmuci_get_option_value_list_##UCI_PATH(char *package, char *section, char *o
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_set_value_##UCI_PATH(char *package, char *section, char *option, char *value) \
+int dmuci_set_value_##UCI_PATH(const char *package, const char *section, const char *option, const char *value) \
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -183,7 +183,7 @@ int dmuci_set_value_##UCI_PATH(char *package, char *section, char *option, char 
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_add_list_value_##UCI_PATH(char *package, char *section, char *option, char *value) \
+int dmuci_add_list_value_##UCI_PATH(const char *package, const char *section, const char *option, const char *value) \
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -192,7 +192,7 @@ int dmuci_add_list_value_##UCI_PATH(char *package, char *section, char *option, 
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_del_list_value_##UCI_PATH(char *package, char *section, char *option, char *value) \
+int dmuci_del_list_value_##UCI_PATH(const char *package, const char *section, const char *option, const char *value) \
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -201,7 +201,7 @@ int dmuci_del_list_value_##UCI_PATH(char *package, char *section, char *option, 
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_add_section_##UCI_PATH(char *package, char *stype, struct uci_section **s)\
+int dmuci_add_section_##UCI_PATH(const char *package, const char *stype, struct uci_section **s)\
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -210,7 +210,7 @@ int dmuci_add_section_##UCI_PATH(char *package, char *stype, struct uci_section 
 	uci_ctx = save_uci_ctx;			\
 	return res;				\
 }\
-int dmuci_delete_##UCI_PATH(char *package, char *section, char *option, char *value) \
+int dmuci_delete_##UCI_PATH(const char *package, const char *section, const char *option, const char *value) \
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -219,7 +219,7 @@ int dmuci_delete_##UCI_PATH(char *package, char *section, char *option, char *va
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_set_value_by_section_##UCI_PATH(struct uci_section *s, char *option, char *value)\
+int dmuci_set_value_by_section_##UCI_PATH(struct uci_section *s, const char *option, const char *value)\
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -228,7 +228,7 @@ int dmuci_set_value_by_section_##UCI_PATH(struct uci_section *s, char *option, c
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_delete_by_section_##UCI_PATH(struct uci_section *s, char *option, char *value)\
+int dmuci_delete_by_section_##UCI_PATH(struct uci_section *s, const char *option, const char *value)\
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -237,7 +237,7 @@ int dmuci_delete_by_section_##UCI_PATH(struct uci_section *s, char *option, char
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-struct uci_section *dmuci_walk_section_##UCI_PATH(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk)\
+struct uci_section *dmuci_walk_section_##UCI_PATH(const char *package, const char *stype, const void *arg1, const void *arg2, int cmp , int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk)\
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -291,7 +291,7 @@ int dmuci_revert_package_##UCI_PATH(char *package) \
 	uci_ctx = save_uci_ctx;			\
 	return res;						\
 }\
-int dmuci_delete_by_section_unnamed_##UCI_PATH(struct uci_section *s, char *option, char *value)\
+int dmuci_delete_by_section_unnamed_##UCI_PATH(struct uci_section *s, const char *option, const char *value)\
 {\
 	struct uci_context *save_uci_ctx;	\
 	save_uci_ctx = uci_ctx;			\
@@ -305,8 +305,8 @@ void bbfdm_uci_init(struct dmctx *bbf_ctx);
 void bbfdm_uci_exit(struct dmctx *bbf_ctx);
 
 char *dmuci_list_to_string(struct uci_list *list, const char *delimitor);
-int dmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, char *package, char *section, char *option, char *value);
-int dmuci_import(char *package_name, const char *input_path);
+int dmuci_lookup_ptr(struct uci_context *ctx, struct uci_ptr *ptr, const char *package, const char *section, const char *option, const char *value);
+int dmuci_import(const char *package_name, const char *input_path);
 int dmuci_export_package(char *package, const char *output_path);
 int dmuci_export(const char *output_path);
 int dmuci_commit_package(char *package);
@@ -316,56 +316,56 @@ int dmuci_save(void);
 int dmuci_revert_package(char *package);
 int dmuci_revert(void);
 
-int dmuci_get_section_type(char *package, char *section, char **value);
-int dmuci_get_option_value_string(char *package, char *section, char *option, char **value);
-char *dmuci_get_option_value_fallback_def(char *package, char *section, char *option, char *default_value);
-int dmuci_get_option_value_list(char *package, char *section, char *option, struct uci_list **value);
-int dmuci_set_value(char *package, char *section, char *option, char *value);
-int dmuci_add_list_value(char *package, char *section, char *option, char *value);
-int dmuci_del_list_value(char *package, char *section, char *option, char *value);
-int dmuci_add_section(char *package, char *stype, struct uci_section **s);
-int dmuci_delete(char *package, char *section, char *option, char *value);
-int dmuci_rename_section(char *package, char *section, char *value);
-int dmuci_get_value_by_section_string(struct uci_section *s, char *option, char **value);
-char *dmuci_get_value_by_section_fallback_def(struct uci_section *s, char *option, char *default_value);
-int dmuci_get_value_by_section_list(struct uci_section *s, char *option, struct uci_list **value);
-int dmuci_set_value_by_section(struct uci_section *s, char *option, char *value);
-int dmuci_delete_by_section(struct uci_section *s, char *option, char *value);
-int dmuci_delete_by_section_unnamed(struct uci_section *s, char *option, char *value);
-int dmuci_add_list_value_by_section(struct uci_section *s, char *option, char *value);
-int dmuci_del_list_value_by_section(struct uci_section *s, char *option, char *value);
-int dmuci_rename_section_by_section(struct uci_section *s, char *value);
+int dmuci_get_section_type(const char *package, const char *section, char **value);
+int dmuci_get_option_value_string(const char *package, const char *section, const char *option, char **value);
+char *dmuci_get_option_value_fallback_def(const char *package, const char *section, const char *option, const char *default_value);
+int dmuci_get_option_value_list(const char *package, const char *section, const char *option, struct uci_list **value);
+int dmuci_set_value(const char *package, const char *section, const char *option, const char *value);
+int dmuci_add_list_value(const char *package, const char *section, const char *option, const char *value);
+int dmuci_del_list_value(const char *package, const char *section, const char *option, const char *value);
+int dmuci_add_section(const char *package, const char *stype, struct uci_section **s);
+int dmuci_delete(const char *package, const char *section, const char *option, const char *value);
+int dmuci_rename_section(const char *package, const char *section, const char *value);
+int dmuci_get_value_by_section_string(struct uci_section *s, const char *option, char **value);
+char *dmuci_get_value_by_section_fallback_def(struct uci_section *s, const char *option, const char *default_value);
+int dmuci_get_value_by_section_list(struct uci_section *s, const char *option, struct uci_list **value);
+int dmuci_set_value_by_section(struct uci_section *s, const char *option, const char *value);
+int dmuci_delete_by_section(struct uci_section *s, const char *option, const char *value);
+int dmuci_delete_by_section_unnamed(struct uci_section *s, const char *option, const char *value);
+int dmuci_add_list_value_by_section(struct uci_section *s, const char *option, const char *value);
+int dmuci_del_list_value_by_section(struct uci_section *s, const char *option, const char *value);
+int dmuci_rename_section_by_section(struct uci_section *s, const char *value);
 int dmuci_reoder_section_by_section(struct uci_section *s, char *pos);
-struct uci_section *dmuci_walk_section(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
-struct uci_section *dmuci_walk_all_sections(char *package, struct uci_section *prev_section, int walk);
+struct uci_section *dmuci_walk_section(const char *package, const char *stype, const void *arg1, const void *arg2, int cmp , int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk);
+struct uci_section *dmuci_walk_all_sections(const char *package, struct uci_section *prev_section, int walk);
 
-int dmuci_get_option_value_string_bbfdm(char *package, char *section, char *option, char **value);
-int dmuci_set_value_bbfdm(char *package, char *section, char *option, char *value);
-int dmuci_set_value_by_section_bbfdm(struct uci_section *s, char *option, char *value);
-int dmuci_set_value_by_section_varstate(struct uci_section *s, char *option, char *value);
-int dmuci_add_section_bbfdm(char *package, char *stype, struct uci_section **s);
-int dmuci_delete_bbfdm(char *package, char *section, char *option, char *value);
-int dmuci_delete_by_section_unnamed_bbfdm(struct uci_section *s, char *option, char *value);
-int dmuci_delete_by_section_bbfdm(struct uci_section *s, char *option, char *value);
-int dmuci_delete_by_section_varstate(struct uci_section *s, char *option, char *value);
+int dmuci_get_option_value_string_bbfdm(const char *package, const char *section, const char *option, char **value);
+int dmuci_set_value_bbfdm(const char *package, const char *section, const char *option, const char *value);
+int dmuci_set_value_by_section_bbfdm(struct uci_section *s, const char *option, const char *value);
+int dmuci_set_value_by_section_varstate(struct uci_section *s, const char *option, const char *value);
+int dmuci_add_section_bbfdm(const char *package, const char *stype, struct uci_section **s);
+int dmuci_delete_bbfdm(const char *package, const char *section, const char *option, const char *value);
+int dmuci_delete_by_section_unnamed_bbfdm(struct uci_section *s, const char *option, const char *value);
+int dmuci_delete_by_section_bbfdm(struct uci_section *s, const char *option, const char *value);
+int dmuci_delete_by_section_varstate(struct uci_section *s, const char *option, const char *value);
 int dmuci_commit_package_bbfdm(char *package);
 int dmuci_commit_bbfdm(void);
 int dmuci_revert_bbfdm(void);
 int dmuci_commit_package_varstate(char *package);
 int dmuci_save_package_varstate(char *package);
 int dmuci_revert_package_varstate(char *package);
-struct uci_section *dmuci_walk_section_bbfdm(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
-struct uci_section *dmuci_walk_section_varstate(char *package, char *stype, void *arg1, void *arg2, int cmp , int (*filter)(struct uci_section *s, void *value), struct uci_section *prev_section, int walk);
+struct uci_section *dmuci_walk_section_bbfdm(const char *package, const char *stype, const void *arg1, const void *arg2, int cmp , int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk);
+struct uci_section *dmuci_walk_section_varstate(const char *package, const char *stype, const void *arg1, const void *arg2, int cmp , int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk);
 void commit_and_free_uci_ctx_bbfdm(char *dmmap_config);
-int dmuci_add_section_varstate(char *package, char *stype, struct uci_section **s);
-int db_get_value_string(char *package, char *section, char *option, char **value);
-int dmuci_get_option_value_string_varstate(char *package, char *section, char *option, char **value);
-int dmuci_set_value_varstate(char *package, char *section, char *option, char *value);
+int dmuci_add_section_varstate(const char *package, const char *stype, struct uci_section **s);
+int db_get_value_string(const char *package, const char *section, const char *option, char **value);
+int dmuci_get_option_value_string_varstate(const char *package, const char *section, const char *option, char **value);
+int dmuci_set_value_varstate(const char *package, const char *section, const char *option, const char *value);
 
-int dmuci_get_section_name(char *sec_name, char **value);
-int dmuci_set_section_name(char *sec_name, char *str, size_t size);
-bool dmuci_string_to_boolean(char *value);
-bool dmuci_is_option_value_empty(struct uci_section *s, char *option_name);
+int dmuci_get_section_name(const char *sec_name, char **value);
+int dmuci_set_section_name(const char *sec_name, char *str, size_t size);
+bool dmuci_string_to_boolean(const char *value);
+bool dmuci_is_option_value_empty(struct uci_section *s, const char *option_name);
 
 #endif
 

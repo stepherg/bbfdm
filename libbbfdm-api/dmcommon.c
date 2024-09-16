@@ -28,19 +28,23 @@ char *IPv6Prefix[] = {"^$", "^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-f
 
 pid_t get_pid(const char *pname)
 {
-	DIR* dir;
-	struct dirent* ent;
-	char* endptr;
-	char buf[512];
+	DIR *dir = NULL;
+	struct dirent *ent = NULL;
 
-	if (!(dir = opendir("/proc"))) {
+	if (!pname)
 		return -1;
-	}
+
+	if (!(dir = opendir("/proc")))
+		return -1;
+
 	while((ent = readdir(dir)) != NULL) {
+		char *endptr = NULL;
+		char buf[512] = {0};
+
 		long lpid = strtol(ent->d_name, &endptr, 10);
-		if (*endptr != '\0') {
+		if (*endptr != '\0')
 			continue;
-		}
+
 		snprintf(buf, sizeof(buf), "/proc/%ld/cmdline", lpid);
 		FILE* fp = fopen(buf, "r");
 		if (fp) {
@@ -56,6 +60,7 @@ pid_t get_pid(const char *pname)
 		}
 	}
 	closedir(dir);
+
 	return -1;
 }
 
@@ -82,13 +87,18 @@ char *get_uptime(void)
     return uptime;
 }
 
-int check_file(char *path)
+int check_file(const char *path)
 {
 	glob_t globbuf;
+
+	if (!path)
+		return 0;
+
 	if(glob(path, 0, NULL, &globbuf) == 0) {
 		globfree(&globbuf);
 		return 1;
 	}
+
 	return 0;
 }
 
@@ -131,15 +141,20 @@ int netmask2cidr(const char *netmask)
 }
 
 
-bool is_strword_in_optionvalue(char *optionvalue, char *str)
+bool is_strword_in_optionvalue(const char *option_value, const char *str)
 {
-	char *s = optionvalue;
+	if (!option_value || !str)
+		return false;
+
+	const char *s = option_value;
+
 	while ((s = DM_STRSTR(s, str))) {
 		int len = DM_STRLEN(str); //should be inside while, optimization reason
 		if(s[len] == '\0' || s[len] == ' ')
 			return true;
 		s++;
 	}
+
 	return false;
 }
 
@@ -168,14 +183,14 @@ static void dmcmd_exec(char *argv[])
 	exit(127);
 }
 
-int dmcmd(char *cmd, int n, ...)
+int dmcmd(const char *cmd, int n, ...)
 {
 	char *argv[n + 2];
 	va_list arg;
 	int i, status;
 	pid_t pid, wpid;
 
-	argv[0] = cmd;
+	argv[0] = (char *)cmd;
 	va_start(arg, n);
 	for (i = 0; i < n; i++) {
 		argv[i + 1] = va_arg(arg, char *);
@@ -202,14 +217,14 @@ int dmcmd(char *cmd, int n, ...)
 	return -1;
 }
 
-int dmcmd_no_wait(char *cmd, int n, ...)
+int dmcmd_no_wait(const char *cmd, int n, ...)
 {
 	char *argv[n + 2];
 	va_list arg;
 	int i;
 	pid_t pid;
 
-	argv[0] = cmd;
+	argv[0] = (char *)cmd;
 	va_start(arg, n);
 	for (i = 0; i < n; i++) {
 		argv[i + 1] = va_arg(arg, char *);
@@ -252,9 +267,12 @@ int run_cmd(const char *cmd, char *output, size_t out_len)
 	return ret;
 }
 
-void hex_to_ip(char *address, char *ret, size_t size)
+int hex_to_ip(const char *address, char *ret, size_t size)
 {
 	unsigned int ip[4] = {0};
+
+	if (!address || !ret || !size)
+		return -1;
 
 	sscanf(address, "%2x%2x%2x%2x", &(ip[0]), &(ip[1]), &(ip[2]), &(ip[3]));
 	if (htonl(13) == 13) {
@@ -262,6 +280,8 @@ void hex_to_ip(char *address, char *ret, size_t size)
 	} else {
 		snprintf(ret, size, "%u.%u.%u.%u", ip[3], ip[2], ip[1], ip[0]);
 	}
+
+	return 0;
 }
 
 /*
@@ -290,7 +310,7 @@ void free_dmmap_config_dup_list(struct list_head *dup_list)
 /*
  * Function allows to synchronize config section with dmmap config
  */
-struct uci_section *get_origin_section_from_config(char *package, char *section_type, char *orig_section_name)
+struct uci_section *get_origin_section_from_config(const char *package, const char *section_type, const char *orig_section_name)
 {
 	struct uci_section *s = NULL;
 
@@ -302,7 +322,7 @@ struct uci_section *get_origin_section_from_config(char *package, char *section_
 	return NULL;
 }
 
-struct uci_section *get_origin_section_from_dmmap(char *package, char *section_type, char *orig_section_name)
+struct uci_section *get_origin_section_from_dmmap(const char *package, const char *section_type, const char *orig_section_name)
 {
 	struct uci_section *s = NULL;
 
@@ -314,9 +334,9 @@ struct uci_section *get_origin_section_from_dmmap(char *package, char *section_t
 	return NULL;
 }
 
-struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_type, char *orig_section_name)
+struct uci_section *get_dup_section_in_dmmap(const char *dmmap_package, const char *section_type, const char *orig_section_name)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_path_foreach_sections(bbfdm, dmmap_package, section_type, s) {
 		char *dmmap_sec_name = NULL;
@@ -330,9 +350,9 @@ struct uci_section *get_dup_section_in_dmmap(char *dmmap_package, char *section_
 	return NULL;
 }
 
-struct uci_section *get_dup_section_in_config_opt(char *package, char *section_type, char *opt_name, char *opt_value)
+struct uci_section *get_dup_section_in_config_opt(const char *package, const char *section_type, const char *opt_name, const char *opt_value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_foreach_option_eq(package, section_type, opt_name, opt_value, s) {
 		return s;
@@ -341,9 +361,9 @@ struct uci_section *get_dup_section_in_config_opt(char *package, char *section_t
 	return NULL;
 }
 
-struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *section_type, char *opt_name, char *opt_value)
+struct uci_section *get_dup_section_in_dmmap_opt(const char *dmmap_package, const char *section_type, const char *opt_name, const char *opt_value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, opt_name, opt_value, s) {
 		return s;
@@ -352,20 +372,23 @@ struct uci_section *get_dup_section_in_dmmap_opt(char *dmmap_package, char *sect
 	return NULL;
 }
 
-struct uci_section *get_dup_section_in_dmmap_eq(char *dmmap_package, char* section_type, char*sect_name, char *opt_name, char *opt_value)
+struct uci_section *get_dup_section_in_dmmap_eq(const char *dmmap_package, const char *section_type,
+		const char *sect_name, const char *opt_name, const char *opt_value)
 {
-	struct uci_section *s;
-	char *v;
+	struct uci_section *s = NULL;
+	char *v = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, "section_name", sect_name, s) {
 		dmuci_get_value_by_section_string(s, opt_name, &v);
 		if (DM_STRCMP(v, opt_value) == 0)
 			return s;
 	}
+
 	return NULL;
 }
 
-struct uci_section *get_section_in_dmmap_with_options_eq(char *dmmap_package, char *section_type, char *opt1_name, char *opt1_value, char *opt2_name, char *opt2_value)
+struct uci_section *get_section_in_dmmap_with_options_eq(const char *dmmap_package, const char *section_type,
+		const char *opt1_name, const char *opt1_value, const char *opt2_name, const char *opt2_value)
 {
 	struct uci_section *s = NULL;
 
@@ -380,10 +403,10 @@ struct uci_section *get_section_in_dmmap_with_options_eq(char *dmmap_package, ch
 	return NULL;
 }
 
-void synchronize_specific_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list)
+void synchronize_specific_config_sections_with_dmmap(const char *package, const char *section_type, const char *dmmap_package, struct list_head *dup_list)
 {
-	struct uci_section *s, *stmp, *dmmap_sect;
-	char *v;
+	struct uci_section *s = NULL, *stmp = NULL, *dmmap_sect = NULL;
+	char *v = NULL;
 
 	uci_foreach_sections(package, section_type, s) {
 		/*
@@ -410,7 +433,8 @@ void synchronize_specific_config_sections_with_dmmap(char *package, char *sectio
 	}
 }
 
-void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *section_type, char *dmmap_package, char* option_name, char* option_value, struct list_head *dup_list)
+void synchronize_specific_config_sections_with_dmmap_eq(const char *package, const char *section_type, const char *dmmap_package,
+		const char *option_name, const char *option_value, struct list_head *dup_list)
 {
 	struct uci_section *s, *stmp, *dmmap_sec;
 	char *v;
@@ -440,10 +464,11 @@ void synchronize_specific_config_sections_with_dmmap_eq(char *package, char *sec
 	}
 }
 
-void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *section_type, char *dmmap_package, char* option_name, char* option_value, struct list_head *dup_list)
+void synchronize_specific_config_sections_with_dmmap_cont(const char *package, const char *section_type, const char *dmmap_package,
+		const char *option_name, const char *option_value, struct list_head *dup_list)
 {
-	struct uci_section *uci_s, *stmp, *dmmap_sect;
-	char *v;
+	struct uci_section *uci_s = NULL, *stmp = NULL, *dmmap_sect = NULL;
+	char *v = NULL;
 
 	uci_foreach_option_cont(package, section_type, option_name, option_value, uci_s) {
 		/*
@@ -470,9 +495,9 @@ void synchronize_specific_config_sections_with_dmmap_cont(char *package, char *s
 	}
 }
 
-void get_dmmap_section_of_config_section(char* dmmap_package, char* section_type, char *section_name, struct uci_section **dmmap_section)
+void get_dmmap_section_of_config_section(const char *dmmap_package, const char *section_type, const char *section_name, struct uci_section **dmmap_section)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, "section_name", section_name, s) {
 		*dmmap_section = s;
@@ -481,9 +506,9 @@ void get_dmmap_section_of_config_section(char* dmmap_package, char* section_type
 	*dmmap_section = NULL;
 }
 
-void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section)
+void get_dmmap_section_of_config_section_eq(const char *dmmap_package, const char *section_type, const char *opt, const char *value, struct uci_section **dmmap_section)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, dmmap_package, section_type, opt, value, s) {
 		*dmmap_section = s;
@@ -492,9 +517,9 @@ void get_dmmap_section_of_config_section_eq(char* dmmap_package, char* section_t
 	*dmmap_section = NULL;
 }
 
-void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section_type, char *opt, char* value, struct uci_section **dmmap_section)
+void get_dmmap_section_of_config_section_cont(const char *dmmap_package, const char *section_type, const char *opt, const char *value, struct uci_section **dmmap_section)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_path_foreach_option_cont(bbfdm, dmmap_package, section_type, opt, value, s) {
 		*dmmap_section = s;
@@ -503,9 +528,9 @@ void get_dmmap_section_of_config_section_cont(char* dmmap_package, char* section
 	*dmmap_section = NULL;
 }
 
-void get_config_section_of_dmmap_section(char* package, char* section_type, char *section_name, struct uci_section **config_section)
+void get_config_section_of_dmmap_section(const char *package, const char *section_type, const char *section_name, struct uci_section **config_section)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_foreach_sections(package, section_type, s) {
 		if (strcmp(section_name(s), section_name) == 0) {
@@ -516,10 +541,13 @@ void get_config_section_of_dmmap_section(char* package, char* section_type, char
 	*config_section = NULL;
 }
 
-char *check_create_dmmap_package(const char *dmmap_package)
+static char *check_create_dmmap_package(const char *dmmap_package)
 {
-	char *path;
+	char *path = NULL;
 	int rc;
+
+	if (!dmmap_package)
+		return NULL;
 
 	rc = dmasprintf(&path, "/etc/bbfdm/dmmap/%s", dmmap_package);
 	if (rc == -1)
@@ -533,12 +561,13 @@ char *check_create_dmmap_package(const char *dmmap_package)
 		if (fp)
 			fclose(fp);
 	}
+
 	return path;
 }
 
-struct uci_section *is_dmmap_section_exist(char* package, char* section)
+struct uci_section *is_dmmap_section_exist(const char *package, const char *section)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_path_foreach_sections(bbfdm, package, section, s) {
 		return s;
@@ -546,9 +575,9 @@ struct uci_section *is_dmmap_section_exist(char* package, char* section)
 	return NULL;
 }
 
-struct uci_section *is_dmmap_section_exist_eq(char* package, char* section, char* opt, char* value)
+struct uci_section *is_dmmap_section_exist_eq(const char *package, const char *section, const char *opt, const char *value)
 {
-	struct uci_section *s;
+	struct uci_section *s = NULL;
 
 	uci_path_foreach_option_eq(bbfdm, package, section, opt, value, s) {
 		return s;
@@ -695,7 +724,7 @@ void convert_str_to_uppercase(char *str)
 	}
 }
 
-char *get_macaddr(char *interface_name)
+char *get_macaddr(const char *interface_name)
 {
 	char *device = get_device(interface_name);
 	char *mac;
@@ -714,7 +743,7 @@ char *get_macaddr(char *interface_name)
 	return mac;
 }
 
-char *get_device(char *interface_name)
+char *get_device(const char *interface_name)
 {
 	json_object *res;
 
@@ -722,7 +751,7 @@ char *get_device(char *interface_name)
 	return dmjson_get_value(res, 1, "device");
 }
 
-char *get_l3_device(char *interface_name)
+char *get_l3_device(const char *interface_name)
 {
 	json_object *res;
 
@@ -745,7 +774,7 @@ bool value_exists_in_uci_list(struct uci_list *list, const char *value)
 	return false;
 }
 
-bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *str)
+bool value_exits_in_str_list(const char *str_list, const char *delimitor, const char *str)
 {
 	char *pch = NULL, *spch = NULL;
 
@@ -762,7 +791,7 @@ bool value_exits_in_str_list(char *str_list, const char *delimitor, const char *
 	return false;
 }
 
-char *add_str_to_str_list(char *str_list, const char *delimitor, const char *str)
+char *add_str_to_str_list(const char *str_list, const char *delimitor, const char *str)
 {
 	char *res = "";
 
@@ -774,7 +803,7 @@ char *add_str_to_str_list(char *str_list, const char *delimitor, const char *str
 	return res;
 }
 
-char *remove_str_from_str_list(char *str_list, const char *delimitor, const char *str)
+char *remove_str_from_str_list(const char *str_list, const char *delimitor, const char *str)
 {
 	char *pch = NULL, *spch = NULL;
 	unsigned pos = 0;
@@ -1006,6 +1035,9 @@ bool match(const char *string, const char *pattern, size_t nmatch, regmatch_t pm
 {
 	regex_t re;
 
+	if (!string || !pattern)
+		return 0;
+
 	if (regcomp(&re, pattern, REG_EXTENDED) != 0)
 		return 0;
 
@@ -1029,7 +1061,7 @@ void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...)
 	va_end(args);
 }
 
-static int bbfdm_validate_string_length(struct dmctx *ctx, char *value, int min_length, int max_length)
+static int bbfdm_validate_string_length(struct dmctx *ctx, const char *value, int min_length, int max_length)
 {
 	if ((min_length > 0) && (DM_STRLEN(value) < min_length)) {
 		bbfdm_set_fault_message(ctx, "The length of '%s' value must be greater than '%d'.", value, min_length);
@@ -1044,7 +1076,7 @@ static int bbfdm_validate_string_length(struct dmctx *ctx, char *value, int min_
 	return 0;
 }
 
-static int bbfdm_validate_string_enumeration(struct dmctx *ctx, char *value, char *enumeration[])
+static int bbfdm_validate_string_enumeration(struct dmctx *ctx, const char *value, char *enumeration[])
 {
 	for (; *enumeration; enumeration++) {
 		if (DM_STRCMP(*enumeration, value) == 0)
@@ -1055,7 +1087,7 @@ static int bbfdm_validate_string_enumeration(struct dmctx *ctx, char *value, cha
 	return -1;
 }
 
-static int bbfdm_validate_string_pattern(struct dmctx *ctx, char *value, char *pattern[])
+static int bbfdm_validate_string_pattern(struct dmctx *ctx, const char *value, char *pattern[])
 {
 	for (; *pattern; pattern++) {
 		if (match(value, *pattern, 0, NULL))
@@ -1066,7 +1098,7 @@ static int bbfdm_validate_string_pattern(struct dmctx *ctx, char *value, char *p
 	return -1;
 }
 
-int bbfdm_validate_string(struct dmctx *ctx, char *value, int min_length, int max_length, char *enumeration[], char *pattern[])
+int bbfdm_validate_string(struct dmctx *ctx, const char *value, int min_length, int max_length, char *enumeration[], char *pattern[])
 {
 	/* check size */
 	if (bbfdm_validate_string_length(ctx, value, min_length, max_length))
@@ -1083,7 +1115,7 @@ int bbfdm_validate_string(struct dmctx *ctx, char *value, int min_length, int ma
 	return 0;
 }
 
-int bbfdm_validate_boolean(struct dmctx *ctx, char *value)
+int bbfdm_validate_boolean(struct dmctx *ctx, const char *value)
 {
 	/* check format */
 	if ((value[0] == '1' && value[1] == '\0') ||
@@ -1097,7 +1129,7 @@ int bbfdm_validate_boolean(struct dmctx *ctx, char *value)
 	return -1;
 }
 
-int bbfdm_validate_unsignedInt(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_unsignedInt(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size)
 {
 	if (!value || value[0] == 0) {
 		bbfdm_set_fault_message(ctx, "Value should not be blank.");
@@ -1160,7 +1192,7 @@ int bbfdm_validate_unsignedInt(struct dmctx *ctx, char *value, struct range_args
 	return 0;
 }
 
-int bbfdm_validate_int(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_int(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size)
 {
 	if (!value || value[0] == 0) {
 		bbfdm_set_fault_message(ctx, "Value should not be blank.");
@@ -1218,7 +1250,7 @@ int bbfdm_validate_int(struct dmctx *ctx, char *value, struct range_args r_args[
 	return 0;
 }
 
-int bbfdm_validate_unsignedLong(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_unsignedLong(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size)
 {
 	if (!value || value[0] == 0) {
 		bbfdm_set_fault_message(ctx, "Value should not be blank.");
@@ -1276,7 +1308,7 @@ int bbfdm_validate_unsignedLong(struct dmctx *ctx, char *value, struct range_arg
 	return 0;
 }
 
-int bbfdm_validate_long(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_long(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size)
 {
 	if (!value || value[0] == 0) {
 		bbfdm_set_fault_message(ctx, "Value should not be blank.");
@@ -1329,7 +1361,7 @@ int bbfdm_validate_long(struct dmctx *ctx, char *value, struct range_args r_args
 	return 0;
 }
 
-int bbfdm_validate_dateTime(struct dmctx *ctx, char *value)
+int bbfdm_validate_dateTime(struct dmctx *ctx, const char *value)
 {
 	/*
 	 * Allowed format:
@@ -1361,7 +1393,7 @@ int bbfdm_validate_dateTime(struct dmctx *ctx, char *value)
 	return 0;
 }
 
-int bbfdm_validate_hexBinary(struct dmctx *ctx, char *value, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_hexBinary(struct dmctx *ctx, const char *value, struct range_args r_args[], int r_args_size)
 {
 	int i;
 
@@ -1421,7 +1453,7 @@ static int bbfdm_validate_size_list(struct dmctx *ctx, int min_item, int max_ite
 	return 0;
 }
 
-int bbfdm_validate_string_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[])
+int bbfdm_validate_string_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[])
 {
 	char *pch, *pchr;
 	int nbr_item = 0;
@@ -1455,7 +1487,7 @@ int bbfdm_validate_string_list(struct dmctx *ctx, char *value, int min_item, int
 	return 0;
 }
 
-int bbfdm_validate_unsignedInt_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_unsignedInt_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
 	char *tmp, *saveptr;
 	int nbr_item = 0;
@@ -1489,7 +1521,7 @@ int bbfdm_validate_unsignedInt_list(struct dmctx *ctx, char *value, int min_item
 	return 0;
 }
 
-int bbfdm_validate_int_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_int_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
 	char *token, *pchr;
 	int nbr_item = 0;
@@ -1523,7 +1555,7 @@ int bbfdm_validate_int_list(struct dmctx *ctx, char *value, int min_item, int ma
 	return 0;
 }
 
-int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
 	char *token, *tmp;
 	int nbr_item = 0;
@@ -1557,7 +1589,7 @@ int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, char *value, int min_ite
 	return 0;
 }
 
-int bbfdm_validate_long_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_long_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
 	char *pch, *saveptr;
 	int nbr_item = 0;
@@ -1591,7 +1623,7 @@ int bbfdm_validate_long_list(struct dmctx *ctx, char *value, int min_item, int m
 	return 0;
 }
 
-int bbfdm_validate_hexBinary_list(struct dmctx *ctx, char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
+int bbfdm_validate_hexBinary_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size)
 {
 	char *pch, *spch;
 	int nbr_item = 0;
@@ -1851,7 +1883,7 @@ void strip_lead_trail_whitespace(char *str)
 	}
 }
 
-int dm_buf_to_file(char *buf, const char *filename)
+int dm_buf_to_file(const char *buf, const char *filename)
 {
 	FILE *file;
 	int ret = -1;
@@ -1868,7 +1900,7 @@ int dm_buf_to_file(char *buf, const char *filename)
 	return ret;
 }
 
-int dm_file_to_buf(const char *filename, void *buf, size_t buf_size)
+int dm_file_to_buf(const char *filename, char *buf, size_t buf_size)
 {
 	FILE *file;
 	int ret = -1;
@@ -1878,11 +1910,11 @@ int dm_file_to_buf(const char *filename, void *buf, size_t buf_size)
 		ret = fread(buf, 1, buf_size - 1, file);
 		fclose(file);
 	}
-	((char *)buf)[ret > 0 ? ret : 0] = '\0';
+	buf[ret > 0 ? ret : 0] = '\0';
 	return ret;
 }
 
-int dm_file_copy(char *src, char *dst)
+int dm_file_copy(const char *src, const char *dst)
 {
 	size_t n;
 	char buf[1024];
@@ -1941,20 +1973,23 @@ int parse_proc_intf6_line(const char *line, const char *device, char *ipstr, siz
 	return 0;
 }
 
-char *diagnostics_get_option(char *sec_name, char *option)
+char *diagnostics_get_option(const char *sec_name, const char *option)
 {
 	char *value = NULL;
 	dmuci_get_option_value_string_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, option, &value);
 	return value;
 }
 
-char *diagnostics_get_option_fallback_def(char *sec_name, char *option, char *default_value)
+char *diagnostics_get_option_fallback_def(const char *sec_name, const char *option, const char *default_value)
 {
 	char *value = diagnostics_get_option(sec_name, option);
-	return (*value != '\0') ? value : default_value;
+	if (DM_STRLEN(value) == 0)
+		value = dmstrdup(default_value);
+
+	return value;
 }
 
-void diagnostics_set_option(char *sec_name, char *option, char *value)
+void diagnostics_set_option(const char *sec_name, const char *option, const char *value)
 {
 	check_create_dmmap_package(DMMAP_DIAGNOSTIGS);
 	struct uci_section *section = dmuci_walk_section_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, NULL, NULL, CMP_SECTION, NULL, NULL, GET_FIRST_SECTION);
@@ -1964,7 +1999,7 @@ void diagnostics_set_option(char *sec_name, char *option, char *value)
 	dmuci_set_value_bbfdm(DMMAP_DIAGNOSTIGS, sec_name, option, value);
 }
 
-void diagnostics_reset_state(char *sec_name)
+void diagnostics_reset_state(const char *sec_name)
 {
 	char *diag_state = diagnostics_get_option(sec_name, "DiagnosticState");
 	if (strcmp(diag_state, "Requested") != 0) {
@@ -1972,7 +2007,7 @@ void diagnostics_reset_state(char *sec_name)
 	}
 }
 
-char *diagnostics_get_interface_name(struct dmctx *ctx, char *value)
+char *diagnostics_get_interface_name(struct dmctx *ctx, const char *value)
 {
 	char *linker = NULL;
 
