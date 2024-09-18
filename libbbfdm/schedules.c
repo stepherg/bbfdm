@@ -158,6 +158,7 @@ static int addSchedule(char *refparam, struct dmctx *ctx, void *data, char **ins
 	dmuci_add_section_bbfdm("dmmap_schedules", "schedule", &dmmap_s);
 	dmuci_set_value_by_section(dmmap_s, "section_name", s_name);
 	dmuci_set_value_by_section(dmmap_s, "schedule_instance", *instance);
+	dmuci_set_value_by_section(dmmap_s, "schedule_alias", s_name);
 	return 0;
 }
 
@@ -257,7 +258,35 @@ static int get_schedule_alias(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int set_schedule_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "schedule_alias", instance, value);
+	int ret = 0;
+
+	switch (action) {
+	case VALUECHECK:
+		if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL)) {
+			ret = FAULT_9007;
+			break;
+		}
+
+		/* alias is mapped with the section name because this value is used by external packages
+		 * to refer to schedule configuration. As alias is mapped with section name so we can't
+		 * accept empty value and as well as special characters in the alias.
+		 * Encoded section name is also not used because that will keep the section name encoded
+		 * but the linker value will return decoded string value thus external package will fail
+		 * to refer to correct section */
+		if ((DM_STRLEN(value) == 0) || special_char_exits(value)) {
+			bbfdm_set_fault_message(ctx, "Empty value and character other than A-Z,a-z,0-9 and _ are not allowed");
+			ret = FAULT_9007;
+		}
+
+		break;
+	case VALUESET:
+		dmuci_rename_section_by_section(((struct dm_data *)data)->config_section, value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "section_name", value);
+		dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "schedule_alias", value);
+		break;
+	}
+
+	return ret;
 }
 
 static int get_schedule_desc(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
