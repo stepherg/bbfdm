@@ -20,11 +20,11 @@
           "description": "Enabled debug logging"
         },
         {
-          "name": "sock",
-          "type": "string",
+          "name": "loglevel",
+          "type": "unsigned integer",
           "required": "no",
-          "default": "",
-          "description": "Path for ubus socket to register bbfdmd services"
+          "default": "3",
+          "description": "Log verbosity value as per standard syslog"
         }
       ]
     },

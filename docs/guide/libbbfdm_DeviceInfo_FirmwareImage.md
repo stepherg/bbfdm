@@ -11,7 +11,7 @@ The Activate() command has as arguments the TimeWindow object which is used to a
 Below is an example of an 'Activate()' command call with three TimeWindow instances. As a result, three jobs are created according to the defined TimeWindow.{i}.Start:
 
 ```bash
-root@iopsys-44d43771aff0:~# ubus call usp operate '{"path":"Device.DeviceInfo.FirmwareImage.2.", "action":"Activate()", "input":{"TimeWindow.1
+root@iopsys-44d43771aff0:~# ubus call bbfdm operate '{"path":"Device.DeviceInfo.FirmwareImage.2.", "action":"Activate()", "input":{"TimeWindow.1
 .Start":"1800", "TimeWindow.1.End":"3600", "TimeWindow.1.Mode":"WhenIdle", "TimeWindow.2.Start":"5400", "TimeWindow.2.End":"9000", "TimeWindow
 .2.Mode":"WhenIdle", "TimeWindow.3.Start":"86400", "TimeWindow.3.End":"172800", "TimeWindow.3.Mode":"Immediately"}}'
 {

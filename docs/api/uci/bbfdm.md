@@ -69,19 +69,19 @@
                                     </tr>
                                     <tr>
                                         <td class="td_row_even">
-                                            <div class="td_row_even">sock</div>
+                                            <div class="td_row_even">loglevel</div>
                                         </td>
                                         <td class="td_row_even">
-                                            <div class="td_row_even">string</div>
+                                            <div class="td_row_even">unsigned integer</div>
                                         </td>
                                         <td class="td_row_even">
                                             <div class="td_row_even">no</div>
                                         </td>
                                         <td class="td_row_even">
-                                            <div class="td_row_even"></div>
+                                            <div class="td_row_even">3</div>
                                         </td>
                                         <td class="td_row_even">
-                                            <div class="td_row_even">Path for ubus socket to register bbfdmd services</div>
+                                            <div class="td_row_even">Log verbosity value as per standard syslog</div>
                                         </td>
                                     </tr>
                                 </tbody>
