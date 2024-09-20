@@ -47,8 +47,10 @@ extern char *DMT_TYPE[];
 
 #define DM_STRNCPY(DST, SRC, SIZE) \
 do { \
-	strncpy(DST, SRC, SIZE - 1); \
-	DST[SIZE-1] = '\0'; \
+	if ((DST) != NULL && (SRC) != NULL) { \
+		strncpy(DST, SRC, SIZE - 1); \
+		DST[SIZE-1] = '\0'; \
+	} \
 } while(0)
 
 #define DM_ULTOSTR(DST, SRC, SIZE) \
@@ -165,36 +167,41 @@ struct dm_reference {
 struct dmctx {
 	bool stop;
 	bool match;
+	bool nextlevel;
+	bool iswildcard;
+	bool isgetschema;
+	bool iscommand;
+	bool isevent;
+	bool isinfo;
+	bool disable_mservice_browse;
+
 	int (*method_param)(DMPARAM_ARGS);
 	int (*method_obj)(DMOBJECT_ARGS);
 	int (*checkobj)(DMOBJECT_ARGS);
 	int (*checkleaf)(DMOBJECT_ARGS);
+
 	struct list_head *memhead;
 	struct blob_buf bb;
+
 	DMOBJ *dm_entryobj;
 	struct uci_context *config_uci_ctx;
 	struct uci_context *dmmap_uci_ctx;
 	struct uci_context *varstate_uci_ctx;
-	bool nextlevel;
-	bool iswildcard;
+
 	int faultcode;
-	char fault_msg[256];
 	int setaction;
+	unsigned int dm_type;
+	unsigned char inparam_isparam;
+	unsigned char findparam;
+
 	char *in_param;
 	char *in_value;
 	char *in_type;
 	char *addobj_instance;
 	char *linker;
 	char *linker_param;
-	unsigned int dm_type;
-	unsigned char inparam_isparam;
-	unsigned char findparam;
 	char *inst_buf[16];
-	bool isgetschema;
-	bool iscommand;
-	bool isevent;
-	bool isinfo;
-	bool disable_mservice_browse;
+	char fault_msg[256];
 };
 
 typedef struct dmnode {

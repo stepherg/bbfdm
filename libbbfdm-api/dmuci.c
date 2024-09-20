@@ -17,7 +17,6 @@
 #include "dmmem.h"
 
 static struct uci_context *uci_ctx = NULL;
-static char *db_config = NULL;
 
 NEW_UCI_PATH(bbfdm)
 NEW_UCI_PATH(varstate)
@@ -52,8 +51,6 @@ void bbfdm_uci_init(struct dmctx *bbf_ctx)
 	uci_ctx = bbf_ctx->config_uci_ctx;
 	uci_ctx_bbfdm = bbf_ctx->dmmap_uci_ctx;
 	uci_ctx_varstate = bbf_ctx->varstate_uci_ctx;
-
-	db_config = ETC_DB_CONFIG;
 }
 
 void bbfdm_uci_exit(struct dmctx *bbf_ctx)
@@ -154,13 +151,13 @@ int dmuci_get_section_type(const char *package, const char *section, char **valu
 	struct uci_ptr ptr = {0};
 
 	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, NULL, NULL)) {
-		*value = "";
+		*value = dmstrdup("");
 		return -1;
 	}
 	if (ptr.s) {
 		*value = dmstrdup(ptr.s->type); // MEM WILL BE FREED IN DMMEMCLEAN
 	} else {
-		*value = "";
+		*value = dmstrdup("");
 		return -1;
 	}
 	return 0;
@@ -171,7 +168,7 @@ int dmuci_get_option_value_string(const char *package, const char *section, cons
 	struct uci_ptr ptr = {0};
 
 	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, NULL)) {
-		*value = "";
+		*value = dmstrdup("");
 		return -1;
 	}
 	if (ptr.o && ptr.o->type == UCI_TYPE_LIST) {
@@ -179,7 +176,7 @@ int dmuci_get_option_value_string(const char *package, const char *section, cons
 	} else if (ptr.o && ptr.o->v.string) {
 		*value = dmstrdup(ptr.o->v.string); // MEM WILL BE FREED IN DMMEMCLEAN
 	} else {
-		*value = "";
+		*value = dmstrdup("");
 		return -1;
 	}
 	return 0;
@@ -187,10 +184,10 @@ int dmuci_get_option_value_string(const char *package, const char *section, cons
 
 char *dmuci_get_option_value_fallback_def(const char *package, const char *section, const char *option, const char *default_value)
 {
-	char *value = "";
+	char *value = NULL;
 
 	dmuci_get_option_value_string(package, section, option, &value);
-	if (*value == '\0')
+	if (DM_STRLEN(value) == 0)
 		value = dmstrdup(default_value);
 
 	return value;
@@ -237,7 +234,7 @@ int dmuci_get_option_value_list(const char *package, const char *section, const 
 	return 0;
 }
 
-static struct uci_option *dmuci_get_option_ptr(char *cfg_path, const char *package, const char *section, const char *option)
+static struct uci_option *dmuci_get_option_ptr(const char *cfg_path, const char *package, const char *section, const char *option)
 {
 	struct uci_option *o = NULL;
 	struct uci_element *e = NULL;
@@ -245,7 +242,7 @@ static struct uci_option *dmuci_get_option_ptr(char *cfg_path, const char *packa
 	char *oconfdir;
 
 	oconfdir = uci_ctx->confdir;
-	uci_ctx->confdir = cfg_path;
+	uci_ctx->confdir = dmstrdup(cfg_path);
 
 	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, NULL))
 		goto end;
@@ -597,23 +594,23 @@ int dmuci_get_value_by_section_string(struct uci_section *s, const char *option,
 			if (o->type == UCI_TYPE_LIST) {
 				*value = dmuci_list_to_string(&o->v.list, " ");
 			} else {
-				*value = o->v.string ? dmstrdup(o->v.string) : ""; // MEM WILL BE FREED IN DMMEMCLEAN
+				*value = o->v.string ? dmstrdup(o->v.string) : dmstrdup(""); // MEM WILL BE FREED IN DMMEMCLEAN
 			}
 			return 0;
 		}
 	}
 
 not_found:
-	*value = "";
+	*value = dmstrdup("");
 	return -1;
 }
 
 char *dmuci_get_value_by_section_fallback_def(struct uci_section *s, const char *option, const char *default_value)
 {
-	char *value = "";
+	char *value = NULL;
 
 	dmuci_get_value_by_section_string(s, option, &value);
-	if (*value == '\0')
+	if (DM_STRLEN(value) == 0)
 		value = dmstrdup(default_value);
 
 	return value;
@@ -787,12 +784,12 @@ struct uci_section *dmuci_walk_section (const char *package, const char *stype, 
 					goto end;
 				case CMP_OPTION_EQUAL:
 					dmuci_get_value_by_section_string(s, (const char *)arg1, &value);
-					if (DM_STRCMP(value, (char *)arg2) == 0)
+					if (DM_STRCMP(value, (const char *)arg2) == 0)
 						goto end;
 					break;
 				case CMP_OPTION_CONTAINING:
 					dmuci_get_value_by_section_string(s, (const char *)arg1, &value);
-					if (DM_STRSTR(value, (char *)arg2))
+					if (DM_STRSTR(value, (const char *)arg2))
 						goto end;
 					break;
 				case CMP_OPTION_CONT_WORD:
@@ -800,7 +797,7 @@ struct uci_section *dmuci_walk_section (const char *package, const char *stype, 
 					dup = dmstrdup(value);
 					pch = strtok_r(dup, " ", &spch);
 					while (pch != NULL) {
-						if (DM_STRCMP((char *)arg2, pch) == 0) {
+						if (DM_STRCMP((const char *)arg2, pch) == 0) {
 							dmfree(dup);
 							goto end;
 						}
@@ -812,7 +809,7 @@ struct uci_section *dmuci_walk_section (const char *package, const char *stype, 
 					dmuci_get_value_by_section_list(s, (const char *)arg1, &list_value);
 					if (list_value != NULL) {
 						uci_foreach_element(list_value, m) {
-							if (DM_STRCMP(m->name, (char *)arg2) == 0)
+							if (DM_STRCMP(m->name, (const char *)arg2) == 0)
 								goto end;
 						}
 					}										
@@ -855,13 +852,13 @@ struct uci_section *dmuci_walk_all_sections(const char *package, struct uci_sect
 /**** UCI GET db config *****/
 int db_get_value_string(const char *package, const char *section, const char *option, char **value)
 {
-	struct uci_option *o;
+	struct uci_option *o = NULL;
 
-	o = dmuci_get_option_ptr((db_config) ? db_config : ETC_DB_CONFIG, package, section, option);
+	o = dmuci_get_option_ptr(ETC_DB_CONFIG, package, section, option);
 	if (o) {
-		*value = o->v.string ? dmstrdup(o->v.string) : ""; // MEM WILL BE FREED IN DMMEMCLEAN
+		*value = o->v.string ? dmstrdup(o->v.string) : dmstrdup(""); // MEM WILL BE FREED IN DMMEMCLEAN
 	} else {
-		*value = "";
+		*value = dmstrdup("");
 		return -1;
 	}
 	return 0;

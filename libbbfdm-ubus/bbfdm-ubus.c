@@ -116,7 +116,7 @@ static void async_complete_cb(struct uloop_process *p, __attribute__((unused)) i
 
 static struct bbfdm_async_req *async_req_new(void)
 {
-	struct bbfdm_async_req *r = malloc(sizeof(*r));
+	struct bbfdm_async_req *r = (struct bbfdm_async_req *)calloc(1, sizeof(*r));
 
 	if (r) {
 		memset(&r->process, 0, sizeof(r->process));
@@ -883,7 +883,7 @@ static struct ubus_object bbf_object = {
 
 static void run_schema_updater(struct bbfdm_context *u)
 {
-	bool ret;
+	bool ret = false;
 	char method_name[256] = {0};
 
 	ret = is_object_schema_update_available(u);
@@ -1197,7 +1197,7 @@ static int daemon_load_config_internal_plugin(bbfdm_config_t *config)
 
 static int daemon_load_config(bbfdm_config_t *config)
 {
-	int err = -1;
+	int err = 0;
 
 	if (INTERNAL_ROOT_TREE) {
 		err = daemon_load_config_internal_plugin(config);
@@ -1323,7 +1323,7 @@ static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 
 static int daemon_load_data_model(struct bbfdm_context *daemon_ctx)
 {
-	int err = -1;
+	int err = 0;
 
 	if (INTERNAL_ROOT_TREE) {
 		BBF_INFO("Loading Data Model Internal plugin (%s)", daemon_ctx->config.service_name);

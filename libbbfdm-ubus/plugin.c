@@ -15,7 +15,8 @@
 #include "common.h"
 #include "get_helper.h"
 
-#include "plugin/json_plugin.h"
+#include "../libbbfdm-api/plugin/json_plugin.h"
+
 
 extern struct list_head loaded_json_files;
 extern struct list_head json_list;
@@ -181,6 +182,9 @@ int bbfdm_load_json_plugin(struct list_head *json_plugin, struct list_head *json
 
 	json_object_object_foreach(json_obj, key, jobj) {
 		char node_obj[1024] = {0};
+
+		if (key == NULL)
+			continue;
 
 		if (strcmp(key, "json_plugin_version") == 0) {
 			json_plugin_version = get_json_plugin_version(jobj);

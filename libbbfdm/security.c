@@ -59,10 +59,12 @@ static char *get_certificate_sig_alg(int sig_nid)
 	return "";
 }
 
-static char *generate_serial_number(char *text, int length)
+static char *generate_serial_number(const char *text, int length)
 {
-	char *hex = (char *)dmcalloc(100, sizeof(char));
 	unsigned pos = 0;
+	char *hex = (char *)dmcalloc(100, sizeof(char));
+	if (!hex)
+		return dmstrdup("");
 
 	for (int i = 0; i < length; i++) {
 		pos += snprintf(&hex[pos], 100 - pos, "%02x:", text[i] & 0xff);
@@ -74,7 +76,7 @@ static char *generate_serial_number(char *text, int length)
 	return hex;
 }
 
-static int fill_certificate_paths(char *dir_path, int *cidx)
+static int fill_certificate_paths(const char *dir_path, int *cidx)
 {
 	struct dirent *d_file = NULL;
 	DIR *dir = NULL;
@@ -199,11 +201,13 @@ static int get_Security_CertificateNumberOfEntries(char *refparam, struct dmctx 
 static int get_SecurityCertificate_LastModif(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	struct certificate_profile *cert_profile = (struct certificate_profile *)((struct dm_data *)data)->additional_data;
-	char buf[sizeof("AAAA-MM-JJTHH:MM:SSZ")] = "0001-01-01T00:00:00Z";
+	char buf[sizeof("0001-01-01T00:00:00Z")] = {0};
 	struct stat b;
 
 	if (!stat(cert_profile->path, &b))
 		strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", gmtime(&b.st_mtime));
+	else
+		DM_STRNCPY(buf, "0001-01-01T00:00:00Z", sizeof("0001-01-01T00:00:00Z"));
 
 	*value = dmstrdup(buf);
 	return 0;

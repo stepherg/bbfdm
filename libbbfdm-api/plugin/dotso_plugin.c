@@ -22,7 +22,11 @@ struct loaded_library
 
 static void add_list_loaded_libraries(struct list_head *library_list, void *library)
 {
-	struct loaded_library *lib = calloc(1, sizeof(struct loaded_library));
+	struct loaded_library *lib = NULL;
+
+	lib = (struct loaded_library *)calloc(1, sizeof(struct loaded_library));
+	if (!lib)
+		return;
 
 	list_add_tail(&lib->list, library_list);
 	lib->library = library;
@@ -30,14 +34,16 @@ static void add_list_loaded_libraries(struct list_head *library_list, void *libr
 
 static void free_all_list_open_library(struct list_head *library_list)
 {
-	struct loaded_library *lib = NULL;
+	struct loaded_library *lib = NULL, *tmp = NULL;
 
-	while (library_list->next != library_list) {
-		lib = list_entry(library_list->next, struct loaded_library, list);
+	list_for_each_entry_safe(lib, tmp, library_list, list) {
 		list_del(&lib->list);
+
 		if (lib->library) {
 			dlclose(lib->library);
+			lib->library = NULL;
 		}
+
 		FREE(lib);
 	}
 }
@@ -89,17 +95,17 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 		if (dynamic_obj[i].root_obj) {
 
 			if (dm_entryobj->nextdynamicobj == NULL) {
-				dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
+				dm_entryobj->nextdynamicobj = (struct dm_dynamic_obj *)calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
 				dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
 				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
 			}
 
 			if (dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj == NULL) {
-				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
+				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = (DMOBJ **)calloc(2, sizeof(DMOBJ *));
 				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[0] = dynamic_obj[i].root_obj;
 			} else {
 				int idx = get_obj_idx(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj);
-				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = realloc(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj, (idx + 2) * sizeof(DMOBJ *));
+				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj = (DMOBJ **)realloc(dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj, (idx + 2) * sizeof(DMOBJ *));
 				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[idx] = dynamic_obj[i].root_obj;
 				dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].nextobj[idx+1] = NULL;
 			}
@@ -109,17 +115,17 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 		if (dynamic_obj[i].root_leaf) {
 
 			if (dm_entryobj->dynamicleaf == NULL) {
-				dm_entryobj->dynamicleaf = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_leaf));
+				dm_entryobj->dynamicleaf = (struct dm_dynamic_leaf *)calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_leaf));
 				dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
 				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
 			}
 
 			if (dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf == NULL) {
-				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = calloc(2, sizeof(DMLEAF *));
+				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = (DMLEAF **)calloc(2, sizeof(DMLEAF *));
 				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[0] = dynamic_obj[i].root_leaf;
 			} else {
 				int idx = get_leaf_idx(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf);
-				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = realloc(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf, (idx + 2) * sizeof(DMLEAF *));
+				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf = (DMLEAF **)realloc(dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf, (idx + 2) * sizeof(DMLEAF *));
 				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx] = dynamic_obj[i].root_leaf;
 				dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].nextleaf[idx+1] = NULL;
 			}

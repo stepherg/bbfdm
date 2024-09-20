@@ -72,7 +72,7 @@ int compare_strings(const void *a, const void *b)
 char *get_uptime(void)
 {
     FILE *fp = fopen(UPTIME, "r");
-    char *uptime = "0";
+    char *uptime = NULL;
 
 	if (fp != NULL) {
 		char *pch = NULL, *spch = NULL, buf[64] = {0};
@@ -84,7 +84,7 @@ char *get_uptime(void)
 		fclose(fp);
 	}
 
-    return uptime;
+    return uptime ? uptime : "0";
 }
 
 int check_file(const char *path)
@@ -104,7 +104,9 @@ int check_file(const char *path)
 
 char *cidr2netmask(int bits)
 {
-	static char buf[INET_ADDRSTRLEN];
+	char *buf = (char *)dmcalloc(INET_ADDRSTRLEN, sizeof(char));
+	if (!buf)
+		return "";
 
 	uint32_t mask = (bits >= 32) ? 0xFFFFFFFFUL : (0xFFFFFFFFUL << (32 - bits));
 	mask = htonl(mask);
@@ -190,7 +192,7 @@ int dmcmd(const char *cmd, int n, ...)
 	int i, status;
 	pid_t pid, wpid;
 
-	argv[0] = (char *)cmd;
+	argv[0] = dmstrdup(cmd);
 	va_start(arg, n);
 	for (i = 0; i < n; i++) {
 		argv[i + 1] = va_arg(arg, char *);
@@ -224,7 +226,7 @@ int dmcmd_no_wait(const char *cmd, int n, ...)
 	int i;
 	pid_t pid;
 
-	argv[0] = (char *)cmd;
+	argv[0] = dmstrdup(cmd);
 	va_start(arg, n);
 	for (i = 0; i < n; i++) {
 		argv[i + 1] = va_arg(arg, char *);
@@ -256,7 +258,7 @@ int run_cmd(const char *cmd, char *output, size_t out_len)
 
 	memset(output, 0, out_len);
 
-	pp = popen(cmd, "r");
+	pp = popen(cmd, "r"); // flawfinder: ignore
 	if (pp != NULL) {
 		if (!(fgets(output, out_len, pp) == NULL && ferror(pp) != 0)) {
 			ret = 0;
@@ -291,7 +293,10 @@ void add_dmmap_config_dup_list(struct list_head *dup_list, struct uci_section *c
 {
 	struct dm_data *dm_data = NULL;
 
-	dm_data = dmcalloc(1, sizeof(struct dm_data));
+	dm_data = (struct dm_data *)dmcalloc(1, sizeof(struct dm_data));
+	if (!dm_data)
+		return;
+
 	list_add_tail(&dm_data->list, dup_list);
 	dm_data->config_section = config_section;
 	dm_data->dmmap_section = dmmap_section;
@@ -604,11 +609,15 @@ unsigned int count_occurrences(const char *str, char c)
 bool isdigit_str(const char *str)
 {
 	if (!DM_STRLEN(str))
-		return 0;
+		return false;
 
-	while(isdigit(*str++));
+	while (*str) {
+		if (!isdigit((unsigned char)*str))
+			return false;
+		str++;
+	}
 
-	return (*(str-1)) ? 0 : 1;
+	return true;
 }
 
 bool ishex_str(const char *str)
@@ -642,9 +651,13 @@ bool special_char_exits(const char *str)
 	if (!DM_STRLEN(str))
 		return false;
 
-	while (!special_char(*str++));
+	while (*str) {
+		if (special_char(*str))
+			return true;
+		str++;
+	}
 
-	return (*(str-1)) ? true : false;
+	return false;
 }
 
 void replace_special_char(char *str, char c)
@@ -686,32 +699,45 @@ char *dm_strword(char *src, char *str)
 	return NULL;
 }
 
-char **strsplit(const char *str, const char *delim, size_t *numtokens)
+char **strsplit(const char *str, const char *delim, size_t *num_tokens)
 {
-	char *s = strdup(str);
-	size_t tokens_alloc = 1;
-	size_t tokens_used = 0;
-	char **tokens = dmcalloc(tokens_alloc, sizeof(char*));
-	char *token, *strtok_ctx;
+	char *token = NULL, *save_ptr = NULL;
+	char buf[2048] = {0};
+	size_t tokens_num = 0;
 
-	for (token = strtok_r(s, delim, &strtok_ctx);
-		token != NULL;
-		token = strtok_r(NULL, delim, &strtok_ctx)) {
+	if (!str || !delim || !num_tokens) {
+		if (num_tokens)
+			*num_tokens = 0;
+		return NULL;
+	}
 
-		if (tokens_used == tokens_alloc) {
-			tokens_alloc *= 2;
-			tokens = dmrealloc(tokens, tokens_alloc * sizeof(char*));
-		}
-		tokens[tokens_used++] = dmstrdup(token);
+	DM_STRNCPY(buf, str, sizeof(buf));
+
+	for (token = strtok_r(buf, delim, &save_ptr);
+			token != NULL;
+			token = strtok_r(NULL, delim, &save_ptr))
+		tokens_num++;
+
+	if (tokens_num == 0) {
+		*num_tokens = 0;
+		return NULL;
 	}
-	if (tokens_used == 0) {
-		dmfree(tokens);
-		tokens = NULL;
-	} else {
-		tokens = dmrealloc(tokens, tokens_used * sizeof(char*));
+
+	char **tokens = dmcalloc(tokens_num, sizeof(char *));
+	if (!tokens) {
+		*num_tokens = 0;
+		return NULL;
 	}
-	*numtokens = tokens_used;
-	FREE(s);
+
+	DM_STRNCPY(buf, str, sizeof(buf));
+
+	token = strtok_r(buf, delim, &save_ptr);
+	for (size_t idx = 0; idx < tokens_num && token != NULL; idx++) {
+		tokens[idx] = dmstrdup(token);
+		token = strtok_r(NULL, delim, &save_ptr);
+	}
+
+	*num_tokens = tokens_num;
 	return tokens;
 }
 
@@ -727,7 +753,7 @@ void convert_str_to_uppercase(char *str)
 char *get_macaddr(const char *interface_name)
 {
 	char *device = get_device(interface_name);
-	char *mac;
+	char *mac = NULL;
 
 	if (device[0]) {
 		char file[128];
@@ -737,10 +763,9 @@ char *get_macaddr(const char *interface_name)
 		dm_read_sysfs_file(file, val, sizeof(val));
 		convert_str_to_uppercase(val);
 		mac = dmstrdup(val);
-	} else {
-		mac = "";
 	}
-	return mac;
+
+	return mac ? mac : "";
 }
 
 char *get_device(const char *interface_name)
@@ -793,14 +818,14 @@ bool value_exits_in_str_list(const char *str_list, const char *delimitor, const 
 
 char *add_str_to_str_list(const char *str_list, const char *delimitor, const char *str)
 {
-	char *res = "";
+	char *res = NULL;
 
 	if (!str_list || !delimitor || !str)
 		return "";
 
 	dmasprintf(&res, "%s%s%s", str_list, strlen(str_list) ? delimitor : "", str);
 
-	return res;
+	return res ? res : "";
 }
 
 char *remove_str_from_str_list(const char *str_list, const char *delimitor, const char *str)
@@ -921,8 +946,9 @@ int get_net_device_sysfs(const char *device, const char *name, char **value)
 		}
 		*value = dmstrdup(val);
 	} else {
-		*value = "0";
+		*value = dmstrdup("0");
 	}
+
 	return 0;
 }
 
@@ -932,29 +958,29 @@ int get_net_device_status(const char *device, char **value)
 
 	get_net_device_sysfs(device, "operstate", &operstate);
 	if (operstate == NULL || *operstate == '\0') {
-		*value = "Down";
+		*value = dmstrdup("Down");
 		return 0;
 	}
 
 	if (strcmp(operstate, "up") == 0)
-		*value = "Up";
+		*value = dmstrdup("Up");
 	else if (strcmp(operstate, "unknown") == 0)
-		*value = "Unknown";
+		*value = dmstrdup("Unknown");
 	else if (strcmp(operstate, "notpresent") == 0)
-		*value = "NotPresent";
+		*value = dmstrdup("NotPresent");
 	else if (strcmp(operstate, "lowerlayerdown") == 0)
-		*value = "LowerLayerDown";
+		*value = dmstrdup("LowerLayerDown");
 	else if (strcmp(operstate, "dormant") == 0)
-		*value = "Dormant";
+		*value = dmstrdup("Dormant");
 	else
-		*value = "Down";
+		*value = dmstrdup("Down");
 
 	return 0;
 }
 
 int get_net_iface_sysfs(const char *uci_iface, const char *name, char **value)
 {
-	const char *device = get_device((char *)uci_iface);
+	const char *device = get_device(uci_iface);
 
 	return get_net_device_sysfs(device, name, value);
 }
@@ -964,7 +990,7 @@ int dm_time_utc_format(time_t ts, char **dst)
 	char time_buf[32] = { 0, 0 };
 	struct tm *t_tm;
 
-	*dst = "0001-01-01T00:00:00Z";
+	*dst = dmstrdup("0001-01-01T00:00:00Z");
 
 	t_tm = gmtime(&ts);
 	if (t_tm == NULL)
@@ -982,7 +1008,7 @@ int dm_time_format(time_t ts, char **dst)
 	char time_buf[32] = { 0, 0 };
 	struct tm *t_tm;
 
-	*dst = "0001-01-01T00:00:00+00:00";
+	*dst = dmstrdup("0001-01-01T00:00:00+00:00");
 
 	t_tm = localtime(&ts);
 	if (t_tm == NULL)
@@ -1057,7 +1083,7 @@ void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...)
 		return;
 
 	va_start(args, format);
-	vsnprintf(ctx->fault_msg, sizeof(ctx->fault_msg), format, args);
+	vsnprintf(ctx->fault_msg, sizeof(ctx->fault_msg), format, args); // flawfinder: ignore
 	va_end(args);
 }
 
@@ -1698,11 +1724,11 @@ unsigned long file_system_size(const char *path, const enum fs_size_type_enum ty
 
 static int get_base64_char(char b64)
 {
-	char *base64C = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	const char *base64C = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 	for (int i = 0; i < 64; i++)
 		if (base64C[i] == b64)
-		return i;
+			return i;
 
 	return -1;
 }
@@ -1715,7 +1741,7 @@ char *base64_decode(const char *src)
 		return "";
 
 	size_t decsize = DM_STRLEN(src)*6/8;
-	char *out = (char *)dmmalloc((decsize +1) * sizeof(char));
+	char *out = (char *)dmcalloc(decsize + 1, sizeof(char));
 
 	for (i = 0; i < DM_STRLEN(src)-1; i++) {
 		out[j] = (get_base64_char(src[i]) << (j%3==0?2:(j%3==1?4:6))) + (get_base64_char(src[i+1]) >> (j%3==0?4:(j%3==1? 2:0)));
@@ -1812,7 +1838,7 @@ char *replace_str(const char *input_str, const char *old_substr, const char *new
 	}
 
 	// Count occurrences of old_substr in input_str
-	for (size_t i = 0; i<input_str_len; i++) {
+	for (size_t i = 0; i < input_str_len; i++) {
 		if (strstr(&input_str[i], old_substr) == &input_str[i]) {
 			occurrences++;
 			i += old_substr_len;
@@ -1827,7 +1853,7 @@ char *replace_str(const char *input_str, const char *old_substr, const char *new
 	}
 
 	// Allocate memory only if result_str is not provided
-	char *result = result_str ? result_str : (char *)malloc(new_str_len * sizeof(char));
+	char *result = result_str ? result_str : (char *)calloc(new_str_len, sizeof(char));
 
 	if (!result) {
 		// Memory allocation failed

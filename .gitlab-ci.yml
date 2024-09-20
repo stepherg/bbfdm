@@ -1,13 +1,14 @@
 variables:
   DEBUG: 'TRUE'
   SOURCE_FOLDER: "."
-  FLAWFINDER_OPTIONS: "-m 4 --error-level=5"
-  CPPCHECK_OPTIONS: "--enable=all --suppress=variableScope --suppress=unusedFunction --suppress=constParameter --suppress=knownConditionTrueFalse -DBBF_VENDOR_PREFIX=X_IOPSYS_EU_ -i test/"
+  COMPILATION_FIXUP: "cmake -DBBF_VENDOR_PREFIX=\\\"X_IOPSYS_EU_\\\" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/"
+  CPPCHECK_OPTIONS: "--suppress=cert-MSC24-C -DBBF_VENDOR_PREFIX=X_IOPSYS_EU_"
+  CPD_OPTIONS: "--exclude ./build/ --minimum-tokens 200"
 
 include:
   - project: 'iopsys/gitlab-ci-pipeline'
     file: '/static-code-analysis.yml'
-    ref: '0.31'
+    ref: '1.2'
   - project: 'docs/portal2/pipeline-template'
     file: 'MkDocs.gitlab-ci.yml'
     rules:

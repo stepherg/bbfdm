@@ -81,7 +81,7 @@ static void prepare_blob_message(struct blob_buf *b, const struct ubus_arg u_arg
 
 static void receive_call_result_data(struct ubus_request *req, int type, struct blob_attr *msg)
 {
-	const char *str;
+	char *str = NULL;
 
 	if (!msg)
 		return;
@@ -369,23 +369,31 @@ static const struct dm_ubus_cache_entry * dm_ubus_cache_lookup(unsigned hash)
 
 static void dm_ubus_cache_entry_new(unsigned hash, json_object *data)
 {
-	struct dm_ubus_cache_entry *entry = malloc(sizeof(*entry));
+	struct dm_ubus_cache_entry *entry = NULL;
 
-	if (entry) {
-		entry->data = data;
-		entry->hash = hash;
-		list_add_tail(&entry->list, &dmubus_cache);
-	}
+	entry = calloc(1, sizeof(struct dm_ubus_cache_entry));
+	if (!entry)
+		return;
+
+	list_add_tail(&entry->list, &dmubus_cache);
+	entry->data = data;
+	entry->hash = hash;
 }
 
-static void dm_ubus_cache_entry_free(struct dm_ubus_cache_entry *entry)
+static void dm_ubus_cache_entry_free(void)
 {
-	list_del(&entry->list);
+	struct dm_ubus_cache_entry *entry = NULL, *tmp = NULL;
 
-	if (entry->data)
-		json_object_put(entry->data);
+	list_for_each_entry_safe(entry, tmp, &dmubus_cache, list) {
+		list_del(&entry->list);
 
-	FREE(entry);
+		if (entry->data) {
+			json_object_put(entry->data);
+			entry->data = NULL;
+		}
+
+		FREE(entry);
+	}
 }
 
 int dmubus_call(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
@@ -489,12 +497,6 @@ bool dmubus_object_method_exists(const char *object)
 
 void dmubus_free()
 {
-	struct dm_ubus_cache_entry *entry, *tmp;
-
-	// cppcheck-suppress unknownMacro
-	list_for_each_entry_safe(entry, tmp, &dmubus_cache, list)
-		dm_ubus_cache_entry_free(entry);
-
+	dm_ubus_cache_entry_free();
 	dm_libubus_free();
-
 }

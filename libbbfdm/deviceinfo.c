@@ -321,7 +321,7 @@ static void init_processes(void)
 
 		if (process_count == 0 || !(pentry_exits = check_entry_exists(entry->d_name))) {
 
-			pentry = dm_dynamic_malloc(&global_memhead, sizeof(struct process_entry));
+			pentry = dm_dynamic_calloc(&global_memhead, 1, sizeof(struct process_entry));
 			if (!pentry)
 				return;
 
@@ -564,11 +564,13 @@ int bbf_config_restore(const char *url, const char *username, const char *passwo
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
 		const char *command, const char *obj_path)
 {
-	char config_restore[256] = "/tmp/bbf_config_restore";
+	char config_restore[256] = {0};
 	int res = 0;
 	char fault_msg[128] = {0};
 	time_t complete_time = 0;
 	time_t start_time = time(NULL);
+
+	DM_STRNCPY(config_restore, "/tmp/bbf_config_restore", sizeof(config_restore));
 
 	// Check the file system size if there is sufficient space for downloading the config file
 	if (!validate_file_system_size(file_size)) {
@@ -662,13 +664,15 @@ static int bbf_fw_image_download(const char *url, const char *auto_activate, con
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
 		const char *bank_id, const char *command, const char *obj_path, const char *commandKey, char *keep)
 {
-	char fw_image_path[256] = "/tmp/firmware-XXXXXX";
+	char fw_image_path[256] = {0};
 	json_object *json_obj = NULL;
 	bool activate = false, valid = false;
 	int res = 0;
 	char fault_msg[128] = {0};
 	time_t complete_time = 0;
 	time_t start_time = time(NULL);
+
+	DM_STRNCPY(fw_image_path, "/tmp/firmware-XXXXXX", sizeof(fw_image_path));
 
 	// Check the file system size if there is sufficient space for downloading the firmware image
 	if (!validate_file_system_size(file_size)) {
@@ -704,7 +708,7 @@ static int bbf_fw_image_download(const char *url, const char *auto_activate, con
 		goto end;
 	}
 
-	string_to_bool((char *)auto_activate, &activate);
+	string_to_bool(auto_activate, &activate);
 	char *act = (activate) ? "1" : "0";
 
 	dmubus_call_blocking("system", "validate_firmware_image", UBUS_ARGS{{"path", fw_image_path, String}}, 1, &json_obj);
@@ -983,7 +987,7 @@ static int get_device_active_fwimage(char *refparam, struct dmctx *ctx, void *da
 	}
 
 	if (DM_STRLEN(id) == 0) {
-		*value = "";
+		*value = dmstrdup("");
 		return 0;
 	}
 
@@ -1008,7 +1012,7 @@ static int get_device_boot_fwimage(char *refparam, struct dmctx *ctx, void *data
 	}
 
 	if (DM_STRLEN(id) == 0) {
-		*value = "";
+		*value = dmstrdup("");
 		return 0;
 	}
 
@@ -1224,7 +1228,7 @@ static int get_vcf_date(char *refparam, struct dmctx *ctx, void *data, char *ins
 	struct dirent *d_file = NULL;
 	char *config_name = NULL;
 
-	*value = "0001-01-01T00:00:00Z";
+	*value = dmstrdup("0001-01-01T00:00:00Z");
 	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "name", &config_name);
 	if ((dir = opendir (DEFAULT_CONFIG_DIR)) != NULL) {
 		while ((d_file = readdir (dir)) != NULL) {
@@ -1296,7 +1300,7 @@ static int get_vlf_max_size(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int get_vlf_persistent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "0";
+	*value = dmstrdup("0");
 	return 0;
 }
 
@@ -1343,10 +1347,16 @@ static int get_DeviceInfoProcessor_Architecture(char *refparam, struct dmctx *ct
 		return 0;
 
 	if (DM_LSTRSTR(utsname.machine, "arm") || DM_LSTRSTR(utsname.machine, "aarch64")) {
-		*value = "arm";
+		*value = dmstrdup("arm");
 	} else if(DM_LSTRSTR(utsname.machine, "mips")) {
-		const bool is_big_endian = IS_BIG_ENDIAN;
-		*value = (is_big_endian) ? "mipseb" : "mipsel";
+		union {
+		    uint16_t value;
+		    uint8_t bytes[2];
+		} endian_test = { .bytes = { 0x00, 0xff } };
+
+		const bool is_big_endian = (endian_test.value < 0x100);
+
+		*value = (is_big_endian) ? dmstrdup("mipseb") : dmstrdup("mipsel");
 	} else
 		*value = dmstrdup(utsname.machine);
 	return 0;
@@ -1457,7 +1467,7 @@ static int get_DeviceInfoFirmwareImage_Available(char *refparam, struct dmctx *c
 	}
 
 	if ((*value)[0] == '\0')
-		*value = "true";
+		*value = dmstrdup("true");
 	return 0;
 }
 
@@ -1507,7 +1517,7 @@ static int get_memory_status_total(char* refparam, struct dmctx *ctx, void *data
 {
 	json_object *res = NULL;
 	dmubus_call("system", "info", UBUS_ARGS{{}}, 0, &res);
-	DM_ASSERT(res, *value = "0");
+	DM_ASSERT(res, *value = dmstrdup("0"));
 	char *total = dmjson_get_value(res, 2, "memory", "total");
 	dmasprintf(value, "%lu", DM_STRTOUL(total) / 1024);
 	return 0;
@@ -1517,7 +1527,7 @@ static int get_memory_status_free(char* refparam, struct dmctx *ctx, void *data,
 {
 	json_object *res = NULL;
 	dmubus_call("system", "info", UBUS_ARGS{{}}, 0, &res);
-	DM_ASSERT(res, *value = "0");
+	DM_ASSERT(res, *value = dmstrdup("0"));
 	char *free = dmjson_get_value(res, 2, "memory", "free");
 	dmasprintf(value, "%lu", DM_STRTOUL(free) / 1024);
 	return 0;
@@ -1530,7 +1540,7 @@ static int get_memory_status_total_persistent(char* refparam, struct dmctx *ctx,
 		unsigned int total = (dinfo.f_bsize * dinfo.f_blocks) / 1024;
 		dmasprintf(value, "%u", total);
 	} else {
-		*value = "0";
+		*value = dmstrdup("0");
 	}
 
 	return 0;
@@ -1543,7 +1553,7 @@ static int get_memory_status_free_persistent(char* refparam, struct dmctx *ctx, 
 		unsigned int free = (dinfo.f_bsize * dinfo.f_bavail) / 1024;
 		dmasprintf(value, "%u", free);
 	} else {
-		*value = "0";
+		*value = dmstrdup("0");
 	}
 
 	return 0;
@@ -1617,13 +1627,16 @@ static int get_operate_args_DeviceInfoVendorLogFile_Upload(char *refparam, struc
 }
 static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	const char *upload_command = "Upload()";
 	char upload_path[256] = {'\0'};
-	char upload_command[32] = {'\0'};
 	char *vlf_file_path = NULL;
 
 	char *ret = DM_STRRCHR(refparam, '.');
-	strncpy(upload_path, refparam, ret - refparam +1);
-	DM_STRNCPY(upload_command, ret+1, sizeof(upload_command));
+	if (!ret)
+		return USP_FAULT_INVALID_ARGUMENT;
+
+	if ((ret - refparam + 2) < sizeof(upload_path))
+		snprintf(upload_path, ret - refparam + 2, "%s", refparam);
 
 	char *user = dmjson_get_value((json_object *)value, 1, "Username");
 	char *pass = dmjson_get_value((json_object *)value, 1, "Password");
@@ -1635,12 +1648,29 @@ static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *
 	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "log_file", &vlf_file_path);
 
 	if (DM_STRLEN(vlf_file_path) == 0) {
-		vlf_file_path = DEF_VENDOR_LOG_FILE;
-		char cmd[64] = {0};
-		snprintf(cmd, sizeof(cmd), "logread > %s", DEF_VENDOR_LOG_FILE);
-		if (system(cmd) == -1) {
+		vlf_file_path = dmstrdup(DEF_VENDOR_LOG_FILE);
+		char buffer[256] = {0};
+
+		// Open the log file for writing
+		FILE *logfile = fopen(DEF_VENDOR_LOG_FILE, "w");
+		if (logfile == NULL)
+			return USP_FAULT_COMMAND_FAILURE;
+
+		// Use popen to run "logread" command and open a pipe to read its output
+		FILE *fp = popen("logread", "r"); // flawfinder: ignore
+		if (fp == NULL) {
+			fclose(logfile);
 			return USP_FAULT_COMMAND_FAILURE;
 		}
+
+		// Read the output of "logread" and write it to the log file
+		while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+			fputs(buffer, logfile);
+		}
+
+		// Close the pipe and the log file
+		pclose(fp);
+		fclose(logfile);
 	}
 
 	int res = bbf_upload_log(url, user, pass, vlf_file_path, upload_command, upload_path);
@@ -1668,13 +1698,16 @@ static int get_operate_args_DeviceInfoVendorConfigFile_Backup(char *refparam, st
 
 static int operate_DeviceInfoVendorConfigFile_Backup(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	const char *backup_command = "Backup()";
 	char backup_path[256] = {'\0'};
-	char backup_command[32] = {'\0'};
 	char *vcf_name = NULL;
 
 	char *ret = DM_STRRCHR(refparam, '.');
-	strncpy(backup_path, refparam, ret - refparam +1);
-	DM_STRNCPY(backup_command, ret+1, sizeof(backup_command));
+	if (!ret)
+		return USP_FAULT_INVALID_ARGUMENT;
+
+	if ((ret - refparam + 2) < sizeof(backup_path))
+		snprintf(backup_path, ret - refparam + 2, "%s", refparam);
 
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");
 	if (url[0] == '\0')
@@ -1711,12 +1744,15 @@ static int get_operate_args_DeviceInfoVendorConfigFile_Restore(char *refparam, s
 
 static int operate_DeviceInfoVendorConfigFile_Restore(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	const char *restore_command = "Restore()";
 	char restore_path[256] = {'\0'};
-	char restore_command[32] = {'\0'};
 
 	char *ret = DM_STRRCHR(refparam, '.');
-	DM_STRNCPY(restore_path, refparam, ret - refparam + 2);
-	DM_STRNCPY(restore_command, ret+1, sizeof(restore_command));
+	if (!ret)
+		return USP_FAULT_INVALID_ARGUMENT;
+
+	if ((ret - refparam + 2) < sizeof(restore_path))
+		snprintf(restore_path, ret - refparam + 2, "%s", refparam);
 
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");
 	if (url[0] == '\0')
@@ -1756,12 +1792,15 @@ static int get_operate_args_DeviceInfoFirmwareImage_Download(char *refparam, str
 
 static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	char obj_path[256] = {'\0'};
-	char command[32] = {'\0'};
+	const char *command = "Download()";
+	char obj_path[256] = {0};
 
 	char *ret = DM_STRRCHR(refparam, '.');
-	DM_STRNCPY(obj_path, refparam, ret - refparam + 2);
-	DM_STRNCPY(command, ret+1, sizeof(command));
+	if (!ret)
+		return USP_FAULT_INVALID_ARGUMENT;
+
+	if ((ret - refparam + 2) < sizeof(obj_path))
+		snprintf(obj_path, ret - refparam + 2, "%s", refparam);
 
 	char *url = dmjson_get_value((json_object *)value, 1, "URL");
 	char *auto_activate = dmjson_get_value((json_object *)value, 1, "AutoActivate");
@@ -1771,7 +1810,7 @@ static int operate_DeviceInfoFirmwareImage_Download(char *refparam, struct dmctx
 	// Assuming auto activate as false, if not provided by controller, in case of strict validation,
 	// this should result into a fault
 	if (DM_STRLEN(auto_activate) == 0)
-		auto_activate="0";
+		auto_activate = dmstrdup("0");
 
 	char *username = dmjson_get_value((json_object *)value, 1, "Username");
 	char *password = dmjson_get_value((json_object *)value, 1, "Password");

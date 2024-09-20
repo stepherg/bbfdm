@@ -26,72 +26,72 @@
  *
  */
 
-int bbf_uci_add_section(char *package, char *type, struct uci_section **s)
+int bbf_uci_add_section(const char *package, const char *type, struct uci_section **s)
 {
 	return dmuci_add_section(package, type, s);
 }
 
-int bbf_uci_delete_section(char *package, char *type, char *option, char *value)
+int bbf_uci_delete_section(const char *package, const char *type, const char *option, const char *value)
 {
 	return dmuci_delete(package, type, option, value);
 }
 
-int bbf_uci_add_section_bbfdm(char *package, char *type, struct uci_section **s)
+int bbf_uci_add_section_bbfdm(const char *package, const char *type, struct uci_section **s)
 {
 	return dmuci_add_section_bbfdm(package, type, s);
 }
 
-int bbf_uci_delete_section_bbfdm(char *package, char *type, char *option, char *value)
+int bbf_uci_delete_section_bbfdm(const char *package, const char *type, const char *option, const char *value)
 {
 	return dmuci_delete_bbfdm(package, type, option, value);
 }
 
-int bbf_uci_rename_section(struct uci_section *s, char *value)
+int bbf_uci_rename_section(struct uci_section *s, const char *value)
 {
 	return dmuci_rename_section_by_section(s, value);
 }
 
-int bbf_uci_get_value(char *package, char *section, char *option, char **value)
+int bbf_uci_get_value(const char *package, const char *section, const char *option, char **value)
 {
 	return dmuci_get_option_value_string(package, section, option, value);
 }
 
-int bbf_uci_set_value(char *package, char *section, char *option, char *value)
+int bbf_uci_set_value(const char *package, const char *section, const char *option, const char *value)
 {
 	return dmuci_set_value(package, section, option, value);
 }
 
-int bbf_uci_get_value_by_section(struct uci_section *s, char *option, char **value)
+int bbf_uci_get_value_by_section(struct uci_section *s, const char *option, char **value)
 {
 	return dmuci_get_value_by_section_string(s, option, value);
 }
 
-char *bbf_uci_get_value_by_section_fallback_def(struct uci_section *s, char *option, char *default_value)
+char *bbf_uci_get_value_by_section_fallback_def(struct uci_section *s, const char *option, const char *default_value)
 {
 	return dmuci_get_value_by_section_fallback_def(s, option, default_value);
 }
 
-int bbf_uci_set_value_by_section(struct uci_section *s, char *option, char *value)
+int bbf_uci_set_value_by_section(struct uci_section *s, const char *option, const char *value)
 {
 	return dmuci_set_value_by_section(s, option, value);
 }
 
-int bbf_uci_delete_section_by_section(struct uci_section *s, char *option, char *value)
+int bbf_uci_delete_section_by_section(struct uci_section *s, const char *option, const char *value)
 {
 	return dmuci_delete_by_section(s, option, value);
 }
 
-int bbf_uci_get_section_name(char *sec_name, char **value)
+int bbf_uci_get_section_name(const char *sec_name, char **value)
 {
 	return dmuci_get_section_name(sec_name, value);
 }
 
-int bbf_uci_set_section_name(char *sec_name, char *str, size_t size)
+int bbf_uci_set_section_name(const char *sec_name, char *str, size_t size)
 {
 	return dmuci_set_section_name(sec_name, str, size);
 }
 
-struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, void *arg2, int cmp, int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk)
+struct uci_section *bbf_uci_walk_section(const char *package, const char *type, const void *arg1, const void *arg2, int cmp, int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk)
 {
 	return dmuci_walk_section(package, type, arg1, arg2, cmp, filter, prev_section, walk);
 
@@ -104,12 +104,12 @@ struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, 
  *
  */
 
-int bbf_ubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
+int bbf_ubus_call(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
 {
 	return dmubus_call(obj, method, u_args, u_args_size, req_res);
 }
 
-int bbf_ubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size)
+int bbf_ubus_call_set(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size)
 {
 	return dmubus_call_set(obj, method, u_args, u_args_size);
 }
@@ -148,7 +148,7 @@ char *bbf_strdup(const char *ptr)
  *
  */
 
-void bbf_synchronise_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list)
+void bbf_synchronise_config_sections_with_dmmap(const char *package, const char *section_type, const char *dmmap_package, struct list_head *dup_list)
 {
 	return synchronize_specific_config_sections_with_dmmap(package, section_type, dmmap_package, dup_list);
 }
@@ -173,22 +173,22 @@ int bbf_get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int
 	return get_number_of_entries(ctx, data, instance, browseinstobj);
 }
 
-int bbf_convert_string_to_bool(char *str, bool *b)
+int bbf_convert_string_to_bool(const char *str, bool *b)
 {
 	return string_to_bool(str, b);
 }
 
-void bbf_find_dmmap_section(char *dmmap_package, char *section_type, char *section_name, struct uci_section **dmmap_section)
+void bbf_find_dmmap_section(const char *dmmap_package, const char *section_type, const char *section_name, struct uci_section **dmmap_section)
 {
 	return get_dmmap_section_of_config_section(dmmap_package, section_type, section_name, dmmap_section);
 }
 
-void bbf_find_dmmap_section_by_option(char *dmmap_package, char *section_type, char *option_name, char *option_value, struct uci_section **dmmap_section)
+void bbf_find_dmmap_section_by_option(const char *dmmap_package, const char *section_type, const char *option_name, const char *option_value, struct uci_section **dmmap_section)
 {
 	return get_dmmap_section_of_config_section_eq(dmmap_package, section_type, option_name, option_value, dmmap_section);
 }
 
-int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char **value)
+int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, const char *option_name, const char *instance, char **value)
 {
 	if (!ctx || !s || !option_name || !instance || !value)
 		return -1;
@@ -204,7 +204,7 @@ int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 	return 0;
 }
 
-int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value)
+int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, const char *option_name, const char *instance, const char *value)
 {
 	if (!ctx || !s || !option_name || !instance || !value)
 		return -1;
@@ -222,7 +222,7 @@ int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 	return 0;
 }
 
-int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, char *key_name, char *key_value, char *out, size_t out_len)
+int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, const char *key_name, char *key_value, char *out, size_t out_len)
 {
 	char param_path[1024] = {0};
 	char *value = NULL;
@@ -278,7 +278,7 @@ end:
 	return 0;
 }
 
-int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, char *key_name, char *key_value, char **value)
+int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, const char *key_name, char *key_value, char **value)
 {
 	char buf[1024] = {0};
 

@@ -31,7 +31,7 @@ bool dm_is_micro_service(void);
 void dm_set_micro_service(void);
 
 int get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int (*browseinstobj)(struct dmctx *ctx, struct dmnode *node, void *data, char *instance));
-char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt);
+char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, const char *inst_opt, const char *alias_opt);
 char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr);
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 

@@ -26,10 +26,10 @@ static json_object *dmjson_select_obj(json_object *jobj, const char *argv[])
 static char *dmjson_print_value(json_object *jobj)
 {
 	enum json_type type;
-	char *ret = "";
+	char *ret = NULL;
 
 	if (!jobj)
-		return ret;
+		return "";
 
 	type = json_object_get_type(jobj);
 	switch (type) {
@@ -42,7 +42,7 @@ static char *dmjson_print_value(json_object *jobj)
 	default:
 		break;
 	}
-	return ret;
+	return ret ? ret : "";
 }
 
 static char *____dmjson_get_value_in_obj(json_object *mainjobj, const char *argv[])
@@ -178,7 +178,7 @@ char *__dmjson_get_value_in_array_idx(json_object *mainjobj, json_object **arrob
 static char *____dmjson_get_value_array_all(json_object *mainjobj, const char *delim, const char *argv[])
 {
 	json_object *arrobj;
-	char *v, *ret = "";
+	char *v, *ret = NULL;
 	int i, dlen, rlen;
 
 	dlen = (delim) ? DM_STRLEN(delim) : 1;
@@ -187,7 +187,7 @@ static char *____dmjson_get_value_array_all(json_object *mainjobj, const char *d
 		v;
 		v = ____dmjson_get_value_in_array_idx(mainjobj, &arrobj, ++i, argv)) {
 
-		if (*ret == '\0') {
+		if (ret == NULL) {
 			ret = dmstrdup(v);
 		} else if (*v) {
 			rlen = strlen(ret);
@@ -195,7 +195,8 @@ static char *____dmjson_get_value_array_all(json_object *mainjobj, const char *d
 			snprintf(&ret[rlen], dlen + strlen(v) + 1, "%s%s", delim ? delim : ",", v);
 		}
 	}
-	return ret;
+
+	return ret ? ret : "";
 }
 
 char *__dmjson_get_value_array_all(json_object *mainjobj, const char *delim, int argc, ...)

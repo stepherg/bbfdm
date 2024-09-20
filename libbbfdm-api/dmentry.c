@@ -273,7 +273,8 @@ int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *referenc
 int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, char **value)
 {
 	struct dmctx dmctx = {0};
-	*value = "";
+
+	*value = dmstrdup("");
 
 	if (!param || !linker || *linker == 0)
 		return 0;
@@ -287,7 +288,7 @@ int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, 
 
 	dm_entry_get_reference_param(&dmctx);
 
-	*value = dmctx.linker_param ? dmctx.linker_param : "";
+	*value = dmctx.linker_param ? dmctx.linker_param : dmstrdup("");
 
 	bbf_ctx_clean_sub(&dmctx);
 	return 0;
@@ -297,6 +298,7 @@ int adm_entry_get_reference_value(struct dmctx *ctx, const char *param, char **v
 {
 	struct dmctx dmctx = {0};
 	char linker[256] = {0};
+
 	*value = NULL;
 
 	if (!param || param[0] == '\0')

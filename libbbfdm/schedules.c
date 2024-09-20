@@ -350,6 +350,7 @@ static int get_schedule_start(char *refparam, struct dmctx *ctx, void *data, cha
 
 static int set_schedule_start(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	const char *reg_exp = "^([01][0-9]|2[0-3]):[0-5][0-9]$";
 	int ret = 0;
 
 	switch (action) {
@@ -357,7 +358,6 @@ static int set_schedule_start(char *refparam, struct dmctx *ctx, void *data, cha
 		if (bbfdm_validate_string(ctx, value, -1, 5, NULL, NULL))
 			ret = FAULT_9007;
 
-		char *reg_exp = "^([01][0-9]|2[0-3]):[0-5][0-9]$";
 		if (match(value, reg_exp, 0, NULL) != true)
 			ret = FAULT_9007;
 		break;
@@ -405,12 +405,12 @@ static int get_schedule_status(char *refparam, struct dmctx *ctx, void *data, ch
 	string_to_bool(val, &inst_enable);
 
 	if (glob_enable == false && inst_enable == true) {
-		*value = "StackDisabled";
+		*value = dmstrdup("StackDisabled");
 		return 0;
 	}
 
 	if (!inst_enable) {
-		*value = "Inactive";
+		*value = dmstrdup("Inactive");
 		return 0;
 	}
 

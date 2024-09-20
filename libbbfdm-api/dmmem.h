@@ -20,7 +20,7 @@
 
 #include "dmapi.h"
 
-void dmfree(void *m);
+void dmfree(const void *m);
 
 void __dminitmem(struct list_head *mem_list);
 void __dmcleanmem(struct list_head *mem_list);

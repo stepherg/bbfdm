@@ -87,10 +87,9 @@ static void add_service_to_list(struct list_head *srvlist, const char *srv_name,
 
 void free_services_from_list(struct list_head *clist)
 {
-	struct service *srv = NULL;
+	struct service *srv = NULL, *tmp = NULL;
 
-	while (clist->next != clist) {
-		srv = list_entry(clist->next, struct service, list);
+	list_for_each_entry_safe(srv, tmp, clist, list) {
 		list_del(&srv->list);
 		free(srv->name);
 		free(srv->parent_dm);

@@ -87,7 +87,6 @@ extern char *IPv6Prefix[];
 #define FTP_URI "ftp"
 #define FILE_URI "file://"
 #define FILE_LOCALHOST_URI "file://localhost"
-#define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
 #define BBFDM_SCRIPTS_PATH "/usr/share/bbfdm/scripts"
 
 #define DM_ASSERT(X, Y) \
@@ -161,7 +160,7 @@ bool special_char(char c);
 bool special_char_exits(const char *str);
 void replace_special_char(char *str, char c);
 char *dm_strword(char *src, char *str);
-char **strsplit(const char* str, const char* delim, size_t* numtokens);
+char **strsplit(const char *str, const char *delim, size_t *num_tokens);
 void convert_str_to_uppercase(char *str);
 char *get_macaddr(const char *interface_name);
 char *get_device(const char *interface_name);
@@ -207,10 +206,10 @@ int bbfdm_validate_unsignedLong_list(struct dmctx *ctx, const char *value, int m
 int bbfdm_validate_long_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
 int bbfdm_validate_string_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, int min, int max, char *enumeration[], char *pattern[]);
 int bbfdm_validate_hexBinary_list(struct dmctx *ctx, const char *value, int min_item, int max_item, int max_size, struct range_args r_args[], int r_args_size);
-int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char **value);
-int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value);
-int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, char *key_name, char *key_value, char *out, size_t out_len);
-int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, char *key_name, char *key_value, char **value);
+int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, const char *option_name, const char *instance, char **value);
+int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, const char *option_name, const char *instance, const char *value);
+int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, const char *key_name, char *key_value, char *out, size_t out_len);
+int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, const char *key_name, char *key_value, char **value);
 int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct dm_reference *reference_args);
 int bbfdm_operate_reference_linker(struct dmctx *ctx, const char *reference_path, char **reference_value);
 char *base64_decode(const char *src);

@@ -21,19 +21,6 @@
 DMOBJ *DEAMON_DM_ROOT_OBJ = NULL;
 DM_MAP_OBJ *INTERNAL_ROOT_TREE = NULL;
 
-static jmp_buf gs_jump_location;
-static bool gs_jump_called_by_bbf = false;
-
-void handle_pending_signal(int sig)
-{
-	if (gs_jump_called_by_bbf) {
-		siglongjmp(gs_jump_location, 1);
-	}
-
-	BBF_ERR("Exception [%d] not cause by bbf dm, exit with error", sig);
-	exit(1);
-}
-
 int bbfdm_cmd_exec(struct dmctx *bbf_ctx, int cmd)
 {
 	int fault = 0;
@@ -41,20 +28,7 @@ int bbfdm_cmd_exec(struct dmctx *bbf_ctx, int cmd)
 	if (bbf_ctx->in_param == NULL)
 		return USP_FAULT_INTERNAL_ERROR;
 
-	if (sigsetjmp(gs_jump_location, 1) == 0) {
-		gs_jump_called_by_bbf = true;
-		fault = bbf_entry_method(bbf_ctx, cmd);
-	} else {
-		BBF_ERR("PID [%d]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
-		fault = USP_FAULT_INTERNAL_ERROR;
-		if (dm_is_micro_service()) {
-			BBF_ERR("Micro-service PID [%d]::Exception on [%d => %s]", getpid(), cmd, bbf_ctx->in_param);
-			exit(-1);
-		}
-	}
-
-	gs_jump_called_by_bbf = false;
-
+	fault = bbf_entry_method(bbf_ctx, cmd);
 	if (fault)
 		BBF_WARNING("Fault [%d => %d => %s]", fault, cmd, bbf_ctx->in_param);
 
@@ -98,23 +72,23 @@ bool present_in_path_list(struct list_head *plist, char *entry)
 	return false;
 }
 
-void add_pv_list(char *para, char *val, char *type, struct list_head *pv_list)
+void add_pv_list(const char *para, const char *val, const char *type, struct list_head *pv_list)
 {
 	struct pvNode *node = NULL;
 
-	node = (struct pvNode *) malloc(sizeof(*node));
+	node = (struct pvNode *)calloc(1, sizeof(*node));
 
 	if (!node) {
 		BBF_ERR("Out of memory!");
 		return;
 	}
 
+	INIT_LIST_HEAD(&node->list);
+	list_add_tail(&node->list, pv_list);
+
 	node->param = (para) ? strdup(para) : strdup("");
 	node->val = (val) ? strdup(val) : strdup("");
 	node->type = (type) ? strdup(type) : strdup("");
-
-	INIT_LIST_HEAD(&node->list);
-	list_add_tail(&node->list, pv_list);
 }
 
 void free_pv_list(struct list_head *pv_list)
@@ -131,7 +105,7 @@ void free_pv_list(struct list_head *pv_list)
 	}
 }
 
-void add_path_list(char *param, struct list_head *plist)
+void add_path_list(const char *param, struct list_head *plist)
 {
 	struct pathNode *node = NULL;
 	size_t len;
@@ -143,11 +117,11 @@ void add_path_list(char *param, struct list_head *plist)
 		return;
 	}
 
-	len = DM_STRLEN(param);
-	strncpyt(node->path, param, len + 1);
-
 	INIT_LIST_HEAD(&node->list);
 	list_add_tail(&node->list, plist);
+
+	len = DM_STRLEN(param);
+	strncpyt(node->path, param, len + 1);
 }
 
 void free_path_list(struct list_head *plist)
@@ -199,8 +173,8 @@ static int CountConsecutiveDigits(char *p)
 
 static int compare_path(const void *arg1, const void *arg2)
 {
-	struct pvNode *pv1 = (struct pvNode *)arg1;
-	struct pvNode *pv2 = (struct pvNode *)arg2;
+	const struct pvNode *pv1 = (const struct pvNode *)arg1;
+	const struct pvNode *pv2 = (const struct pvNode *)arg2;
 
 	char *s1 = pv1->param;
 	char *s2 = pv2->param;
@@ -256,7 +230,7 @@ struct pvNode *sort_pv_path(struct list_head *pv_list, size_t pv_count)
 	if (list_empty(pv_list) || pv_count == 0)
 		return NULL;
 
-	struct pvNode *arr = malloc(sizeof(struct pvNode) * pv_count);
+	struct pvNode *arr = (struct pvNode *)calloc(pv_count, sizeof(struct pvNode));
 	if (arr == NULL)
 		return NULL;
 

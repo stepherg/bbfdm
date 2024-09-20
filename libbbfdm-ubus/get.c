@@ -731,7 +731,7 @@ static int resolve_path(struct dmctx *bbf_ctx, char *qPath, size_t pos, struct l
 	struct pathNode *ptr;
 	int fault;
 	bool check = true;
-	size_t start;
+	size_t start = 0;
 	bool non_leaf = false;
 
 	LIST_HEAD(plist_local);
@@ -845,7 +845,7 @@ void bbfdm_get_value(bbfdm_data_t *data, void *output)
 		LIST_HEAD(resolved_list);
 
 		if (DM_STRLEN(pn->path) == 0)
-			snprintf(pn->path, MAX_DM_PATH, ROOT_NODE);
+			snprintf(pn->path, MAX_DM_PATH, "%s", ROOT_NODE);
 
 		fault = get_resolved_paths(&data->bbf_ctx, pn->path, &resolved_list);
 

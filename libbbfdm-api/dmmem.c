@@ -32,15 +32,15 @@ void __dminitmem(struct list_head *mem_list)
 
 void __dmcleanmem(struct list_head *mem_list)
 {
-	struct dmmem *dmm;
-	while (mem_list->next != mem_list) {
-		dmm = list_entry(mem_list->next, struct dmmem, list);
+	struct dmmem *dmm = NULL, *tmp = NULL;
+
+	list_for_each_entry_safe(dmm, tmp, mem_list, list) {
 		list_del(&dmm->list);
 		FREE(dmm);
 	}
 }
 
-void dmfree(void *m)
+void dmfree(const void *m)
 {
 	if (m == NULL) return;
 	struct dmmem *rm;
@@ -185,15 +185,14 @@ void bbfdm_init_mem(struct dmctx *ctx)
 
 void bbfdm_clean_mem(struct dmctx *ctx)
 {
-	struct dmmem *dmm = NULL;
+	struct dmmem *dmm = NULL, *tmp = NULL;
 
 	if (ctx->memhead == NULL) {
 		BBF_ERR("Memory list is NULL!");
 		return;
 	}
 
-	while (ctx->memhead->next != ctx->memhead) {
-		dmm = list_entry(ctx->memhead->next, struct dmmem, list);
+	list_for_each_entry_safe(dmm, tmp, ctx->memhead, list) {
 		list_del(&dmm->list);
 		FREE(dmm);
 	}

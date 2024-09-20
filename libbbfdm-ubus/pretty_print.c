@@ -48,7 +48,7 @@ static bool is_res_required(char *str, size_t *start, size_t *len)
 
 	BBF_DEBUG("Entry |%s|", str);
 	if (match(str, GLOB_CHAR, 0, NULL)) {
-		size_t s_len, b_len, p_len;
+		size_t s_len = 0, b_len = 0, p_len = 0;
 		char *star, *b_start, *b_end, *plus;
 		char temp_char[MAX_DM_KEY_LEN] = {'\0'};
 
@@ -241,18 +241,18 @@ static void add_result_node(struct list_head *rlist, char *key, char *cookie)
 {
 	struct resultstack *rnode = NULL;
 
-	rnode = (struct resultstack *) malloc(sizeof(*rnode));
+	rnode = (struct resultstack *)calloc(1, sizeof(*rnode));
 	if (!rnode) {
 		BBF_ERR("Out of memory!");
 		return;
 	}
 
+	INIT_LIST_HEAD(&rnode->list);
+	list_add(&rnode->list, rlist);
+
 	rnode->key = (key) ? strdup(key) : strdup("");
 	rnode->cookie = cookie;
 	BBF_DEBUG("## ResSTACK ADD (%s) ##", rnode->key);
-
-	INIT_LIST_HEAD(&rnode->list);
-	list_add(&rnode->list, rlist);
 }
 
 static bool is_leaf_element(char *path)
@@ -297,7 +297,6 @@ static bool add_paths_to_stack(struct blob_buf *bb, char *path, size_t begin,
 	size_t parsed_len = 0;
 	void *c;
 	char *k;
-
 
 	ptr = path + begin;
 	if (is_leaf_element(ptr)) {

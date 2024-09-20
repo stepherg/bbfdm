@@ -95,18 +95,19 @@ static void add_ubus_event_handler(struct ubus_event_handler *ev, const char *ev
 		return;
 
 	struct ev_handler_node *node = NULL;
-	node = (struct ev_handler_node *) malloc(sizeof(struct ev_handler_node));
 
+	node = (struct ev_handler_node *)calloc(1, sizeof(struct ev_handler_node));
 	if (!node) {
 		BBF_ERR("Out of memory!");
 		return;
 	}
 
-	node->ev_name = ev_name ? strdup(ev_name) : NULL;
-	node->dm_path = dm_path ? strdup(dm_path) : NULL;
-	node->ev_handler = ev;
 	INIT_LIST_HEAD(&node->list);
 	list_add_tail(&node->list, ev_list);
+
+	node->ev_handler = ev;
+	node->ev_name = ev_name ? strdup(ev_name) : NULL;
+	node->dm_path = dm_path ? strdup(dm_path) : NULL;
 }
 
 int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
@@ -147,14 +148,13 @@ int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
 			if (!param_name || !event_name || !strlen(event_name))
 				continue;
 
-			struct ubus_event_handler *ev = (struct ubus_event_handler *)malloc(sizeof(struct ubus_event_handler));
+			struct ubus_event_handler *ev = (struct ubus_event_handler *)calloc(1, sizeof(struct ubus_event_handler));
 			if (!ev) {
 				BBF_ERR("Out of memory!");
 				err = -1;
 				goto end;
 			}
 
-			memset(ev, 0, sizeof(struct ubus_event_handler));
 			ev->cb = bbfdm_event_handler;
 
 			if (0 != ubus_register_event_handler(ctx, ev, event_name)) {

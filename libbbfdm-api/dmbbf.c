@@ -601,7 +601,7 @@ int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char 
 	return err;
 }
 
-static int rootcmp(char *inparam, char *rootobj)
+static int rootcmp(const char *inparam, const char *rootobj)
 {
 	char buf[32];
 	snprintf(buf, sizeof(buf), "%s.", rootobj);
@@ -631,10 +631,10 @@ static int find_max_instance(struct dmctx *ctx, DMNODE *node)
 	return ++(node->max_instance);
 }
 
-char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, char *inst_opt, char *alias_opt)
+char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, const char *inst_opt, const char *alias_opt)
 {
 	char buf[64] = {0};
-	char *instance = "";
+	char *instance = NULL;
 
 	dmuci_get_value_by_section_string(s, inst_opt, &instance);
 
@@ -652,13 +652,14 @@ char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_secti
 		break;
 	}
 
-	dmctx->inst_buf[parent_node->instance_level] = instance;
-	return instance;
+	dmctx->inst_buf[parent_node->instance_level] = instance ? instance : "";
+
+	return instance ? instance : "";
 }
 
 char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr)
 {
-	char *instance = "";
+	char *instance = NULL;
 
 	switch(parent_node->browse_type) {
 	case BROWSE_NORMAL:
@@ -669,13 +670,14 @@ char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, 
 		break;
 	}
 
-	dmctx->inst_buf[parent_node->instance_level] = instance;
-	return instance;
+	dmctx->inst_buf[parent_node->instance_level] = instance ? instance : "";
+
+	return instance ? instance : "";
 }
 
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = "";
+	*value = dmstrdup("");
 	return 0;
 }
 
@@ -1027,7 +1029,7 @@ static void prepare_optional_table(struct dmctx *dmctx, struct blob_buf *bb)
 
 typedef void (*ms_ubus_cb)(struct ubus_request *req, int type, struct blob_attr *msg);
 
-static int ubus_call_blob_msg(char *obj, char *method, struct blob_buf *blob, int timeout, ms_ubus_cb ms_callback, void *callback_arg)
+static int ubus_call_blob_msg(const char *obj, const char *method, struct blob_buf *blob, int timeout, ms_ubus_cb ms_callback, void *callback_arg)
 {
 	struct ubus_context *ubus_ctx = NULL;
 	uint32_t id;
@@ -1406,7 +1408,7 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
 	char param_value[2048] = {0};
-	char *ref_value = "";
+	char *ref_value = dmstrdup("");
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
@@ -1713,14 +1715,14 @@ static int get_value_param(DMPARAM_ARGS)
 		return get_ubus_value(dmctx, node);
 	} else {
 		char full_param[MAX_DM_PATH] = {0};
-		char *value = "";
+		char *value = dmstrdup("");
 
 		snprintf(full_param, sizeof(full_param), "%s%s", node->current_object, leaf->parameter);
 
 		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
 		if ((leaf->dm_flags & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
-			value = "";
+			value = dmstrdup("");
 		} else if (value && *value) {
 			if (leaf->dm_flags & DM_FLAG_REFERENCE) {
 				value = get_value_by_reference(dmctx, value);
@@ -1752,7 +1754,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 		dmctx->stop = (dmctx->iswildcard) ? false : true;
 	} else {
 		char full_param[MAX_DM_PATH] = {0};
-		char *value = "";
+		char *value = dmstrdup("");
 
 		snprintf(full_param, sizeof(full_param), "%s%s", node->current_object, leaf->parameter);
 
@@ -1767,7 +1769,7 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
 		if ((leaf->dm_flags & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
-			value = "";
+			value = dmstrdup("");
 		} else if (value && *value) {
 			if (leaf->dm_flags & DM_FLAG_REFERENCE) {
 				value = get_value_by_reference(dmctx, value);
@@ -1835,7 +1837,7 @@ int dm_entry_get_value(struct dmctx *dmctx)
 /* **********
  * get name 
  * **********/
-static void fill_blob_alias_param(struct blob_buf *bb, char *path, char *data, char *type, char *alias)
+static void fill_blob_alias_param(struct blob_buf *bb, const char *path, const char *data, const char *type, const char *alias)
 {
 	if (!bb || !path || !data || !type || !alias)
 		return;
@@ -1888,7 +1890,7 @@ static int mparam_get_name(DMPARAM_ARGS)
 			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
 		if (DM_LSTRCMP(leaf->parameter, "Alias") == 0) {
-			char *alias = "";
+			char *alias = dmstrdup("");
 
 			(leaf->getvalue)(refparam, dmctx, data, instance, &alias);
 			fill_blob_alias_param(&dmctx->bb, refparam, perm, DMT_TYPE[leaf->type], alias);
@@ -1936,7 +1938,7 @@ static int mparam_get_name_in_param(DMPARAM_ARGS)
 			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
 		if (DM_LSTRCMP(leaf->parameter, "Alias") == 0) {
-			char *alias = "";
+			char *alias = dmstrdup("");
 
 			(leaf->getvalue)(refparam, dmctx, data, instance, &alias);
 			fill_blob_alias_param(&dmctx->bb, refparam, perm, DMT_TYPE[leaf->type], alias);
@@ -1990,7 +1992,7 @@ static int mparam_get_name_in_obj(DMPARAM_ARGS)
 			perm = leaf->permission->get_permission(refparam, dmctx, data, instance);
 
 		if (DM_LSTRCMP(leaf->parameter, "Alias") == 0) {
-			char *alias = "";
+			char *alias = dmstrdup("");
 
 			(leaf->getvalue)(refparam, dmctx, data, instance, &alias);
 			fill_blob_alias_param(&dmctx->bb, refparam, perm, DMT_TYPE[leaf->type], alias);
@@ -2387,7 +2389,7 @@ static int mparam_set_value(DMPARAM_ARGS)
 	} else {
 		char refparam[MAX_DM_PATH] = {0};
 		char param_value[2048] = {0};
-		char *value = "";
+		char *value = dmstrdup("");
 
 		snprintf(refparam, MAX_DM_PATH, "%s%s", node->current_object, leaf->parameter);
 		if (DM_STRCMP(refparam, dmctx->in_param) != 0)
@@ -2543,7 +2545,7 @@ static int get_key_check_param(DMPARAM_ARGS)
 		return err ? err : 0;
 	} else {
 		char full_param[MAX_DM_PATH] = {0};
-		char *value = "";
+		char *value = dmstrdup("");
 
 		snprintf(full_param, sizeof(full_param), "%s%s", node->current_object, leaf->parameter);
 
@@ -2552,7 +2554,7 @@ static int get_key_check_param(DMPARAM_ARGS)
 
 		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
 
-		if (value && value[0] != '\0' && DM_STRCMP(value, dmctx->linker) == 0) {
+		if (DM_STRLEN(value) && DM_STRCMP(value, dmctx->linker) == 0) {
 			if (node->current_object[DM_STRLEN(node->current_object) - 1] == '.')
 				node->current_object[DM_STRLEN(node->current_object) - 1] = 0;
 			dmctx->linker_param = dmstrdup(node->current_object);

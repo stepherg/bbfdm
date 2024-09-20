@@ -131,7 +131,7 @@
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_add_section(char *package, char *type, struct uci_section **s);
+int bbf_uci_add_section(const char *package, const char *type, struct uci_section **s);
 
 /*********************************************************************//**
 **
@@ -147,7 +147,7 @@ int bbf_uci_add_section(char *package, char *type, struct uci_section **s);
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_delete_section(char *package, char *type, char *option, char *value);
+int bbf_uci_delete_section(const char *package, const char *type, const char *option, const char *value);
 
 /*********************************************************************//**
 **
@@ -162,7 +162,7 @@ int bbf_uci_delete_section(char *package, char *type, char *option, char *value)
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_add_section_bbfdm(char *package, char *type, struct uci_section **s);
+int bbf_uci_add_section_bbfdm(const char *package, const char *type, struct uci_section **s);
 
 /*********************************************************************//**
 **
@@ -178,7 +178,7 @@ int bbf_uci_add_section_bbfdm(char *package, char *type, struct uci_section **s)
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_delete_section_bbfdm(char *package, char *type, char *option, char *value);
+int bbf_uci_delete_section_bbfdm(const char *package, const char *type, const char *option, const char *value);
 
 /*********************************************************************//**
 **
@@ -192,7 +192,7 @@ int bbf_uci_delete_section_bbfdm(char *package, char *type, char *option, char *
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_rename_section(struct uci_section *s, char *value);
+int bbf_uci_rename_section(struct uci_section *s, const char *value);
 
 /*********************************************************************//**
 **
@@ -208,7 +208,7 @@ int bbf_uci_rename_section(struct uci_section *s, char *value);
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_get_value(char *package, char *section, char *option, char **value);
+int bbf_uci_get_value(const char *package, const char *section, const char *option, char **value);
 
 /*********************************************************************//**
 **
@@ -226,7 +226,7 @@ int bbf_uci_get_value(char *package, char *section, char *option, char **value);
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_set_value(char *package, char *section, char *option, char *value);
+int bbf_uci_set_value(const char *package, const char *section, const char *option, const char *value);
 
 /*********************************************************************//**
 **
@@ -241,7 +241,7 @@ int bbf_uci_set_value(char *package, char *section, char *option, char *value);
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_get_value_by_section(struct uci_section *s, char *option, char **value);
+int bbf_uci_get_value_by_section(struct uci_section *s, const char *option, char **value);
 
 /*********************************************************************//**
 **
@@ -257,7 +257,7 @@ int bbf_uci_get_value_by_section(struct uci_section *s, char *option, char **val
 ** \return  uci option value if the value is not empty, empty otherwise
 **
 **************************************************************************/
-char *bbf_uci_get_value_by_section_fallback_def(struct uci_section *s, char *option, char *default_value);
+char *bbf_uci_get_value_by_section_fallback_def(struct uci_section *s, const char *option, const char *default_value);
 
 /*********************************************************************//**
 **
@@ -272,7 +272,7 @@ char *bbf_uci_get_value_by_section_fallback_def(struct uci_section *s, char *opt
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_set_value_by_section(struct uci_section *s, char *option, char *value);
+int bbf_uci_set_value_by_section(struct uci_section *s, const char *option, const char *value);
 
 /*********************************************************************//**
 **
@@ -287,7 +287,7 @@ int bbf_uci_set_value_by_section(struct uci_section *s, char *option, char *valu
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_delete_section_by_section(struct uci_section *s, char *option, char *value);
+int bbf_uci_delete_section_by_section(struct uci_section *s, const char *option, const char *value);
 
 /*********************************************************************//**
 **
@@ -301,7 +301,7 @@ int bbf_uci_delete_section_by_section(struct uci_section *s, char *option, char 
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_get_section_name(char *sec_name, char **value);
+int bbf_uci_get_section_name(const char *sec_name, char **value);
 
 /*********************************************************************//**
 **
@@ -315,10 +315,10 @@ int bbf_uci_get_section_name(char *sec_name, char **value);
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_uci_set_section_name(char *sec_name, char *str, size_t size);
+int bbf_uci_set_section_name(const char *sec_name, char *str, size_t size);
 
 
-struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, void *arg2, int cmp, int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk);
+struct uci_section *bbf_uci_walk_section(const char *package, const char *type, const void *arg1, const void *arg2, int cmp, int (*filter)(struct uci_section *s, const void *value), struct uci_section *prev_section, int walk);
 
 
 /*******************
@@ -342,7 +342,7 @@ struct uci_section *bbf_uci_walk_section(char *package, char *type, void *arg1, 
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_ubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
+int bbf_ubus_call(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
 
 /*********************************************************************//**
 **
@@ -358,7 +358,7 @@ int bbf_ubus_call(char *obj, char *method, struct ubus_arg u_args[], int u_args_
 ** \return  0 if the operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_ubus_call_set(char *obj, char *method, struct ubus_arg u_args[], int u_args_size);
+int bbf_ubus_call_set(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size);
 
 
 /*******************
@@ -445,7 +445,7 @@ char *bbf_strdup(const char *ptr);
 ** \param   dup_list - pointer to the list of all sections
 **
 **************************************************************************/
-void bbf_synchronise_config_sections_with_dmmap(char *package, char *section_type, char *dmmap_package, struct list_head *dup_list);
+void bbf_synchronise_config_sections_with_dmmap(const char *package, const char *section_type, const char *dmmap_package, struct list_head *dup_list);
 
 /*********************************************************************//**
 **
@@ -519,7 +519,7 @@ int bbf_get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int
 ** \return  bool value if the operation is successful, false otherwise
 **
 **************************************************************************/
-int bbf_convert_string_to_bool(char *str, bool *b);
+int bbf_convert_string_to_bool(const char *str, bool *b);
 
 /*********************************************************************//**
 **
@@ -533,7 +533,7 @@ int bbf_convert_string_to_bool(char *str, bool *b);
 ** \param   dmmap_section - pointer to the dmmap section, it should be 'NULL' if the section is not found
 **
 **************************************************************************/
-void bbf_find_dmmap_section(char *dmmap_package, char *section_type, char *section_name, struct uci_section **dmmap_section);
+void bbf_find_dmmap_section(const char *dmmap_package, const char *section_type, const char *section_name, struct uci_section **dmmap_section);
 
 /*********************************************************************//**
 **
@@ -548,7 +548,7 @@ void bbf_find_dmmap_section(char *dmmap_package, char *section_type, char *secti
 ** \param   dmmap_section - pointer to the dmmap section, it should be 'NULL' if the section is not found
 **
 **************************************************************************/
-void bbf_find_dmmap_section_by_option(char *dmmap_package, char *section_type, char *option_name, char *option_value, struct uci_section **dmmap_section);
+void bbf_find_dmmap_section_by_option(const char *dmmap_package, const char *section_type, const char *option_name, const char *option_value, struct uci_section **dmmap_section);
 
 /*********************************************************************//**
 **
@@ -565,7 +565,7 @@ void bbf_find_dmmap_section_by_option(char *dmmap_package, char *section_type, c
 ** \return  0 if operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char **value);
+int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, const char *option_name, const char *instance, char **value);
 
 /*********************************************************************//**
 **
@@ -582,7 +582,7 @@ int bbf_get_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 ** \return  0 if operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, char *instance, char *value);
+int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, const char *option_name, const char *instance, const char *value);
 
 /*********************************************************************//**
 **
@@ -601,7 +601,7 @@ int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, char *option_name, c
 ** \return  0 if operation is successful, -1 otherwise
 **
 **************************************************************************/
-int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, char *key_name, char *key_value, char *out, size_t out_len);
+int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, const char *key_name, char *key_value, char *out, size_t out_len);
 
 /*********************************************************************//**
 **
@@ -618,7 +618,7 @@ int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_p
 ** \return  0 if operation is successful, -1 otherwise
 **
 **************************************************************************/
-int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, char *key_name, char *key_value, char **value);
+int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, const char *key_name, char *key_value, char **value);
 
 /*********************************************************************//**
 **

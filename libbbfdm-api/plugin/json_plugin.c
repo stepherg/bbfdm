@@ -65,11 +65,11 @@ static void free_event_command_args(const char **arg_p)
 	if (arg_p) {
 		int i = 0;
 		while (arg_p[i]) {
-			dmfree((char *)arg_p[i]);
+			dmfree(arg_p[i]);
 			i++;
 		}
 
-		free((char **)arg_p);
+		free(arg_p);
 	}
 }
 
@@ -229,9 +229,9 @@ static json_object *get_requested_json_obj(json_object *json_obj, char *instance
 			char *p = strchr(buf, '[');
 
 			if (strcmp(p+1, "@index") == 0 || strcmp(p+1, "@i-1") == 0) {
-				idx_pos = instance ? DM_STRTOL(instance)-1 : 1;
+				idx_pos = instance ? DM_STRTOUL(instance)-1 : 1;
 			} else {
-				idx_pos = DM_STRTOL(p+1);
+				idx_pos = DM_STRTOUL(p+1);
 			}
 			*p = 0;
 
@@ -318,7 +318,7 @@ static void replace_indexes(struct dmctx *ctx, char *old_key, char *new_key, siz
 	}
 }
 
-static void resolve_all_symbols(struct dmctx *ctx, void *data, char *instance, char *value, int nbr_instances, int json_version,
+static void resolve_all_symbols(struct dmctx *ctx, void *data, char *instance, const char *value, int nbr_instances, int json_version,
 		const char *old_key, char *new_key, size_t key_len)
 {
 	char *pch = NULL, *pchr = NULL;
@@ -363,7 +363,7 @@ static void resolve_all_symbols(struct dmctx *ctx, void *data, char *instance, c
 		replace_indexes(ctx, new_key, new_key, key_len);
 }
 
-static int fill_ubus_arguments(struct dmctx *ctx, void *data, char *instance, char *value, int nbr_instances, int json_version,
+static int fill_ubus_arguments(struct dmctx *ctx, void *data, char *instance, const char *value, int nbr_instances, int json_version,
 		struct json_object *args_obj, struct ubus_arg u_args[])
 {
 	int u_args_size = 0;
@@ -397,8 +397,8 @@ static int fill_ubus_arguments(struct dmctx *ctx, void *data, char *instance, ch
 static void free_ubus_arguments(struct ubus_arg u_args[], int u_args_size)
 {
 	for (int i = 0; i < u_args_size; i++) {
-		dmfree((char *)u_args[i].key);
-		dmfree((char *)u_args[i].val);
+		dmfree(u_args[i].key);
+		dmfree(u_args[i].val);
 	}
 }
 
@@ -669,7 +669,7 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 	struct json_object *list_name = NULL;
 	struct json_object *linker_jobj = NULL;
 	char *linker = NULL;
-	char *value = "";
+	char *value = NULL;
 
 	json_object_object_get_ex(mapping_obj, "uci", &obj);
 	json_object_object_get_ex(obj, "file", &file);
@@ -764,7 +764,7 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 
 end:
 	FREE(linker);
-	return value;
+	return value ? value : "";
 }
 
 static char *ubus_get_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance)
@@ -779,7 +779,7 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 	char buf_method[256] = {0};
 	struct ubus_arg u_args[16] = {0};
 	int u_args_size = 0;
-	char *value = "";
+	char *value = NULL;
 
 	int nbr_instances = get_number_of_instances(refparam);
 
@@ -839,7 +839,7 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 		}
 	}
 
-	return value;
+	return value ? value : "";
 }
 
 static int handle_linker_json_object(struct json_object *linker_jobj, struct dmctx *ctx, char *in, char **out)
@@ -864,7 +864,7 @@ static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct d
 {
 	struct json_object *data_s = NULL;
 	struct json_object *key = NULL, *list = NULL, *linker_jobj = NULL;
-	char *value = "";
+	char *value = NULL;
 
 	json_object_object_get_ex(mapping_obj, "data", &data_s);
 	json_object_object_get_ex(mapping_obj, "key", &key);
@@ -905,7 +905,7 @@ static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct d
 	}
 
 end:
-	return value;
+	return value ? value : "";
 }
 
 static char *ubus_v1_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance)
@@ -913,7 +913,7 @@ static char *ubus_v1_get_value(json_object *mapping_obj, char *refparam, struct 
 	struct json_object *data_json = NULL;
 	struct json_object *key = NULL;
 	struct json_object *linker_jobj = NULL;
-	char *value = "";
+	char *value = NULL;
 
 	json_object_object_get_ex(mapping_obj, "data", &data_json);
 	json_object_object_get_ex(mapping_obj, "key", &key);
@@ -935,7 +935,7 @@ static char *ubus_v1_get_value(json_object *mapping_obj, char *refparam, struct 
 	}
 
 end:
-	return value;
+	return value ? value: "";
 }
 
 static char *get_value_from_mapping(json_object *param_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance)
@@ -1235,7 +1235,7 @@ static int fill_string_arguments(struct json_object *json_obj, int *min_length, 
 	return 0;
 }
 
-static int dm_validate_value(struct dmctx *ctx, json_object *json_obj, char *value)
+static int dm_validate_value(struct dmctx *ctx, json_object *json_obj, const char *value)
 {
 	struct json_object *type_obj = NULL;
 
@@ -1290,9 +1290,9 @@ static int dm_validate_value(struct dmctx *ctx, json_object *json_obj, char *val
 			struct json_object *datatype_obj = NULL;
 			struct json_object *maxsize = NULL;
 			struct json_object *item_obj = NULL;
-			int min_item = -1;
-			int max_item = -1;
-			int max_size = -1;
+			int min_item = 0;
+			int max_item = 0;
+			int max_size = 0;
 
 			json_object_object_get_ex(list_obj, "datatype", &datatype_obj);
 			if (!datatype_obj)
@@ -1361,7 +1361,7 @@ static int dm_validate_value(struct dmctx *ctx, json_object *json_obj, char *val
 	return 0;
 }
 
-static int uci_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, const void *data, char *instance, char *value)
+static int uci_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, const char *value)
 {
 	struct json_object *uci_obj = NULL;
 	struct json_object *file = NULL;
@@ -1428,10 +1428,14 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 				res = dmuci_set_value(json_object_get_string(file), uci_type, opt_temp, value);
 		} else {
 			if (value != NULL) {
+				char buf[1024] = {0};
+
 				if (dmuci_delete_by_section(((struct dm_data *)data)->config_section, opt_temp, NULL))
 					dmuci_delete(json_object_get_string(file), uci_type, opt_temp, NULL);
 
-				char *p = strtok(value, ",");
+				DM_STRNCPY(buf, value, sizeof(buf));
+
+				char *p = strtok(buf, ",");
 				while (p) {
 					strip_lead_trail_whitespace(p);
 
@@ -1450,9 +1454,13 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 			res = dmuci_set_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, value);
 		} else {
 			if (value != NULL) {
+				char buf[1024] = {0};
+
 				dmuci_delete(json_object_get_string(file), json_object_get_string(section_name), opt_temp, NULL);
 
-				char *p = strtok(value, ",");
+				DM_STRNCPY(buf, value, sizeof(buf));
+
+				char *p = strtok(buf, ",");
 				while (p) {
 					strip_lead_trail_whitespace(p);
 
@@ -1470,7 +1478,7 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 	return res;
 }
 
-static int ubus_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
+static int ubus_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, const char *value)
 {
 	struct json_object *ubus_obj = NULL;
 	struct json_object *object = NULL;
@@ -1505,7 +1513,7 @@ static int ubus_set_value(json_object *mapping_obj, int json_version, char *refp
 	return res;
 }
 
-static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, bool is_dmmap)
+static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, const char *value, bool is_dmmap)
 {
 	struct json_object *data_s = NULL;
 	struct json_object *key = NULL, *list = NULL;
@@ -1524,9 +1532,13 @@ static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *re
 
 	if (list_value) {
 		if (value != NULL) {
+			char buf[1024] = {0};
+
 			dmuci_delete_by_section(req_sec, list_value, NULL);
 
-			char *p = strtok(value, ",");
+			DM_STRNCPY(buf, value, sizeof(buf));
+
+			char *p = strtok(buf, ",");
 			while (p) {
 				strip_lead_trail_whitespace(p);
 				dmuci_add_list_value_by_section(req_sec, list_value, p);
@@ -1557,7 +1569,7 @@ static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *re
 	return -1;
 }
 
-static int set_value_from_mapping(json_object *param_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, char *value)
+static int set_value_from_mapping(json_object *param_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, const char *value)
 {
 	struct json_object *type_obj = NULL, *mapping_arr = NULL, *mapping = NULL;
 	int res = 0;
@@ -1633,7 +1645,7 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 		bbfdm_get_reference_linker(ctx, value, &reference);
 	} else {
 		reference.path = value;
-		reference.value = "";
+		reference.value = dmstrdup("");
 	}
 
 	switch (action) {
@@ -1653,9 +1665,9 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 static bool is_obj(char *object, json_object *jobj)
 {
 	json_object_object_foreach(jobj, key, json_obj) {
-		if((strcmp(key, "type") == 0) && (strcmp(json_object_get_string(json_obj), "object") == 0))
+		if((DM_LSTRCMP(key, "type") == 0) && (strcmp(json_object_get_string(json_obj), "object") == 0))
 			return true;
-		else if((strcmp(key, "type") == 0) && (strcmp(json_object_get_string(json_obj), "object") != 0))
+		else if((DM_LSTRCMP(key, "type") == 0) && (strcmp(json_object_get_string(json_obj), "object") != 0))
 			return false;
 	}
 	return false;
@@ -1673,11 +1685,11 @@ static bool valid_event_param(char *param)
 {
 	bool ret;
 
-	if (strcmp(param, "type") == 0) {
+	if (DM_LSTRCMP(param, "type") == 0) {
 		ret = false;
-	} else if (strcmp(param, "version") == 0) {
+	} else if (DM_LSTRCMP(param, "version") == 0) {
 		ret = false;
-	} else if (strcmp(param, "protocols") == 0) {
+	} else if (DM_LSTRCMP(param, "protocols") == 0) {
 		ret = false;
 	} else {
 		ret = true;
@@ -1686,13 +1698,13 @@ static bool valid_event_param(char *param)
 	return ret;
 }
 
-static char** fill_command_param(int count, struct json_object *obj)
+static const char **fill_command_param(int count, struct json_object *obj)
 {
-	char **res_p = NULL;
+	const char **res_p = NULL;
 	if (!obj || !count)
 		return res_p;
 
-	res_p = malloc(sizeof(char *) * (count + 1));
+	res_p = (const char **)calloc(count + 1, sizeof(char *));
 	if (res_p) {
 		res_p[count] = NULL;
 		int id = 0;
@@ -1713,8 +1725,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	char full_param[1024] = {0};
 	char param_ext[256] = {0};
 	size_t n_flags;
-	// cppcheck-suppress nullPointerRedundantCheck
-	char **in_p = NULL, **out_p = NULL, **ev_arg = NULL, **tmp = NULL;
+	const char **in_p = NULL, **out_p = NULL, **ev_arg = NULL, **tmp = NULL;
 
 	if (!jobj || !pleaf)
 		return;
@@ -1769,7 +1780,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 			if (valid_event_param(key)) {
 				param_count++;
 				if (!ev_arg) {
-					ev_arg = malloc(sizeof(char*) * param_count);
+					ev_arg = (const char **)calloc(param_count, sizeof(char *));
 					if (!ev_arg)
 						break;
 				} else {
@@ -1787,7 +1798,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 
 		if (ev_arg) {
 			param_count++;
-			tmp = realloc(ev_arg, sizeof(char*) * param_count);
+			tmp = realloc(ev_arg, sizeof(const char *) * param_count);
 			if (tmp == NULL) {
 				FREE(ev_arg);
 			}
@@ -1850,7 +1861,7 @@ static void parse_param(char *object, char *param, json_object *jobj, DMLEAF *pl
 	}
 
 	snprintf(full_param, sizeof(full_param), "%s%s", object, param_ext);
-	save_json_data(list, full_param, jobj, json_version, (const char**)in_p, (const char**)out_p, (const char**)ev_arg);
+	save_json_data(list, full_param, jobj, json_version, in_p, out_p, ev_arg);
 }
 
 static void count_obj_param_under_jsonobj(json_object *jsonobj, int *obj_number, int *param_number)
@@ -1858,10 +1869,10 @@ static void count_obj_param_under_jsonobj(json_object *jsonobj, int *obj_number,
 	json_object_object_foreach(jsonobj, key, jobj) {
 		if (json_object_get_type(jobj) == json_type_object) {
 			json_object_object_foreach(jobj, key1, jobj1) {
-				if ((strcmp(key1, "type") == 0) && (strcmp(json_object_get_string(jobj1), "object") == 0)) {
+				if ((DM_LSTRCMP(key1, "type") == 0) && (DM_LSTRCMP(json_object_get_string(jobj1), "object") == 0)) {
 					(*obj_number)++;
 					break;
-				} else if (((strcmp(key1, "type") == 0) && (strcmp(json_object_get_string(jobj1), "object") != 0)) && (strcmp(key, "mapping") != 0)) {
+				} else if (((DM_LSTRCMP(key1, "type") == 0) && (DM_LSTRCMP(json_object_get_string(jobj1), "object") != 0)) && (DM_LSTRCMP(key, "mapping") != 0)) {
 					(*param_number)++;
 					break;
 				}
@@ -2041,7 +2052,7 @@ int load_json_plugins(DMOBJ *entryobj, const char *plugin_path)
 		char obj_path[MAX_DM_LENGTH] = {0};
 		DMOBJ *dm_entryobj = NULL;
 
-		if (strcmp(key, "json_plugin_version") == 0) {
+		if (DM_LSTRCMP(key, "json_plugin_version") == 0) {
 			json_plugin_version = get_json_plugin_version(jobj);
 			continue;
 		}

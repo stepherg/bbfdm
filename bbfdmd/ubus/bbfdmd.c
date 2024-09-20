@@ -15,7 +15,7 @@
 #include "bbfdm-ubus.h"
 #include "cli.h"
 
-#include "libbbfdm/device.h"
+#include "../../libbbfdm/device.h"
 
 static void usage(char *prog)
 {
