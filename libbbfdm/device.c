@@ -22,7 +22,7 @@
 **************************************************************/
 static int get_Device_RootDataModelVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup("2.17");
+	*value = dmstrdup("2.18");
 	return 0;
 }
 
