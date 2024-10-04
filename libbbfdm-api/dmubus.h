@@ -30,6 +30,18 @@ struct dmubus_ev_subtask {
 	uint32_t timeout;
 };
 
+// bbfdm task related functions
+typedef void (*bbfdm_task_callback_t)(const void *arg1, const void *arg2);
+
+typedef struct bbfdm_task_data {
+	struct uloop_timeout timeout;
+	bbfdm_task_callback_t callback;
+	const void *arg1;
+	const void *arg2;
+} bbfdm_task_data_t;
+
+int bbfdm_task_add(bbfdm_task_callback_t callback, const void *arg1, const void *arg2, int timeout);
+
 typedef void (*CB_FUNC_PTR)(struct ubus_context *ctx, struct ubus_event_handler *ev,
 			const char *type, struct blob_attr *msg);
 
