@@ -628,7 +628,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 end:
 	if ((data.bbf_ctx.dm_type == BBFDM_BOTH) && (dm_is_micro_service() == false)) {
-		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, false);
+		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, true);
 	}
 
 	bbf_cleanup(&data.bbf_ctx);

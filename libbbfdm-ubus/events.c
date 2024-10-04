@@ -14,6 +14,12 @@
 #include "get_helper.h"
 #include <libubus.h>
 
+struct event_data {
+	struct blob_attr *blob_data;
+	char dm_path[MAX_DM_PATH];
+	char method_name[256];
+};
+
 static char *get_events_dm_path(struct list_head *ev_list, const char *event)
 {
 	struct ev_handler_node *iter = NULL;
@@ -27,6 +33,87 @@ static char *get_events_dm_path(struct list_head *ev_list, const char *event)
 	}
 
 	return NULL;
+}
+
+static void send_bbf_config_change_event(struct ubus_context *ctx, const char *dm_path)
+{
+	struct blob_buf bb = {0};
+
+	if (ctx == NULL) {
+		BBF_ERR("Can't connect UBUS context for event");
+		return;
+	}
+
+	BBF_ERR("Sending bbf.config.change event for [%s]", dm_path);
+
+	cancel_instance_refresh_timer(ctx);
+	register_instance_refresh_timer(ctx, 0);
+}
+
+static void handle_event_response(struct event_data *edata)
+{
+	struct ubus_context *ctx;
+
+	// Wait for 5 seconds before handling the response
+	sleep(5);
+
+	ctx = ubus_connect(NULL);
+	if (ctx == NULL) {
+		BBF_ERR("Can't create UBUS context for event");
+		goto end;
+	}
+
+	// Send the event using the stored blob data
+	ubus_send_event(ctx, edata->method_name, edata->blob_data);
+
+	BBF_ERR("Event [%s] for [%s] sent\n", edata->method_name, edata->dm_path);
+
+	ubus_free(ctx);
+end:
+	free(edata->blob_data); // Free blob data
+	free(edata); // Free event_data structure
+}
+
+static void schedule_event_response(struct bbfdm_context *u, const char *dm_path, struct blob_attr *attr)
+{
+	pid_t pid = fork();
+
+	if (pid == 0) {
+		// Child process
+		struct event_data *edata = malloc(sizeof(struct event_data));
+		if (edata == NULL) {
+			BBF_ERR("Failed to allocate memory for event_data");
+			exit(1);
+		}
+
+		snprintf(edata->dm_path, sizeof(edata->dm_path), "%s", dm_path);
+		snprintf(edata->method_name, sizeof(edata->method_name), "%s.%s",
+			DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name,
+			BBF_EVENT_NAME);
+
+		// Copy the blob data
+		size_t blob_data_len = blob_len(attr);
+		edata->blob_data = (struct blob_attr *)malloc(blob_data_len);
+		if (edata->blob_data == NULL) {
+			BBF_ERR("Failed to allocate memory for blob_data");
+			free(edata);
+			exit(1);
+		}
+
+		memcpy(edata->blob_data, attr, blob_data_len);
+
+		// Handle event response after 5 seconds
+		handle_event_response(edata);
+
+		// Exit the child process after handling the event
+		exit(0);
+	} else if (pid > 0) {
+		// Parent process continues, doesn't wait for the child
+		BBF_ERR("Scheduled event response for [%s], child PID: %d", dm_path, pid);
+	} else {
+		// Fork failed
+		BBF_ERR("Fork failed");
+	}
 }
 
 static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_handler *ev,
@@ -73,16 +160,11 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	if (ret)
 		goto end;
 
-	cancel_instance_refresh_timer(ctx);
+	// Send 'bbf.config.changes' event
+	send_bbf_config_change_event(ctx, dm_path);
 
-	char method_name[256] = {0};
-
-	snprintf(method_name, sizeof(method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
-
-	ubus_send_event(ctx, method_name, bbf_ctx.bb.head);
-	BBF_INFO("Event[%s], for [%s] sent", method_name, dm_path);
-
-	register_instance_refresh_timer(ctx, 2000);
+	// Fork a new process to handle the response in 5 seconds
+	schedule_event_response(u, dm_path, bbf_ctx.bb.head);
 
 end:
 	bbf_cleanup(&bbf_ctx);
