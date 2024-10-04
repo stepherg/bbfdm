@@ -8,3 +8,4 @@ out
 /build
 /.repo
 /utilities/bbf_configd
+*.swp

@@ -153,6 +153,48 @@ static void dmubus_listen_timeout(struct uloop_timeout *timeout)
 	uloop_end();
 }
 
+static void _bbfdm_task_callback(struct uloop_timeout *t)
+{
+	struct bbfdm_task_data *task = container_of(t, struct bbfdm_task_data, timeout);
+
+	if (task == NULL) {
+		BBF_ERR("Failed to decode task");
+		return;
+	}
+	task->callback(task->arg1, task->arg2);
+	free(task);
+}
+
+int bbfdm_task_add(bbfdm_task_callback_t callback, const void *arg1, const void *arg2, int timeout_sec) {
+
+	bbfdm_task_data_t *task;
+
+	if (timeout_sec < 0) {
+		BBF_ERR("Can't handler negative timeouts");
+		return -1;
+	}
+
+	// do not use dmalloc here, as this needs to persists beyond session
+	task = (bbfdm_task_data_t *)calloc(sizeof(bbfdm_task_data_t), 1);
+	if (task == NULL) {
+		BBF_ERR("Failed to allocate memory");
+		return -1;
+	}
+
+
+	task->callback = callback;
+	task->arg1 = arg1;
+	task->arg2 = arg2;
+
+	task->timeout.cb = _bbfdm_task_callback;
+
+	// Set the initial timeout
+	int ret = uloop_timeout_set(&task->timeout, timeout_sec * 1000);
+
+	return ret;
+}
+
+
 /*******************************************************************************
 **
 ** dmubus_wait_for_event
