@@ -34,13 +34,17 @@ struct dmubus_ev_subtask {
 typedef void (*bbfdm_task_callback_t)(const void *arg1, const void *arg2);
 
 typedef struct bbfdm_task_data {
+	struct uloop_process process; // Used for forked task
 	struct uloop_timeout timeout;
-	bbfdm_task_callback_t callback;
+	bbfdm_task_callback_t taskcb;
+	bbfdm_task_callback_t finishcb; // Used for forked task
 	const void *arg1;
 	const void *arg2;
 } bbfdm_task_data_t;
 
-int bbfdm_task_add(bbfdm_task_callback_t callback, const void *arg1, const void *arg2, int timeout);
+int bbfdm_task_schedule(bbfdm_task_callback_t callback, const void *arg1, const void *arg2, int timeout);
+
+int bbfdm_task_fork(bbfdm_task_callback_t taskcb, bbfdm_task_callback_t finishcb, const void *arg1, const void *arg2);
 
 typedef void (*CB_FUNC_PTR)(struct ubus_context *ctx, struct ubus_event_handler *ev,
 			const char *type, struct blob_attr *msg);

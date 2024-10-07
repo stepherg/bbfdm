@@ -731,15 +731,9 @@ static int bbf_fw_image_download(const char *url, const char *auto_activate, con
 		goto end;
 	}
 
-	// Reboot the device if auto activation is true
+	// Schedule a device Reboot, if auto activation is true
 	if (activate) {
-		// Send the transfer complete after image applied
-		send_transfer_complete_event(command, obj_path, url, fault_msg, start_time, complete_time, commandKey, "Download");
-
-		sleep(5); // added additional buffer for TransferComplete! event
-		if (dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0) != 0)
-			res = -1;
-		sleep(10); // Wait for reboot to take action
+		bbfdm_task_fork(_exec_reboot, NULL, NULL, NULL);
 	}
 
 end:
@@ -1698,6 +1692,17 @@ static int get_operate_args_DeviceInfoFirmwareImage_Activate(char *refparam, str
 	return 0;
 }
 
+void _exec_reboot(const void *arg1, const void *arg2)
+{
+	sleep(3); // Wait for reboot to happen
+	dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
+	sleep(5); // Wait for reboot to happen
+	BBF_ERR("Reboot call failed with rpc-sys, trying again with system");
+	dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0);
+	sleep(5); // Wait for reboot
+	BBF_ERR("Reboot call failed!!!");
+}
+
 static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 #define CRONTABS_ROOT "/etc/crontabs/root"
@@ -1799,8 +1804,7 @@ static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx
 		if (strcasecmp(status, "true") != 0)
 			return USP_FAULT_COMMAND_FAILURE;
 
-		res = dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
-		sleep(10); // Wait for reboot to happen
+		bbfdm_task_fork(_exec_reboot, NULL, NULL, NULL);
 	}
 
 	return res ? USP_FAULT_COMMAND_FAILURE : 0;

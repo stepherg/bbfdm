@@ -161,11 +161,11 @@ static void _bbfdm_task_callback(struct uloop_timeout *t)
 		BBF_ERR("Failed to decode task");
 		return;
 	}
-	task->callback(task->arg1, task->arg2);
+	task->taskcb(task->arg1, task->arg2);
 	free(task);
 }
 
-int bbfdm_task_add(bbfdm_task_callback_t callback, const void *arg1, const void *arg2, int timeout_sec) {
+int bbfdm_task_schedule(bbfdm_task_callback_t callback, const void *arg1, const void *arg2, int timeout_sec) {
 
 	bbfdm_task_data_t *task;
 
@@ -182,7 +182,7 @@ int bbfdm_task_add(bbfdm_task_callback_t callback, const void *arg1, const void 
 	}
 
 
-	task->callback = callback;
+	task->taskcb = callback;
 	task->arg1 = arg1;
 	task->arg2 = arg2;
 
@@ -194,7 +194,68 @@ int bbfdm_task_add(bbfdm_task_callback_t callback, const void *arg1, const void 
 	return ret;
 }
 
+static void _bbfdm_task_finish_callback(struct uloop_process *p, int ret)
+{
+	struct bbfdm_task_data *task = container_of(p, struct bbfdm_task_data, process);
 
+	if (task == NULL) {
+		BBF_ERR("Failed to decode forked task");
+		return;
+	}
+	if (task->finishcb) {
+		task->finishcb(task->arg1, task->arg2);
+	}
+	free(task);
+}
+
+
+int bbfdm_task_fork(bbfdm_task_callback_t taskcb, bbfdm_task_callback_t finishcb, const void *arg1, const void *arg2)
+{
+	pid_t child;
+	bbfdm_task_data_t *task;
+
+	// do not use dmalloc here, as this needs to persists beyond session
+	task = (bbfdm_task_data_t *)calloc(sizeof(bbfdm_task_data_t), 1);
+	if (task == NULL) {
+		BBF_ERR("Failed to allocate memory");
+		return -1;
+	}
+
+	task->arg1 = arg1;
+	task->arg2 = arg2;
+
+	child = fork();
+	if (child == -1) {
+		BBF_ERR("Failed to fork a child for task");
+		goto err_out;
+	} else if (child == 0) {
+		/* free fd's and memory inherited from parent */
+		uloop_done();
+		fclose(stdin);
+		fclose(stdout);
+		fclose(stderr);
+
+		BBF_INFO("{fork} Calling from subprocess");
+		taskcb(task->arg1, task->arg2);
+
+		/* write result and exit */
+		exit(EXIT_SUCCESS);
+	}
+
+	// monitor the process if finish callback is defined
+	if (finishcb) {
+		task->finishcb = finishcb;
+		task->process.pid = child;
+		task->process.cb = _bbfdm_task_finish_callback;
+		uloop_process_add(&task->process);
+	} else {
+		FREE(task);
+	}
+	return 0;
+
+err_out:
+	return -1;
+}
 /*******************************************************************************
 **
 ** dmubus_wait_for_event
