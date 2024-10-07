@@ -165,8 +165,8 @@ static void _bbfdm_task_callback(struct uloop_timeout *t)
 	free(task);
 }
 
-int bbfdm_task_schedule(bbfdm_task_callback_t callback, const void *arg1, const void *arg2, int timeout_sec) {
-
+int bbfdm_task_schedule(bbfdm_task_callback_t callback, const void *arg1, void *arg2, int timeout_sec)
+{
 	bbfdm_task_data_t *task;
 
 	if (timeout_sec < 0) {
@@ -209,7 +209,7 @@ static void _bbfdm_task_finish_callback(struct uloop_process *p, int ret)
 }
 
 
-int bbfdm_task_fork(bbfdm_task_callback_t taskcb, bbfdm_task_callback_t finishcb, const void *arg1, const void *arg2)
+int bbfdm_task_fork(bbfdm_task_callback_t taskcb, bbfdm_task_callback_t finishcb, const void *arg1, void *arg2)
 {
 	pid_t child;
 	bbfdm_task_data_t *task;

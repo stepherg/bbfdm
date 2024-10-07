@@ -26,7 +26,7 @@ static int get_Device_RootDataModelVersion(char *refparam, struct dmctx *ctx, vo
 	return 0;
 }
 
-static void _exec_factoryreset(const void *arg1, const void *arg2)
+static void _exec_factoryreset(const void *arg1, void *arg2)
 {
 	sleep(2);
 	dmubus_call_set("rpc-sys", "factory", UBUS_ARGS{0}, 0);

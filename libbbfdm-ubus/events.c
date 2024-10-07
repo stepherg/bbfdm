@@ -14,6 +14,11 @@
 #include "get_helper.h"
 #include <libubus.h>
 
+struct event_args {
+	struct blob_attr *blob_data;
+	char method_name[256];
+};
+
 static char *get_events_dm_path(struct list_head *ev_list, const char *event)
 {
 	struct ev_handler_node *iter = NULL;
@@ -27,6 +32,28 @@ static char *get_events_dm_path(struct list_head *ev_list, const char *event)
 	}
 
 	return NULL;
+}
+
+void event_callback(const void *arg1, void *arg2)
+{
+	struct event_args *e_args = (struct event_args *)arg2;
+
+	if (!e_args || !e_args->blob_data || !DM_STRLEN(e_args->method_name))
+		return;
+
+	struct ubus_context *ctx = ubus_connect(NULL);
+	if (ctx == NULL) {
+		BBF_ERR("Can't create UBUS context for event");
+		return;
+	}
+
+	ubus_send_event(ctx, e_args->method_name, e_args->blob_data);
+	BBF_INFO("Event[%s] sent", e_args->method_name);
+
+	ubus_free(ctx);
+
+	free(e_args->blob_data);
+	free(e_args);
 }
 
 static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_handler *ev,
@@ -73,14 +100,23 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	if (ret)
 		goto end;
 
-	char method_name[256] = {0};
-
-	snprintf(method_name, sizeof(method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
-
-	ubus_send_event(ctx, method_name, bbf_ctx.bb.head);
-	BBF_INFO("Event[%s], for [%s] sent", method_name, dm_path);
-
 	bbfdm_schedule_instance_refresh_timer(ctx, 2);
+
+	size_t blob_data_len = blob_len(bbf_ctx.bb.head);
+
+	if (blob_data_len) {
+		struct event_args *e_args = (struct event_args *)calloc(1, sizeof(struct event_args));
+		if (!e_args)
+			goto end;
+
+		snprintf(e_args->method_name, sizeof(e_args->method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
+
+		e_args->blob_data = (struct blob_attr *)calloc(1, blob_data_len);
+
+		memcpy(e_args->blob_data, bbf_ctx.bb.head, blob_data_len);
+
+		bbfdm_task_schedule(event_callback, NULL, e_args, 6);
+	}
 
 end:
 	bbf_cleanup(&bbf_ctx);

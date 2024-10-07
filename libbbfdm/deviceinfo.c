@@ -1692,9 +1692,9 @@ static int get_operate_args_DeviceInfoFirmwareImage_Activate(char *refparam, str
 	return 0;
 }
 
-void _exec_reboot(const void *arg1, const void *arg2)
+void _exec_reboot(const void *arg1, void *arg2)
 {
-	sleep(3); // Wait for reboot to happen
+	sleep(3);
 	dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
 	sleep(5); // Wait for reboot to happen
 	BBF_ERR("Reboot call failed with rpc-sys, trying again with system");
