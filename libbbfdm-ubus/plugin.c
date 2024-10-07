@@ -62,7 +62,7 @@ static void fill_dotso_micro_service_out_args(bbfdm_config_t *config, DMOBJ *ent
 		strncpyt(config->out_name, ms_name, sizeof(config->out_name));
 }
 
-int bbfdm_load_internal_plugin(DM_MAP_OBJ *dynamic_obj, bbfdm_config_t *config, DMOBJ **main_entry)
+int bbfdm_load_internal_plugin(struct bbfdm_context *bbfdm_ctx, DM_MAP_OBJ *dynamic_obj, bbfdm_config_t *config, DMOBJ **main_entry)
 {
 	if (!dynamic_obj || !config || !main_entry) {
 		BBF_ERR("Input validation failed");
@@ -103,13 +103,16 @@ int bbfdm_load_internal_plugin(DM_MAP_OBJ *dynamic_obj, bbfdm_config_t *config, 
 		dm_entryobj[i].nextobj = dynamic_obj[i].root_obj;
 		dm_entryobj[i].leaf = dynamic_obj[i].root_leaf;
 		dm_entryobj[i].bbfdm_type = BBFDM_BOTH;
+
+		if (dynamic_obj[i].init_module)
+			dynamic_obj[i].init_module(bbfdm_ctx);
 	}
 
 	*main_entry = dm_entryobj;
 	return 0;
 }
 
-int bbfdm_load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
+int bbfdm_load_dotso_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
 {
 	if (!lib_handle || !file_path || !strlen(file_path) || !config || !main_entry) {
 		BBF_ERR("Input validation failed");
@@ -129,12 +132,25 @@ int bbfdm_load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_conf
 	//Dynamic Object
 	*(void **) (&dynamic_obj) = dlsym(handle, "tDynamicObj");
 
-	return bbfdm_load_internal_plugin(dynamic_obj, config, main_entry);
+	return bbfdm_load_internal_plugin(bbfdm_ctx, dynamic_obj, config, main_entry);
 }
 
-int bbfdm_free_dotso_plugin(void **lib_handle)
+int bbfdm_free_dotso_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle)
 {
 	if (*lib_handle) {
+		DM_MAP_OBJ *dynamic_obj = NULL;
+
+		//Dynamic Object
+		*(void **) (&dynamic_obj) = dlsym(*lib_handle, "tDynamicObj");
+
+		if (dynamic_obj) {
+			// Clean module
+			for (int i = 0; dynamic_obj[i].path; i++) {
+				if (dynamic_obj[i].clean_module)
+					dynamic_obj[i].clean_module(bbfdm_ctx);
+			}
+		}
+
 		dlclose(*lib_handle);
 		*lib_handle = NULL;
 	}
@@ -260,9 +276,12 @@ int bbfdm_free_json_plugin(void)
 	return free_json_plugins();
 }
 
-int bbfdm_load_external_plugin(const char *file_path, void **lib_handle, bbfdm_config_t *config, DMOBJ **main_entry)
+int bbfdm_load_external_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle, bbfdm_config_t *config, DMOBJ **main_entry)
 {
+	char file_path[128] = {0};
 	int err = -1;
+
+	snprintf(file_path, sizeof(file_path), "%s", bbfdm_ctx->config.in_name);
 
 	if (DM_STRLEN(file_path) == 0) {
 		BBF_ERR("Input type/name not supported or defined");
@@ -277,7 +296,7 @@ int bbfdm_load_external_plugin(const char *file_path, void **lib_handle, bbfdm_c
 		err = bbfdm_load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path, config, main_entry);
 	} else if (strcasecmp(ext, ".so") == 0) {
 		BBF_INFO("Loading DotSo plugin %s", file_path);
-		err = bbfdm_load_dotso_plugin(lib_handle, file_path, config, main_entry);
+		err = bbfdm_load_dotso_plugin(bbfdm_ctx, lib_handle, file_path, config, main_entry);
 	} else {
 		BBF_ERR("Input type %s not supported", ext);
 	}

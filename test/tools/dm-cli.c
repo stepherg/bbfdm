@@ -83,9 +83,9 @@ int main(int argc, char **argv)
 	}
 
 	if (plugin_path == NULL) {
-		err = bbfdm_load_internal_plugin(tDynamicObj, &bbfdm_config, &CLI_DM_ROOT_OBJ);
+		err = bbfdm_load_internal_plugin(NULL, tDynamicObj, &bbfdm_config, &CLI_DM_ROOT_OBJ);
 	} else {
-		err = bbfdm_load_dotso_plugin(&cli_lib_handle, plugin_path, &bbfdm_config, &CLI_DM_ROOT_OBJ);
+		err = bbfdm_load_dotso_plugin(NULL, &cli_lib_handle, plugin_path, &bbfdm_config, &CLI_DM_ROOT_OBJ);
 	}
 
 	if (err || !CLI_DM_ROOT_OBJ) {
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 	bbf_global_clean(CLI_DM_ROOT_OBJ);
 
 	// Free plugin handle
-	bbfdm_free_dotso_plugin(&cli_lib_handle);
+	bbfdm_free_dotso_plugin(NULL, &cli_lib_handle);
 
 	return err;
 }

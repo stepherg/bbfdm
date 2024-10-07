@@ -100,8 +100,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	if (ret)
 		goto end;
 
-	cancel_instance_refresh_timer(ctx);
-	register_instance_refresh_timer(ctx, 0);
+	bbfdm_schedule_instance_refresh_timer(ctx, 2);
 
 	size_t blob_data_len = blob_len(bbf_ctx.bb.head);
 
@@ -116,7 +115,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 
 		memcpy(e_args->blob_data, bbf_ctx.bb.head, blob_data_len);
 
-		bbfdm_task_add(event_callback, e_args, NULL, 5);
+		bbfdm_task_add(event_callback, e_args, NULL, 6);
 	}
 
 end:
