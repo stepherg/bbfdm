@@ -647,13 +647,13 @@
 					"flags": [
 						"Reference"
 					],
-					"description": "Reference to the schedule instance",
+					"description": "Comma separated list of references to the Schedules object",
 					"mapping": [
 						{
 							"data": "@Parent",
 							"type": "uci_sec",
-							"key": "internet_access_schedule",
-							"linker_obj": "Device.Schedules.Schedule.[Alias==@key]"
+							"list": "internet_access_schedule",
+							"linker_obj": "Device.Schedules.Schedule.[Alias==@list]"
 						}
 					]
 				}

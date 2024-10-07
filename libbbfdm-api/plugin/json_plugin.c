@@ -44,8 +44,6 @@ struct dm_json_obj {
 	event_args event_arg;
 };
 
-static int handle_linker_json_object(struct json_object *linker_jobj, struct dmctx *ctx, char *in, char **out);
-
 static void save_json_data(struct list_head *json_list, char *name, json_object *data, int json_version,
 			   const char **in_p, const char **out_p, const char **ev_arg)
 {
@@ -656,6 +654,58 @@ static int delete_obj(char *refparam, struct dmctx *ctx, void *data, char *insta
 	return 0;
 }
 
+static char *handle_reference_value(struct dmctx *ctx, struct json_object *linker_jobj, const char *key_name, char *key_value)
+{
+	if (!ctx || !linker_jobj || !key_name || !key_value)
+		return "";
+
+	char linker_path[256] = {0};
+
+	char *linker_val = json_object_get_string(linker_jobj);
+	if (!linker_val)
+		return "";
+
+	replace_str(linker_val, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, linker_path, sizeof(linker_path));
+	if (DM_STRLEN(linker_path) == 0)
+		return "";
+
+	char *ext_ref = strstr(linker_path, "==");
+	if (ext_ref == NULL) {
+		char *pref = NULL;
+
+		adm_entry_get_reference_param(ctx, linker_path, key_value, &pref);
+		return pref;
+	} else {
+		char buf_ref[256 + 32] = {0};
+
+		replace_str(linker_path, key_name, key_value, buf_ref, sizeof(buf_ref));
+		return dmstrdup(buf_ref);
+	}
+}
+
+static char *handle_reference_list_value(struct dmctx *ctx, struct json_object *linker_jobj, struct uci_list *list)
+{
+	if (!ctx || !linker_jobj || !list)
+		return "";
+
+	struct uci_element *e = NULL;
+	char list_ref[4096] = {0};
+	unsigned pos = 0;
+
+	list_ref[0] = 0;
+	uci_foreach_element(list, e) {
+		char *ref = handle_reference_value(ctx, linker_jobj, "@list", e->name);
+
+		if (DM_STRLEN(ref))
+			pos += snprintf(&list_ref[pos], sizeof(list_ref) - pos, "%s;", ref);
+	}
+
+	if (pos)
+		list_ref[pos - 1] = 0;
+
+	return dmstrdup(list_ref);
+}
+
 static char *uci_get_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance)
 {
 	struct json_object *obj = NULL;
@@ -733,7 +783,7 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 					dmuci_get_option_value_string(json_object_get_string(file), uci_type, opt_temp, &res);
 
 				if (linker_jobj)
-					handle_linker_json_object(linker_jobj, ctx, res, &value);
+					value = handle_reference_value(ctx, linker_jobj, "@key", res);
 				else
 					value = res;
 			} else {
@@ -742,7 +792,12 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 				dmuci_get_value_by_section_list(((struct dm_data *)data)->config_section, opt_temp, &list_val);
 				if (list_val == NULL)
 					dmuci_get_option_value_list(json_object_get_string(file), uci_type, opt_temp, &list_val);
-				value = dmuci_list_to_string(list_val, ",");
+
+				if (linker_jobj) {
+					value = handle_reference_list_value(ctx, linker_jobj, list_val);
+				} else {
+					value = dmuci_list_to_string(list_val, ",");
+				}
 			}
 		}
 	} else if (file && section_name && opt_temp) {
@@ -751,14 +806,21 @@ static char *uci_get_value(json_object *mapping_obj, int json_version, char *ref
 
 			dmuci_get_option_value_string(json_object_get_string(file), json_object_get_string(section_name), opt_temp, &res);
 
-			if (linker_jobj)
-				handle_linker_json_object(linker_jobj, ctx, res, &value);
-			else
+			if (linker_jobj) {
+				value = handle_reference_value(ctx, linker_jobj, "@key", res);
+			} else {
 				value = res;
+			}
 		} else {
 			struct uci_list *list_val;
+
 			dmuci_get_option_value_list(json_object_get_string(file), json_object_get_string(section_name), opt_temp, &list_val);
-			value = dmuci_list_to_string(list_val, ",");
+
+			if (linker_jobj) {
+				value = handle_reference_list_value(ctx, linker_jobj, list_val);
+			} else {
+				value = dmuci_list_to_string(list_val, ",");
+			}
 		}
 	}
 
@@ -842,24 +904,6 @@ static char *ubus_get_value(json_object *mapping_obj, int json_version, char *re
 	return value ? value : "";
 }
 
-static int handle_linker_json_object(struct json_object *linker_jobj, struct dmctx *ctx, char *in, char **out)
-{
-	char *link = json_object_get_string(linker_jobj);
-	char linker[256] = {0}, ref[256] = {0};
-	char *external_ref = NULL;
-
-	replace_str(link, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, linker, sizeof(linker));
-	external_ref = strstr(link, "==");
-	if (external_ref == NULL) {
-		adm_entry_get_reference_param(ctx, linker, in, out);
-	} else {
-		replace_str(linker, "@key", in, ref, sizeof(ref));
-		*out = dmstrdup(ref);
-	}
-
-	return 0;
-}
-
 static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct dmctx *ctx, void *data, char *instance, bool is_dmmap)
 {
 	struct json_object *data_s = NULL;
@@ -883,7 +927,13 @@ static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct d
 		struct uci_list *list_val;
 
 		dmuci_get_value_by_section_list(req_sec, list_value, &list_val);
-		value = dmuci_list_to_string(list_val, ",");
+
+		if (linker_jobj) {
+			value = handle_reference_list_value(ctx, linker_jobj, list_val);
+		} else {
+			value = dmuci_list_to_string(list_val, ",");
+		}
+
 		goto end;
 	}
 
@@ -897,7 +947,7 @@ static char *uci_v1_get_value(json_object *mapping_obj, char *refparam, struct d
 
 			dmuci_get_value_by_section_string(req_sec, key_value, &res);
 			if (linker_jobj) {
-				handle_linker_json_object(linker_jobj, ctx, res, &value);
+				value = handle_reference_value(ctx, linker_jobj, "@key", res);
 			} else {
 				value = res;
 			}
@@ -928,7 +978,7 @@ static char *ubus_v1_get_value(json_object *mapping_obj, char *refparam, struct 
 		json_object *json_obj = get_requested_json_obj(((struct dm_data *)data)->json_object, instance, json_object_get_string(key), key_name, sizeof(key_name));
 		res = dmjson_get_value(json_obj, 1, key_name);
 		if (linker_jobj) {
-			handle_linker_json_object(linker_jobj, ctx, res, &value);
+			value = handle_reference_value(ctx, linker_jobj, "@key", res);
 		} else {
 			value = res;
 		}
@@ -1372,6 +1422,9 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 	struct json_object *option_name = NULL;
 	struct json_object *list = NULL;
 	struct json_object *list_name = NULL;
+	struct json_object *linker_jobj = NULL;
+	char *opt_temp = NULL;
+	char buf_value[1024] = {0};
 	int res = 0;
 
 	json_object_object_get_ex(mapping_obj, "uci", &uci_obj);
@@ -1383,16 +1436,21 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 	json_object_object_get_ex(option, "name", &option_name);
 	json_object_object_get_ex(uci_obj, "list", &list);
 	json_object_object_get_ex(list, "name", &list_name);
+	json_object_object_get_ex(mapping_obj, "linker_obj", &linker_jobj);
 
-	char *opt_temp = NULL;
 	if (list_name) {
 		opt_temp = json_object_get_string(list_name);
 	} else if (option_name) {
 		opt_temp = json_object_get_string(option_name);
 	}
 
+	if (value == NULL)
+		return -1;
+
+	snprintf(buf_value, sizeof(buf_value), "%s", value);
+
 	if (opt_temp && strstr(refparam, ".Alias")) {
-		return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, opt_temp, instance, value);
+		return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, opt_temp, instance, buf_value);
 	}
 
 	if (data && file && type && opt_temp) {
@@ -1406,7 +1464,7 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 			char sec_name[256] = {0};
 			char buf[64] = {0};
 
-			if (dmuci_set_section_name(value, sec_name, sizeof(sec_name)))
+			if (dmuci_set_section_name(buf_value, sec_name, sizeof(sec_name)))
 				return -1;
 
 			snprintf(buf, sizeof(buf), "dmmap_%s", json_object_get_string(file));
@@ -1424,50 +1482,73 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 		}
 
 		if (option) {
-			if ((res = dmuci_set_value_by_section(((struct dm_data *)data)->config_section, opt_temp, value)))
-				res = dmuci_set_value(json_object_get_string(file), uci_type, opt_temp, value);
+			if (linker_jobj) { // It is a reference value
+				struct dm_reference reference = {0};
+
+				bbfdm_get_reference_linker(ctx, buf_value, &reference);
+
+				if ((res = dmuci_set_value_by_section(((struct dm_data *)data)->config_section, opt_temp, reference.value)))
+					res = dmuci_set_value(json_object_get_string(file), uci_type, opt_temp, reference.value);
+			} else {
+				if ((res = dmuci_set_value_by_section(((struct dm_data *)data)->config_section, opt_temp, buf_value)))
+					res = dmuci_set_value(json_object_get_string(file), uci_type, opt_temp, buf_value);
+			}
 		} else {
-			if (value != NULL) {
-				char buf[1024] = {0};
+			char *pch = NULL, *pchr = NULL;
 
-				if (dmuci_delete_by_section(((struct dm_data *)data)->config_section, opt_temp, NULL))
-					dmuci_delete(json_object_get_string(file), uci_type, opt_temp, NULL);
+			if (dmuci_delete_by_section(((struct dm_data *)data)->config_section, opt_temp, NULL))
+				dmuci_delete(json_object_get_string(file), uci_type, opt_temp, NULL);
 
-				DM_STRNCPY(buf, value, sizeof(buf));
+			for (pch = strtok_r(buf_value, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 
-				char *p = strtok(buf, ",");
-				while (p) {
-					strip_lead_trail_whitespace(p);
+				strip_lead_trail_whitespace(pch);
 
-					if ((res = dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, opt_temp, p)))
-						res = dmuci_add_list_value(json_object_get_string(file), uci_type, opt_temp, p);
+				if (linker_jobj) { // It is a reference value
+					struct dm_reference reference = {0};
 
-					if (res)
-						return -1;
+					bbfdm_get_reference_linker(ctx, pch, &reference);
 
-					p = strtok(NULL, ",");
+					if ((res = dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, opt_temp, reference.value)))
+						res = dmuci_add_list_value(json_object_get_string(file), uci_type, opt_temp, reference.value);
+				} else {
+					if ((res = dmuci_add_list_value_by_section(((struct dm_data *)data)->config_section, opt_temp, pch)))
+						res = dmuci_add_list_value(json_object_get_string(file), uci_type, opt_temp, pch);
 				}
+
+				if (res)
+					return -1;
 			}
 		}
 	} else if (file && section_name && opt_temp) {
 		if (option) {
-			res = dmuci_set_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, value);
+			if (linker_jobj) { // It is a reference value
+				struct dm_reference reference = {0};
+
+				bbfdm_get_reference_linker(ctx, buf_value, &reference);
+
+				res = dmuci_set_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, reference.value);
+			} else {
+				res = dmuci_set_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, buf_value);
+			}
 		} else {
-			if (value != NULL) {
-				char buf[1024] = {0};
+			char *pch = NULL, *pchr = NULL;
 
-				dmuci_delete(json_object_get_string(file), json_object_get_string(section_name), opt_temp, NULL);
+			dmuci_delete(json_object_get_string(file), json_object_get_string(section_name), opt_temp, NULL);
 
-				DM_STRNCPY(buf, value, sizeof(buf));
+			for (pch = strtok_r(buf_value, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 
-				char *p = strtok(buf, ",");
-				while (p) {
-					strip_lead_trail_whitespace(p);
+				strip_lead_trail_whitespace(pch);
 
-					if (dmuci_add_list_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, p))
+				if (linker_jobj) { // It is a reference value
+					struct dm_reference reference = {0};
+
+					bbfdm_get_reference_linker(ctx, pch, &reference);
+
+					if (dmuci_add_list_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, reference.value))
 						return -1;
-
-					p = strtok(NULL, ",");
+				} else {
+					if (dmuci_add_list_value(json_object_get_string(file), json_object_get_string(section_name), opt_temp, pch))
+						return -1;
 				}
 			}
 		}
@@ -1516,14 +1597,21 @@ static int ubus_set_value(json_object *mapping_obj, int json_version, char *refp
 static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *refparam, struct dmctx *ctx, void *data, char *instance, const char *value, bool is_dmmap)
 {
 	struct json_object *data_s = NULL;
-	struct json_object *key = NULL, *list = NULL;
+	struct json_object *key = NULL, *list = NULL, *linker_jobj = NULL;
+	char buf_value[1024] = {0};
 
 	json_object_object_get_ex(mapping_obj, "data", &data_s);
 	json_object_object_get_ex(mapping_obj, "key", &key);
 	json_object_object_get_ex(mapping_obj, "list", &list);
+	json_object_object_get_ex(mapping_obj, "linker_obj", &linker_jobj);
 
 	if (data == NULL || data_s == NULL || strcmp(json_object_get_string(data_s), "@Parent") != 0)
 		return -1;
+
+	if (value == NULL)
+		return -1;
+
+	snprintf(buf_value, sizeof(buf_value), "%s", value);
 
 	char *key_value = key ? json_object_get_string(key) : NULL;
 	char *list_value = list ? json_object_get_string(list) : NULL;
@@ -1531,18 +1619,22 @@ static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *re
 	struct uci_section *req_sec = is_dmmap ? ((struct dm_data *)data)->dmmap_section : ((struct dm_data *)data)->config_section;
 
 	if (list_value) {
-		if (value != NULL) {
-			char buf[1024] = {0};
+		char *pch = NULL, *pchr = NULL;
 
-			dmuci_delete_by_section(req_sec, list_value, NULL);
+		dmuci_delete_by_section(req_sec, list_value, NULL);
 
-			DM_STRNCPY(buf, value, sizeof(buf));
+		for (pch = strtok_r(buf_value, ",", &pchr); pch != NULL; pch = strtok_r(NULL, ",", &pchr)) {
 
-			char *p = strtok(buf, ",");
-			while (p) {
-				strip_lead_trail_whitespace(p);
-				dmuci_add_list_value_by_section(req_sec, list_value, p);
-				p = strtok(NULL, ",");
+			strip_lead_trail_whitespace(pch);
+
+			if (linker_jobj) { // It is a reference value
+				struct dm_reference reference = {0};
+
+				bbfdm_get_reference_linker(ctx, pch, &reference);
+
+				dmuci_add_list_value_by_section(req_sec, list_value, reference.value);
+			} else {
+				dmuci_add_list_value_by_section(req_sec, list_value, pch);
 			}
 		}
 
@@ -1553,16 +1645,24 @@ static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *re
 		if (strcmp(key_value, "@Name") == 0) {
 			char sec_name[256] = {0};
 
-			if (dmuci_set_section_name(value, sec_name, sizeof(sec_name)))
+			if (dmuci_set_section_name(buf_value, sec_name, sizeof(sec_name)))
 				return -1;
 
 			dmuci_set_value_by_section(((struct dm_data *)data)->dmmap_section, "section_name", sec_name);
 			dmuci_rename_section_by_section(((struct dm_data *)data)->config_section, sec_name);
 			return 0;
 		} else if (strstr(refparam, ".Alias")) {
-			return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, key_value, instance, value);
+			return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, key_value, instance, buf_value);
 		} else {
-			return dmuci_set_value_by_section(req_sec, key_value, value);
+			if (linker_jobj) { // It is a reference value
+				struct dm_reference reference = {0};
+
+				bbfdm_get_reference_linker(ctx, buf_value, &reference);
+
+				return dmuci_set_value_by_section(req_sec, key_value, reference.value);
+			} else {
+				return dmuci_set_value_by_section(req_sec, key_value, buf_value);
+			}
 		}
 	}
 
@@ -1626,7 +1726,6 @@ static int set_value_from_mapping(json_object *param_obj, int json_version, char
 
 static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	struct dm_reference reference = {0};
 	struct dm_json_obj *pleaf = NULL;
 	json_object *param_obj = NULL;
 	char obj[MAX_DM_LENGTH] = {0};
@@ -1641,20 +1740,15 @@ static int setvalue_param(char *refparam, struct dmctx *ctx, void *data, char *i
 		}
 	}
 
-	if (DM_LSTRSTR(value, "=>")) {
-		bbfdm_get_reference_linker(ctx, value, &reference);
-	} else {
-		reference.path = value;
-		reference.value = dmstrdup("");
-	}
-
 	switch (action) {
 		case VALUECHECK:
-			if (dm_validate_value(ctx, param_obj, reference.path))
-				return FAULT_9007;
+			if (!DM_LSTRSTR(value, "=>")) { // It is not a reference value
+				if (dm_validate_value(ctx, param_obj, value))
+					return FAULT_9007;
+			}
 			break;
 		case VALUESET:
-			if (set_value_from_mapping(param_obj, json_version, refparam, ctx, data, instance, DM_STRLEN(reference.value) ? reference.value : reference.path))
+			if (set_value_from_mapping(param_obj, json_version, refparam, ctx, data, instance, value))
 				return FAULT_9007;
 			break;
 	}
