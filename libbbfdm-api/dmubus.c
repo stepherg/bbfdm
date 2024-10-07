@@ -165,8 +165,8 @@ static void _bbfdm_task_callback(struct uloop_timeout *t)
 	free(task);
 }
 
-int bbfdm_task_add(bbfdm_task_callback_t callback, const void *arg1, const void *arg2, int timeout_sec) {
-
+int bbfdm_task_add(bbfdm_task_callback_t callback, const void *arg1, const void *arg2, int timeout_sec)
+{
 	bbfdm_task_data_t *task;
 
 	if (timeout_sec < 0) {
