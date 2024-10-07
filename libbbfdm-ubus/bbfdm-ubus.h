@@ -55,14 +55,13 @@ typedef struct bbfdm_data {
 	bool is_raw;
 } bbfdm_data_t;
 
-void register_instance_refresh_timer(struct ubus_context *ctx, int start_sec);
-void cancel_instance_refresh_timer(struct ubus_context *ctx);
-
 int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx);
 int bbfdm_ubus_regiter_free(struct bbfdm_context *bbfdm_ctx);
 
 void bbfdm_ubus_set_service_name(struct bbfdm_context *bbfdm_ctx, const char *srv_name);
 void bbfdm_ubus_set_log_level(int log_level);
 void bbfdm_ubus_load_data_model(DM_MAP_OBJ *DynamicObj);
+
+void bbfdm_schedule_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec);
 
 #endif /* BBFDM_UBUS_H */

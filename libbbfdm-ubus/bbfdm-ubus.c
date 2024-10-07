@@ -37,6 +37,8 @@ LIST_HEAD(head_registered_service);
 
 static void run_schema_updater(struct bbfdm_context *u);
 static void periodic_instance_updater(struct uloop_timeout *t);
+static void bbfdm_register_instance_refresh_timer(struct ubus_context *ctx, int start_in);
+static void bbfdm_cancel_instance_refresh_timer(struct ubus_context *ctx);
 
 // Global variables
 static void *deamon_lib_handle = NULL;
@@ -55,7 +57,7 @@ static void bbfdm_ctx_cleanup(struct bbfdm_context *u)
 	}
 
 	/* DotSo Plugin */
-	bbfdm_free_dotso_plugin(&deamon_lib_handle);
+	bbfdm_free_dotso_plugin(u, &deamon_lib_handle);
 
 	/* JSON Plugin */
 	bbfdm_free_json_plugin();
@@ -106,7 +108,7 @@ static void async_complete_cb(struct uloop_process *p, __attribute__((unused)) i
 		BBF_INFO("pid(%d) blob data sent raw(%zu)", r->process.pid, blob_raw_len(bb->head));
 		ubus_complete_deferred_request(r->ctx, &r->req, 0);
 		if (r->is_operate) {
-			register_instance_refresh_timer(r->ctx, 0);
+			bbfdm_register_instance_refresh_timer(r->ctx, 0);
 		}
 		munmap(r->result, DEF_IPC_DATA_LEN);
 		async_req_free(r);
@@ -555,7 +557,7 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 	if (is_sync_operate_cmd(&data)) {
 		bbfdm_operate_cmd(&data, NULL);
 	} else {
-		cancel_instance_refresh_timer(ctx);
+		bbfdm_cancel_instance_refresh_timer(ctx);
 		bbfdm_start_deferred(&data, bbfdm_operate_cmd, true);
 	}
 
@@ -628,7 +630,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 end:
 	if ((data.bbf_ctx.dm_type == BBFDM_BOTH) && (dm_is_micro_service() == false)) {
-		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, false);
+		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, true);
 	}
 
 	bbf_cleanup(&data.bbf_ctx);
@@ -1266,7 +1268,7 @@ static void lookup_event_cb(struct ubus_context *ctx,
 	}
 }
 
-void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
+static void bbfdm_register_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec)
 {
 	struct bbfdm_context *u;
 
@@ -1276,14 +1278,14 @@ void register_instance_refresh_timer(struct ubus_context *ctx, int start_in)
 		return;
 	}
 
-	if (start_in >= 0) {
-		BBF_INFO("Register instance refresh timer in %d ms...", start_in);
+	if (start_in_sec >= 0) {
+		BBF_INFO("Register instance refresh timer in %d sec...", start_in_sec);
 		u->instance_timer.cb = periodic_instance_updater;
-		uloop_timeout_set(&u->instance_timer, start_in);
+		uloop_timeout_set(&u->instance_timer, start_in_sec * 1000);
 	}
 }
 
-void cancel_instance_refresh_timer(struct ubus_context *ctx)
+static void bbfdm_cancel_instance_refresh_timer(struct ubus_context *ctx)
 {
 	struct bbfdm_context *u;
 
@@ -1304,13 +1306,9 @@ static void bbf_config_change_cb(struct ubus_context *ctx, struct ubus_event_han
 	(void)ctx;
 	(void)msg;
 
-	if (type && strcmp(type, "bbf.config.change") != 0)
-		return;
-
 	BBF_INFO("Config updated, Scheduling instance refresh timers");
 
-	cancel_instance_refresh_timer(ctx);
-	register_instance_refresh_timer(ctx, 0);
+	bbfdm_schedule_instance_refresh_timer(ctx, 0);
 }
 
 static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
@@ -1327,10 +1325,10 @@ static int daemon_load_data_model(struct bbfdm_context *daemon_ctx)
 
 	if (INTERNAL_ROOT_TREE) {
 		BBF_INFO("Loading Data Model Internal plugin (%s)", daemon_ctx->config.service_name);
-		err = bbfdm_load_internal_plugin(INTERNAL_ROOT_TREE, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
+		err = bbfdm_load_internal_plugin(daemon_ctx, INTERNAL_ROOT_TREE, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
 	} else {
 		BBF_INFO("Loading Data Model External plugin (%s)", daemon_ctx->config.service_name);
-		err = bbfdm_load_external_plugin(daemon_ctx->config.in_name, &deamon_lib_handle, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
+		err = bbfdm_load_external_plugin(daemon_ctx, &deamon_lib_handle, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
 	}
 
 	if (err)
@@ -1399,7 +1397,7 @@ int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 		return -1;
 
 	run_schema_updater(bbfdm_ctx);
-	register_instance_refresh_timer(&bbfdm_ctx->ubus_ctx, 1000);
+	bbfdm_register_instance_refresh_timer(&bbfdm_ctx->ubus_ctx, 1);
 
 	err = register_events_to_ubus(&bbfdm_ctx->ubus_ctx, &bbfdm_ctx->event_handlers);
 	if (err != 0)
@@ -1447,4 +1445,10 @@ void bbfdm_ubus_set_log_level(int log_level)
 void bbfdm_ubus_load_data_model(DM_MAP_OBJ *DynamicObj)
 {
 	INTERNAL_ROOT_TREE = DynamicObj;
+}
+
+void bbfdm_schedule_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec)
+{
+	bbfdm_cancel_instance_refresh_timer(ctx);
+	bbfdm_register_instance_refresh_timer(ctx, start_in_sec);
 }

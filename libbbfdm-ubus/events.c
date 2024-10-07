@@ -73,8 +73,6 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	if (ret)
 		goto end;
 
-	cancel_instance_refresh_timer(ctx);
-
 	char method_name[256] = {0};
 
 	snprintf(method_name, sizeof(method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
@@ -82,7 +80,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	ubus_send_event(ctx, method_name, bbf_ctx.bb.head);
 	BBF_INFO("Event[%s], for [%s] sent", method_name, dm_path);
 
-	register_instance_refresh_timer(ctx, 2000);
+	bbfdm_schedule_instance_refresh_timer(ctx, 2);
 
 end:
 	bbf_cleanup(&bbf_ctx);

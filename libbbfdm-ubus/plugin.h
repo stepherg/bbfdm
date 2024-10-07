@@ -10,11 +10,11 @@
 
 #ifndef PLUGIN_H
 
-int bbfdm_load_internal_plugin(DM_MAP_OBJ *Dynamic_Obj, bbfdm_config_t *config, DMOBJ **main_entry);
-int bbfdm_load_external_plugin(const char *file_path, void **lib_handle, bbfdm_config_t *config, DMOBJ **main_entry);
+int bbfdm_load_internal_plugin(struct bbfdm_context *bbfdm_ctx, DM_MAP_OBJ *Dynamic_Obj, bbfdm_config_t *config, DMOBJ **main_entry);
+int bbfdm_load_external_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle, bbfdm_config_t *config, DMOBJ **main_entry);
 
-int bbfdm_load_dotso_plugin(void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry);
-int bbfdm_free_dotso_plugin(void *lib_handle);
+int bbfdm_load_dotso_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry);
+int bbfdm_free_dotso_plugin(struct bbfdm_context *bbfdm_ctx, void *lib_handle);
 
 int bbfdm_load_json_plugin(struct list_head *json_plugin, struct list_head *json_list, struct list_head *json_memhead,
 		const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry);
