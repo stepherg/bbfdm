@@ -34,9 +34,9 @@ static char *get_events_dm_path(struct list_head *ev_list, const char *event)
 	return NULL;
 }
 
-void event_callback(const void *arg1, const void *arg2)
+void event_callback(const void *arg1, void *arg2)
 {
-	struct event_args *e_args = (struct event_args *)arg1;
+	struct event_args *e_args = (struct event_args *)arg2;
 
 	if (!e_args || !e_args->blob_data || !DM_STRLEN(e_args->method_name))
 		return;
@@ -115,7 +115,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 
 		memcpy(e_args->blob_data, bbf_ctx.bb.head, blob_data_len);
 
-		bbfdm_task_add(event_callback, e_args, NULL, 6);
+		bbfdm_task_add(event_callback, NULL, e_args, 6);
 	}
 
 end:
