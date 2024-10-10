@@ -52,6 +52,8 @@ static struct proto_args supported_protocols[] = {
 		},
 };
 
+static time_t last_config_change_time = 0;
+
 // Structure to represent an instance of a service
 struct instance {
 	char name[NAME_LENGTH];
@@ -508,10 +510,7 @@ end:
 	ubus_send_reply(ctx, req, bb.head);
 	blob_buf_free(&bb);
 
-	// Send 'bbf.config.change' event to run refresh instances
-	send_bbf_config_change_event();
 	LOG("Commit handler exit");
-
 	return 0;
 }
 
@@ -558,10 +557,7 @@ end:
 	ubus_send_reply(ctx, req, bb.head);
 	blob_buf_free(&bb);
 
-	// Send 'bbf.config.change' event to run refresh instances
-	send_bbf_config_change_event();
 	LOG("revert handler exit");
-
 	return 0;
 }
 
@@ -625,10 +621,32 @@ static void usage(char *prog)
 	fprintf(stderr, "\n");
 }
 
+static int config_change_receive_request(struct ubus_context *ctx, struct ubus_object *obj,
+			    struct ubus_request_data *req,
+			    const char *method, struct blob_attr *msg)
+{
+	if (strcmp(method, "config.change") != 0)
+		return -1;
+
+	time_t time_now = time(NULL);
+
+	if (time_now - last_config_change_time > 2) {
+		// Send 'bbf.config.change' event to run refresh instances
+		send_bbf_config_change_event();
+	}
+
+	last_config_change_time = time_now;
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
-	struct ubus_context *uctx;
-	int ch;
+	struct ubus_context *uctx = NULL;
+	struct ubus_subscriber sub = {
+		.cb = config_change_receive_request
+	};
+	int ch, ret = 0;
 
 	openlog("bbf.config", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
@@ -656,6 +674,19 @@ int main(int argc, char **argv)
 
 	if (ubus_add_object(uctx, &bbf_config_object))
 		goto exit;
+
+	ret = ubus_register_subscriber(uctx, &sub);
+	if (!ret) {
+		uint32_t id;
+
+		ret = ubus_lookup_id(uctx, "service", &id);
+		if (ret)
+			goto exit;
+
+		ret = ubus_subscribe(uctx, &sub, id);
+		if (ret)
+			goto exit;
+	}
 
 	uloop_run();
 
