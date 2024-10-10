@@ -24,7 +24,6 @@ static int process_count = 0;
 
 #define PROCPS_BUFSIZE 1024
 #define CONFIG_BACKUP "/tmp/bbf_config_backup"
-#define DEF_VENDOR_LOG_FILE "/tmp/.vend_log"
 #define MAX_TIME_WINDOW 5
 
 struct process_entry {
@@ -539,27 +538,7 @@ end:
 	return res;
 }
 
-int bbf_upload_log(const char *url, const char *username, const char *password,
-                char *config_name, const char *command, const char *obj_path)
-{
-	int res = 0;
-	char fault_msg[128] = {0};
 
-	// Upload the config file
-	time_t start_time = time(NULL);
-	long res_code = upload_file(config_name, url, username, password);
-	time_t complete_time = time(NULL);
-
-	// Check if the upload operation was successful
-	if (!get_response_code_status(url, res_code)) {
-		snprintf(fault_msg, sizeof(fault_msg), "Upload operation is failed, fault code (%ld)", res_code);
-		res = -1;
-	}
-
-	// Send the transfer complete event
-	send_transfer_complete_event(command, obj_path, url, fault_msg, start_time, complete_time, NULL, "Upload");
-	return res;
-}
 int bbf_config_restore(const char *url, const char *username, const char *password,
 		const char *file_size, const char *checksum_algorithm, const char *checksum,
 		const char *command, const char *obj_path)
@@ -830,24 +809,6 @@ static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
 			break;
 	}
-	return 0;
-}
-
-static int browseVlfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	struct dm_data *curr_data = NULL;
-	LIST_HEAD(dup_list);
-	char *inst = NULL;
-
-	synchronize_specific_config_sections_with_dmmap("system", "system", "dmmap", &dup_list);
-	list_for_each_entry(curr_data, &dup_list, list) {
-
-		inst = handle_instance(dmctx, parent_node, curr_data->dmmap_section, "vlf_instance", "vlf_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)curr_data, inst) == DM_STOP)
-			break;
-	}
-	free_dmmap_config_dup_list(&dup_list);
 	return 0;
 }
 
@@ -1159,13 +1120,6 @@ static int get_DeviceInfo_ProcessorNumberOfEntries(char *refparam, struct dmctx 
 	return 0;
 }
 
-static int get_DeviceInfo_VendorLogFileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	int cnt = get_number_of_entries(ctx, data, instance, browseVlfInst);
-	dmasprintf(value, "%d", cnt);
-	return 0;
-}
-
 static int get_DeviceInfo_VendorConfigFileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	int cnt = get_number_of_entries(ctx, data, instance, browseVcfInst);
@@ -1267,41 +1221,6 @@ static int get_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 static int set_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	return bbf_set_alias(ctx, ((struct dm_data *)data)->config_section, "vcf_alias", instance, value);
-}
-
-static int get_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "vlf_alias", instance, value);
-}
-
-static int set_vlf_alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "vlf_alias", instance, value);
-}
-
-static int get_vlf_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "log_file", value);
-	return 0;
-}
-
-static int get_vlf_max_size(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	int size = 0;
-
-	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "log_size", value);
-
-	// Value defined in system is in KiB in datamodel this is in bytes, convert the value in bytes
-	size = (*value && **value) ? DM_STRTOL(*value) * 1000 : 0;
-
-	dmasprintf(value, "%d", size);
-	return 0;
-}
-
-static int get_vlf_persistent(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = dmstrdup("0");
-	return 0;
 }
 
 static int get_DeviceInfoProcessor_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
@@ -1611,76 +1530,6 @@ static int get_process_state(char* refparam, struct dmctx *ctx, void *data, char
 /*************************************************************
  * OPERATE COMMANDS
  *************************************************************/
-static operation_args vendor_log_file_upload_args = {
-    .in = (const char *[]) {
-        "URL",
-        "Username",
-        "Password",
-        NULL
-    }
-};
-
-static int get_operate_args_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	*value = (char *)&vendor_log_file_upload_args;
-	return 0;
-}
-static int operate_DeviceInfoVendorLogFile_Upload(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	const char *upload_command = "Upload()";
-	char upload_path[256] = {'\0'};
-	char *vlf_file_path = NULL;
-
-	char *ret = DM_STRRCHR(refparam, '.');
-	if (!ret)
-		return USP_FAULT_INVALID_ARGUMENT;
-
-	if ((ret - refparam + 2) < sizeof(upload_path))
-		snprintf(upload_path, ret - refparam + 2, "%s", refparam);
-
-	char *user = dmjson_get_value((json_object *)value, 1, "Username");
-	char *pass = dmjson_get_value((json_object *)value, 1, "Password");
-	char *url = dmjson_get_value((json_object *)value, 1, "URL");
-
-	if (url[0] == '\0')
-		return USP_FAULT_INVALID_ARGUMENT;
-
-	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "log_file", &vlf_file_path);
-
-	if (DM_STRLEN(vlf_file_path) == 0) {
-		vlf_file_path = dmstrdup(DEF_VENDOR_LOG_FILE);
-		char buffer[256] = {0};
-
-		// Open the log file for writing
-		FILE *logfile = fopen(DEF_VENDOR_LOG_FILE, "w");
-		if (logfile == NULL)
-			return USP_FAULT_COMMAND_FAILURE;
-
-		// Use popen to run "logread" command and open a pipe to read its output
-		FILE *fp = popen("logread", "r"); // flawfinder: ignore
-		if (fp == NULL) {
-			fclose(logfile);
-			return USP_FAULT_COMMAND_FAILURE;
-		}
-
-		// Read the output of "logread" and write it to the log file
-		while (fgets(buffer, sizeof(buffer), fp) != NULL) {
-			fputs(buffer, logfile);
-		}
-
-		// Close the pipe and the log file
-		pclose(fp);
-		fclose(logfile);
-	}
-
-	int res = bbf_upload_log(url, user, pass, vlf_file_path, upload_command, upload_path);
-
-	if (file_exists(DEF_VENDOR_LOG_FILE))
-		remove(DEF_VENDOR_LOG_FILE);
-
-	return res ? USP_FAULT_COMMAND_FAILURE : 0;
-}
-
 static operation_args vendor_config_file_backup_args = {
 	.in = (const char *[]) {
 		"URL",
@@ -1967,7 +1816,6 @@ DMOBJ tDeviceInfoObj[] = {
 {"MemoryStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoMemoryStatusParams, NULL, BBFDM_BOTH, NULL},
 {"ProcessStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusObj, tDeviceInfoProcessStatusParams, NULL, BBFDM_BOTH, NULL},
 {"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, NULL},
-{"VendorLogFile", &DMREAD, NULL, NULL, NULL, browseVlfInst, NULL, NULL, NULL, tDeviceInfoVendorLogFileParams, NULL, BBFDM_BOTH, NULL},
 {"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, NULL},
 {"FirmwareImage", &DMREAD, NULL, NULL, "file:/usr/libexec/rpcd/fwbank", browseDeviceInfoFirmwareImageInst, NULL, NULL, NULL, tDeviceInfoFirmwareImageParams, NULL, BBFDM_BOTH, NULL},
 {0}
@@ -1992,7 +1840,6 @@ DMLEAF tDeviceInfoParams[] = {
 {"UpTime", &DMREAD, DMT_UNINT, get_device_info_uptime, NULL, BBFDM_BOTH},
 {"FirstUseDate", &DMREAD, DMT_TIME, get_device_info_firstusedate, NULL, BBFDM_BOTH},
 {"ProcessorNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_ProcessorNumberOfEntries, NULL, BBFDM_BOTH},
-{"VendorLogFileNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_VendorLogFileNumberOfEntries, NULL, BBFDM_BOTH},
 {"VendorConfigFileNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_VendorConfigFileNumberOfEntries, NULL, BBFDM_BOTH},
 {"SupportedDataModelNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_SupportedDataModelNumberOfEntries, NULL, BBFDM_CWMP},
 {"FirmwareImageNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_FirmwareImageNumberOfEntries, NULL, BBFDM_BOTH},
@@ -2049,17 +1896,6 @@ DMLEAF tDeviceInfoProcessStatusProcessParams[] = {
 {"Priority", &DMREAD, DMT_UNINT, get_process_priority, NULL, BBFDM_BOTH},
 {"CPUTime", &DMREAD, DMT_UNINT, get_process_cpu_time, NULL, BBFDM_BOTH},
 {"State", &DMREAD, DMT_STRING, get_process_state, NULL, BBFDM_BOTH},
-{0}
-};
-
-/* *** Device.DeviceInfo.VendorLogFile.{i}. *** */
-DMLEAF tDeviceInfoVendorLogFileParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_vlf_alias, set_vlf_alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"Name", &DMREAD, DMT_STRING, get_vlf_name, NULL, BBFDM_BOTH, DM_FLAG_UNIQUE|DM_FLAG_LINKER},
-{"MaximumSize", &DMREAD, DMT_UNINT, get_vlf_max_size, NULL, BBFDM_BOTH},
-{"Persistent", &DMREAD, DMT_BOOL, get_vlf_persistent, NULL, BBFDM_BOTH},
-{"Upload()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoVendorLogFile_Upload, operate_DeviceInfoVendorLogFile_Upload, BBFDM_USP},
 {0}
 };
 

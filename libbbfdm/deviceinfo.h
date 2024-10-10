@@ -17,7 +17,6 @@
 
 extern DMLEAF tDeviceInfoParams[];
 extern DMLEAF tDeviceInfoVendorConfigFileParams[];
-extern DMLEAF tDeviceInfoVendorLogFileParams[];
 extern DMLEAF tDeviceInfoMemoryStatusParams[];
 extern DMOBJ tDeviceInfoProcessStatusObj[];
 extern DMLEAF tDeviceInfoProcessStatusParams[];
