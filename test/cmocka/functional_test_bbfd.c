@@ -383,40 +383,40 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	assert_int_equal(fault, FAULT_9008);
 
 	// get value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_URLFilter.Profile.1.Name";
+	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.X_IOPSYS_EU_URLFilter.Profile.1.Name", "homeoffice", "xsd:string");
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name", "kids", "xsd:string");
 
 	// set value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_URLFilter.Profile.1.Name";
+	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
 	ctx->in_value = "home+office test";
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_URLFilter.Profile.1.Name";
+	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.X_IOPSYS_EU_URLFilter.Profile.1.Name", "home+office test", "xsd:string");
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name", "home+office test", "xsd:string");
 
 	// set value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_URLFilter.Profile.1.Name";
+	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
 	ctx->in_value = "office_test";
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// get value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_URLFilter.Profile.1.Name";
+	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
 	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.X_IOPSYS_EU_URLFilter.Profile.1.Name", "office_test", "xsd:string");
+	validate_parameter(ctx, "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name", "office_test", "xsd:string");
 }
 
 static void test_api_bbfdm_get_set_library_parameter(void **state)
