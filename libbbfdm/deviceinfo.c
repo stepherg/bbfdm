@@ -875,6 +875,24 @@ static int browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 	return 0;
 }
 
+static int browseDeviceInfoRebootsRebootInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+{
+	struct dm_data curr_data = {0};
+	struct uci_section *s = NULL;
+	char *inst = NULL;
+
+	uci_foreach_sections("deviceinfo", "reboot", s) {
+
+		curr_data.config_section = s;
+
+		inst = handle_instance(dmctx, parent_node, s, "reboot_instance", "reboot_alias");
+
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, &curr_data, inst) == DM_STOP)
+			break;
+	}
+	return 0;
+}
+
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
@@ -1521,6 +1539,97 @@ static int get_process_state(char* refparam, struct dmctx *ctx, void *data, char
 	return 0;
 }
 
+static int get_DeviceInfoReboots_BootCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("deviceinfo", "globals", "boot_count", value);
+	return 0;
+}
+
+static int get_DeviceInfoReboots_CurrentVersionBootCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("deviceinfo", "globals", "curr_version_boot_count", value);
+	return 0;
+}
+
+static int get_DeviceInfoReboots_WatchdogBootCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("deviceinfo", "globals", "watchdog_boot_count", value);
+	return 0;
+}
+
+static int get_DeviceInfoReboots_ColdBootCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("deviceinfo", "globals", "cold_boot_count", value);
+	return 0;
+}
+
+static int get_DeviceInfoReboots_WarmBootCount(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("deviceinfo", "globals", "warm_boot_count", value);
+	return 0;
+}
+
+static int get_DeviceInfoReboots_MaxRebootEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmuci_get_option_value_fallback_def("deviceinfo", "globals", "max_reboot_entries", "3");
+	return 0;
+}
+
+static int set_DeviceInfoReboots_MaxRebootEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			//TODO
+			break;
+	}
+	return 0;
+}
+
+static int get_DeviceInfoReboots_RebootNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	int cnt = get_number_of_entries(ctx, data, instance, browseDeviceInfoRebootsRebootInst);
+	dmasprintf(value, "%d", cnt);
+	return 0;
+}
+
+static int get_DeviceInfoRebootsReboot_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->config_section, "reboot_alias", instance, value);
+}
+
+static int set_DeviceInfoRebootsReboot_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->config_section, "reboot_alias", instance, value);
+}
+
+static int get_DeviceInfoRebootsReboot_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "time_stamp", value);
+	return 0;
+}
+
+static int get_DeviceInfoRebootsReboot_FirmwareUpdated(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "firmware_updated", value);
+	return 0;
+}
+
+static int get_DeviceInfoRebootsReboot_Cause(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "cause", value);
+	return 0;
+}
+
+static int get_DeviceInfoRebootsReboot_Reason(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "reason", value);
+	return 0;
+}
+
 /*************************************************************
  * OPERATE COMMANDS
  *************************************************************/
@@ -1694,6 +1803,14 @@ static int get_operate_args_DeviceInfoFirmwareImage_Activate(char *refparam, str
 
 void _exec_reboot(const void *arg1, void *arg2)
 {
+	char config_name[16] = {0};
+
+	snprintf(config_name, sizeof(config_name), "%s", "deviceinfo");
+
+	// Set last_reboot_cause to 'RemoteReboot' because the upcoming reboot will be initiated by USP Operate
+	dmuci_set_value(config_name, "globals", "last_reboot_cause", "RemoteReboot");
+	dmuci_commit_package(config_name);
+
 	sleep(3);
 	dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
 	sleep(5); // Wait for reboot to happen
@@ -1701,6 +1818,10 @@ void _exec_reboot(const void *arg1, void *arg2)
 	dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0);
 	sleep(5); // Wait for reboot
 	BBF_ERR("Reboot call failed!!!");
+
+	// Set last_reboot_cause to empty because there is a problem in the system reboot
+	dmuci_set_value(config_name, "globals", "last_reboot_cause", "");
+	dmuci_commit_package(config_name);
 }
 
 static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
@@ -1810,6 +1931,22 @@ static int operate_DeviceInfoFirmwareImage_Activate(char *refparam, struct dmctx
 	return res ? USP_FAULT_COMMAND_FAILURE : 0;
 }
 
+static int operate_DeviceInfoReboots_RemoveAllReboots(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	struct uci_section *s = NULL, *tmp_s = NULL;
+
+	uci_foreach_sections_safe("deviceinfo", "reboot", tmp_s, s) {
+		dmuci_delete_by_section(s, NULL, NULL);
+	}
+    return 0;
+}
+
+static int operate_DeviceInfoRebootsReboot_Remove(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	dmuci_delete_by_section(((struct dm_data *)data)->config_section, NULL, NULL);
+    return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & LEAF DEFINITION
 ***********************************************************************************************************************************/
@@ -1822,6 +1959,7 @@ DMOBJ tDeviceInfoObj[] = {
 {"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, NULL},
 {"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, NULL},
 {"FirmwareImage", &DMREAD, NULL, NULL, "file:/usr/libexec/rpcd/fwbank", browseDeviceInfoFirmwareImageInst, NULL, NULL, NULL, tDeviceInfoFirmwareImageParams, NULL, BBFDM_BOTH, NULL},
+{"Reboots", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoRebootsObj, tDeviceInfoRebootsParams, NULL, BBFDM_USP, NULL},
 {0}
 };
 
@@ -1932,5 +2070,37 @@ DMLEAF tDeviceInfoFirmwareImageParams[] = {
 {"BootFailureLog", &DMREAD, DMT_STRING, get_empty, NULL, BBFDM_BOTH},
 {"Download()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoFirmwareImage_Download, operate_DeviceInfoFirmwareImage_Download, BBFDM_USP},
 {"Activate()", &DMASYNC, DMT_COMMAND, get_operate_args_DeviceInfoFirmwareImage_Activate, operate_DeviceInfoFirmwareImage_Activate, BBFDM_USP},
+{0}
+};
+
+/* *** Device.DeviceInfo.Reboots. *** */
+DMOBJ tDeviceInfoRebootsObj[] = {
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys */
+{"Reboot", &DMREAD, NULL, NULL, NULL, browseDeviceInfoRebootsRebootInst, NULL, NULL, NULL, tDeviceInfoRebootsRebootParams, NULL, BBFDM_USP, NULL},
+{0}
+};
+
+DMLEAF tDeviceInfoRebootsParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
+{"BootCount", &DMREAD, DMT_UNINT, get_DeviceInfoReboots_BootCount, NULL, BBFDM_USP},
+{"CurrentVersionBootCount", &DMREAD, DMT_UNINT, get_DeviceInfoReboots_CurrentVersionBootCount, NULL, BBFDM_USP},
+{"WatchdogBootCount", &DMREAD, DMT_UNINT, get_DeviceInfoReboots_WatchdogBootCount, NULL, BBFDM_USP},
+{"ColdBootCount", &DMREAD, DMT_UNINT, get_DeviceInfoReboots_ColdBootCount, NULL, BBFDM_USP},
+{"WarmBootCount", &DMREAD, DMT_UNINT, get_DeviceInfoReboots_WarmBootCount, NULL, BBFDM_USP},
+{"MaxRebootEntries", &DMWRITE, DMT_INT, get_DeviceInfoReboots_MaxRebootEntries, set_DeviceInfoReboots_MaxRebootEntries, BBFDM_USP},
+{"RebootNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfoReboots_RebootNumberOfEntries, NULL, BBFDM_USP},
+{"RemoveAllReboots()", &DMASYNC, DMT_COMMAND, NULL, operate_DeviceInfoReboots_RemoveAllReboots, BBFDM_USP},
+{0}
+};
+
+/* *** Device.DeviceInfo.Reboots.Reboot.{i}. *** */
+DMLEAF tDeviceInfoRebootsRebootParams[] = {
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type */
+{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoRebootsReboot_Alias, set_DeviceInfoRebootsReboot_Alias, BBFDM_USP},
+{"TimeStamp", &DMREAD, DMT_TIME, get_DeviceInfoRebootsReboot_TimeStamp, NULL, BBFDM_USP},
+{"FirmwareUpdated", &DMREAD, DMT_BOOL, get_DeviceInfoRebootsReboot_FirmwareUpdated, NULL, BBFDM_USP},
+{"Cause", &DMREAD, DMT_STRING, get_DeviceInfoRebootsReboot_Cause, NULL, BBFDM_USP},
+{"Reason", &DMREAD, DMT_STRING, get_DeviceInfoRebootsReboot_Reason, NULL, BBFDM_USP},
+{"Remove()", &DMASYNC, DMT_COMMAND, NULL, operate_DeviceInfoRebootsReboot_Remove, BBFDM_USP},
 {0}
 };

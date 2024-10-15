@@ -25,6 +25,9 @@ extern DMLEAF tDeviceInfoProcessStatusProcessParams[];
 extern DMLEAF tDeviceInfoProcessorParams[];
 extern DMLEAF tDeviceInfoSupportedDataModelParams[];
 extern DMLEAF tDeviceInfoFirmwareImageParams[];
+extern DMOBJ tDeviceInfoRebootsObj[];
+extern DMLEAF tDeviceInfoRebootsParams[];
+extern DMLEAF tDeviceInfoRebootsRebootParams[];
 
 void _exec_reboot(const void *arg1, void *arg2);
 #endif
