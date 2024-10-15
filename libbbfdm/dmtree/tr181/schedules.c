@@ -223,7 +223,7 @@ static int set_schedule_day(char *refparam, struct dmctx *ctx, void *data, char 
 
 static int get_schedule_start(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "start", value);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "start_time", value);
 	return 0;
 }
 
@@ -241,7 +241,7 @@ static int set_schedule_start(char *refparam, struct dmctx *ctx, void *data, cha
 			ret = FAULT_9007;
 		break;
 	case VALUESET:
-		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "start", value);
+		dmuci_set_value_by_section(((struct dmmap_dup *)data)->config_section, "start_time", value);
 		break;
 	}
 
@@ -414,7 +414,7 @@ static int get_schedule_status(char *refparam, struct dmctx *ctx, void *data, ch
 		return 0;
 	}
 
-	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "start", &start);
+	dmuci_get_value_by_section_string(((struct dmmap_dup *)data)->config_section, "start_time", &start);
 
 	duration = dmuci_get_value_by_section_fallback_def(((struct dmmap_dup *)data)->config_section, "duration", "1");
 
