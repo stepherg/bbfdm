@@ -76,7 +76,6 @@
       "proto": "git",
       "version": "release-7.3",
       "dm_files": [
-        "urlfilter/files/etc/bbfdm/plugins/urlfilter.json",
         "obuspa/files/etc/bbfdm/json/USPAgent.json",
         "icwmp/files/etc/bbfdm/json/CWMPManagementServer.json",
         "ponmngr/files/etc/bbfdm/json/xpon.json"
@@ -102,11 +101,19 @@
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/iopsys/hostmngr.git",
+      "repo": "https://dev.iopsys.eu/network/hostmngr.git",
       "proto": "git",
       "version": "release-7.3",
       "dm_files": [
         "src/bbf_plugin/hosts.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/urlfilter.git",
+      "proto": "git",
+      "version": "release-7.3",
+      "dm_files": [
+        "src/parentalcontrol.c"
       ]
     },
     {
