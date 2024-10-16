@@ -26,12 +26,16 @@
 #define CONFIG_CONFDIR "/etc/config/"
 #define DMMAP_CONFDIR "/etc/bbfdm/dmmap/"
 
-uint8_t g_log_level = 0;
+uint8_t g_log_level = 1;
 
 void print_log(const char *format, ...);
 
-#define LOG(fmt, args...) \
-	print_log(fmt, ##args)
+#define PRINT_ERR(fmt, args...) \
+	print_err(fmt, ##args)
+
+#define PRINT_INFO(fmt, args...) \
+	print_info(fmt, ##args)
+
 
 struct proto_args {
 	const char *name;
@@ -89,15 +93,23 @@ static const struct blobmsg_policy bbf_config_policy[] = {
 	[SERVICES_RELOAD] = { .name = "reload", .type = BLOBMSG_TYPE_BOOL },
 };
 
-void print_log(const char *format, ...)
+void print_info(const char *format, ...)
 {
 	va_list arglist;
 
-	if (g_log_level < 1)
-		return;
+	if (g_log_level > 1) {
+		va_start(arglist, format);
+		vsyslog(LOG_INFO, format, arglist);
+		va_end(arglist);
+	}
+}
+
+void print_err(const char *format, ...)
+{
+	va_list arglist;
 
 	va_start(arglist, format);
-	vsyslog(LOG_INFO, format, arglist);
+	vsyslog(LOG_ERR, format, arglist);
 	va_end(arglist);
 }
 
@@ -429,11 +441,11 @@ static void send_bbf_config_change_event()
 
 	ctx = ubus_connect(NULL);
 	if (ctx == NULL) {
-		LOG("Can't create UBUS context for event");
+		PRINT_ERR("Can't create UBUS context for event");
 		return;
 	}
 
-	LOG("Sending bbf.config.change event");
+	PRINT_INFO("Sending bbf.config.change event");
 
 	memset(&bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&bb, 0);
@@ -452,7 +464,7 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 	unsigned char idx = 0;
 	bool monitor = true, reload = true;
 
-	LOG("Commit handler called");
+	PRINT_INFO("Commit handler called");
 	memset(package, 0, sizeof(struct config_package) * MAX_PACKAGE_NUM);
 
 	memset(&bb, 0, sizeof(struct blob_buf));
@@ -510,7 +522,7 @@ end:
 	ubus_send_reply(ctx, req, bb.head);
 	blob_buf_free(&bb);
 
-	LOG("Commit handler exit");
+	PRINT_INFO("Commit handler exit");
 	return 0;
 }
 
@@ -525,7 +537,7 @@ static int bbf_config_revert_handler(struct ubus_context *ctx, struct ubus_objec
 	memset(&bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&bb, 0);
 
-	LOG("Revert handler called");
+	PRINT_INFO("Revert handler called");
 	if (blobmsg_parse(bbf_config_policy, __MAX, tb, blob_data(msg), blob_len(msg))) {
 		blobmsg_add_string(&bb, "error", "Failed to parse blob");
 		goto end;
@@ -557,7 +569,7 @@ end:
 	ubus_send_reply(ctx, req, bb.head);
 	blob_buf_free(&bb);
 
-	LOG("revert handler exit");
+	PRINT_INFO("revert handler exit");
 	return 0;
 }
 
@@ -652,7 +664,7 @@ int main(int argc, char **argv)
 
 	uctx = ubus_connect(NULL);
 	if (uctx == NULL) {
-		printf("Can't create UBUS context");
+		PRINT_ERR("Failed to get UBUS context");
 		return -1;
 	}
 
@@ -680,12 +692,16 @@ int main(int argc, char **argv)
 		uint32_t id;
 
 		ret = ubus_lookup_id(uctx, "service", &id);
-		if (ret)
+		if (ret) {
+			PRINT_ERR("Failed to get service method, exiting");
 			goto exit;
+		}
 
 		ret = ubus_subscribe(uctx, &sub, id);
-		if (ret)
+		if (ret) {
+			PRINT_ERR("Failed to subscribe to service method, exiting");
 			goto exit;
+		}
 	}
 
 	uloop_run();

@@ -72,6 +72,7 @@ function install_libbbf()
 	echo "371d530c95a17d1ca223a29b7a6cdc97e1135c1e0959b51106cca91a0b148b5e42742d372a359760742803f2a44bd88fca67ccdcfaeed26d02ce3b6049cb1e04" > /etc/bbfdm/.secure_hash
 	cd ..
 	exec_cmd cp utilities/bbf_configd /usr/sbin/
+	exec_cmd cp utilities/files/usr/libexec/rpcd/bbf.config /usr/libexec/rpcd/bbf.config
 }
 
 function install_libbbf_test()
