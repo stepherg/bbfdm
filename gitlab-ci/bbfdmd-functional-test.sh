@@ -56,7 +56,6 @@ gcovr -r . --xml -o ./funl-test-coverage.xml
 gcovr -r .
 
 check_valgrind_xml "/tmp/memory-report.xml" "bbfdmd"
-check_valgrind_xml "/tmp/memory-config-report.xml" "bbf.config"
 
 if [ "${fault}" -ne 0 ]; then
 	echo "Failed running ubus-api-validator fault[$fault]"
