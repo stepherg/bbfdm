@@ -1577,13 +1577,43 @@ static int get_DeviceInfoReboots_MaxRebootEntries(char *refparam, struct dmctx *
 
 static int set_DeviceInfoReboots_MaxRebootEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
+	struct uci_section *s = NULL, *tmp_s = NULL;
+	int max_entries = DM_STRTOL(value);
+
 	switch (action)	{
 		case VALUECHECK:
 			if (bbfdm_validate_int(ctx, value, RANGE_ARGS{{"-1",NULL}}, 1))
 				return FAULT_9007;
 			break;
 		case VALUESET:
-			//TODO
+			if (max_entries == 0) {
+				// Delete all sections if value is "0"
+				uci_foreach_sections_safe("deviceinfo", "reboot", tmp_s, s) {
+					dmuci_delete_by_section(s, NULL, NULL);
+				}
+			} else if (max_entries > 0) {
+				// Step 1: Count total sections
+				int total_sections = 0;
+
+				uci_foreach_sections_safe("deviceinfo", "reboot", tmp_s, s) {
+					total_sections++;
+				}
+
+				// Step 2: Calculate how many sections to delete (earliest sections)
+				int to_delete = total_sections - max_entries;
+
+				// Step 3: Delete the earliest sections that exceed max_entries
+				if (to_delete > 0) {
+					int idx = 0;
+					uci_foreach_sections_safe("deviceinfo", "reboot", tmp_s, s) {
+						if (idx++ < to_delete) {
+							dmuci_delete_by_section(s, NULL, NULL);
+						}
+					}
+				}
+			}
+
+			dmuci_set_value("deviceinfo", "globals", "max_reboot_entries", value);
 			break;
 	}
 	return 0;
