@@ -1176,6 +1176,26 @@ static int get_deviceinfo_modelnumber (char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
+static int get_DeviceInfo_HostName(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmuci_get_option_value_string("system", "@system[0]", "hostname", value);
+	return 0;
+}
+
+static int set_DeviceInfo_HostName(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+{
+	switch (action)	{
+		case VALUECHECK:
+			if (bbfdm_validate_string(ctx, value, -1, 255, NULL, NULL))
+				return FAULT_9007;
+			break;
+		case VALUESET:
+			dmuci_set_value("system", "@system[0]", "hostname", value);
+			break;
+	}
+	return 0;
+}
+
 static int get_vcf_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string(((struct dm_data *)data)->config_section, "name", value);
@@ -2019,6 +2039,7 @@ DMLEAF tDeviceInfoParams[] = {
 {"FriendlyName", &DMREAD, DMT_STRING, get_deviceinfo_friendlyname, NULL, BBFDM_USP},
 {"PEN", &DMREAD, DMT_STRING, get_deviceinfo_pen, NULL, BBFDM_USP},
 {"ModelNumber", &DMREAD, DMT_STRING, get_deviceinfo_modelnumber, NULL, BBFDM_BOTH},
+{"HostName", &DMWRITE, DMT_STRING, get_DeviceInfo_HostName, set_DeviceInfo_HostName, BBFDM_BOTH},
 {0}
 };
 
