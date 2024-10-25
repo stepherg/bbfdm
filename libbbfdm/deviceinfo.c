@@ -1182,6 +1182,12 @@ static int get_DeviceInfo_HostName(char *refparam, struct dmctx *ctx, void *data
 	return 0;
 }
 
+static int get_DeviceInfo_MaxNumberOfActivateTimeWindows(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	dmasprintf(value, "%d", MAX_TIME_WINDOW);
+	return 0;
+}
+
 static int set_DeviceInfo_HostName(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action)	{
@@ -2040,6 +2046,7 @@ DMLEAF tDeviceInfoParams[] = {
 {"PEN", &DMREAD, DMT_STRING, get_deviceinfo_pen, NULL, BBFDM_USP},
 {"ModelNumber", &DMREAD, DMT_STRING, get_deviceinfo_modelnumber, NULL, BBFDM_BOTH},
 {"HostName", &DMWRITE, DMT_STRING, get_DeviceInfo_HostName, set_DeviceInfo_HostName, BBFDM_BOTH},
+{"MaxNumberOfActivateTimeWindows", &DMREAD, DMT_UNINT, get_DeviceInfo_MaxNumberOfActivateTimeWindows, NULL, BBFDM_USP},
 {0}
 };
 
