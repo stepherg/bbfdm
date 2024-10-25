@@ -877,19 +877,19 @@ static int browseProcessEntriesInst(struct dmctx *dmctx, DMNODE *parent_node, vo
 
 static int browseDeviceInfoRebootsRebootInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
-	struct dm_data curr_data = {0};
-	struct uci_section *s = NULL;
+	struct dm_data *p = NULL;
 	char *inst = NULL;
+	LIST_HEAD(dup_list);
 
-	uci_foreach_sections("deviceinfo", "reboot", s) {
+	synchronize_specific_config_sections_with_dmmap("deviceinfo", "reboot", "dmmap_deviceinfo", &dup_list);
+	list_for_each_entry(p, &dup_list, list) {
 
-		curr_data.config_section = s;
+		inst = handle_instance(dmctx, parent_node, p->dmmap_section, "reboot_instance", "reboot_alias");
 
-		inst = handle_instance(dmctx, parent_node, s, "reboot_instance", "reboot_alias");
-
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, &curr_data, inst) == DM_STOP)
+		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)p, inst) == DM_STOP)
 			break;
 	}
+	free_dmmap_config_dup_list(&dup_list);
 	return 0;
 }
 
@@ -1654,12 +1654,12 @@ static int get_DeviceInfoReboots_RebootNumberOfEntries(char *refparam, struct dm
 
 static int get_DeviceInfoRebootsReboot_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	return bbf_get_alias(ctx, ((struct dm_data *)data)->config_section, "reboot_alias", instance, value);
+	return bbf_get_alias(ctx, ((struct dm_data *)data)->dmmap_section, "reboot_alias", instance, value);
 }
 
 static int set_DeviceInfoRebootsReboot_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
-	return bbf_set_alias(ctx, ((struct dm_data *)data)->config_section, "reboot_alias", instance, value);
+	return bbf_set_alias(ctx, ((struct dm_data *)data)->dmmap_section, "reboot_alias", instance, value);
 }
 
 static int get_DeviceInfoRebootsReboot_TimeStamp(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
