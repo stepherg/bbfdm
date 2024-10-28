@@ -69,6 +69,17 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
 } while(0)
 #endif
 
+
+#ifndef TRACE_FILE
+#define TRACE_FILE(MESSAGE, ...) do { \
+    FILE *log_file = fopen("/tmp/bbfdm.log", "a"); \
+    if (log_file) { \
+        fprintf(log_file, "[%s:%d] " MESSAGE "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+        fclose(log_file); \
+    } \
+} while(0)
+#endif
+
 // Macros for different log levels
 #define BBF_ERR(MESSAGE, ...) do { \
 	syslog(LOG_ERR, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \

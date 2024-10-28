@@ -15,7 +15,6 @@
 
 #include "dmcommon.h"
 
-
 char *DiagnosticsState[] = {"None", "Requested", "Canceled", "Complete", "Error", NULL};
 
 char *IPv4Address[] = {"^$", "^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$", NULL};
@@ -1702,6 +1701,23 @@ bool is_regular_file(const char *path)
 	struct stat buffer;
 
 	return stat(path, &buffer) == 0 && S_ISREG(buffer.st_mode);
+}
+
+int create_empty_file(const char *file_name)
+{
+	if (!file_name)
+		return -1;
+
+	// Skip creating the file if it already exists
+	if (file_exists(file_name))
+		return 0;
+
+	FILE *fp = fopen(file_name, "w");
+	if (fp == NULL)
+		return -1;
+
+	fclose(fp);
+	return 0;
 }
 
 unsigned long file_system_size(const char *path, const enum fs_size_type_enum type)

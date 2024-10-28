@@ -2,6 +2,7 @@
 
 BBFDM_PLUGIN_DIR="/usr/share/bbfdm/plugins"
 BBFDM_MS_DIR="/usr/share/bbfdm/micro_services"
+BBFDM_LOG_FILE="/tmp/bbfdm.log"
 
 if [ -z "${CI_PROJECT_PATH}" ]; then
 	CI_PROJECT_PATH=${PWD}
@@ -64,7 +65,7 @@ function install_libbbf()
 
 	mkdir -p build
 	cd build
-	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS -lm" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
+	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS -lm" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBF_SCHEMA_FULL_TREE=ON -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
 	exec_cmd_verbose make
 
 	echo "installing libbbf"

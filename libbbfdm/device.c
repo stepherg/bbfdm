@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 iopsys Software Solutions AB
+ * Copyright (C) 2019-2024 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
@@ -7,23 +7,39 @@
  *
  *		Author: Imen Bhiri <imen.bhiri@pivasoftware.com>
  *		Author: Anis Ellouze <anis.ellouze@pivasoftware.com>
- *		Author: Amin Ben Ramdhane <amin.benramdhane@pivasoftware.com>
+ *		Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  */
 
 #include "device.h"
-#include "deviceinfo.h"
 #include "lanconfigsecurity.h"
 #include "security.h"
 #include "gatewayinfo.h"
 #include "schedules.h"
 
 /*************************************************************
-* GET & SET PARAM
+* COMMON FUNCTIONS
 **************************************************************/
-static int get_Device_RootDataModelVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static void _exec_reboot(const void *arg1, void *arg2)
 {
-	*value = dmstrdup("2.18");
-	return 0;
+	char config_name[16] = {0};
+
+	snprintf(config_name, sizeof(config_name), "%s", "sysmngr");
+
+	// Set last_reboot_cause to 'RemoteReboot' because the upcoming reboot will be initiated by USP Operate
+	dmuci_set_value(config_name, "reboots", "last_reboot_cause", "RemoteReboot");
+	dmuci_commit_package(config_name);
+
+	sleep(3);
+	dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
+	sleep(5); // Wait for reboot to happen
+	BBF_ERR("Reboot call failed with rpc-sys, trying again with system");
+	dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0);
+	sleep(5); // Wait for reboot
+	BBF_ERR("Reboot call failed!!!");
+
+	// Set last_reboot_cause to empty because there is a problem in the system reboot
+	dmuci_set_value(config_name, "reboots", "last_reboot_cause", "");
+	dmuci_commit_package(config_name);
 }
 
 static void _exec_factoryreset(const void *arg1, void *arg2)
@@ -35,6 +51,15 @@ static void _exec_factoryreset(const void *arg1, void *arg2)
 	dmcmd_no_wait("/sbin/defaultreset", 0);
 	sleep(5); // Wait for reboot to happen
 	BBF_ERR("FactoryReset call failed!!!");
+}
+
+/*************************************************************
+* GET & SET PARAM
+**************************************************************/
+static int get_Device_RootDataModelVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	*value = dmstrdup("2.18");
+	return 0;
 }
 
 /*************************************************************
@@ -67,7 +92,6 @@ DM_MAP_OBJ tDynamicObj[] = {
 /* *** Device. *** */
 DMOBJ tDMRootObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"DeviceInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoObj, tDeviceInfoParams, NULL, BBFDM_BOTH, NULL},
 {"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH, NULL},
 {"Schedules", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSchedulesObj, tSchedulesParams, NULL, BBFDM_BOTH, NULL},
 {"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH, NULL},

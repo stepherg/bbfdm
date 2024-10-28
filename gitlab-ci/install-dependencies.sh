@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "install dependencies of bbf"
+echo "install dependencies of bbfdm"
 
 source ./gitlab-ci/shared.sh
 
@@ -12,6 +12,7 @@ exec_cmd pip3 install pexpect ubus xlwt ValgrindCI
 # Make sure that all plugins are removed
 [ ! -d "${BBFDM_PLUGIN_DIR}" ] && mkdir -p "${BBFDM_PLUGIN_DIR}"
 rm -f ${BBFDM_PLUGIN_DIR}/*
+rm -f ${BBFDM_LOG_FILE}
 
 # compile and install libbbf
 install_libbbf ${1}

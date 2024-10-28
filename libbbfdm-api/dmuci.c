@@ -502,13 +502,9 @@ int dmuci_add_section(const char *package, const char *stype, struct uci_section
 	*s = NULL;
 
 	snprintf(fname, sizeof(fname), "%s/%s", uci_ctx->confdir, package);
-	if (!file_exists(fname)) {
-		FILE *fptr = fopen(fname, "w");
-		if (fptr)
-			fclose(fptr);
-		else
-			return -1;
-	}
+
+	if (create_empty_file(fname))
+		return -1;
 
 	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, NULL, NULL, NULL))
 		return -1;

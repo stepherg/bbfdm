@@ -1,5 +1,5 @@
 
-config globals 'globals'
+config reboots 'reboots'
 	option boot_count '2'
 	option curr_version_boot_count '4'
 	option watchdog_boot_count '3'
@@ -7,28 +7,28 @@ config globals 'globals'
 	option warm_boot_count '2'
 	option max_reboot_entries '3'
 
-config reboot
+config reboot 'reboot_1730818192'
 	option alias 'cpe-1'
 	option time_stamp '2024-09-22T20:34:45Z'
 	option firmware_updated '0'
 	option cause 'RemoteReboot'
 	option reason 'REBOOT'
 	
-config reboot
+config reboot 'reboot_2541818178'
 	option alias 'cpe-2'
 	option time_stamp '2024-09-22T21:55:09Z'
 	option firmware_updated '0'
 	option cause 'LocalReboot'
 	option reason 'POR_RESET'
 
-config reboot
+config reboot 'reboot_4512818130'
 	option alias 'cpe-3'
 	option time_stamp '2024-09-23T04:11:24Z'
 	option firmware_updated '1'
 	option cause 'LocalReboot'
 	option reason 'upgrade'
 
-config reboot
+config reboot 'reboot_9874811423'
 	option alias 'cpe-4'
 	option time_stamp '2024-09-23T04:15:53Z'
 	option firmware_updated '0'

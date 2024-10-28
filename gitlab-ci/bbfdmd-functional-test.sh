@@ -24,6 +24,15 @@ echo "Checking system resources"
 free -h
 df -h
 
+# Check if the specified log file exists, which indicates errors during plugin loading
+if [ -f ${BBFDM_LOG_FILE} ]; then
+	 echo "Some plugins failed to load! Please check the errors below"
+	echo "*****************************************************"
+	cat "${BBFDM_LOG_FILE}"
+	echo "*****************************************************"
+	exit 1
+fi
+
 echo "## Running python based verification of functionalities ##"
 echo > ./funl-result.log
 num=0

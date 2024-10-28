@@ -411,7 +411,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
                     BBF_ERROR_CODE += 1
 
         if len(LIST_FILES) > 0:
-            if not generate_shared_library(f"{name}{plugin_index}.so", LIST_FILES, vendor_prefix, extra_dependencies, is_microservice):
+            if not generate_shared_library(f"{plugin_index}_{name}.so", LIST_FILES, vendor_prefix, extra_dependencies, is_microservice):
                 BBF_ERROR_CODE += 1
 
         clear_list(LIST_FILES)

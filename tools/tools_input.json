@@ -6,11 +6,37 @@
   "model_name": "DG400PRIME-A",
   "software_version": "1.2.3.4",
   "dm_json_files": [
-    "tools/datamodel.json",
-    "libbbfdm/vendor/vendor.json"
+    "tools/datamodel.json"
   ],
   "vendor_prefix": "X_IOPSYS_EU_",
   "plugins": [
+    {
+        "repo": "https://dev.iopsys.eu/system/sysmngr.git",
+        "proto": "git",
+        "version": "devel",
+        "dm_info_file": "src/datamodel_description.json",
+        "extra_dependencies": [
+          "-DSYSMNGR_VENDOR_CONFIG_FILE",
+          "-DSYSMNGR_MEMORY_STATUS",
+          "-DSYSMNGR_PROCESS_STATUS",
+          "-DSYSMNGR_SUPPORTED_DATA_MODEL",
+          "-DSYSMNGR_FIRMWARE_IMAGE",
+          "-DSYSMNGR_REBOOTS",
+          "-DSYSMNGR_NETWORK_PROPERTIES",
+          "-DSYSMNGR_VENDOR_EXTENSIONS"
+        ],
+        "dm_files": [
+            "src/deviceinfo.c",
+            "src/configs.c",
+            "src/fw_images.c",
+            "src/memory.c",
+            "src/processes.c",
+            "src/reboots.c",
+            "src/supported_dm.c",
+            "src/network.c",
+            "src/utils.c"
+        ]
+    },
     {
       "repo": "https://dev.iopsys.eu/bbf/icwmp.git",
       "proto": "git",
@@ -23,6 +49,9 @@
       "repo": "https://dev.iopsys.eu/bbf/bulkdata.git",
       "proto": "git",
       "version": "devel",
+      "extra_dependencies": [
+        "-D_GNU_SOURCE"
+      ],
       "dm_files": [
         "src/datamodel.c",
         "src/utils.c"
@@ -330,7 +359,8 @@
       "dm_files": [
         "bbf_plugin/mcast_bbf.c",
         "bbf_plugin/x_iopsys_eu_igmp.c",
-        "bbf_plugin/x_iopsys_eu_mld.c"
+        "bbf_plugin/x_iopsys_eu_mld.c",
+        "bbf_plugin/x_iopsys_eu_common.c"
       ]
     },
     {
@@ -382,7 +412,7 @@
         "libdm/tr104/*.c"
       ],
       "extra_dependencies": [
-        "-I libdmtree",
+        "-I /builds/bbf/bbfdm/libbbfdm-api",
         "-I libdm/common"
       ]
     },
@@ -421,7 +451,7 @@
         "libdm/extensions/iowrt/*.c"
       ],
       "extra_dependencies": [
-        "-I libdmtree",
+        "-I /builds/bbf/bbfdm/libbbfdm-api",
         "-I libdm/common"
       ]
     }

@@ -217,6 +217,7 @@ void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len);
 bool folder_exists(const char *path);
 bool file_exists(const char *path);
 bool is_regular_file(const char *path);
+int create_empty_file(const char *file_name);
 unsigned long file_system_size(const char *path, const enum fs_size_type_enum type);
 void remove_char(char *str, const char c);
 char *replace_char(char *str, char find, char replace);
