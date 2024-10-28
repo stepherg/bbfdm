@@ -22,8 +22,10 @@
     {
       "repo": "https://dev.iopsys.eu/bbf/bulkdata.git",
       "proto": "git",
+      "version": "devel",
       "dm_files": [
-        "bbf_plugin/bulkdata.json"
+        "src/datamodel.c",
+        "src/utils.c"
       ]
     },
     {
