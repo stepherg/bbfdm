@@ -22,7 +22,6 @@ extern DMOBJ tDeviceInfoProcessStatusObj[];
 extern DMLEAF tDeviceInfoProcessStatusParams[];
 extern DMOBJ tDeviceInfoObj[];
 extern DMLEAF tDeviceInfoProcessStatusProcessParams[];
-extern DMLEAF tDeviceInfoProcessorParams[];
 extern DMLEAF tDeviceInfoSupportedDataModelParams[];
 extern DMLEAF tDeviceInfoFirmwareImageParams[];
 extern DMOBJ tDeviceInfoRebootsObj[];

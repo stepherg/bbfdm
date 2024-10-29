@@ -359,15 +359,6 @@ static bool check_file_dir(char *name)
 	return false;
 }
 
-static int get_number_of_cpus(void)
-{
-	char val[16];
-
-	dm_read_sysfs_file("/sys/devices/system/cpu/present", val, sizeof(val));
-	char *max = DM_STRCHR(val, '-');
-	return max ? DM_STRTOL(max+1)+1 : 0;
-}
-
 static bool get_response_code_status(const char *url, int response_code)
 {
 	if ((strncmp(url, HTTP_URI, strlen(HTTP_URI)) == 0 && response_code != 200) ||
@@ -806,21 +797,6 @@ static int browseVcfInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_da
 	return 0;
 }
 
-static int browseDeviceInfoProcessorInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
-{
-	int nbr_cpus = get_number_of_cpus();
-	struct dm_data curr_data = {0};
-	char *inst = NULL;
-	int i;
-
-	for (i = 0; i < nbr_cpus; i++) {
-		inst = handle_instance_without_section(dmctx, parent_node, i+1);
-		if (DM_LINK_INST_OBJ(dmctx, parent_node, (void *)&curr_data, inst) == DM_STOP)
-			break;
-	}
-	return 0;
-}
-
 static int browseDeviceInfoSupportedDataModelInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL;
@@ -1125,13 +1101,6 @@ static int set_device_provisioningcode(char *refparam, struct dmctx *ctx, void *
 	return 0;
 }
 
-static int get_DeviceInfo_ProcessorNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	int cnt = get_number_of_entries(ctx, data, instance, browseDeviceInfoProcessorInst);
-	dmasprintf(value, "%d", cnt);
-	return 0;
-}
-
 static int get_DeviceInfo_VendorConfigFileNumberOfEntries(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	int cnt = get_number_of_entries(ctx, data, instance, browseVcfInst);
@@ -1261,63 +1230,6 @@ static int set_vcf_alias(char *refparam, struct dmctx *ctx, void *data, char *in
 	return bbf_set_alias(ctx, ((struct dm_data *)data)->config_section, "vcf_alias", instance, value);
 }
 
-static int get_DeviceInfoProcessor_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct uci_section *s = NULL;
-
-	uci_path_foreach_option_eq(bbfdm, "dmmap", "processor", "processor_inst", instance, s) {
-		dmuci_get_value_by_section_string(s, "alias", value);
-		break;
-	}
-	if ((*value)[0] == '\0')
-		dmasprintf(value, "cpe-%s", instance);
-	return 0;
-}
-
-static int set_DeviceInfoProcessor_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
-{
-	struct uci_section *s = NULL, *dmmap = NULL;
-
-	switch (action)	{
-		case VALUECHECK:
-			if (bbfdm_validate_string(ctx, value, -1, 64, NULL, NULL))
-				return FAULT_9007;
-			break;
-		case VALUESET:
-			uci_path_foreach_option_eq(bbfdm, "dmmap", "processor", "processor_inst", instance, s) {
-				dmuci_set_value_by_section_bbfdm(s, "alias", value);
-				return 0;
-			}
-			dmuci_add_section_bbfdm("dmmap", "processor", &dmmap);
-			dmuci_set_value_by_section(dmmap, "processor_inst", instance);
-			dmuci_set_value_by_section(dmmap, "alias", value);
-			break;
-	}
-	return 0;
-}
-
-static int get_DeviceInfoProcessor_Architecture(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
-{
-	struct utsname utsname;
-
-	if (uname(&utsname) < 0)
-		return 0;
-
-	if (DM_LSTRSTR(utsname.machine, "arm") || DM_LSTRSTR(utsname.machine, "aarch64")) {
-		*value = dmstrdup("arm");
-	} else if(DM_LSTRSTR(utsname.machine, "mips")) {
-		union {
-		    uint16_t value;
-		    uint8_t bytes[2];
-		} endian_test = { .bytes = { 0x00, 0xff } };
-
-		const bool is_big_endian = (endian_test.value < 0x100);
-
-		*value = (is_big_endian) ? dmstrdup("mipseb") : dmstrdup("mipsel");
-	} else
-		*value = dmstrdup(utsname.machine);
-	return 0;
-}
 
 static int get_DeviceInfoSupportedDataModel_Alias(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
@@ -2012,7 +1924,6 @@ DMOBJ tDeviceInfoObj[] = {
 {"VendorConfigFile", &DMREAD, NULL, NULL, NULL, browseVcfInst, NULL, NULL, NULL, tDeviceInfoVendorConfigFileParams, NULL, BBFDM_BOTH, NULL},
 {"MemoryStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoMemoryStatusParams, NULL, BBFDM_BOTH, NULL},
 {"ProcessStatus", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoProcessStatusObj, tDeviceInfoProcessStatusParams, NULL, BBFDM_BOTH, NULL},
-{"Processor", &DMREAD, NULL, NULL, NULL, browseDeviceInfoProcessorInst, NULL, NULL, NULL, tDeviceInfoProcessorParams, NULL, BBFDM_BOTH, NULL},
 {"SupportedDataModel", &DMREAD, NULL, NULL, NULL, browseDeviceInfoSupportedDataModelInst, NULL, NULL, NULL, tDeviceInfoSupportedDataModelParams, NULL, BBFDM_CWMP, NULL},
 {"FirmwareImage", &DMREAD, NULL, NULL, "file:/usr/libexec/rpcd/fwbank", browseDeviceInfoFirmwareImageInst, NULL, NULL, NULL, tDeviceInfoFirmwareImageParams, NULL, BBFDM_BOTH, NULL},
 {"Reboots", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tDeviceInfoRebootsObj, tDeviceInfoRebootsParams, NULL, BBFDM_USP, NULL},
@@ -2037,7 +1948,6 @@ DMLEAF tDeviceInfoParams[] = {
 {"ProvisioningCode", &DMWRITE, DMT_STRING, get_device_provisioningcode, set_device_provisioningcode, BBFDM_BOTH},
 {"UpTime", &DMREAD, DMT_UNINT, get_device_info_uptime, NULL, BBFDM_BOTH},
 {"FirstUseDate", &DMREAD, DMT_TIME, get_device_info_firstusedate, NULL, BBFDM_BOTH},
-{"ProcessorNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_ProcessorNumberOfEntries, NULL, BBFDM_BOTH},
 {"VendorConfigFileNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_VendorConfigFileNumberOfEntries, NULL, BBFDM_BOTH},
 {"SupportedDataModelNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_SupportedDataModelNumberOfEntries, NULL, BBFDM_CWMP},
 {"FirmwareImageNumberOfEntries", &DMREAD, DMT_UNINT, get_DeviceInfo_FirmwareImageNumberOfEntries, NULL, BBFDM_BOTH},
@@ -2096,14 +2006,6 @@ DMLEAF tDeviceInfoProcessStatusProcessParams[] = {
 {"Priority", &DMREAD, DMT_UNINT, get_process_priority, NULL, BBFDM_BOTH},
 {"CPUTime", &DMREAD, DMT_UNINT, get_process_cpu_time, NULL, BBFDM_BOTH},
 {"State", &DMREAD, DMT_STRING, get_process_state, NULL, BBFDM_BOTH},
-{0}
-};
-
-/* *** Device.DeviceInfo.Processor.{i}. *** */
-DMLEAF tDeviceInfoProcessorParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
-{"Alias", &DMWRITE, DMT_STRING, get_DeviceInfoProcessor_Alias, set_DeviceInfoProcessor_Alias, BBFDM_BOTH, DM_FLAG_UNIQUE},
-{"Architecture", &DMREAD, DMT_STRING, get_DeviceInfoProcessor_Architecture, NULL, BBFDM_BOTH},
 {0}
 };
 
