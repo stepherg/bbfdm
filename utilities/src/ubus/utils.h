@@ -11,11 +11,19 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
+#include <libubox/ulog.h>
+
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #endif
 
-void dbg_printf(const char *format, ...);
+#ifndef FREE
+#define FREE(x) do { if(x) {free(x); x = NULL;} } while (0)
+#endif
+
+#ifndef ULOG_DEBUG
+#define ULOG_DEBUG(fmt, ...) ulog(LOG_DEBUG, fmt, ## __VA_ARGS__)
+#endif
 
 void strncpyt(char *dst, const char *src, size_t n);
 

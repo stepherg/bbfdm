@@ -59,6 +59,9 @@ run_valgrind -c del Device.WiFi.SSID.3.
 supervisorctl stop all
 supervisorctl status
 
+cp /tmp/memory-*.xml .
+check_valgrind_xml "memory-report.xml" "bbfdmd"
+check_valgrind_xml "memory-config-report.xml" "bbf.config"
 #report part
 #GitLab-CI output
 gcovr -r . 2> /dev/null #throw away stderr

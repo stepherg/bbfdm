@@ -18,6 +18,7 @@ cp -r ./test/files/lib/* /lib/
 mkdir -p /tmp/bbfdm/.bbfdm /tmp/bbfdm/.cwmp /tmp/bbfdm/.usp
 
 cp ./gitlab-ci/core_service.conf /etc/supervisor/conf.d/
+cp ./gitlab-ci/reload_service.conf /etc/supervisor/conf.d/
 
 rm -f /etc/bbfdm/dmmap/*
 
