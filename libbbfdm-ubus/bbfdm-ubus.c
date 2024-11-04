@@ -1009,20 +1009,13 @@ static void periodic_instance_updater(struct uloop_timeout *t)
 		return;
 	}
 
-	if (list_empty(&u->instances)) {
-		if (!list_empty(&u->old_instances)) {
-			list_splice_init(&u->old_instances, &u->instances);
-		} else {
-			update_instances_list(&u->instances);
-			return;
-		}
+	free_path_list(&u->old_instances);
+	if (!list_empty(&u->instances)) {
+		list_splice_init(&u->instances, &u->old_instances);
 	}
 
-	free_path_list(&u->old_instances);
-	list_splice_init(&u->instances, &u->old_instances);
-
 	update_instances_list(&u->instances);
-	if (!list_empty(&u->instances) && !list_empty(&u->old_instances)) {
+	if (!list_empty(&u->instances)) {
 		BBF_INFO("Comparing instances ...");
 		instance_compare_publish(u);
 	}
