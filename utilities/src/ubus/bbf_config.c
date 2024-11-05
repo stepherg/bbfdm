@@ -18,10 +18,11 @@
 
 #define TIME_TO_WAIT_FOR_RELOAD 5
 #define MAX_PACKAGE_NUM 256
-#define MAX_SERVICE_NUM 8
-#define MAX_INSTANCE_NUM 32
+#define MAX_SERVICE_NUM 16
+#define MAX_INSTANCE_NUM 8
 #define NAME_LENGTH 64
 
+#define BBF_CONFIG_DAEMON_NAME "bbf_configd"
 #define CONFIG_CONFDIR "/etc/config/"
 #define DMMAP_CONFDIR "/etc/bbfdm/dmmap/"
 
@@ -59,6 +60,59 @@ struct bbf_config_async_req {
 	struct blob_attr *services;
 	struct config_package package[MAX_PACKAGE_NUM];
 };
+
+#ifdef BBF_CONFIG_DEBUG
+static void log_instance(struct instance *inst)
+{
+	ULOG_ERR("    |- Instance name: '%s', PID: %d, Status: %s",
+			 inst->name,
+			 inst->pid,
+			 inst->is_running ? "running" : "stopped");
+}
+
+static void log_service(struct service *svc)
+{
+	ULOG_ERR("  - Service name: '%s'", svc->name);
+	if (svc->has_instances) {
+		bool has_any_instance = false;
+		for (int i_idx = 0; i_idx < MAX_INSTANCE_NUM; i_idx++) {
+			if (svc->instances[i_idx].name[0] == '\0')
+				break;
+
+			log_instance(&svc->instances[i_idx]);
+			has_any_instance = true;
+		}
+		if (!has_any_instance) {
+			ULOG_ERR("    |- No active instances");
+		}
+	} else {
+		ULOG_ERR("    |- No instances available");
+	}
+}
+
+static void show_package_tree(struct config_package *packages)
+{
+	for (int p_idx = 0; p_idx < MAX_PACKAGE_NUM; p_idx++) {
+
+		if (packages[p_idx].name[0] == '\0')
+			break;
+
+		ULOG_ERR("Package name: '%s'", packages[p_idx].name);
+		bool has_any_service = false;
+		for (int s_idx = 0; s_idx < MAX_SERVICE_NUM; s_idx++) {
+			if (packages[p_idx].services[s_idx].name[0] == '\0')
+				break;
+
+			log_service(&packages[p_idx].services[s_idx]);
+			has_any_service = true;
+		}
+
+		if (!has_any_service) {
+			ULOG_ERR("  |- No services defined");
+		}
+	}
+}
+#endif
 
 static struct proto_args supported_protocols[] = {
 		{
@@ -182,7 +236,7 @@ static int handle_instances_service(const char *service_name, struct blob_attr *
 
 		strncpyt(package[pkg_idx].services[srv_idx].instances[inst_idx].name, blobmsg_name(cur), NAME_LENGTH);
 		package[pkg_idx].services[srv_idx].instances[inst_idx].is_running = (tb[0]) ? blobmsg_get_bool(tb[0]) : false;
-		package[pkg_idx].services[srv_idx].instances[inst_idx].pid = (tb[1]) ? blobmsg_get_u32(tb[1]) : false;
+		package[pkg_idx].services[srv_idx].instances[inst_idx].pid = (tb[1]) ? blobmsg_get_u32(tb[1]) : 0;
 		inst_idx++;
 	}
 
@@ -370,9 +424,16 @@ static bool validate_required_services(struct ubus_context *ctx, struct config_p
 
 		for (int j = 0; j < MAX_SERVICE_NUM && strlen(package[idx].services[j].name); j++) {
 
+			if (strcmp(package[idx].services[j].name, BBF_CONFIG_DAEMON_NAME) == 0) {
+				// Skip 'bbf_configd' service itself, as it does not need processing here
+				continue; // Move to the next service
+			}
+
 			// Get configuration information for each service name
 			struct config_package new_package[1] = {0};
+
 			memset(new_package, 0, sizeof(struct config_package));
+
 			fill_service_info(ctx, new_package, package[idx].services[j].name, false, _get_specific_service_cb);
 
 			if (package[idx].services[j].has_instances != new_package[0].services[0].has_instances) {
@@ -545,6 +606,9 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 	if (monitor) {
 		ULOG_DEBUG("Retrieving all config information before committing changes");
 		fill_service_info(ctx, async_req->package, NULL, true, _get_service_list_cb);
+#ifdef BBF_CONFIG_DEBUG
+		show_package_tree(async_req->package);
+#endif
 	}
 
 	if (reload) {
@@ -557,7 +621,7 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 	size_t arr_len = (services) ? blobmsg_len(services) : 0;
 
 	if (arr_len) {
-		size_t blob_data_len = blob_len(services);
+		size_t blob_data_len = blob_raw_len(services);
 		if (blob_data_len) {
 			async_req->services = (struct blob_attr *)calloc(1, blob_data_len);
 			if (!async_req->services) {
@@ -572,7 +636,7 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 		}
 
 		ULOG_INFO("Committing changes for specified services and reloading");
-		reload_specified_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, services, true, reload);
+		reload_specified_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, async_req->services, true, reload);
 	} else {
 		ULOG_INFO("Committing changes for all services and reloading");
 		reload_all_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, true, reload);

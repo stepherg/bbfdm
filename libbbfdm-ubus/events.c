@@ -102,7 +102,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 
 	bbfdm_schedule_instance_refresh_timer(ctx, 2);
 
-	size_t blob_data_len = blob_len(bbf_ctx.bb.head);
+	size_t blob_data_len = blob_raw_len(bbf_ctx.bb.head);
 
 	if (blob_data_len) {
 		struct event_args *e_args = (struct event_args *)calloc(1, sizeof(struct event_args));
