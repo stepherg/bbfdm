@@ -69,9 +69,7 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 #endif
 	if (!handle) {
 		char *err_msg = dlerror();
-#ifdef BBF_SCHEMA_FULL_TREE
 		TRACE_FILE("Failed to add DotSo plugin '%s', [%s]\n", plugin_path, err_msg);
-#endif
 		BBF_ERR("Failed to add DotSo plugin '%s', [%s]\n", plugin_path, err_msg);
 		return 0;
 	}
@@ -90,9 +88,7 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 		DMOBJ *dm_entryobj = find_entry_obj(entryobj, dynamic_obj[i].path);
 		if (!dm_entryobj) {
-#ifdef BBF_SCHEMA_FULL_TREE
 			TRACE_FILE("Failed to add DotSo plugin '%s' to main tree with parent DM index '%d' => '%s'", plugin_path, i, dynamic_obj[i].path);
-#endif
 			BBF_ERR("Failed to add DotSo plugin '%s' to main tree with parent DM index '%d' => '%s'", plugin_path, i, dynamic_obj[i].path);
 			continue;
 		}

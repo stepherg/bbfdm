@@ -30,4 +30,20 @@ if [ -z "${1}" ]; then
 	check_ret $?
 	
 	ls -l /usr/share/bbfdm/plugins/
+else
+	# Create directories for micro-service configuration and shared files
+	mkdir -p /etc/bbfdm/micro_services
+	mkdir -p /usr/share/bbfdm/micro_services
+
+	#install WiFi Data Model as a micro-service
+	echo "Installing WiFi Data Model (wifidmd) as a micro-service"
+	install_wifidmd_as_micro_service
+
+	#install Network Data Model as a micro-service
+	echo "Installing Network Data Model (netmngr) as a micro-service"
+	install_netmngr_as_micro_service
+
+	#install SYSMNGR Data Model as a micro-service
+	echo "Installing System Manager (SYSMNGR) Data Model as a micro-service"	
+	install_sysmngr_as_micro_service
 fi

@@ -20,6 +20,10 @@ mkdir -p /tmp/bbfdm/.bbfdm /tmp/bbfdm/.cwmp /tmp/bbfdm/.usp
 cp ./gitlab-ci/core_service.conf /etc/supervisor/conf.d/
 cp ./gitlab-ci/reload_service.conf /etc/supervisor/conf.d/
 
+if [ -n "$1" ]; then
+	cp ./gitlab-ci/micro_service.conf /etc/supervisor/conf.d/
+fi
+
 rm -f /etc/bbfdm/dmmap/*
 
 echo "Starting base services..."

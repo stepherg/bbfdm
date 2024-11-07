@@ -43,6 +43,40 @@ function exec_cmd_verbose()
 	fi
 }
 
+generate_input_schema()
+{
+	service_name="$1"
+	schema='{
+  "daemon": {
+    "enable": "1",
+    "service_name": "'"$service_name"'",
+    "config": {
+      "loglevel": "4"
+    }
+  }
+}'
+	echo "$schema"
+}
+
+generate_input_schema_with_output_name()
+{
+	service_name="$1"
+	output_name="$2"
+	schema='{
+  "daemon": {
+    "enable": "1",
+    "service_name": "'"$service_name"'",
+    "config": {
+      "loglevel": "4"
+    },
+    "output": {
+      "name": "'"$output_name"'"
+    }
+  }
+}'
+	echo "$schema"
+}
+
 function install_plugin()
 {
 	exec_cmd cp -f "${1}" ${BBFDM_PLUGIN_DIR}/
@@ -65,7 +99,7 @@ function install_libbbf()
 
 	mkdir -p build
 	cd build
-	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS -lm" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBF_SCHEMA_FULL_TREE=ON -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
+	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS -lm" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
 	exec_cmd_verbose make
 
 	echo "installing libbbf"
@@ -87,6 +121,71 @@ function install_libbbf_test()
 
 	echo "installing libbbf_test"
 	install_plugin ./test/bbf_test/libbbf_test.so
+}
+
+function install_wifidmd_as_micro_service()
+{
+	[ -d "/opt/dev/wifidmd" ] && return 0
+
+	exec_cmd git clone https://dev.iopsys.eu/bbf/wifidmd.git /opt/dev/wifidmd
+
+	exec_cmd make -C /opt/dev/wifidmd/src/ clean && make -C /opt/dev/wifidmd/src/ CFLAGS="-D'BBF_VENDOR_PREFIX=\"X_IOPSYS_EU_\"'"
+	exec_cmd cp -f /opt/dev/wifidmd/src/libwifi.so /usr/share/bbfdm/micro_services/wifidmd.so
+	exec_cmd mkdir -p /usr/share/bbfdm/micro_services/wifidmd
+	exec_cmd cp -f /opt/dev/wifidmd/src/libdataelements.so /usr/share/bbfdm/micro_services/wifidmd
+
+	generate_input_schema_with_output_name "wifidmd" "WiFi" > /etc/bbfdm/micro_services/wifidmd.json
+}
+
+function install_netmngr_as_micro_service()
+{
+	[ -d "/opt/dev/netmngr" ] && return 0
+
+	exec_cmd git clone https://dev.iopsys.eu/network/netmngr.git /opt/dev/netmngr
+
+	exec_cmd make -C /opt/dev/netmngr/src/ clean && make -C /opt/dev/netmngr/src/ CFLAGS="-D'BBF_VENDOR_PREFIX=\"X_IOPSYS_EU_\"'"
+	exec_cmd cp -f /opt/dev/netmngr/src/libnetmngr.so /usr/share/bbfdm/micro_services/netmngr.so
+	exec_cmd cp -f /opt/dev/netmngr/src/libinterface_stack.so /usr/share/bbfdm/plugins
+	exec_cmd mkdir -p /usr/share/bbfdm/micro_services/netmngr
+
+	generate_input_schema_with_output_name "netmngr" "Network" > /etc/bbfdm/micro_services/netmngr.json
+
+	exec_cmd git clone https://dev.iopsys.eu/bbf/tr143d.git /opt/dev/tr143d
+	exec_cmd make -C /opt/dev/tr143d/src/ clean && make -C /opt/dev/tr143d/src/
+	exec_cmd cp -f /opt/dev/tr143d/src/libtr143d.so /usr/share/bbfdm/micro_services/netmngr
+
+	exec_cmd git clone https://dev.iopsys.eu/bbf/tr471d.git /opt/dev/tr471d
+	exec_cmd make -C /opt/dev/tr471d/src/ clean && make -C /opt/dev/tr471d/src/
+	exec_cmd cp -f /opt/dev/tr471d/src/libtr471d.so /usr/share/bbfdm/micro_services/netmngr
+
+	exec_cmd git clone https://dev.iopsys.eu/bbf/twamp-light.git /opt/dev/twamp
+	exec_cmd make -C /opt/dev/twamp clean && make -C /opt/dev/twamp
+	exec_cmd cp -f /opt/dev/twamp/libtwamp.so /usr/share/bbfdm/micro_services/netmngr
+
+	exec_cmd git clone https://dev.iopsys.eu/bbf/udpecho.git /opt/dev/udpecho
+	exec_cmd make -C /opt/dev/udpecho/src/ clean && make -C /opt/dev/udpecho/src/
+	exec_cmd cp -f /opt/dev/udpecho/src/libudpechoserver.so /usr/share/bbfdm/micro_services/netmngr
+}
+
+function install_sysmngr_as_micro_service()
+{
+	[ -d "/opt/dev/sysmngr" ] && return 0
+
+	exec_cmd git clone https://dev.iopsys.eu/system/sysmngr.git /opt/dev/sysmngr
+
+	exec_cmd make -C /opt/dev/sysmngr/src/ clean && \
+	exec_cmd make -C /opt/dev/sysmngr/src/ \
+		CFLAGS+="-DBBF_VENDOR_PREFIX=\\\"X_IOPSYS_EU_\\\"" \
+		SYSMNGR_VENDOR_CONFIG_FILE='y' \
+		SYSMNGR_MEMORY_STATUS='y' \
+		SYSMNGR_PROCESS_STATUS='y' \
+		SYSMNGR_SUPPORTED_DATA_MODEL='y' \
+		SYSMNGR_FIRMWARE_IMAGE='y' \
+		SYSMNGR_REBOOTS='y' \
+		SYSMNGR_NETWORK_PROPERTIES='y' \
+		SYSMNGR_VENDOR_EXTENSIONS='y'
+
+	exec_cmd cp /opt/dev/sysmngr/src/sysmngr /usr/sbin/
 }
 
 function error_on_zero()

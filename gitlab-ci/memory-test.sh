@@ -62,6 +62,7 @@ supervisorctl status
 cp /tmp/memory-*.xml .
 check_valgrind_xml "memory-report.xml" "bbfdmd"
 check_valgrind_xml "memory-config-report.xml" "bbf.config"
+
 #report part
 #GitLab-CI output
 gcovr -r . 2> /dev/null #throw away stderr
