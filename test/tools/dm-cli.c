@@ -39,7 +39,7 @@ static int cli_exec_schema(struct dmctx *bbfdm_ctx, char *in_path)
 			char *data = (tb[1]) ? blobmsg_get_string(tb[1]) : "";
 			char *type = (tb[2]) ? blobmsg_get_string(tb[2]) : "";
 
-			printf("%s %s %s\n", name, type, data);
+			printf("%s %s %s\n", name, type, strlen(data) ? data : "0"); // Added a data check to handle events with empty or missing data
 		}
 	} else {
 		printf("ERROR: %d retrieving %s\n", err, bbfdm_ctx->in_param);
