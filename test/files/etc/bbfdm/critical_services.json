@@ -1,0 +1,18 @@
+{
+	"usp": [
+			"firewall",
+			"network",
+			"dhcp",
+			"wireless",
+			"time"
+	],
+	"cwmp": [
+			"firewall",
+			"network",
+			"dhcp",
+			"stunc",
+			"xmpp",
+			"wireless",
+			"time"
+	]
+}

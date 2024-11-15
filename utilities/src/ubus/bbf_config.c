@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <libubox/blobmsg.h>
+#include <libubox/blobmsg_json.h>
 #include <libubox/uloop.h>
 #include <libubus.h>
 
@@ -25,6 +26,7 @@
 #define BBF_CONFIG_DAEMON_NAME "bbf_configd"
 #define CONFIG_CONFDIR "/etc/config/"
 #define DMMAP_CONFDIR "/etc/bbfdm/dmmap/"
+#define CRITICAL_DEF_JSON "/etc/bbfdm/critical_services.json"
 
 struct proto_args {
 	const char *name;
@@ -60,6 +62,8 @@ struct bbf_config_async_req {
 	struct blob_attr *services;
 	struct config_package package[MAX_PACKAGE_NUM];
 };
+
+static struct blob_buf g_critical_bb;
 
 #ifdef BBF_CONFIG_DEBUG
 static void log_instance(struct instance *inst)
@@ -131,7 +135,6 @@ static bool g_internal_commit = false;
 enum {
 	SERVICES_NAME,
 	SERVICES_PROTO,
-	SERVICES_MONITOR,
 	SERVICES_RELOAD,
 	__MAX
 };
@@ -139,7 +142,6 @@ enum {
 static const struct blobmsg_policy bbf_config_policy[] = {
 	[SERVICES_NAME] = { .name = "services", .type = BLOBMSG_TYPE_ARRAY },
 	[SERVICES_PROTO] = { .name = "proto", .type = BLOBMSG_TYPE_STRING },
-	[SERVICES_MONITOR] = { .name = "monitor", .type = BLOBMSG_TYPE_BOOL },
 	[SERVICES_RELOAD] = { .name = "reload", .type = BLOBMSG_TYPE_BOOL },
 };
 
@@ -559,12 +561,77 @@ static void complete_request_callback(struct uloop_timeout *t)
 	}
 }
 
+struct blob_attr *get_blob_attr_with_idx(int idx, struct blob_attr *msg)
+{
+	struct blob_attr *params = NULL;
+	struct blob_attr *cur;
+	int rem;
+	const char *proto = supported_protocols[idx].name;
+
+	blobmsg_for_each_attr(cur, msg, rem) {
+		const char *name = blobmsg_name(cur);
+
+		if ((strcmp(proto, name) == 0) && (blobmsg_type(cur) == BLOBMSG_TYPE_ARRAY)) {
+			params = cur;
+			break;
+		}
+	}
+	return params;
+}
+
+static bool check_if_critical_service(int proto_idx, const char *sname)
+{
+	bool is_critical = false;
+	struct blob_attr *service = NULL, *services_ba;
+	size_t rem = 0;
+
+	services_ba = get_blob_attr_with_idx(proto_idx, g_critical_bb.head);
+	if (services_ba == NULL) {
+		ULOG_DEBUG("Critical service not defined for %s proto", supported_protocols[proto_idx].name);
+		return is_critical;
+	}
+
+	blobmsg_for_each_attr(service, services_ba, rem) {
+		char *config_name = blobmsg_get_string(service);
+
+		if (strcmp(sname, config_name) == 0) {
+			is_critical = true;
+			break;
+		}
+	}
+	ULOG_DEBUG("Service %s, found %d, in %s critical list", sname, is_critical, supported_protocols[proto_idx].name);
+	return is_critical;
+}
+
+static bool get_monitor_status(int proto_idx, struct blob_attr *services_ba)
+{
+	bool monitor = false, is_critical;
+	struct blob_attr *service = NULL;
+	size_t rem = 0;
+
+	if (services_ba == NULL) {
+		ULOG_DEBUG("Empty service list");
+		return monitor;
+	}
+
+	blobmsg_for_each_attr(service, services_ba, rem) {
+		char *config_name = blobmsg_get_string(service);
+
+		is_critical = check_if_critical_service(proto_idx, config_name);
+		if (is_critical == true) {
+			monitor = true;
+			break;
+		}
+	}
+	return monitor;
+}
+
 static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
 		    struct ubus_request_data *req, const char *method __attribute__((unused)),
 		    struct blob_attr *msg)
 {
 	struct blob_attr *tb[__MAX];
-	bool monitor = true, reload = true;
+	bool monitor = false, reload = true;
 	unsigned char idx = 0;
 
 	ULOG_INFO("Commit handler called");
@@ -593,16 +660,12 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 		ULOG_DEBUG("Protocol index determined as %d for protocol '%s'", idx, proto);
 	}
 
-	if (tb[SERVICES_MONITOR]) {
-		monitor = blobmsg_get_bool(tb[SERVICES_MONITOR]);
-		ULOG_DEBUG("Monitor flag set to %s.", monitor ? "true" : "false");
-	}
-
 	if (tb[SERVICES_RELOAD]) {
 		reload = blobmsg_get_bool(tb[SERVICES_RELOAD]);
 		ULOG_DEBUG("Reload flag set to %s.", reload ? "true" : "false");
 	}
 
+	monitor = get_monitor_status(idx, tb[SERVICES_NAME]);
 	if (monitor) {
 		ULOG_DEBUG("Retrieving all config information before committing changes");
 		fill_service_info(ctx, async_req->package, NULL, true, _get_service_list_cb);
@@ -713,6 +776,18 @@ static int bbf_config_revert_handler(struct ubus_context *ctx, struct ubus_objec
 	return 0;
 }
 
+static int update_critical_services(int proto_idx, struct blob_buf *bb)
+{
+	struct blob_attr *services_ba = NULL;
+
+	services_ba = get_blob_attr_with_idx(proto_idx, g_critical_bb.head);
+	if (services_ba != NULL) {
+		blobmsg_add_field(bb, blobmsg_type(services_ba), "critical_services", blobmsg_data(services_ba), blobmsg_data_len(services_ba));
+	}
+
+	return 0;
+}
+
 static int bbf_config_changes_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
 		    struct ubus_request_data *req, const char *method __attribute__((unused)),
 		    struct blob_attr *msg)
@@ -735,10 +810,10 @@ static int bbf_config_changes_handler(struct ubus_context *ctx, struct ubus_obje
 	}
 
 	void *array = blobmsg_open_array(&bb, "configs");
-
 	uci_config_changes(CONFIG_CONFDIR, supported_protocols[idx].config_savedir, &bb);
-
 	blobmsg_close_array(&bb, array);
+
+	update_critical_services(idx, &bb);
 
 end:
 	ubus_send_reply(ctx, req, bb.head);
@@ -785,6 +860,13 @@ static void usage(char *prog)
 	fprintf(stderr, "\n");
 }
 
+static void load_critical_services()
+{
+	memset(&g_critical_bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&g_critical_bb, 0);
+	blobmsg_add_json_from_file(&g_critical_bb, CRITICAL_DEF_JSON);
+}
+
 int main(int argc, char **argv)
 {
 	struct ubus_event_handler ev = {
@@ -818,6 +900,8 @@ int main(int argc, char **argv)
 	uloop_init();
 	ubus_add_uloop(uctx);
 
+	load_critical_services();
+
 	if (ubus_add_object(uctx, &bbf_config_object)) {
 		ULOG_ERR("Failed to add 'bbf.config' ubus object");
 		goto exit;
@@ -831,6 +915,7 @@ int main(int argc, char **argv)
 	uloop_run();
 
 exit:
+	blob_buf_free(&g_critical_bb);
 	uloop_done();
 	ubus_free(uctx);
 	ulog_close();

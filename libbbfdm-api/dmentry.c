@@ -351,7 +351,6 @@ void bbf_entry_services(unsigned int proto, bool is_commit, bool reload_required
 	blob_buf_init(&bb, 0);
 
 	blobmsg_add_string(&bb, "proto", (proto == BBFDM_CWMP) ? "cwmp": (proto == BBFDM_USP) ? "usp" : "both");
-	blobmsg_add_u8(&bb, "monitor", false);
 	blobmsg_add_u8(&bb, "reload", reload_required);
 
 	dmubus_call_blob_msg_set("bbf.config", is_commit ? "commit" : "revert", &bb);
