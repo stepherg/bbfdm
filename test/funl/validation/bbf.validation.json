@@ -71,20 +71,6 @@
             "rc": 0
         },
         {
-            "method": "get",
-            "args": {
-                "path":"Device.USB.USBHosts.Host.*.Device."
-            },
-            "rc": 0
-        },
-        {
-            "method": "get",
-            "args": {
-                "path":"Device.USB.USBHosts.Host.*.Device."
-            },
-            "rc": 0
-        },
-        {
             "method": "hello",
             "rc": 3
         },

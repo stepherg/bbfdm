@@ -26,8 +26,8 @@ run_unit_test:
   allow_failure: false
   script:
   - "./gitlab-ci/pipeline_setup.sh"
-  - "./gitlab-ci/install-dependencies.sh"
-  - "./gitlab-ci/setup.sh"
+  - "./gitlab-ci/install-dependencies.sh ms"
+  - "./gitlab-ci/setup.sh ms"
   - "./gitlab-ci/unit-test.sh"
   artifacts:
     when: always
@@ -56,8 +56,8 @@ run_libbbfdm_api_functional_test:
   allow_failure: false
   script:
   - "./gitlab-ci/pipeline_setup.sh"
-  - "./gitlab-ci/install-dependencies.sh"
-  - "./gitlab-ci/setup.sh"
+  - "./gitlab-ci/install-dependencies.sh ms"
+  - "./gitlab-ci/setup.sh ms"
   - "./gitlab-ci/functional-api-test.sh"
 
   artifacts:
@@ -71,8 +71,8 @@ run_libbbfdm_functional_test:
   allow_failure: false
   script:
   - "./gitlab-ci/pipeline_setup.sh"
-  - "./gitlab-ci/install-dependencies.sh"
-  - "./gitlab-ci/setup.sh"
+  - "./gitlab-ci/install-dependencies.sh ms"
+  - "./gitlab-ci/setup.sh ms"
   - "./gitlab-ci/functional-test.sh"
 
   artifacts:
@@ -86,8 +86,8 @@ run_libbbfdm_memory_test:
   allow_failure: false
   script:
   - "./gitlab-ci/pipeline_setup.sh"
-  - "./gitlab-ci/install-dependencies.sh"
-  - "./gitlab-ci/setup.sh"
+  - "./gitlab-ci/install-dependencies.sh ms"
+  - "./gitlab-ci/setup.sh ms"
   - "./gitlab-ci/memory-test.sh"
   artifacts:
       when: always
@@ -101,8 +101,8 @@ run_bbfd_functional_test:
     allow_failure: false
     script:
     - "./gitlab-ci/pipeline_setup.sh"
-    - "./gitlab-ci/install-dependencies.sh"
-    - "./gitlab-ci/setup.sh"
+    - "./gitlab-ci/install-dependencies.sh ms"
+    - "./gitlab-ci/setup.sh ms"
     - "./gitlab-ci/bbfdmd-functional-test.sh"
     artifacts:
         when: always

@@ -111,9 +111,6 @@ function install_libbbf()
 
 function install_libbbf_test()
 {
-	# Enable coverage flags only for test
-	[ -n "${1}" ] && return 0;
-
 	# compile and install libbbf_test
 	echo "Compiling libbbf_test"
 	exec_cmd_verbose make clean -C test/bbf_test/

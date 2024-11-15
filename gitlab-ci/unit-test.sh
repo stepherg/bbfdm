@@ -5,9 +5,9 @@ pwd
 . ./gitlab-ci/shared.sh
 
 echo "Starting supervisor"
-supervisorctl shutdown
+supervisorctl stop all
 sleep 1
-supervisord -c /etc/supervisor/supervisord.conf
+supervisorctl start ubusd rpcd bbf.config
 sleep 3
 
 supervisorctl status all

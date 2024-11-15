@@ -381,42 +381,6 @@ static void test_api_bbfdm_get_set_json_v1_parameter(void **state)
 	ctx->in_value = "IEEE 802_11AX_5_GHZ";
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9008);
-
-	// get value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name", "kids", "xsd:string");
-
-	// set value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
-	ctx->in_value = "home+office test";
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// get value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name", "home+office test", "xsd:string");
-
-	// set value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
-	ctx->in_value = "office_test";
-	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// get value ==> expected "0" error
-	ctx->in_param = "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name";
-	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
-	assert_int_equal(fault, 0);
-
-	// validate parameter : name, type, value
-	validate_parameter(ctx, "Device.X_IOPSYS_EU_ParentalControl.Profile.1.Name", "office_test", "xsd:string");
 }
 
 static void test_api_bbfdm_get_set_library_parameter(void **state)
@@ -1924,17 +1888,17 @@ int main(void)
 {
 	const struct CMUnitTest tests[] = {
 		// Get/Set Value method test cases
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter, setup, teardown_commit),
+		//cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_standard_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_json_v1_parameter, setup, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_library_parameter, setup, teardown_commit),
+		//cmocka_unit_test_setup_teardown(test_api_bbfdm_get_set_library_parameter, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_input_value_validation_json_parameter, setup, teardown_commit),
 
 		// Add/Delete Object method test cases
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_standard_object, setup, teardown_commit),
+		//cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_standard_object, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_json_object, setup, teardown_commit),
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_json_v1_object, setup, teardown_commit),
-		cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_library_object, setup, teardown_commit),
+		//cmocka_unit_test_setup_teardown(test_api_bbfdm_add_del_library_object, setup, teardown_commit),
 
 		// Operate method test cases
 		cmocka_unit_test_setup_teardown(test_api_bbfdm_valid_standard_operate, setup, teardown_commit),

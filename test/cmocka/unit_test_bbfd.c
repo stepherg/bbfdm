@@ -6,6 +6,7 @@
 #include <libbbfdm-api/dmuci.h>
 #include <libbbfdm-api/dmapi.h>
 #include <libbbfdm-api/dmentry.h>
+#include <libubox/blobmsg_json.h>
 
 #include "../../libbbfdm/device.h"
 
@@ -80,7 +81,7 @@ static void test_api_bbfdm_get_value_parameter(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.Radio.1.Alias";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.Alias";
 
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
@@ -146,7 +147,7 @@ static void test_api_bbfdm_get_name_parameter(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.Radio.1.Enable";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.Verbose";
 	ctx->nextlevel = false;
 
 	fault = bbf_entry_method(ctx, BBF_GET_NAME);
@@ -174,7 +175,7 @@ static void test_api_bbfdm_get_name_wrong_object_path(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFii.";
+	ctx->in_param = "Device.WrongObjPath.";
 	ctx->nextlevel = false;
 
 	fault = bbf_entry_method(ctx, BBF_GET_NAME);
@@ -188,7 +189,7 @@ static void test_api_bbfdm_set_value_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.Users.User.";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
 	ctx->in_value = "test";
 
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
@@ -200,7 +201,7 @@ static void test_api_bbfdm_set_value_parameter(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.Users.User.1.Username";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.BannerFile";
 	ctx->in_value = "test";
 
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
@@ -224,7 +225,7 @@ static void test_api_bbfdm_set_value_wrong_parameter_path(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.Users.User.Username";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.Port";
 	ctx->in_value = "test";
 
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
@@ -236,8 +237,8 @@ static void test_api_bbfdm_set_value_parameter_non_writable(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.Radio.1.Status";
-	ctx->in_value = "Enabled";
+	ctx->in_param = "Device.UCI_TEST_V1.OWSDNumberOfEntries";
+	ctx->in_value = "5";
 
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
 	assert_int_equal(fault, FAULT_9008);
@@ -248,7 +249,7 @@ static void test_api_bbfdm_set_value_parameter_wrong_value(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.Radio.1.Enable";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.RootLogin";
 	ctx->in_value = "truee";
 
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
@@ -260,7 +261,7 @@ static void test_api_bbfdm_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.Users.User.";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
 
 	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, 0);
@@ -274,7 +275,7 @@ static void test_api_bbfdm_add_wrong_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.Users.";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.Users.";
 
 	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
@@ -287,7 +288,7 @@ static void test_api_bbfdm_add_object_non_writable(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.Radio.";
+	ctx->in_param = "Device.InterfaceStack.";
 
 	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
@@ -313,7 +314,7 @@ static void test_api_bbfdm_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.SSID.1.";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
@@ -324,7 +325,7 @@ static void test_api_bbfdm_delete_object_all_instances(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.Users.User.";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
@@ -335,7 +336,7 @@ static void test_api_bbfdm_delete_wrong_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.SSID";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
@@ -346,7 +347,7 @@ static void test_api_bbfdm_delete_object_non_writable(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.Hosts.Host.";
+	ctx->in_param = "Device.InterfaceStack.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
@@ -368,7 +369,7 @@ static void test_api_bbfdm_valid_operate(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.AccessPoint.1.Security.Reset()";
+	ctx->in_param = "Device.X_IOPSYS_EU_Reboot()";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
 	assert_int_equal(fault, 0);
@@ -458,7 +459,7 @@ static void test_api_bbfdm_get_instances_wrong_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFii.";
+	ctx->in_param = "Device.WrongObj.";
 	ctx->nextlevel = false;
 
 	fault = bbf_entry_method(ctx, BBF_INSTANCES);
@@ -472,7 +473,7 @@ static void test_api_bbfdm_get_instances_without_next_level(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.";
+	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
 	ctx->nextlevel = false;
 
 	fault = bbf_entry_method(ctx, BBF_INSTANCES);
@@ -543,7 +544,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Syslog.";
+	ctx->in_param = "Device.InterfaceStack.";
 
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
@@ -553,7 +554,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	bbf_ctx_clean(ctx);
 	bbf_ctx_init(ctx, TR181_ROOT_TREE);
 
-	ctx->in_param = "Device.WiFi.SSID.2.Enable";
+	ctx->in_param = "Device.RootDataModelVersion";
 
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
@@ -566,7 +567,7 @@ static void test_api_bbfdm_library_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.SSID.";
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.";
 
 	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, 0);
@@ -580,12 +581,12 @@ static void test_api_bbfdm_library_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.WiFi.SSID.2.";
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.2.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
 
-	ctx->in_param = "Device.WiFi.SSID.";
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);

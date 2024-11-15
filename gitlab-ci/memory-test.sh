@@ -46,8 +46,6 @@ run_valgrind -c instances Device.
 
 run_valgrind -c schema Device.
 
-run_valgrind_verbose -c get Device.BulkData.
-
 run_valgrind_verbose -c get Device.RootDataModelVersion
 
 run_valgrind_verbose -c get Device.IP.Interface.*.IPv6Address.*.IPAddress

@@ -9,3 +9,4 @@ out
 /.repo
 /utilities/bbf_configd
 *.swp
+*.swo
