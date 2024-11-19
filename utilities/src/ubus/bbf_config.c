@@ -22,6 +22,7 @@
 #define MAX_SERVICE_NUM 16
 #define MAX_INSTANCE_NUM 8
 #define NAME_LENGTH 64
+#define DEFAULT_LOG_LEVEL LOG_INFO
 
 #define BBF_CONFIG_DAEMON_NAME "bbf_configd"
 #define CONFIG_CONFDIR "/etc/config/"
@@ -855,7 +856,7 @@ static void usage(char *prog)
 	fprintf(stderr, "Usage: %s [options]\n", prog);
 	fprintf(stderr, "\n");
 	fprintf(stderr, "options:\n");
-	fprintf(stderr, "    -d  Use multiple time to get more verbose debug logs (Debug: -dddd)\n");
+	fprintf(stderr, "    -l <0-4> Set the loglevel\n");
 	fprintf(stderr, "    -h  Displays this help\n");
 	fprintf(stderr, "\n");
 }
@@ -873,12 +874,17 @@ int main(int argc, char **argv)
 		.cb = receive_notify_event,
 	};
 	struct ubus_context *uctx;
-	int ch, log_level = 0;
+	int ch, log_level = DEFAULT_LOG_LEVEL;
 
-	while ((ch = getopt(argc, argv, "hd")) != -1) {
+	while ((ch = getopt(argc, argv, "hl:")) != -1) {
 		switch (ch) {
-		case 'd':
-			log_level += 1;
+		case 'l':
+			if (optarg) {
+				log_level = (int)strtod(optarg, NULL);
+				if (log_level < 0 || log_level > 7) {
+					log_level = DEFAULT_LOG_LEVEL;
+				}
+			}
 			break;
 		case 'h':
 			usage(argv[0]);
