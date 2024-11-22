@@ -382,6 +382,14 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/bbf/obuspa.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+         "test/obuspa_core_dm.json"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/network/netmngr.git",
       "proto": "git",
       "version": "devel",
