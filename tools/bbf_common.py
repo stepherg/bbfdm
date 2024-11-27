@@ -360,8 +360,8 @@ def download_and_build_plugins(plugins, vendor_prefix):
         name=os.path.basename(repo).replace('.git','')
 
         if repo is None or proto is None or dm_files is None or not isinstance(dm_files, list):
-            print("Necessary input missing")
             BBF_ERROR_CODE += 1
+            print(f"# Necessary input missing {BBF_ERROR_CODE}")
             continue
 
         print(f' - Processing plugin: MS({is_microservice}) {plugin}')
@@ -372,8 +372,8 @@ def download_and_build_plugins(plugins, vendor_prefix):
 
 
             if not clone_git_repository(repo, version):
-                print(f"Failed to clone {repo}")
                 BBF_ERROR_CODE += 1
+                print(f"# Failed to clone {repo} {BBF_ERROR_CODE}")
                 continue
                 
             print(f'    Processing {get_repo_version_info(repo, version)}')
@@ -382,8 +382,8 @@ def download_and_build_plugins(plugins, vendor_prefix):
             print(f'    Processing {get_repo_version_info(repo, proto)}')
             
         if repo_path is None:
-            print("Repository path not defined!!!")
             BBF_ERROR_CODE += 1
+            print(f"# Repository path not defined {BBF_ERROR_CODE}!!!")
             continue
 
         create_folder("/tmp/repo/dm_info")
@@ -404,20 +404,21 @@ def download_and_build_plugins(plugins, vendor_prefix):
                     elif filename.endswith('.json'):
                         move_file(filename, "/usr/share/bbfdm/plugins")
                     else:
-                        print(f"Unknown file format {filename}")
                         BBF_ERROR_CODE += 1
+                        print(f"# Unknown file format {filename} {BBF_ERROR_CODE}")
                 else:
-                    print(f"Error: File not accessible {filename} !!!!!!")
                     BBF_ERROR_CODE += 1
+                    print(f"# Error: File not accessible {filename} {BBF_ERROR_CODE}!!!!!!")
 
         if len(LIST_FILES) > 0:
             if not generate_shared_library(f"{plugin_index}_{name}.so", LIST_FILES, vendor_prefix, extra_dependencies, is_microservice):
                 BBF_ERROR_CODE += 1
+                print(f"# Error: Failed to generate shared library for {plugin_index}_{name}, error {BBF_ERROR_CODE}")
 
         clear_list(LIST_FILES)
         cd_dir(CURRENT_PATH)
 
-    print('Generating plugins completed.')
+    print(f'Generating plugins completed, error {BBF_ERROR_CODE}')
 
 
 def generate_supported_dm(vendor_prefix=None, plugins=None):

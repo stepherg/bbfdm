@@ -103,7 +103,6 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "urlfilter/files/etc/urlfilter/X_IOPSYS_EU_ParentalControl.json",
         "icwmp/files/etc/bbfdm/json/CWMPManagementServer.json",
         "ponmngr/files/etc/ponmngr/xpon.json"
       ]

@@ -69,7 +69,7 @@ def getparamtype(dmparam):
                     break
                 if c.tag == "dataType":
                     reftype = c.get("ref")
-                    if reftype == "StatsCounter32" or reftype == "PSDBreakPointIndexAndLevel" or reftype == "PSMBreakPointIndexAndLevel" or reftype == "SELTPAttenuationCharacteristicsIndexAndTFlog":
+                    if reftype == "StatsCounter32" or reftype == "PSDBreakPointIndexAndLevel" or reftype == "PSMBreakPointIndexAndLevel" or reftype == "SELTPAttenuationCharacteristicsIndexAndTFlog" or reftype == "Order":
                         ptype = "unsignedInt"
                         break
                     elif reftype == "StatsCounter64":
@@ -453,7 +453,10 @@ def add_param_to_list(main_obj, dmobject, dmparam, proto):
 
 
 def add_command_to_list(main_obj, dmparam, proto):
-    is_async = dmparam.get('async') is not None
+    is_async = False
+
+    if dmparam.get('async') == "true":
+        is_async = True
 
     entry_command = {
         "name": main_obj + dmparam.get('name'),
