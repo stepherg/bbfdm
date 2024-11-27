@@ -143,6 +143,14 @@
       ]
     },
     {
+      "repo": "https://dev.iopsys.eu/network/urlfilter.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "src/parentalcontrol.c"
+      ]
+    },
+    {
       "repo": "https://dev.iopsys.eu/iopsys/hostmngr.git",
       "proto": "git",
       "version": "devel",
