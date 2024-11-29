@@ -180,9 +180,11 @@ function install_sysmngr_as_micro_service()
 		SYSMNGR_FIRMWARE_IMAGE='y' \
 		SYSMNGR_REBOOTS='y' \
 		SYSMNGR_NETWORK_PROPERTIES='y' \
-		SYSMNGR_VENDOR_EXTENSIONS='y'
+		SYSMNGR_VENDOR_EXTENSIONS='y' \
+		SYSMNGR_FWBANK_UBUS_SUPPORT='y'
 
 	exec_cmd cp /opt/dev/sysmngr/src/sysmngr /usr/sbin/
+	exec_cmd mkdir /etc/sysmngr
 }
 
 function error_on_zero()
