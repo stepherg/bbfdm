@@ -499,6 +499,39 @@ void synchronize_specific_config_sections_with_dmmap_cont(const char *package, c
 	}
 }
 
+void synchronize_specific_config_sections_with_dmmap_option(const char *package, const char *section_type, const char *dmmap_package,
+		const char *option_name, struct list_head *dup_list)
+{
+	struct uci_section *s = NULL, *stmp = NULL, *dmmap_sec = NULL;
+	char *option_value = NULL;
+
+	uci_foreach_sections(package, section_type, s) {
+		dmuci_get_value_by_section_string(s, option_name, &option_value);
+
+		/*
+		 * create/update corresponding dmmap section that have same config_section link and using param_value_array
+		 */
+		if ((dmmap_sec = get_dup_section_in_dmmap_opt(dmmap_package, section_type, option_name, option_value)) == NULL) {
+			dmuci_add_section_bbfdm(dmmap_package, section_type, &dmmap_sec);
+			dmuci_set_value_by_section_bbfdm(dmmap_sec, option_name, option_value);
+		}
+
+		/*
+		 * Add system and dmmap sections to the list
+		 */
+		add_dmmap_config_dup_list(dup_list, s, dmmap_sec);
+	}
+
+	/*
+	 * Delete unused dmmap sections
+	 */
+	uci_path_foreach_sections_safe(bbfdm, dmmap_package, section_type, stmp, s) {
+		dmuci_get_value_by_section_string(s, option_name, &option_value);
+		if (get_dup_section_in_config_opt(package, section_type, option_name, option_value) == NULL)
+			dmuci_delete_by_section(s, NULL, NULL);
+	}
+}
+
 void get_dmmap_section_of_config_section(const char *dmmap_package, const char *section_type, const char *section_name, struct uci_section **dmmap_section)
 {
 	struct uci_section *s = NULL;

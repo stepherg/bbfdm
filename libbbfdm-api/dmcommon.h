@@ -146,6 +146,8 @@ void synchronize_specific_config_sections_with_dmmap_eq(const char *package, con
 		const char *option_name, const char *option_value, struct list_head *dup_list);
 void synchronize_specific_config_sections_with_dmmap_cont(const char *package, const char *section_type, const char *dmmap_package,
 		const char *option_name, const char *option_value, struct list_head *dup_list);
+void synchronize_specific_config_sections_with_dmmap_option(const char *package, const char *section_type, const char *dmmap_package,
+		const char *option_name, struct list_head *dup_list);
 void get_dmmap_section_of_config_section(const char *dmmap_package, const char *section_type, const char *section_name, struct uci_section **dmmap_section);
 void get_dmmap_section_of_config_section_eq(const char *dmmap_package, const char *section_type, const char *opt, const char *value, struct uci_section **dmmap_section);
 void get_dmmap_section_of_config_section_cont(const char *dmmap_package, const char *section_type, const char *opt, const char *value, struct uci_section **dmmap_section);
