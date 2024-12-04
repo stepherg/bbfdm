@@ -207,3 +207,16 @@ function generate_report()
 	exec_cmd tap-junit --name "${1}" --input "${2}" --output report
 }
 
+function install_cmph()
+{
+	[ -d "/opt/dev/cmph" ] && rm -rf /opt/dev/cmph
+
+	exec_cmd git clone https://git.code.sf.net/p/cmph/git /opt/dev/cmph
+	(
+		cd /opt/dev/cmph
+		exec_cmd autoreconf -i
+		exec_cmd ./configure
+		exec_cmd make
+		exec_cmd sudo make install
+	)
+}

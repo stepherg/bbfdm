@@ -21,14 +21,7 @@ install_libbbf_test ${1}
 
 # Install datamodel plugins/micro-service only when pipeline trigger for bbfdm
 if [ -z "${1}" ]; then
-	# Generate plugin_input.json
-	jq 'del(.output)' tools/tools_input.json > /tmp/plugin_input.json
-
-	# Install datamodel plugins
-	./tools/generate_dm.py /tmp/plugin_input.json
-	check_ret $?
-
-	ls -l /usr/share/bbfdm/plugins/
+	echo "Skip installation of micro-services ...."
 else
 	# Create directories for micro-service configuration and shared files
 	mkdir -p /etc/bbfdm/micro_services
