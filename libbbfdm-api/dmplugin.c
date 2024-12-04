@@ -18,6 +18,7 @@ extern struct list_head global_memhead;
 
 struct service
 {
+	bool is_unified_daemon;
 	struct list_head list;
 	char *name;
 	char *parent_dm;
@@ -73,7 +74,7 @@ static bool is_service_registered(struct list_head *srvlist, const char *srv_nam
 	return false;
 }
 
-static void add_service_to_list(struct list_head *srvlist, const char *srv_name, const char *srv_parent_dm, const char *srv_object)
+static void add_service_to_list(struct list_head *srvlist, const char *srv_name, const char *srv_parent_dm, const char *srv_object, bool is_unified)
 {
 	struct service *srv = NULL;
 
@@ -83,6 +84,7 @@ static void add_service_to_list(struct list_head *srvlist, const char *srv_name,
 	srv->name = strdup(srv_name);
 	srv->parent_dm = strdup(srv_parent_dm);
 	srv->object = strdup(srv_object);
+	srv->is_unified_daemon = is_unified;
 }
 
 void free_services_from_list(struct list_head *clist)
@@ -98,7 +100,7 @@ void free_services_from_list(struct list_head *clist)
 	}
 }
 
-bool load_service(DMOBJ *main_dm, struct list_head *srv_list, const char *srv_name, const char *srv_parent_dm, const char *srv_obj)
+bool load_service(DMOBJ *main_dm, struct list_head *srv_list, const char *srv_name, const char *srv_parent_dm, const char *srv_obj, bool is_unified)
 {
 	if (!main_dm || !srv_list || !srv_name || !srv_parent_dm || !srv_obj) {
 		BBF_ERR("Invalid arguments: main_dm, srv_list, srv_name, srv_parent_dm, and srv_obj must not be NULL.");
@@ -117,7 +119,7 @@ bool load_service(DMOBJ *main_dm, struct list_head *srv_list, const char *srv_na
 		return false;
 	}
 
-	add_service_to_list(srv_list, srv_name, srv_parent_dm, srv_obj);
+	add_service_to_list(srv_list, srv_name, srv_parent_dm, srv_obj, is_unified);
 	return true;
 }
 
@@ -131,6 +133,7 @@ void get_list_of_registered_service(struct list_head *srvlist, struct blob_buf *
 		blobmsg_add_string(bb, "name", srv->name);
 		blobmsg_add_string(bb, "parent_dm", srv->parent_dm);
 		blobmsg_add_string(bb, "object", srv->object);
+		blobmsg_add_u8(bb, "unified_daemon", srv->is_unified_daemon);
 		blobmsg_close_table(bb, table);
 	}
 }

@@ -30,3 +30,5 @@ echo "Starting base services..."
 supervisorctl reread
 supervisorctl update
 sleep 10
+
+ubus list

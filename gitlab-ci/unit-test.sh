@@ -7,7 +7,7 @@ pwd
 echo "Starting supervisor"
 supervisorctl stop all
 sleep 1
-supervisorctl start ubusd rpcd bbf.config
+supervisorctl start ubusd rpcd bbf.config netmngr sysmngr
 sleep 3
 
 supervisorctl status all

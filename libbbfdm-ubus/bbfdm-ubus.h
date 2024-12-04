@@ -19,7 +19,7 @@ struct bbfdm_async_req {
 
 typedef struct bbfdm_config {
 	struct list_head list_objs; // Micro-service list of objects to expose
-	char service_name[16]; // Service name for micro-service identification
+	char service_name[32]; // Service name for micro-service identification
 	char in_type[32]; // Input type, Possible values: { 'JSON', 'DotSo' }
 	char in_name[128]; // plugin path
 	char in_plugin_dir[128];  // extra plugin directory path

@@ -28,7 +28,7 @@
 #include "get_helper.h"
 #include "plugin.h"
 
-#define BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH "/etc/bbfdm/micro_services"
+#define BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH "/etc/bbfdm/services"
 #define BBFDM_DEFAULT_MODULES_PATH "/usr/share/bbfdm"
 #define BBFDM_DEFAULT_PLUGINS_PATH BBFDM_DEFAULT_MODULES_PATH"/plugins"
 #define BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH BBFDM_DEFAULT_MODULES_PATH"/micro_services"
@@ -710,21 +710,6 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	return 0;
 }
 
-enum {
-	BBF_SERVICE_CMD,
-	BBF_SERVICE_NAME,
-	BBF_SERVICE_PARENT_DM,
-	BBF_SERVICE_OBJECTS,
-	__BBF_SERVICE_MAX,
-};
-
-static const struct blobmsg_policy service_policy[] = {
-	[BBF_SERVICE_CMD] = { .name = "cmd", .type = BLOBMSG_TYPE_STRING },
-	[BBF_SERVICE_NAME] = { .name = "name", .type = BLOBMSG_TYPE_STRING },
-	[BBF_SERVICE_PARENT_DM] = { .name = "parent_dm", .type = BLOBMSG_TYPE_STRING },
-	[BBF_SERVICE_OBJECTS] = { .name = "objects", .type = BLOBMSG_TYPE_ARRAY },
-};
-
 static void service_list(struct blob_buf *bb)
 {
 	void *array;
@@ -743,7 +728,6 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 			    struct ubus_request_data *req __attribute__((unused)), const char *method,
 			    struct blob_attr *msg)
 {
-	struct blob_attr *tb[__BBF_SERVICE_MAX] = {NULL};
 	struct blob_buf bb;
 	struct bbfdm_context *u;
 
@@ -756,11 +740,6 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 	memset(&bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&bb, 0);
 
-	if (blobmsg_parse(service_policy, __BBF_SERVICE_MAX, tb, blob_data(msg), blob_len(msg))) {
-		service_list(&bb);
-		goto end;
-	}
-
 	BBF_INFO("ubus method|%s|, name|%s|", method, obj->name);
 
 	if (dm_is_micro_service() == true) { // It's a micro-service instance
@@ -768,52 +747,7 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 		goto end;
 	}
 
-	if (!tb[BBF_SERVICE_CMD]) {
-		service_list(&bb);
-		goto end;
-	}
-
-	char *srv_cmd = blobmsg_get_string(tb[BBF_SERVICE_CMD]);
-
-	if (is_str_eq(srv_cmd, "register")) {
-
-		if (!tb[BBF_SERVICE_NAME]) {
-			blobmsg_add_string(&bb, "error", "service name should be defined!!");
-			goto end;
-		}
-
-		if (!tb[BBF_SERVICE_PARENT_DM]) {
-			blobmsg_add_string(&bb, "error", "service parent dm should be defined!!");
-			goto end;
-		}
-
-		if (!tb[BBF_SERVICE_OBJECTS]) {
-			blobmsg_add_string(&bb, "error", "service objects should be defined!!");
-			goto end;
-		}
-
-		char *srv_name = blobmsg_get_string(tb[BBF_SERVICE_NAME]);
-		char *srv_parent_dm = blobmsg_get_string(tb[BBF_SERVICE_PARENT_DM]);
-		bool res = true;
-
-		if (tb[BBF_SERVICE_OBJECTS]) {
-			struct blob_attr *objs = tb[BBF_SERVICE_OBJECTS];
-			struct blob_attr *attr_obj = NULL;
-			size_t rem;
-
-			blobmsg_for_each_attr(attr_obj, objs, rem) {
-				char *srv_obj = blobmsg_get_string(attr_obj);
-				res |= load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, srv_name, srv_parent_dm, srv_obj);
-			}
-		} else {
-			res = false;
-		}
-
-		blobmsg_add_u8(&bb, "status", res);
-		run_schema_updater(u);
-	} else {
-		service_list(&bb);
-	}
+	service_list(&bb);
 
 end:
 	ubus_send_reply(ctx, req, bb.head);
@@ -870,8 +804,8 @@ static struct ubus_method bbf_methods[] = {
 	UBUS_METHOD("operate", bbfdm_operate_handler, dm_operate_policy),
 	UBUS_METHOD("add", bbfdm_add_handler, dm_add_policy),
 	UBUS_METHOD("del", bbfdm_del_handler, dm_del_policy),
-	UBUS_METHOD("service", bbfdm_service_handler, service_policy),
 	UBUS_METHOD("notify_event", bbfdm_notify_event, dm_notify_event_policy),
+	UBUS_METHOD_NOARG("service", bbfdm_service_handler),
 };
 
 static struct ubus_object_type bbf_type = UBUS_OBJECT_TYPE("", bbf_methods);
@@ -1021,44 +955,6 @@ static void periodic_instance_updater(struct uloop_timeout *t)
 	}
 }
 
-static int register_service(struct ubus_context *ctx)
-{
-	struct blob_buf bb = {0};
-	uint32_t ubus_id;
-	struct bbfdm_context *u;
-	struct pathNode *pn = NULL;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		BBF_ERR("failed to get the bbfdm context");
-		return false;
-	}
-	// check if object already present
-	int ret = ubus_lookup_id(ctx, u->config.out_root_obj, &ubus_id);
-	if (ret != 0)
-		return ret;
-
-	memset(&bb, 0, sizeof(struct blob_buf));
-	blob_buf_init(&bb, 0);
-
-	blobmsg_add_string(&bb, "cmd", "register");
-	blobmsg_add_string(&bb, "name", u->config.out_name);
-	blobmsg_add_string(&bb, "parent_dm", u->config.out_parent_dm);
-
-	void *arr = blobmsg_open_array(&bb, "objects");
-
-	list_for_each_entry(pn, &u->config.list_objs, list) {
-		blobmsg_add_string(&bb, NULL, pn->path);
-	}
-
-	blobmsg_close_array(&bb, arr);
-
-	ubus_invoke(ctx, ubus_id, "service", bb.head, NULL, NULL, 5000);
-	blob_buf_free(&bb);
-
-	return 0;
-}
-
 static int _fill_daemon_input_option(json_object *daemon_obj, bbfdm_config_t *config)
 {
 	char opt_val[MAX_DM_PATH] = {0};
@@ -1190,6 +1086,67 @@ static int daemon_load_config_internal_plugin(bbfdm_config_t *config)
 	return 0;
 }
 
+static int daemon_load_services(const char *name, const char *json_path)
+{
+	json_object *json_obj = NULL;
+	json_object *jserv = NULL, *jservices = NULL;
+	int idx = 0, err = 0;
+	char buffer[MAX_DM_PATH/2] = {0}, service_name[MAX_DM_PATH] = {0};
+	bool is_unified = false;
+
+	if (!name || !json_path) {
+		BBF_ERR("Invalid service name or json file path");
+		return -1;
+	}
+
+	json_obj = json_object_from_file(json_path);
+	if (!json_obj) {
+		BBF_ERR("Failed to read input %s file for services", json_path);
+		return -1;
+	}
+
+	json_object *daemon_obj = dmjson_get_obj(json_obj, 1, "daemon");
+	if (!daemon_obj) {
+		err = -1;
+		goto exit;
+	}
+
+	strncpyt(buffer, name, sizeof(buffer));
+	// Remove .json from the end
+	size_t len = strlen(buffer) - strlen(".json");
+	buffer[len] = '\0';
+
+	snprintf(service_name, sizeof(service_name), "%s.%s", BBFDM_DEFAULT_UBUS_OBJ, buffer);
+	string_to_bool(dmjson_get_value((daemon_obj), 1, "unified_daemon"), &is_unified);
+
+	dmjson_foreach_obj_in_array(daemon_obj, jservices, jserv, idx, 1, "services") {
+		if (jserv) {
+			char parent[MAX_DM_PATH] = {0}, obj[MAX_DM_PATH] = {0};
+			char *tmp;
+
+			tmp = dmjson_get_value(jserv, 1, "parent_dm");
+			replace_str(tmp, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, parent, sizeof(parent));
+
+			tmp = dmjson_get_value(jserv, 1, "object");
+			replace_str(tmp, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, obj, sizeof(obj));
+
+			if ((DM_STRLEN(parent) == 0) || (DM_STRLEN(obj) == 0)) {
+				BBF_ERR("Skip empty registration parent_dm[%s] or object[%s]", parent, obj);
+				continue;
+			}
+
+			BBF_INFO("Registering [%s :: %s :: %s :: %d]", service_name, parent, obj, is_unified);
+			load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, service_name, parent, obj, is_unified);
+		}
+	}
+exit:
+	if (json_obj) {
+		json_object_put(json_obj);
+	}
+
+	return err;
+}
+
 static int daemon_load_config(bbfdm_config_t *config)
 {
 	int err = 0;
@@ -1227,38 +1184,6 @@ static int regiter_ubus_object(struct ubus_context *ctx)
 		ret = ubus_add_object(ctx, &bbf_object);
 	}
 	return ret;
-}
-
-static void lookup_event_cb(struct ubus_context *ctx,
-		struct ubus_event_handler *ev __attribute__((unused)),
-		const char *type, struct blob_attr *msg)
-{
-	const struct blobmsg_policy policy = {
-		"path", BLOBMSG_TYPE_STRING
-	};
-	struct blob_attr *attr;
-	const char *path;
-	struct bbfdm_context *u;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		BBF_ERR("failed to get the bbfdm context");
-		return;
-	}
-
-	if (type && strcmp(type, "ubus.object.add") != 0)
-		return;
-
-	blobmsg_parse(&policy, 1, &attr, blob_data(msg), blob_len(msg));
-
-	if (!attr)
-		return;
-
-	path = blobmsg_data(attr);
-	if (path && strcmp(path, u->config.out_root_obj) == 0) {
-		// register micro-service
-		register_service(ctx);
-	}
 }
 
 static void bbfdm_register_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec)
@@ -1355,7 +1280,39 @@ static int daemon_load_data_model(struct bbfdm_context *daemon_ctx)
 	return 0;
 }
 
-static struct ubus_event_handler add_event = { .cb = lookup_event_cb };
+static int register_micro_services()
+{
+	DIR *dir_tmp = NULL;
+	struct dirent *d_file = NULL;
+	int err = 0;
+
+	if (dm_is_micro_service() == true) {
+		return 0;
+	}
+
+	sysfs_foreach_file(BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH, dir_tmp, d_file) {
+		char config_name[512] = {0};
+
+		if (d_file->d_name[0] == '.')
+			continue;
+
+		snprintf(config_name, sizeof(config_name), "%s/%s", BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH, d_file->d_name);
+
+		if (!file_exists(config_name) || !is_regular_file(config_name))
+			continue;
+
+		err = daemon_load_services(d_file->d_name, config_name);
+		if (err) {
+			BBF_ERR("Failed to load micro-services %s", d_file->d_name);
+			break;
+		}
+	}
+	if (dir_tmp) {
+		closedir (dir_tmp);
+	}
+	return err;
+}
+
 static struct ubus_event_handler config_change_handler = { .cb = bbf_config_change_cb };
 
 int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
@@ -1385,6 +1342,13 @@ int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 		return err;
 	}
 
+	// Pre-load the services
+	err = register_micro_services();
+	if (err) {
+		BBF_ERR("Failed to load micro-services");
+		return err;
+	}
+
 	err = regiter_ubus_object(&bbfdm_ctx->ubus_ctx);
 	if (err != UBUS_STATUS_OK)
 		return -1;
@@ -1397,21 +1361,8 @@ int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 		return err;
 
 	err = ubus_register_event_handler(&bbfdm_ctx->ubus_ctx, &config_change_handler, "bbf.config.change");
-	if (err != 0)
-		return err;
 
-	if (dm_is_micro_service() == true) {
-		// Register the micro-service
-		register_service(&bbfdm_ctx->ubus_ctx);
-
-		// If the micro-service is not registered, listen for "ubus.object.add" event
-		// and register the micro-service using event handler for it
-		err = ubus_register_event_handler(&bbfdm_ctx->ubus_ctx, &add_event, "ubus.object.add");
-		if (err != 0)
-			return err;
-	}
-
-	return 0;
+	return err;
 }
 
 int bbfdm_ubus_regiter_free(struct bbfdm_context *bbfdm_ctx)
@@ -1427,6 +1378,7 @@ int bbfdm_ubus_regiter_free(struct bbfdm_context *bbfdm_ctx)
 void bbfdm_ubus_set_service_name(struct bbfdm_context *bbfdm_ctx, const char *srv_name)
 {
 	strncpyt(bbfdm_ctx->config.service_name, srv_name, sizeof(bbfdm_ctx->config.service_name));
+	snprintf(bbfdm_ctx->config.out_name, sizeof(bbfdm_ctx->config.out_name), "%s.%s", BBFDM_DEFAULT_UBUS_OBJ, srv_name);
 	dm_set_micro_service();
 }
 

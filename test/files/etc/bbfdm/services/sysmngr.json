@@ -1,0 +1,16 @@
+{
+  "daemon": {
+    "enable": "1",
+    "service_name": "sysmngr",
+    "unified_daemon": true,
+    "services": [
+      {
+        "parent_dm": "Device.",
+        "object": "DeviceInfo"
+      }
+    ],
+    "config": {
+      "loglevel": "3"
+    }
+  }
+}

@@ -27,7 +27,7 @@ static void usage(char *prog)
 int main(int argc, char **argv)
 {
 	struct bbfdm_context bbfdm_ctx = {0};
-	char proc_name[32] = {0};
+	char proc_name[64] = {0};
 	int log_level = 3; // Default is LOG_ERR
 	int err = 0, ch;
 
