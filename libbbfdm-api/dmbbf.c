@@ -1143,6 +1143,16 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	char *ubus_name = node->obj->checkdep;
 	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
 	struct blob_buf blob = {0};
+	int timeout = 5000;
+
+	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
+		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+		return 0;
+	}
+
+	if (node->obj->bbfdm_type == BBFDM_CWMP) {
+		timeout = 10000;
+	}
 
 	memset(&blob, 0, sizeof(struct blob_buf));
 	blob_buf_init(&blob, 0);
@@ -1150,7 +1160,7 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	blobmsg_add_string(&blob, "path", in_path);
 	prepare_optional_table(dmctx, &blob);
 
-	int res = ubus_call_blob_msg(ubus_name, "get", &blob, 5000, __get_ubus_value, dmctx);
+	int res = ubus_call_blob_msg(ubus_name, "get", &blob, timeout, __get_ubus_value, dmctx);
 
 	blob_buf_free(&blob);
 
@@ -1204,6 +1214,11 @@ static int get_ubus_supported_dm(struct dmctx *dmctx, struct dmnode *node)
 	char *ubus_name = node->obj->checkdep;
 	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
 	struct blob_buf blob = {0};
+
+	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
+		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+		return 0;
+	}
 
 	memset(&blob, 0, sizeof(struct blob_buf));
 	blob_buf_init(&blob, 0);
@@ -1267,6 +1282,11 @@ static int get_ubus_instances(struct dmctx *dmctx, struct dmnode *node)
 	char *ubus_name = node->obj->checkdep;
 	struct blob_buf blob = {0};
 
+	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
+		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+		return 0;
+	}
+
 	memset(&blob, 0, sizeof(struct blob_buf));
 	blob_buf_init(&blob, 0);
 
@@ -1291,6 +1311,11 @@ static int add_ubus_object(struct dmctx *dmctx, struct dmnode *node)
 {
 	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
+
+	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
+		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+		return 0;
+	}
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
@@ -1336,6 +1361,11 @@ static int del_ubus_object(struct dmctx *dmctx, struct dmnode *node)
 {
 	json_object *res = NULL, *res_obj = NULL;
 	char *ubus_name = node->obj->checkdep;
+
+	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
+		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+		return 0;
+	}
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
@@ -1409,6 +1439,11 @@ static int set_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	char *ubus_name = node->obj->checkdep;
 	char param_value[2048] = {0};
 	char *ref_value = dmstrdup("");
+
+	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
+		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+		return 0;
+	}
 
 	json_object *in_args = json_object_new_object();
 	json_object_object_add(in_args, "proto", json_object_new_string((dmctx->dm_type == BBFDM_BOTH) ? "both" : (dmctx->dm_type == BBFDM_CWMP) ? "cwmp" : "usp"));
@@ -1529,6 +1564,16 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 	char *ubus_name = node->obj->checkdep;
 	dmctx->in_value = node->current_object;
 	struct blob_buf blob = {0};
+	int timeout = 5000;
+
+	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
+		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+		return 0;
+	}
+
+	if (node->obj->bbfdm_type == BBFDM_CWMP) {
+		timeout = 10000;
+	}
 
 	memset(&blob, 0, sizeof(struct blob_buf));
 	blob_buf_init(&blob, 0);
@@ -1537,7 +1582,7 @@ static int get_ubus_name(struct dmctx *dmctx, struct dmnode *node)
 	blobmsg_add_u8(&blob, "first_level", dmctx->nextlevel);
 	prepare_optional_table(dmctx, &blob);
 
-	int res = ubus_call_blob_msg(ubus_name, "schema", &blob, 5000, __get_ubus_name, dmctx);
+	int res = ubus_call_blob_msg(ubus_name, "schema", &blob, timeout, __get_ubus_name, dmctx);
 
 	blob_buf_free(&blob);
 
@@ -1610,6 +1655,11 @@ static int operate_ubus(struct dmctx *dmctx, struct dmnode *node)
 {
 	char *ubus_name = node->obj->checkdep;
 	struct blob_buf blob = {0};
+
+	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
+		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+		return 0;
+	}
 
 	memset(&blob, 0, sizeof(struct blob_buf));
 	blob_buf_init(&blob, 0);

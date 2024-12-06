@@ -12,14 +12,6 @@
 #include "common.h"
 #include "get_helper.h"
 
-bool is_str_eq(const char *s1, const char *s2)
-{
-	if (strcmp(s1, s2) == 0)
-		return true;
-
-	return false;
-}
-
 bool get_boolean_string(char *value)
 {
 	if (!value)
@@ -124,22 +116,6 @@ int get_dm_type(char *dm_type)
 		return DMT_STRING;
 
 	return DMT_STRING;
-}
-
-int get_proto_type(const char *proto)
-{
-	int type = BBFDM_BOTH;
-
-	if (proto) {
-		if (is_str_eq("cwmp", proto))
-			type = BBFDM_CWMP;
-		else if (is_str_eq("usp", proto))
-			type = BBFDM_USP;
-		else
-			type = BBFDM_BOTH;
-	}
-
-	return type;
 }
 
 // glibc doesn't guarantee a 0 termianted string on strncpy

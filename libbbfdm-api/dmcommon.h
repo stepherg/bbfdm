@@ -236,5 +236,7 @@ void diagnostics_reset_state(const char *sec_name);
 char *diagnostics_get_interface_name(struct dmctx *ctx, const char *value);
 long download_file(char *file_path, const char *url, const char *username, const char *password);
 long upload_file(const char *file_path, const char *url, const char *username, const char *password);
+int get_proto_type(const char *proto);
+bool is_str_eq(const char *s1, const char *s2);
 
 #endif

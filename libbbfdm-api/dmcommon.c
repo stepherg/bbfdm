@@ -2189,3 +2189,28 @@ long upload_file(const char *file_path, const char *url, const char *username, c
 
 	return res_code;
 }
+
+int get_proto_type(const char *proto)
+{
+	int type = BBFDM_BOTH;
+
+	if (proto) {
+		if (is_str_eq("cwmp", proto))
+			type = BBFDM_CWMP;
+		else if (is_str_eq("usp", proto))
+			type = BBFDM_USP;
+		else
+			type = BBFDM_BOTH;
+	}
+
+	return type;
+}
+
+bool is_str_eq(const char *s1, const char *s2)
+{
+	if (strcmp(s1, s2) == 0)
+		return true;
+
+	return false;
+}
+

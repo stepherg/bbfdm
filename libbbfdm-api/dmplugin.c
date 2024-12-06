@@ -19,13 +19,14 @@ extern struct list_head global_memhead;
 struct service
 {
 	bool is_unified_daemon;
+	enum bbfdm_type_enum proto;
 	struct list_head list;
 	char *name;
 	char *parent_dm;
 	char *object;
 };
 
-static bool add_service_to_main_tree(DMOBJ *main_dm, const char *srv_name, const char *srv_parent_dm, const char *srv_obj)
+static bool add_service_to_main_tree(DMOBJ *main_dm, const char *srv_name, const char *srv_parent_dm, const char *srv_obj, uint8_t proto)
 {
 	DMOBJ *dm_entryobj = find_entry_obj(main_dm, srv_parent_dm);
 	if (!dm_entryobj)
@@ -49,12 +50,14 @@ static bool add_service_to_main_tree(DMOBJ *main_dm, const char *srv_name, const
 		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] = dm_dynamic_calloc(&global_memhead, 2, sizeof(struct dm_obj_s));
 		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).obj = dm_dynamic_strdup(&global_memhead, srv_obj);
 		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).checkdep = dm_dynamic_strdup(&global_memhead, srv_name);
+		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).bbfdm_type = proto;
 	} else {
 		int idx = get_entry_obj_idx(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0]);
 		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] = dm_dynamic_realloc(&global_memhead, dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
 		memset(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
 		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).obj = dm_dynamic_strdup(&global_memhead, srv_obj);
 		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).checkdep = dm_dynamic_strdup(&global_memhead, srv_name);
+		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).bbfdm_type = proto;
 	}
 
 	return true;
@@ -74,7 +77,7 @@ static bool is_service_registered(struct list_head *srvlist, const char *srv_nam
 	return false;
 }
 
-static void add_service_to_list(struct list_head *srvlist, const char *srv_name, const char *srv_parent_dm, const char *srv_object, bool is_unified)
+static void add_service_to_list(struct list_head *srvlist, const char *srv_name, const char *srv_parent_dm, const char *srv_object, uint8_t proto, bool is_unified)
 {
 	struct service *srv = NULL;
 
@@ -85,6 +88,7 @@ static void add_service_to_list(struct list_head *srvlist, const char *srv_name,
 	srv->parent_dm = strdup(srv_parent_dm);
 	srv->object = strdup(srv_object);
 	srv->is_unified_daemon = is_unified;
+	srv->proto = proto;
 }
 
 void free_services_from_list(struct list_head *clist)
@@ -100,7 +104,7 @@ void free_services_from_list(struct list_head *clist)
 	}
 }
 
-bool load_service(DMOBJ *main_dm, struct list_head *srv_list, const char *srv_name, const char *srv_parent_dm, const char *srv_obj, bool is_unified)
+bool load_service(DMOBJ *main_dm, struct list_head *srv_list, const char *srv_name, const char *srv_parent_dm, const char *srv_obj, bool is_unified, uint8_t proto)
 {
 	if (!main_dm || !srv_list || !srv_name || !srv_parent_dm || !srv_obj) {
 		BBF_ERR("Invalid arguments: main_dm, srv_list, srv_name, srv_parent_dm, and srv_obj must not be NULL.");
@@ -113,13 +117,13 @@ bool load_service(DMOBJ *main_dm, struct list_head *srv_list, const char *srv_na
 		return false;
 	}
 
-	if (!add_service_to_main_tree(main_dm, srv_name, srv_parent_dm, srv_obj)) {
+	if (!add_service_to_main_tree(main_dm, srv_name, srv_parent_dm, srv_obj, proto)) {
 		BBF_ERR("Failed to add service '%s' to main tree with parent DM '%s' and object '%s'.",
 				srv_name, srv_parent_dm, srv_obj);
 		return false;
 	}
 
-	add_service_to_list(srv_list, srv_name, srv_parent_dm, srv_obj, is_unified);
+	add_service_to_list(srv_list, srv_name, srv_parent_dm, srv_obj, proto, is_unified);
 	return true;
 }
 
@@ -133,6 +137,13 @@ void get_list_of_registered_service(struct list_head *srvlist, struct blob_buf *
 		blobmsg_add_string(bb, "name", srv->name);
 		blobmsg_add_string(bb, "parent_dm", srv->parent_dm);
 		blobmsg_add_string(bb, "object", srv->object);
+		if (srv->proto == BBFDM_USP) {
+			blobmsg_add_string(bb, "proto", "usp");
+		} else if (srv->proto == BBFDM_CWMP) {
+			blobmsg_add_string(bb, "proto", "cwmp");
+		} else {
+			blobmsg_add_string(bb, "proto", "both");
+		}
 		blobmsg_add_u8(bb, "unified_daemon", srv->is_unified_daemon);
 		blobmsg_close_table(bb, table);
 	}

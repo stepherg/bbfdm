@@ -35,7 +35,6 @@
 
 LIST_HEAD(head_registered_service);
 
-static void run_schema_updater(struct bbfdm_context *u);
 static void periodic_instance_updater(struct uloop_timeout *t);
 static void bbfdm_register_instance_refresh_timer(struct ubus_context *ctx, int start_in);
 static void bbfdm_cancel_instance_refresh_timer(struct ubus_context *ctx);
@@ -76,6 +75,7 @@ static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 	if (!data || !msg)
 		return;
 
+	data->bbf_ctx.dm_type = BBFDM_BOTH;
 	blobmsg_for_each_attr(attr, msg, rem) {
 
 		if (is_str_eq(blobmsg_name(attr), "proto")) {
@@ -194,47 +194,6 @@ err_out:
 		munmap(result, DEF_IPC_DATA_LEN);
 
 	return UBUS_STATUS_UNKNOWN_ERROR;
-}
-
-static bool is_object_schema_update_available(struct bbfdm_context *u)
-{
-	bool ret = false;
-	LIST_HEAD(paths_list);
-	bbfdm_data_t data = {
-			.ctx = 0,
-			.req = 0,
-			.is_raw = true,
-			.plist = &paths_list,
-			.bbf_ctx.nextlevel = false,
-			.bbf_ctx.iscommand = true,
-			.bbf_ctx.isevent = true,
-			.bbf_ctx.isinfo = true,
-			.bbf_ctx.dm_type = BBFDM_USP
-	};
-
-	int old_schema_len = u->schema_len;
-
-	// If new parameter gets added it would be a minimum tuple of three params
-	int min_len = 100;
-
-	add_path_list(ROOT_NODE, &paths_list);
-	int new_schema_len = bbfdm_get_supported_dm(&data);
-	if (new_schema_len == 0) {
-		BBF_WARNING("Failed to get schema");
-		free_path_list(&paths_list);
-		return ret;
-	}
-
-	if (new_schema_len - old_schema_len > min_len) {
-		BBF_DEBUG("DM Schema update available old:new[%d:%d]", old_schema_len, new_schema_len);
-		if (old_schema_len != 0) {
-			ret = true;
-		}
-	}
-
-	free_path_list(&paths_list);
-
-	return ret;
 }
 
 static const struct blobmsg_policy dm_get_policy[] = {
@@ -710,46 +669,20 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	return 0;
 }
 
-static void service_list(struct blob_buf *bb)
-{
-	void *array;
-
-	array = blobmsg_open_array(bb, "supported_cmd");
-	blobmsg_add_string(bb, NULL, "register");
-	blobmsg_add_string(bb, NULL, "list");
-	blobmsg_close_array(bb, array);
-
-	array = blobmsg_open_array(bb, "registered_service");
-	get_list_of_registered_service(&head_registered_service, bb);
-	blobmsg_close_array(bb, array);
-}
-
 static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *obj,
 			    struct ubus_request_data *req __attribute__((unused)), const char *method,
 			    struct blob_attr *msg)
 {
 	struct blob_buf bb;
-	struct bbfdm_context *u;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		BBF_ERR("Failed to get the bbfdm context");
-		return 0;
-	}
+	void *array = NULL;
 
 	memset(&bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&bb, 0);
 
-	BBF_INFO("ubus method|%s|, name|%s|", method, obj->name);
+	array = blobmsg_open_array(&bb, "registered_service");
+	get_list_of_registered_service(&head_registered_service, &bb);
+	blobmsg_close_array(&bb, array);
 
-	if (dm_is_micro_service() == true) { // It's a micro-service instance
-		blobmsg_add_string(&bb, "error", "Its not allowed to register a micro-service for another micro-service!!");
-		goto end;
-	}
-
-	service_list(&bb);
-
-end:
 	ubus_send_reply(ctx, req, bb.head);
 	blob_buf_free(&bb);
 
@@ -816,24 +749,6 @@ static struct ubus_object bbf_object = {
 	.methods = bbf_methods,
 	.n_methods = ARRAY_SIZE(bbf_methods)
 };
-
-static void run_schema_updater(struct bbfdm_context *u)
-{
-	bool ret = false;
-	char method_name[256] = {0};
-
-	ret = is_object_schema_update_available(u);
-	if (ret && (dm_is_micro_service() == false)) {
-		struct blob_buf bb;
-
-		memset(&bb, 0, sizeof(struct blob_buf));
-		BBF_INFO("Schema update available");
-		snprintf(method_name, sizeof(method_name), "%s.%s", u->config.out_name, BBF_UPDATE_SCHEMA_EVENT);
-		blob_buf_init(&bb, 0);
-		ubus_send_event(&u->ubus_ctx, method_name, bb.head);
-		blob_buf_free(&bb);
-	}
-}
 
 static void broadcast_add_del_event(struct ubus_context *ctx, const char *method, struct list_head *inst, bool is_add)
 {
@@ -1135,8 +1050,9 @@ static int daemon_load_services(const char *name, const char *json_path)
 				continue;
 			}
 
-			BBF_INFO("Registering [%s :: %s :: %s :: %d]", service_name, parent, obj, is_unified);
-			load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, service_name, parent, obj, is_unified);
+			tmp = dmjson_get_value(jserv, 1, "proto");
+			BBF_INFO("Registering [%s :: %s :: %s :: %d :: %s]", service_name, parent, obj, is_unified, tmp);
+			load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, service_name, parent, obj, is_unified, get_proto_type(tmp));
 		}
 	}
 exit:
@@ -1353,9 +1269,7 @@ int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 	if (err != UBUS_STATUS_OK)
 		return -1;
 
-	run_schema_updater(bbfdm_ctx);
 	bbfdm_register_instance_refresh_timer(&bbfdm_ctx->ubus_ctx, 1);
-
 	err = register_events_to_ubus(&bbfdm_ctx->ubus_ctx, &bbfdm_ctx->event_handlers);
 	if (err != 0)
 		return err;

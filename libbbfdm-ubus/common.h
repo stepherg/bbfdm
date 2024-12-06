@@ -24,7 +24,6 @@
 #define BBF_ADD_EVENT "AddObj"
 #define BBF_DEL_EVENT "DelObj"
 #define BBF_EVENT_NAME "event"
-#define BBF_UPDATE_SCHEMA_EVENT "UpdateSchema"
 
 #define MAX_DM_KEY_LEN 256
 #define MAX_DM_PATH 1024
@@ -44,7 +43,6 @@
 extern DMOBJ *DEAMON_DM_ROOT_OBJ;
 extern DM_MAP_OBJ *INTERNAL_ROOT_TREE;
 
-bool is_str_eq(const char *s1, const char *s2);
 bool is_node_instance(char *path);
 int count_delim(const char *path);
 
@@ -52,7 +50,6 @@ bool get_boolean_string(char *value);
 bool validate_msglen(bbfdm_data_t *data);
 
 int get_dm_type(char *dm_type);
-int get_proto_type(const char *proto);
 
 int get_resolved_paths(struct dmctx *bbf_ctx, char *qpath, struct list_head *resolved_paths);
 void strncpyt(char *dst, const char *src, size_t n);

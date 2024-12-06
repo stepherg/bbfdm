@@ -376,10 +376,10 @@ enum dmt_type_enum {
 };
 
 enum bbfdm_type_enum {
-	BBFDM_BOTH,
-	BBFDM_CWMP,
-	BBFDM_USP,
-	BBFDM_NONE
+	BBFDM_NONE = 0,
+	BBFDM_CWMP = 1<<0,
+	BBFDM_USP = 1<<1,
+	BBFDM_BOTH = BBFDM_CWMP|BBFDM_USP,
 };
 
 enum {

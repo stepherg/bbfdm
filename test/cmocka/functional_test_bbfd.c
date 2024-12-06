@@ -22,6 +22,7 @@ static int setup(void **state)
 		return -1;
 
 	bbf_ctx_init(ctx, TR181_ROOT_TREE);
+	ctx->dm_type = BBFDM_BOTH;
 
 	*state = ctx;
 

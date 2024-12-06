@@ -369,6 +369,7 @@ static void test_api_bbfdm_valid_operate(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
+	ctx->dm_type = BBFDM_USP;
 	ctx->in_param = "Device.X_IOPSYS_EU_Reboot()";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
@@ -380,6 +381,7 @@ static void test_api_bbfdm_wrong_operate(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
+	ctx->dm_type = BBFDM_USP;
 	ctx->in_param = "Device.IP.Diagnostics.IPing()";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
