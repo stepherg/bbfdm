@@ -72,10 +72,14 @@ static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 	struct blob_attr *attr;
 	size_t rem;
 
-	if (!data || !msg)
+	if (!data)
 		return;
 
 	data->bbf_ctx.dm_type = BBFDM_BOTH;
+
+	if (!msg)
+		return;
+
 	blobmsg_for_each_attr(attr, msg, rem) {
 
 		if (is_str_eq(blobmsg_name(attr), "proto")) {
