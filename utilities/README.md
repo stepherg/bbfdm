@@ -78,3 +78,71 @@ Currently have two variants of bbf.config, which can be enabled with below compi
 
 1. CONFIG_BBF_CONFIGMNGR_SCRIPT_BACKEND => Simple rpcd script based backend
 2. CONFIG_BBF_CONFIGMNGR_C_BACKEND => C based application backend with PID monitoring (default)
+
+### bbf.config Supported methods
+
+`bbf.config` provides several methods for managing and monitoring configuration changes in services. These methods can be accessed using the ubus command.
+
+```bash
+$ ubus -v list bbf.config
+'bbf.config' @da2cc0d9
+        "commit":{"services":"Array","proto":"String","reload":"Boolean"}
+        "revert":{"services":"Array","proto":"String","reload":"Boolean"}
+        "changes":{"services":"Array","proto":"String","reload":"Boolean"}
+```
+#### bbf.config commit method: 
+
+This method commits configuration changes to the specified services based on the given `proto` option (protocol). It reloads services according to `reload` option but handles critical services differently.
+
+The Critical services are defined in `/etc/bbfdm/critical_services.json` file.
+- If a service is critical, the process waits until the service's timeout expires or the service's PID changes and then it does reload the service.
+- Non-critical services are reloaded immediately.
+
+Critical Services File
+
+The following file defines critical services for each protocol:
+
+```bash
+cat /etc/bbfdm/critical_services.json 
+{
+        "usp": [
+                        "firewall",
+                        "network",
+                        "dhcp",
+                        "wireless",
+                        "time"
+        ],
+        "cwmp": [
+                        "firewall",
+                        "network",
+                        "dhcp",
+                        "stunc",
+                        "xmpp",
+                        "wireless",
+                        "time"
+        ]
+}
+```
+
+#### bbf.config revert method: 
+this method commits the changes in the required services based on proto option.
+
+#### bbf.config changes method: 
+
+this method provides the list of certical services based on protocol (proto option) and provide the available config changes based on protocol.  
+```bash
+ubus call bbf.config changes '{"proto":"usp"}'
+{
+        "configs": [
+                "users",
+                "wireless"
+        ],
+        "critical_services": [
+                "firewall",
+                "network",
+                "dhcp",
+                "wireless",
+                "time"
+        ]
+}
+```

@@ -109,7 +109,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf add {"path":"anim consequat","obj_path":{}}
+ubus call bbf add {"path":"eu commodo Ut ut ","obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -119,7 +119,7 @@ ubus call bbf add {"path":"anim consequat","obj_path":{}}
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": ["<SID>", "bbf", "add", { "path": "anim consequat", "obj_path": {} }]
+  "params": ["<SID>", "bbf", "add", { "path": "eu commodo Ut ut ", "obj_path": {} }]
 }
 ```
 
@@ -183,7 +183,16 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "dolor in sunt eiusmod", "data": "sunt pariatur", "fault": 8972, "fault_msg": "ea culpa" }] }
+{
+  "results": [
+    {
+      "path": "eused exercitation",
+      "data": "pariatur nostrud in aute Excepteur",
+      "fault": 7415,
+      "fault_msg": "dolor magna"
+    }
+  ]
+}
 ```
 
 ## del
@@ -284,7 +293,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf del {"path":"eu venia","paths":["adipisicing ad dolor do"]}
+ubus call bbf del {"path":"fugiat adipisicing","paths":["do laborum occaecat et"]}
 ```
 
 ### JSONRPC Example
@@ -294,7 +303,7 @@ ubus call bbf del {"path":"eu venia","paths":["adipisicing ad dolor do"]}
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": ["<SID>", "bbf", "del", { "path": "eu venia", "paths": ["adipisicing ad dolor do"] }]
+  "params": ["<SID>", "bbf", "del", { "path": "fugiat adipisicing", "paths": ["do laborum occaecat et"] }]
 }
 ```
 
@@ -358,16 +367,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{
-  "results": [
-    {
-      "path": "incididunt laborum Duis",
-      "data": "nostrud aliquip velit",
-      "fault": 7729,
-      "fault_msg": "culpa nisi adipisicing dolore eiusmod"
-    }
-  ]
-}
+{ "results": [{ "path": "occaecat sit elit i", "data": "non", "fault": 7119, "fault_msg": "elit sunt" }] }
 ```
 
 ## get
@@ -546,7 +546,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf get {"path":"veniam sunt","paths":["nisi ad et veniam"],"maxdepth":-3902100,"optional":{"format":"raw","proto":"both"}}
+ubus call bbf get {"path":"occaecat aliqua mollit","paths":["occaecat Duis Lorem velit aliq"],"maxdepth":-48387650,"optional":{"format":"raw","proto":"usp"}}
 ```
 
 ### JSONRPC Example
@@ -561,10 +561,10 @@ ubus call bbf get {"path":"veniam sunt","paths":["nisi ad et veniam"],"maxdepth"
     "bbf",
     "get",
     {
-      "path": "veniam sunt",
-      "paths": ["nisi ad et veniam"],
-      "maxdepth": -3902100,
-      "optional": { "format": "raw", "proto": "both" }
+      "path": "occaecat aliqua mollit",
+      "paths": ["occaecat Duis Lorem velit aliq"],
+      "maxdepth": -48387650,
+      "optional": { "format": "raw", "proto": "usp" }
     }
   ]
 }
@@ -633,11 +633,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{
-  "results": [
-    { "path": "anim consectetur", "data": "dolore d", "type": "xsd:command", "fault": 8024, "fault_msg": "quis minim" }
-  ]
-}
+{ "results": [{ "path": "dolore dolor", "data": "in", "type": "xsd:int", "fault": 7367, "fault_msg": "laborum nis" }] }
 ```
 
 ## instances
@@ -767,7 +763,7 @@ Device.WiFi.
 ### Ubus CLI Example
 
 ```
-ubus call bbf instances {"path":"veniam mollit occaecat cillum","first_level":true,"optional":{"proto":"cwmp"}}
+ubus call bbf instances {"path":"commodo aliqu","first_level":true,"optional":{"proto":"cwmp"}}
 ```
 
 ### JSONRPC Example
@@ -781,7 +777,7 @@ ubus call bbf instances {"path":"veniam mollit occaecat cillum","first_level":tr
     "<SID>",
     "bbf",
     "instances",
-    { "path": "veniam mollit occaecat cillum", "first_level": true, "optional": { "proto": "cwmp" } }
+    { "path": "commodo aliqu", "first_level": true, "optional": { "proto": "cwmp" } }
   ]
 }
 ```
@@ -843,7 +839,7 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "labore occaecat a", "fault": 9010, "fault_msg": "Lorem" }] }
+{ "results": [{ "path": "ametest minim ut sit ex", "fault": 7415, "fault_msg": "nostrud" }] }
 ```
 
 ## notify_event
@@ -904,7 +900,7 @@ Array type: `array`
 ### Ubus CLI Example
 
 ```
-ubus call bbf notify_event {"name":"eu laboris anim","input":[]}
+ubus call bbf notify_event {"name":"Duis dolor officia anim Ut","input":[]}
 ```
 
 ### JSONRPC Example
@@ -914,7 +910,7 @@ ubus call bbf notify_event {"name":"eu laboris anim","input":[]}
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": ["<SID>", "bbf", "notify_event", { "name": "eu laboris anim", "input": [] }]
+  "params": ["<SID>", "bbf", "notify_event", { "name": "Duis dolor officia anim Ut", "input": [] }]
 }
 ```
 
@@ -1258,7 +1254,7 @@ The value of this property **must** be equal to one of the [known values below](
 ### Ubus CLI Example
 
 ```
-ubus call bbf operate {"command":"velit magna laboris aliquip culpa","command_key":"voluptate ad cupidatat","input":{},"optional":{"format":"pretty","proto":"usp"}}
+ubus call bbf operate {"command":"dolore anim dolor","command_key":"in eiusmod in culpa non","input":{},"optional":{"format":"pretty","proto":"both"}}
 ```
 
 ### JSONRPC Example
@@ -1273,10 +1269,10 @@ ubus call bbf operate {"command":"velit magna laboris aliquip culpa","command_ke
     "bbf",
     "operate",
     {
-      "command": "velit magna laboris aliquip culpa",
-      "command_key": "voluptate ad cupidatat",
+      "command": "dolore anim dolor",
+      "command_key": "in eiusmod in culpa non",
       "input": {},
-      "optional": { "format": "pretty", "proto": "usp" }
+      "optional": { "format": "pretty", "proto": "both" }
     }
   ]
 }
@@ -1364,11 +1360,11 @@ All items must be of the type: Unknown type ``.
 {
   "results": [
     {
-      "path": "commodo dolor laboris",
+      "path": "eteu veniam fugiat al",
       "data": "1",
-      "fault": 7192,
-      "fault_msg": "non Lorem",
-      "output": [{ "path": "fugiat in qui", "data": "0", "type": "xsd:string" }]
+      "fault": 8377,
+      "fault_msg": "cillum magna",
+      "output": [{ "path": "irurein", "data": "0", "type": "xsd:boolean" }]
     }
   ]
 }
@@ -1570,7 +1566,7 @@ All items must be of the type: Unknown type ``.
 ### Ubus CLI Example
 
 ```
-ubus call bbf schema {"path":"qui dolor nisi","paths":["veniam in dolor deserunt"],"first_level":true,"commands":true,"events":false,"params":false,"optional":{"proto":"cwmp"}}
+ubus call bbf schema {"path":"ipsum aliqua","paths":["enim quis laborum"],"first_level":false,"commands":true,"events":false,"params":false,"optional":{"proto":"usp"}}
 ```
 
 ### JSONRPC Example
@@ -1585,13 +1581,13 @@ ubus call bbf schema {"path":"qui dolor nisi","paths":["veniam in dolor deserunt
     "bbf",
     "schema",
     {
-      "path": "qui dolor nisi",
-      "paths": ["veniam in dolor deserunt"],
-      "first_level": true,
+      "path": "ipsum aliqua",
+      "paths": ["enim quis laborum"],
+      "first_level": false,
       "commands": true,
       "events": false,
       "params": false,
-      "optional": { "proto": "cwmp" }
+      "optional": { "proto": "usp" }
     }
   ]
 }
@@ -1701,13 +1697,13 @@ All items must be of the type: Unknown type ``.
 {
   "results": [
     {
-      "path": "pariatur ",
-      "data": "1",
-      "type": "xsd:boolean",
-      "fault": 7493,
-      "fault_msg": "mollit ",
-      "input": [{ "path": "aliquip", "data": "1", "type": "xsd:int" }],
-      "output": [{ "path": "elit est dolor do", "data": "1", "type": "xsd:int" }]
+      "path": "et sunt id",
+      "data": "0",
+      "type": "xsd:command",
+      "fault": 8958,
+      "fault_msg": "vel",
+      "input": [{ "path": "nisi elit amet", "data": "0", "type": "xsd:object" }],
+      "output": [{ "path": "anim pariatur ipsum et", "data": "1", "type": "xsd:unsignedLong" }]
     }
   ]
 }
@@ -1715,7 +1711,7 @@ All items must be of the type: Unknown type ``.
 
 ## service
 
-### Register a micro-service in the main service
+### show the list of micro-service registred in the core Data Model
 
 `service`
 
@@ -1727,105 +1723,23 @@ All items must be of the type: Unknown type ``.
 
 | Property | Type   | Required     |
 | -------- | ------ | ------------ |
-| `input`  | object | **Required** |
+| `intput` |        | Optional     |
 | `output` | object | **Required** |
 
-#### input
+#### intput
 
-`input`
-
-- is **required**
-- type: `object`
-
-##### input Type
-
-`object` with following properties:
-
-| Property    | Type   | Required     |
-| ----------- | ------ | ------------ |
-| `cmd`       | string | **Required** |
-| `name`      | string | Optional     |
-| `object`    | string | Optional     |
-| `parent_dm` | string | Optional     |
-
-#### cmd
-
-`cmd`
-
-- is **required**
-- type: reference
-
-##### cmd Type
-
-`string`
-
-The value of this property **must** be equal to one of the [known values below](#service-known-values).
-
-##### cmd Known Values
-
-| Value    |
-| -------- |
-| register |
-| list     |
-
-#### name
-
-Name of the micro-service ubus object
-
-`name`
+`intput`
 
 - is optional
-- type: `string`
+- type: complex
 
-##### name Type
+##### intput Type
 
-`string`
-
-#### object
-
-Name of the micro-service object
-
-`object`
-
-- is optional
-- type: `string`
-
-##### object Type
-
-`string`
-
-#### parent_dm
-
-Object path where the micro-service object will be added
-
-`parent_dm`
-
-- is optional
-- type: `string`
-
-##### parent_dm Type
-
-`string`
-
-### Ubus CLI Example
-
-```
-ubus call bbf service {"cmd":"list","name":"ex fugiat","parent_dm":"esse ipsum dolore Ut et","object":"sed amet Duis"}
-```
-
-### JSONRPC Example
+Unknown type ``.
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 0,
-  "method": "call",
-  "params": [
-    "<SID>",
-    "bbf",
-    "service",
-    { "cmd": "list", "name": "ex fugiat", "parent_dm": "esse ipsum dolore Ut et", "object": "sed amet Duis" }
-  ]
+  "simpletype": "complex"
 }
 ```
 
@@ -1840,37 +1754,90 @@ ubus call bbf service {"cmd":"list","name":"ex fugiat","parent_dm":"esse ipsum d
 
 `object` with following properties:
 
-| Property | Type    | Required     |
-| -------- | ------- | ------------ |
-| `error`  | string  | Optional     |
-| `status` | boolean | **Required** |
+| Property         | Type    | Required | Default  |
+| ---------------- | ------- | -------- | -------- |
+| `name`           | string  | Optional |          |
+| `object`         | string  | Optional |          |
+| `parent_dm`      | string  | Optional |          |
+| `proto`          | string  | Optional | `"both"` |
+| `unified_daemon` | boolean | Optional |          |
 
-#### error
+#### name
 
-`error`
+`name`
 
 - is optional
 - type: `string`
 
-##### error Type
+##### name Type
 
 `string`
 
-#### status
+#### object
 
-`status`
+`object`
 
-- is **required**
+- is optional
+- type: `string`
+
+##### object Type
+
+`string`
+
+#### parent_dm
+
+`parent_dm`
+
+- is optional
+- type: `string`
+
+##### parent_dm Type
+
+`string`
+
+#### proto
+
+`proto`
+
+- is optional
+- type: reference
+- default: `"both"`
+
+##### proto Type
+
+`string`
+
+The value of this property **must** be equal to one of the [known values below](#service-known-values).
+
+##### proto Known Values
+
+| Value |
+| ----- |
+| usp   |
+| cwmp  |
+| both  |
+
+#### unified_daemon
+
+`unified_daemon`
+
+- is optional
 - type: `boolean`
 
-##### status Type
+##### unified_daemon Type
 
 `boolean`
 
 ### Output Example
 
 ```json
-{ "status": true, "error": "eu aliq" }
+{
+  "name": "incididunt cillum Excepteur ipsum laborum",
+  "parent_dm": "consectetur Excepteur eiusmod aliqua minim",
+  "object": "nostrud incididunt",
+  "proto": "usp",
+  "unified_daemon": false
+}
 ```
 
 ## set
@@ -2072,7 +2039,7 @@ value of the object element provided in path, path should contains valid writabl
 ### Ubus CLI Example
 
 ```
-ubus call bbf set {"path":"occaecat veniam consequa","value":"et Excepteur occaecat fugiat","datatype":"dateTime","obj_path":{}}
+ubus call bbf set {"path":"aliqua aliquip","value":"aliqua","datatype":"int","obj_path":{}}
 ```
 
 ### JSONRPC Example
@@ -2082,17 +2049,7 @@ ubus call bbf set {"path":"occaecat veniam consequa","value":"et Excepteur occae
   "jsonrpc": "2.0",
   "id": 0,
   "method": "call",
-  "params": [
-    "<SID>",
-    "bbf",
-    "set",
-    {
-      "path": "occaecat veniam consequa",
-      "value": "et Excepteur occaecat fugiat",
-      "datatype": "dateTime",
-      "obj_path": {}
-    }
-  ]
+  "params": ["<SID>", "bbf", "set", { "path": "aliqua aliquip", "value": "aliqua", "datatype": "int", "obj_path": {} }]
 }
 ```
 
@@ -2156,5 +2113,5 @@ All items must be of the type: Unknown type ``.
 ### Output Example
 
 ```json
-{ "results": [{ "path": "cillum Ut laborum proident", "data": "0", "fault": 7277, "fault_msg": "dolore ut aliquip" }] }
+{ "results": [{ "path": "in est veniam incididunt", "data": "1", "fault": 7720, "fault_msg": "anim" }] }
 ```

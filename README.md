@@ -33,15 +33,30 @@
 ## Important Topics
 
 * [BBFDMD Design](./docs/guide/bbfdmd.md)
-* [API Documentation](./docs/guide/libbbfdm-api.md)
+* [Micro-Service Design](./docs/guide/dm-service.md)
+* [LIBBBFDM-API Documentation](./docs/guide/libbbfdm-api.md)
+* [LIBBBFDM-UBUS Documentation](./docs/guide/libbbfdm-ubus.md)
+* [Utilities Documentation](./utilities/README.md)
 * [Tools](./tools/README.md)
-* [Utilities](./utilities/README.md)
 * [How to extend datamodel with C Code](./docs/guide/How_to_extend_datamodel_with_C_Code.md)
 * [How to extend datamodel with JSON](./docs/guide/How_to_extend_datamodel_with_JSON.md)
 
-### Datamodel related topics
+## Good To Know
 
-* [Design for firmware activation](./docs/guide/libbbfdm_DeviceInfo_FirmwareImage.md)
+- The current data model implementation follows the latest version of the data model, version `2.18``.
+
+- Instance alias handling has been moved to the icwmp repository since `bbfdm` repository only supports the common functionality provided by CWMP and USP protocols.
+
+- The current data model implementation does not support the delete method for all instances (e.g., Device.Users.User.) since CWMP and USP protocols do not provide support for this operation.
+
+- The data model implementation uses different directories to store temporary UCI configurations based on the protocol being used. The details are as follows:
+
+| Protocol | Save Config Directory    | Config Directory | Save Dmmap Directory   | Dmmap Directory  |
+| -------- | ------------------------   ---------------- | ---------------------- | ---------------- |
+| cwmp     | /tmp/bbfdm/.cwmp/config  | /etc/config      | /tmp/bbfdm/.cwmp/dmmap | /etc/bbfdm/dmmap |
+| usp      | /tmp/bbfdm/.usp/config   | /etc/config      | /tmp/bbfdm/.usp/dmmap  | /etc/bbfdm/dmmap |
+| both     | /tmp/bbfdm/.bbfdm/config | /etc/config      | /tmp/bbfdm/.cwmp/dmmap | /etc/bbfdm/dmmap |
+
 
 ### Compilation helper utilities
 

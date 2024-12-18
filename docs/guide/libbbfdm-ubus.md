@@ -8,7 +8,7 @@
 
  - `bbfdmd`: to expose the core data model
  - `dm-service`: to expose a sub-data model as micro-service, example: [Netmngr](https://dev.iopsys.eu/network/netmngr/-/blob/devel/src/net_plugin.c)
- - Higher-level applications: to expose custom data models as microservices within their daemon, example: [Timemngr](https://dev.iopsys.eu/bbf/timemngr/-/blob/devel/src/main.c)
+ - Higher-level applications(unified daemon): to expose custom data models as microservices within their daemon, example: [Timemngr](https://dev.iopsys.eu/bbf/timemngr/-/blob/devel/src/main.c)
 
 ## libbbfdm-ubus APIs
 
@@ -104,16 +104,16 @@ Following are the ubus methods exposed by `libbbfdm-ubus` when registering a new
 
 ```bash
 # ubus -v list bbfdm
-'bbfdm' @9e9928ef
-        "get":{"path":"String","paths":"Array","maxdepth":"Integer","optional":"Table"}
-        "schema":{"path":"String","paths":"Array","first_level":"Boolean","optional":"Table"}
-        "instances":{"path":"String","paths":"Array","first_level":"Boolean","optional":"Table"}
-        "set":{"path":"String","value":"String","obj_path":"Table","optional":"Table"}
-        "operate":{"command":"String","command_key":"String","input":"Table","optional":"Table"}
-        "add":{"path":"String","obj_path":"Table","optional":"Table"}
-        "del":{"path":"String","paths":"Array","optional":"Table"}
-        "service":{"cmd":"String","name":"String","parent_dm":"String","objects":"Array"}
-        "notify_event":{"name":"String","input":"Array"}
+bbfdm' @b93b62aa
+    "get":{"path":"String","paths":"Array","maxdepth":"Integer","optional":"Table"}
+    "schema":{"path":"String","paths":"Array","first_level":"Boolean","optional":"Table"}
+    "instances":{"path":"String","paths":"Array","first_level":"Boolean","optional":"Table"}
+    "set":{"path":"String","value":"String","datatype":"String","obj_path":"Table","optional":"Table"}
+    "operate":{"command":"String","command_key":"String","input":"Table","optional":"Table"}
+    "add":{"path":"String","obj_path":"Table","optional":"Table"}
+    "del":{"path":"String","paths":"Array","optional":"Table"}
+    "notify_event":{"name":"String","input":"Array"}
+    "service":{}
 ```
 
 ## libbbfdm-ubus example(s)

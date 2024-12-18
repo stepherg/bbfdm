@@ -24,7 +24,7 @@ if [ -z "${1}" ]; then
 	echo "Skip installation of micro-services ...."
 else
 	# Create directories for micro-service configuration and shared files
-	mkdir -p /etc/bbfdm/micro_services
+	mkdir -p /etc/bbfdm/services
 	mkdir -p /usr/share/bbfdm/micro_services
 
 	#install SYSMNGR Data Model as a micro-service

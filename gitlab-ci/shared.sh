@@ -131,7 +131,7 @@ function install_wifidmd_as_micro_service()
 	exec_cmd mkdir -p /usr/share/bbfdm/micro_services/wifidmd
 	exec_cmd cp -f /opt/dev/wifidmd/src/libdataelements.so /usr/share/bbfdm/micro_services/wifidmd
 
-	generate_input_schema_with_output_name "wifidmd" "WiFi" > /etc/bbfdm/micro_services/wifidmd.json
+	generate_input_schema_with_output_name "wifidmd" "WiFi" > /etc/bbfdm/services/wifidmd.json
 }
 
 function install_netmngr_as_micro_service()
@@ -145,7 +145,7 @@ function install_netmngr_as_micro_service()
 	exec_cmd cp -f /opt/dev/netmngr/src/libinterface_stack.so /usr/share/bbfdm/plugins
 	exec_cmd mkdir -p /usr/share/bbfdm/micro_services/netmngr
 
-	generate_input_schema_with_output_name "netmngr" "Network" > /etc/bbfdm/micro_services/netmngr.json
+	generate_input_schema_with_output_name "netmngr" "Network" > /etc/bbfdm/services/netmngr.json
 
 	exec_cmd git clone https://dev.iopsys.eu/bbf/tr143d.git /opt/dev/tr143d
 	exec_cmd make -C /opt/dev/tr143d/src/ clean && make -C /opt/dev/tr143d/src/

@@ -710,51 +710,38 @@
       }
     },
     "service": {
-      "title": "Register a micro-service in the main service",
+      "title": "show the list of micro-service registred in the core Data Model",
       "type": "object",
+      "required": [
+        "output"
+      ],
       "properties": {
-        "input": {
-          "type": "object",
-          "properties": {
-            "cmd": {
-              "$ref": "#/definitions/srv_type_t"
-            },
-            "name": {
-              "type": "string",
-              "description": "Name of the micro-service ubus object"
-            },
-            "parent_dm": {
-              "type": "string",
-              "description": "Object path where the micro-service object will be added"
-            },
-            "object": {
-              "type": "string",
-              "description": "Name of the micro-service object"
-            }
-          },
-          "required": [
-            "cmd"
-          ]
-        },
+        "intput": {},
         "output": {
           "type": "object",
           "properties": {
-            "status": {
-              "type": "boolean"
+            "name": {
+              "type": "string",
+              "Description": "Name of the micro-service ubus object"
             },
-            "error": {
-              "type": "string"
+            "parent_dm": {
+              "type": "string",
+              "Description": "Object path where the micro-service object will be added"
+            },
+            "object": {
+              "type": "string",
+              "Description": "Name of the micro-service object"
+            },
+            "proto": {
+              "$ref": "#/definitions/proto_t"
+            },
+            "unified_daemon": {
+              "type": "boolean",
+              "Description": "type of micro-service: unified daemon or dm-service"
             }
-          },
-          "required": [
-            "status"
-          ]
+          }
         }
-      },
-      "required": [
-        "input",
-        "output"
-      ]
+      }
     },
     "notify_event": {
       "title": "notify occurance of an event on ubus",

@@ -46,13 +46,20 @@
           "required": "no",
           "default": "0",
           "description": "Sets core flag in procd for datamodel microservices"
-        },
+        }
+      ]
+    },
+    {
+      "section": "reload_handler",
+      "description": "bbf_configd Settings",
+      "multi": false,
+      "options": [
         {
-          "name": "enable_respawn",
-          "type": "boolean",
+          "name": "log_level",
+          "type": "unsigned integer",
           "required": "no",
-          "default": "0",
-          "description": "Enable respawning of datamodel micro-service process"
+          "default": "2",
+          "description": "Log verbosity value as per standard syslog"
         }
       ]
     }

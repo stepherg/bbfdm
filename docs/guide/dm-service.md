@@ -6,7 +6,7 @@
 
 ## Concepts and Workflow
 
-`dm-service` daemon gets started by `/etc/init.d/bbfdm.services` service. This init script reads input from `bbfdm` UCI file, particularly from `micro_services` section. It then parses each micro-service configuration file located in `/etc/bbfdm/micro_services/`. Each micro-service’s configuration, written in JSON, is used to start the service using the APIs provided by `libbbfdm-ubus` and `libbbfdm-api` libraries.
+`dm-service` daemon gets started by `/etc/init.d/bbfdm.services` service. This init script reads input from `bbfdm` UCI file, particularly from `micro_services` section. It then parses each micro-service configuration file located in `/etc/bbfdm/services/`. Each micro-service’s configuration, written in JSON, is used to start the service using the APIs provided by `libbbfdm-ubus` and `libbbfdm-api` libraries.
 
 `dm-service` daemon use `libbbfdm-api` library to traverse the datamodel tree defined by DotSo or JSON plugin located in `/usr/share/bbfdm/micro_services/$micro-service-name{.so,.json}` and its plugins defined in `/usr/share/bbfdm/micro_services/$micro-service-name/`.
 
@@ -23,23 +23,72 @@ Datamodel micro-service is nothing but another `bbfdmd` instance running with sm
 12167 root      7800 S    {dm_ethmngr} /usr/sbin/dm-service -m ethmngr -l 3
 ```
 
-Each `dm-service` instance must be started with -m input to define its service name and run its module(sub-tree) datamodel. These micro-services exposed their own ubus objects
+Each `dm-service` instance must be started with -m input to define its service name and run its module(sub-tree) datamodel. These micro-services exposed their own ubus objects.
 
 ```bash
 # ubus list bbfdm.*
-bbfdm.Bridging
-bbfdm.BulkData
-bbfdm.DHCPv4_DHCPv6
-bbfdm.DNS
+bbfdm.bridgemngr
+bbfdm.bulkdata
+bbfdm.ddnsmngr
+bbfdm.dhcpmngr
+bbfdm.dnsmngr
+bbfdm.ethmngr
+bbfdm.firewallmngr
 ```
 
-When a datamodel started as micro-service, it looks/waits for `bbfdm` UBUS object(added by main `bbfdmd` process), once its available micro-service registers with the main `bbfdmd` process by calling the 'service' method
+## Setting Up a Datamodel as a Micro-Service
+
+Before starting a datamodel as a micro-service, ensure that the datamodel definition file is correctly placed and configured. The file should be located at:
+`/etc/bbfdm/services/${micro_service_name}.json`.
+
+This file must include the following required fields:
+
+- service_name: The name of the service.
+- unified_daemon: A boolean indicating whether the service uses a unified daemon.
+- services: An array containing sub-options:
+  - parent_dm: Specifies the parent data model.
+  - object: Defines the object type.
+  - proto: Indicates the protocol (e.g., cwmp, both).
+
+Once all required fields are defined, the datamodel can be registered and started when the `bbfdmd` is initialized
+
+
+## Verifying Micro-Service Registration
+
+After defining the datamodel, wait for the `bbfdmd` to start. Then, verify that the micro-service has been successfully registered to the core data model. You can do this by listing the registered services using the following command:
 
 ```bash
-# ubus -v list bbfdm
-'bbfdm' @e970413c
-        "service":{"cmd":"String","name":"String","parent_dm":"String","objects":"Array"}
+# ubus call bbfdm service
+{
+  "registered_service": [
+    {
+      "name": "bbfdm.bridgemngr",
+      "parent_dm": "Device.",
+      "object": "Bridging",
+      "proto": "both",
+      "unified_daemon": false
+    },
+    {
+      "name": "bbfdm.bulkdata",
+      "parent_dm": "Device.",
+      "object": "BulkData",
+      "proto": "cwmp",
+      "unified_daemon": true
+    },
+    {
+      "name": "bbfdm.ddnsmngr",
+      "parent_dm": "Device.",
+      "object": "DynamicDNS",
+      "proto": "both",
+      "unified_daemon": false
+    }
+}
 ```
+In this example:
+
+- Each entry in `registered_service` represents a micro-service.
+- Verify that your service is included in this list, and that its properties (`name`, `parent_dm`, `object`, `proto`, `unified_daemon`) are correctly configured.
+
 
 ## Input and output Schema(s)
 
@@ -48,7 +97,7 @@ When a datamodel started as micro-service, it looks/waits for `bbfdm` UBUS objec
 - [datamodel micro-service](../api/ubus/bbfdm_micro_service.md)
 - [datamodel micro-service schema](../api/ubus/bbfdm_micro_service.json)
 
-Apart from these, datamodel micro-services can also be configured by updating their input files directly at runtime, micro-service input files present in `/etc/bbfdm/micro_services/` in CPE.
+Apart from these, datamodel micro-services can also be configured by updating their input files directly at runtime, micro-service input files present in `/etc/bbfdm/services/` in CPE.
 
 A typical micro-service input file looks like below:
 
@@ -56,15 +105,21 @@ A typical micro-service input file looks like below:
 {
   "daemon": {
     "enable": "1",
-    "service_name": "netmngr",
+    "service_name": "bulkdata",
+    "unified_daemon": true,
+    "services": [
+      {
+        "parent_dm": "Device.",
+        "object": "BulkData",
+        "proto": "cwmp"
+      }
+    ],
     "config": {
       "loglevel": "3"
-    },
-    "output": {
-      "name": "Network"
     }
   }
 }
+
 ```
 
 ### Ubus methods
@@ -122,7 +177,17 @@ When not to use micro-service:
 ### How to Use micro-service
 
 Manually configuring and starting a micro-services requires multiple steps, but its made simple by using `bbfdm.mk` compile time helper utility.
-To launch a datamodel definition as a datamodel micro-service, user need to install the datamodel definition/plugin using
+
+First of all, To register a datamodel definition as a datamodel micro-service, user needs to register the datamodel definition/plugin using
+
+`BBFDM_REGISTER_SERVICES` API from `bbfdm.mk`
+
+```bash
+bulkdata/Makefile:      $(BBFDM_REGISTER_SERVICES) ./bbfdm_service.json $(1) $(PKG_NAME)
+ddnsmngr/Makefile:      $(BBFDM_REGISTER_SERVICES) ./bbfdm_service.json $(1) $(PKG_NAME)
+```
+
+Then to launch a datamodel definition as a datamodel micro-service, user needs to install the datamodel definition/plugin using
 
 `BBFDM_INSTALL_MS_DM` API from `bbfdm.mk`
 
@@ -134,7 +199,7 @@ ddnsmngr/Makefile:      $(BBFDM_INSTALL_MS_DM) $(PKG_BUILD_DIR)/src/libddnsmngr.
 
 Please check [bbfdm.mk](https://dev.iopsys.eu/feed/iopsys/-/blob/devel/bbfdm/bbfdm.mk) documentation for more details.
 
-In Devices, datamodel micro-services started and managed by `/etc/init.d/bbfdm.services` init script, which reads the global micro-service related configuration from `bbfdm` uci file, and reads module specific configuration for each module's input file present in `/etc/bbfdm/micro_services/` directory.
+In Devices, datamodel micro-services started and managed by `/etc/init.d/bbfdm.services` init script, which reads the global micro-service related configuration from `bbfdm` uci file, and reads module specific configuration for each module's input file present in `/etc/bbfdm/services/` directory.
 
 > In plugins approach, the 3rd party datamodel gets attached to main bbfdm process, which further increases nodes in main datamodel tree, which overtime become a huge tree, results in slower turn around service time for the APIs. Also, any unhandled fault in plugin result in segfault in main bbfdmd process, which takes down the whole tree along with plugin, resulting in complete failure from cwmp and USP, with micro-services plugins runs as an individual processes, so impact of fault limited to its own micro-service only.
 
@@ -145,16 +210,36 @@ Micro-service approach, disintegrate the plugins further and run them as individ
 To configure the log_level in micro-service, update the `loglevel` module json file,
 
 ```json
-# cat /etc/bbfdm/micro_services/netmngr.json 
+# cat /etc/bbfdm/services/netmngr.json 
 {
   "daemon": {
     "enable": "1",
     "service_name": "netmngr",
+    "unified_daemon": false,
+    "services": [
+      {
+        "parent_dm": "Device.",
+        "object": "IP"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "GRE"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "PPP"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "Routing"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "RouterAdvertisement"
+      }
+    ],
     "config": {
       "loglevel": "7"
-    },
-    "output": {
-      "name": "Network"
     }
   }
 }

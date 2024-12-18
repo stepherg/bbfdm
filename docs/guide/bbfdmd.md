@@ -12,13 +12,15 @@
 
 `bbfdmd` daemon use `libbbfdm-ubus` library to expose datamodel over ubus.
 
-When a ubus method is called it first fills `bbfdm_data_t` structure with the necessary information, then proceeds the `Get/Set/Operate/Add/Del` operation based on that information.
+When a ubus method is called it first fills `bbfdm_data_t` structure with the necessary information, then register the micro-services information defined for each JSON service file after that proceeds the `Get/Set/Operate/Add/Del` operation based on that information.
 
 To load the datamodel definitions from a DotSO file, it looks for a 'tDynamicObj' symbol and use it to create the base entry object, for datamodel operations it rely on libbbfdm-api's `bbf_entry_method` which process the datamodel operation on input path and produces result in list/blob, which further gets responded over ubus.
 
 In short, it covers/supports all methods introduced in `TR-069` and `TR-369` by using the `bbf_entry_method` API from `libbbfdm-api`  with the different methods and the existing data-model available with `libbbfdm`.
 
-> Note: In general, bbfdmd does not reload the services after updating the configs, higher layer applications (i.e. icwmp, obuspa) usages `bbf.config` to apply the configs and reloads the services, please check `bbf.config` documentation for more details.
+> Note1: In general, bbfdmd does not reload the services after updating the configs, higher layer applications (i.e. icwmp, obuspa) usages `bbf.config` to apply the configs and reloads the services, please check `bbf.config` documentation for more details.
+
+> Note2: All RPC method's output is stored directly in a blob buffer, which can be used at the end by Ubus reply API to expose the data and reducing CPU usage of `bbfdmd` daemon.
 
 ## Input and output Schema(s)
 
@@ -36,16 +38,16 @@ Following are the ubus methods exposed by `bbfdmd` main process:
 
 ```bash
 # ubus -v list bbfdm
-'bbfdm' @9e9928ef
-        "get":{"path":"String","paths":"Array","maxdepth":"Integer","optional":"Table"}
-        "schema":{"path":"String","paths":"Array","first_level":"Boolean","optional":"Table"}
-        "instances":{"path":"String","paths":"Array","first_level":"Boolean","optional":"Table"}
-        "set":{"path":"String","value":"String","obj_path":"Table","optional":"Table"}
-        "operate":{"command":"String","command_key":"String","input":"Table","optional":"Table"}
-        "add":{"path":"String","obj_path":"Table","optional":"Table"}
-        "del":{"path":"String","paths":"Array","optional":"Table"}
-        "service":{"cmd":"String","name":"String","parent_dm":"String","objects":"Array"}
-        "notify_event":{"name":"String","input":"Array"}
+'bbfdm' @b93b62aa
+    "get":{"path":"String","paths":"Array","maxdepth":"Integer","optional":"Table"}
+    "schema":{"path":"String","paths":"Array","first_level":"Boolean","optional":"Table"}
+    "instances":{"path":"String","paths":"Array","first_level":"Boolean","optional":"Table"}
+    "set":{"path":"String","value":"String","datatype":"String","obj_path":"Table","optional":"Table"}
+    "operate":{"command":"String","command_key":"String","input":"Table","optional":"Table"}
+    "add":{"path":"String","obj_path":"Table","optional":"Table"}
+    "del":{"path":"String","paths":"Array","optional":"Table"}
+    "notify_event":{"name":"String","input":"Array"}
+    "service":{}
 ```
 
 > Note1: `optional` table are present in all methods and it supports below options:
