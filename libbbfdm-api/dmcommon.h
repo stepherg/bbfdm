@@ -214,7 +214,7 @@ int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_p
 int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, const char *key_name, char *key_value, char **value);
 int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct dm_reference *reference_args);
 int bbfdm_operate_reference_linker(struct dmctx *ctx, const char *reference_path, char **reference_value);
-char *base64_decode(const char *src);
+char *dm_base64_decode(const char *src);
 void string_to_mac(const char *str, size_t str_len, char *out, size_t out_len);
 bool folder_exists(const char *path);
 bool file_exists(const char *path);

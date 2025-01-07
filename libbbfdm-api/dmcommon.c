@@ -1782,7 +1782,7 @@ static int get_base64_char(char b64)
 	return -1;
 }
 
-char *base64_decode(const char *src)
+char *dm_base64_decode(const char *src)
 {
 	int i, j = 0;
 

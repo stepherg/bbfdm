@@ -980,11 +980,11 @@ static void test_bbf_api_common(void **state)
 
 
 	/*
-	 * Test of base64_decode function
+	 * Test of dm_base64_decode function
 	 */
 
-	// base64_decode: test
-	value = base64_decode("YmJmX3VuaXRfdGVzdA");
+	// dm_base64_decode: test
+	value = dm_base64_decode("YmJmX3VuaXRfdGVzdA");
 	assert_string_equal(value, "bbf_unit_test");
 
 
