@@ -95,7 +95,10 @@
       "proto": "git",
       "version": "devel",
       "dm_files": [
-        "bbf_plugin/bbf_plugin.c"
+        "src/datamodel.c",
+        "src/main.c",
+        "src/config.c",
+        "src/periodicstats.c"
       ]
     },
     {
