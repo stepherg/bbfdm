@@ -37,7 +37,7 @@ static void bbfdm_uci_init_ctx(struct uci_context **uci_ctx, const char *confdir
 	uci_set_savedir(*uci_ctx, savedir);
 }
 
-void bbfdm_uci_init(struct dmctx *bbf_ctx)
+void dm_uci_init(struct dmctx *bbf_ctx)
 {
 	if (bbf_ctx->dm_type == BBFDM_CWMP) {
 		bbfdm_uci_init_ctx(&bbf_ctx->config_uci_ctx, config_dir, "/tmp/bbfdm/.cwmp/config/");
@@ -57,7 +57,7 @@ void bbfdm_uci_init(struct dmctx *bbf_ctx)
 	uci_ctx_varstate = bbf_ctx->varstate_uci_ctx;
 }
 
-void bbfdm_uci_exit(struct dmctx *bbf_ctx)
+void dm_uci_exit(struct dmctx *bbf_ctx)
 {
 	if (bbf_ctx->config_uci_ctx) {
 		uci_free_context(bbf_ctx->config_uci_ctx);

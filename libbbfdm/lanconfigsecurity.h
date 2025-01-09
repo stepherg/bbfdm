@@ -11,7 +11,7 @@
 #ifndef __LANCONFIGSECURITY_H
 #define __LANCONFIGSECURITY_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "libbbfdm-api/legacy/dmcommon.h"
 
 extern DMLEAF tLANConfigSecurityParams[];
 

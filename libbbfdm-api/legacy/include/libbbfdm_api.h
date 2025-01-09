@@ -893,12 +893,4 @@ int bbfdm_validate_hexBinary_list(struct dmctx *ctx, const char *value, int min_
 **************************************************************************/
 void bbfdm_set_fault_message(struct dmctx *ctx, const char *format, ...);
 
-/**********************
- *
- * BBF DEPRECATED APIs
- *
- **********************/
-__attribute__ ((deprecated("Use bbfdm_get_references"))) int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value);
-__attribute__ ((deprecated("Use bbfdm_get_reference_linker"))) int bbf_get_reference_args(char *value, struct dm_reference *reference_args);
-
 #endif //__LIBBBFDM_API_H__

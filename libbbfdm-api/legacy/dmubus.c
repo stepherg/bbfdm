@@ -99,25 +99,23 @@ static void receive_call_result_data(struct ubus_request *req, int type, struct 
 static int __dm_ubus_call_internal(const char *obj, const char *method, int timeout, struct blob_attr *attr)
 {
 	uint32_t id = 0;
-	int rc = 0;
 
 	json_res = NULL;
 
 	if (ubus_ctx == NULL) {
 		ubus_ctx = dm_libubus_init();
 		if (ubus_ctx == NULL) {
-			printf("UBUS context is null\n\r");
+			BBF_ERR("UBUS context is null");
 			return -1;
 		}
 	}
 
-	if (!ubus_lookup_id(ubus_ctx, obj, &id))
-		rc = ubus_invoke(ubus_ctx, id, method, attr,
-				receive_call_result_data, NULL, timeout);
-	else
-		rc = -1;
+	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
+		BBF_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		return -1;
+	}
 
-	return rc;
+	return ubus_invoke(ubus_ctx, id, method, attr, receive_call_result_data, NULL, timeout);
 }
 
 static int __dm_ubus_call(const char *obj, const char *method, struct blob_attr *attr)
@@ -351,10 +349,13 @@ static int dmubus_call_blob_internal(const char *obj, const char *method, json_o
 		}
 	}
 
-	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
-		rc = ubus_invoke(ubus_ctx, id, method, blob.head,
-				 receive_call_result_data, NULL, timeout);
+	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
+		BBF_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		blob_buf_free(&blob);
+		return rc;
 	}
+
+	rc = ubus_invoke(ubus_ctx, id, method, blob.head, receive_call_result_data, NULL, timeout);
 
 	if (resp) *resp = json_res;
 	blob_buf_free(&blob);
@@ -396,15 +397,17 @@ static int dmubus_call_blob_msg_internal(const char *obj, const char *method, st
 	if (ubus_ctx == NULL) {
 		ubus_ctx = dm_libubus_init();
 		if (ubus_ctx == NULL) {
-			printf("UBUS context is null\n\r");
+			BBF_ERR("UBUS context is null");
 			return -1;
 		}
 	}
 
-	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
-		rc = ubus_invoke(ubus_ctx, id, method, data->head,
-				 receive_call_result_data, NULL, timeout);
+	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
+		BBF_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		return -1;
 	}
+
+	rc = ubus_invoke(ubus_ctx, id, method, data->head, receive_call_result_data, NULL, timeout);
 
 	if (resp)
 		*resp = json_res;

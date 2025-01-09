@@ -11,7 +11,7 @@
 #ifndef __SCHEDULES_H
 #define __SCHEDULES_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "libbbfdm-api/legacy/dmcommon.h"
 
 extern DMOBJ tSchedulesObj[];
 extern DMLEAF tSchedulesParams[];

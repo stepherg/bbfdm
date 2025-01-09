@@ -12,7 +12,7 @@
 #ifndef __GATEWAYINFO_H
 #define __GATEWAYINFO_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "libbbfdm-api/legacy/dmcommon.h"
 
 extern DMLEAF tGatewayInfoParams[];
 

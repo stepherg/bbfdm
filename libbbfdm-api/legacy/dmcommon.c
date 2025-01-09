@@ -1717,40 +1717,22 @@ int bbfdm_validate_hexBinary_list(struct dmctx *ctx, const char *value, int min_
 
 bool folder_exists(const char *path)
 {
-	struct stat buffer;
-
-	return stat(path, &buffer) == 0 && S_ISDIR(buffer.st_mode);
+	return bbfdm_folder_exists(path);
 }
 
 bool file_exists(const char *path)
 {
-	struct stat buffer;
-
-	return stat(path, &buffer) == 0;
+	return bbfdm_file_exists(path);
 }
 
 bool is_regular_file(const char *path)
 {
-	struct stat buffer;
-
-	return stat(path, &buffer) == 0 && S_ISREG(buffer.st_mode);
+	return bbfdm_is_regular_file(path);
 }
 
 int create_empty_file(const char *file_name)
 {
-	if (!file_name)
-		return -1;
-
-	// Skip creating the file if it already exists
-	if (file_exists(file_name))
-		return 0;
-
-	FILE *fp = fopen(file_name, "w");
-	if (fp == NULL)
-		return -1;
-
-	fclose(fp);
-	return 0;
+	return bbfdm_create_empty_file(file_name);
 }
 
 unsigned long file_system_size(const char *path, const enum fs_size_type_enum type)

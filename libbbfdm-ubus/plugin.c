@@ -15,7 +15,7 @@
 #include "common.h"
 #include "get_helper.h"
 
-#include "../libbbfdm-api/plugin/json_plugin.h"
+#include "libbbfdm-api/legacy/plugin/json_plugin.h"
 
 
 extern struct list_head loaded_json_files;

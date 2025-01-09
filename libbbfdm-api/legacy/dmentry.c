@@ -47,16 +47,16 @@ void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 	blob_buf_init(&ctx->bb, 0);
 
 	ctx->dm_entryobj = tEntryObj;
-	bbfdm_init_mem(ctx);
-	bbfdm_uci_init(ctx);
+	dm_init_mem(ctx);
+	dm_uci_init(ctx);
 }
 
 void bbf_ctx_clean(struct dmctx *ctx)
 {
 	blob_buf_free(&ctx->bb);
 
-	bbfdm_uci_exit(ctx);
-	bbfdm_clean_mem(ctx);
+	dm_uci_exit(ctx);
+	dm_clean_mem(ctx);
 	dmubus_free();
 }
 

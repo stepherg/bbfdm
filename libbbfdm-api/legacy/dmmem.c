@@ -167,7 +167,7 @@ static struct list_head *get_ctx_memhead_list(struct dmctx *ctx)
 	return ctx->memhead;
 }
 
-void bbfdm_init_mem(struct dmctx *ctx)
+void dm_init_mem(struct dmctx *ctx)
 {
 	struct list_head *memory_list_head = calloc(1, sizeof(struct list_head));
 
@@ -183,7 +183,7 @@ void bbfdm_init_mem(struct dmctx *ctx)
 	ctx->memhead = dm_memhead_ptr = memory_list_head;
 }
 
-void bbfdm_clean_mem(struct dmctx *ctx)
+void dm_clean_mem(struct dmctx *ctx)
 {
 	struct dmmem *dmm = NULL, *tmp = NULL;
 
@@ -201,7 +201,7 @@ void bbfdm_clean_mem(struct dmctx *ctx)
 	dm_memhead_ptr = NULL;
 }
 
-void *bbfdm_malloc(struct dmctx *ctx, size_t size)
+void *dm_malloc(struct dmctx *ctx, size_t size)
 {
 	struct list_head *ctx_memhead = get_ctx_memhead_list(ctx);
 	if (ctx_memhead == NULL)
@@ -213,7 +213,7 @@ void *bbfdm_malloc(struct dmctx *ctx, size_t size)
 	return (void *)m->mem;
 }
 
-void *bbfdm_calloc(struct dmctx *ctx, int n, size_t size)
+void *dm_calloc(struct dmctx *ctx, int n, size_t size)
 {
 	struct list_head *ctx_memhead = get_ctx_memhead_list(ctx);
 	if (ctx_memhead == NULL)
@@ -225,7 +225,7 @@ void *bbfdm_calloc(struct dmctx *ctx, int n, size_t size)
 	return (void *)m->mem;
 }
 
-void *bbfdm_realloc(struct dmctx *ctx, void *n, size_t size)
+void *dm_realloc(struct dmctx *ctx, void *n, size_t size)
 {
 	struct list_head *ctx_memhead = get_ctx_memhead_list(ctx);
 	if (ctx_memhead == NULL)
@@ -249,13 +249,13 @@ void *bbfdm_realloc(struct dmctx *ctx, void *n, size_t size)
 	return (void *)m->mem;
 }
 
-char *bbfdm_strdup(struct dmctx *ctx, const char *s)
+char *dm_strdup(struct dmctx *ctx, const char *s)
 {
 	if (s == NULL)
 		return NULL;
 
 	size_t len = strlen(s) + 1;
-	void *new = bbfdm_malloc(ctx, len);
+	void *new = dm_malloc(ctx, len);
 
 	if (new == NULL)
 		return NULL;
@@ -263,7 +263,7 @@ char *bbfdm_strdup(struct dmctx *ctx, const char *s)
 	return (char *) memcpy(new, s, len);
 }
 
-int bbfdm_asprintf(struct dmctx *ctx, char **s, const char *format, ...)
+int dm_asprintf(struct dmctx *ctx, char **s, const char *format, ...)
 {
 	va_list arg;
 	char *str = NULL;
@@ -276,7 +276,7 @@ int bbfdm_asprintf(struct dmctx *ctx, char **s, const char *format, ...)
 	if (size < 0 || str == NULL)
 		return -1;
 
-	*s = bbfdm_strdup(ctx, str);
+	*s = dm_strdup(ctx, str);
 
 	FREE(str);
 	if (*s == NULL)

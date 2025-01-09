@@ -12,7 +12,7 @@
 #ifndef __TEST_DEVICE_H
 #define __TEST_DEVICE_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "libbbfdm-api/legacy/dmcommon.h"
 
 extern DMOBJ tTEST_DeviceObj[];
 

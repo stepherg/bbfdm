@@ -406,30 +406,3 @@ int bbfdm_operate_reference_linker(struct dmctx *ctx, const char *reference_path
 
 	return 0;
 }
-
-__attribute__ ((deprecated)) int bbf_get_reference_param(char *path, char *key_name, char *key_value, char **value)
-{
-	if (DM_STRLEN(path) == 0 || DM_STRLEN(key_name) == 0 || DM_STRLEN(key_value) == 0 || !value)
-		return -1;
-
-	dmasprintf(value, "%s[%s==\"%s\"].", path, key_name, key_value);
-	return 0;
-}
-
-__attribute__ ((deprecated)) int bbf_get_reference_args(char *value, struct dm_reference *reference_args)
-{
-	if (DM_STRLEN(value) == 0)
-		return -1;
-
-	reference_args->path = value;
-
-	char *seperator = strstr(value, "=>");
-	if (!seperator)
-		return -1;
-
-	*seperator = 0;
-
-	reference_args->value = seperator + 2;
-
-	return 0;
-}

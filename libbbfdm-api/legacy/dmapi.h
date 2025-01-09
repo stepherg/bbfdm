@@ -26,6 +26,8 @@
 #include <json-c/json.h>
 #include <libubox/blob.h>
 
+#include "libbbfdm-api/version-2/bbfdm_api.h"
+
 extern struct dm_permession_s DMREAD;
 extern struct dm_permession_s DMWRITE;
 extern struct dm_permession_s DMSYNC;
@@ -420,12 +422,6 @@ struct ubus_arg {
 struct range_args {
 	const char *min;
 	const char *max;
-};
-
-struct __attribute__((deprecated("'dmmap_dup' is deprecated, please use the new structure 'dm_data'"))) dmmap_dup {
-	struct list_head list;
-	struct uci_section *config_section;
-	struct uci_section *dmmap_section;
 };
 
 struct dm_data {

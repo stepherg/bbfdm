@@ -899,7 +899,7 @@ char *get_value_by_reference(struct dmctx *ctx, char *value)
 	return "";
 }
 
-static char *check_value_by_type(char *value, int type)
+static char *check_value_by_type(const char *param_name, char *value, int type)
 {
 	int i = 0, len = DM_STRLEN(value);
 	char buf[len + 1];
@@ -911,8 +911,10 @@ static char *check_value_by_type(char *value, int type)
 		case DMT_UNINT:
 		case DMT_UNLONG:
 			while (buf[i] != 0) {
-				if (isdigit(buf[i]) == 0)
+				if (isdigit(buf[i]) == 0) {
+					BBF_WARNING("The parameter '%s' contains an invalid value '%s' for its type. Defaulting to '0'", param_name, buf);
 					return "0";
+				}
 				i++;
 			}
 			break;
@@ -921,8 +923,10 @@ static char *check_value_by_type(char *value, int type)
 			if (buf[i] == '-')
 				i++;
 			while (buf[i] != 0) {
-				if (isdigit(buf[i]) == 0)
+				if (isdigit(buf[i]) == 0) {
+					BBF_WARNING("The parameter '%s' contains an invalid value '%s' for its type. Defaulting to '0'", param_name, buf);
 					return "0";
+				}
 				i++;
 			}
 			break;
@@ -930,21 +934,27 @@ static char *check_value_by_type(char *value, int type)
 			return dmuci_string_to_boolean(buf) ? "1" : "0";
 		case DMT_HEXBIN:
 			while (buf[i] != 0) {
-				if (isxdigit(buf[i]) == 0)
+				if (isxdigit(buf[i]) == 0) {
+					BBF_WARNING("The parameter '%s' contains an invalid hexadecimal value '%s'. Defaulting to an empty value", param_name, buf);
 					return "";
+				}
 				i++;
 			}
 			break;
 		case DMT_BASE64:
 			while (buf[i] != 0) {
-				if (is64digit(buf[i]) == 0)
-					return "0";
+				if (is64digit(buf[i]) == 0) {
+					BBF_WARNING("The parameter '%s' contains an invalid Base64 value '%s'. Defaulting to 'AA=='.", param_name, buf);
+					return "AA==";
+				}
 				i++;
 			}
 			break;
 		case DMT_TIME:
-			if (!strptime(buf, "%Y-%m-%dT%H:%M:%S", &tm))
+			if (!strptime(buf, "%Y-%m-%dT%H:%M:%S", &tm)) {
+				BBF_WARNING("The parameter '%s' contains an invalid time value '%s'. Defaulting to '0001-01-01T00:00:00Z'.", param_name, buf);
 				return "0001-01-01T00:00:00Z";
+			}
 			break;
 		default:
 			break;
@@ -952,7 +962,7 @@ static char *check_value_by_type(char *value, int type)
 	return value;
 }
 
-static char *get_default_value_by_type(int type)
+static char *get_default_value_by_type(const char *param_name, int type)
 {
 	switch (type) {
 		case DMT_UNINT:
@@ -960,10 +970,13 @@ static char *get_default_value_by_type(int type)
 		case DMT_UNLONG:
 		case DMT_LONG:
 		case DMT_BOOL:
+			BBF_WARNING("The parameter '%s' is empty but must have a value according to its type. Defaulting to '0'", param_name);
 			return "0";
 		case DMT_BASE64:
+			BBF_WARNING("The parameter '%s' is empty but must have a value according to its Base64 type. Defaulting to 'AA=='", param_name);
 			return "AA=="; // base64 encoded hex value 00
 		case DMT_TIME:
+			BBF_WARNING("The parameter '%s' is empty but must have a value according to its Time type. Defaulting to '0001-01-01T00:00:00Z'", param_name);
 			return "0001-01-01T00:00:00Z";
 		default:
 			return "";
@@ -1037,14 +1050,17 @@ static int ubus_call_blob_msg(const char *obj, const char *method, struct blob_b
 
 	ubus_ctx = ubus_connect(NULL);
 	if (ubus_ctx == NULL) {
-		BBF_DEBUG("UBUS context is null\n\r");
+		BBF_ERR("UBUS context is null");
 		return -1;
 	}
 
-	if (!ubus_lookup_id(ubus_ctx, obj, &id)) {
-		rc = ubus_invoke(ubus_ctx, id, method, blob->head,
-				ms_callback, callback_arg, timeout);
+	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
+		BBF_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		ubus_free(ubus_ctx);
+		return -1;
 	}
+
+	rc = ubus_invoke(ubus_ctx, id, method, blob->head, ms_callback, callback_arg, timeout);
 
 	if (ubus_ctx) {
 		ubus_free(ubus_ctx);
@@ -1777,10 +1793,10 @@ static int get_value_param(DMPARAM_ARGS)
 			if (leaf->dm_flags & DM_FLAG_REFERENCE) {
 				value = get_value_by_reference(dmctx, value);
 			} else {
-				value = check_value_by_type(value, leaf->type);
+				value = check_value_by_type(full_param, value, leaf->type);
 			}
 		} else {
-			value = get_default_value_by_type(leaf->type);
+			value = get_default_value_by_type(full_param, leaf->type);
 		}
 
 		fill_blob_param(&dmctx->bb, full_param, value, DMT_TYPE[leaf->type], leaf->dm_flags);
@@ -1824,9 +1840,9 @@ static int mparam_get_value_in_param(DMPARAM_ARGS)
 			if (leaf->dm_flags & DM_FLAG_REFERENCE) {
 				value = get_value_by_reference(dmctx, value);
 			} else
-				value = check_value_by_type(value, leaf->type);
+				value = check_value_by_type(full_param, value, leaf->type);
 		} else {
-			value = get_default_value_by_type(leaf->type);
+			value = get_default_value_by_type(full_param, leaf->type);
 		}
 
 		fill_blob_param(&dmctx->bb, full_param, value, DMT_TYPE[leaf->type], leaf->dm_flags);

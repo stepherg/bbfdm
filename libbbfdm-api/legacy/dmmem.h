@@ -35,13 +35,13 @@ int __dmastrcat(struct list_head *mem_list, char **s, char *obj, char *lastname)
  * Initialize memory management.
  * @param ctx - Pointer to bbf context
  */
-void bbfdm_init_mem(struct dmctx *ctx);
+void dm_init_mem(struct dmctx *ctx);
 
 /*
  * Clean up memory management.
  * @param ctx - Pointer to bbf context
  */
-void bbfdm_clean_mem(struct dmctx *ctx);
+void dm_clean_mem(struct dmctx *ctx);
 
 /*
  * Allocate memory block of the specified size.
@@ -49,7 +49,7 @@ void bbfdm_clean_mem(struct dmctx *ctx);
  * @param size - Size of memory block to allocate
  * @return Pointer to the allocated memory block
  */
-void *bbfdm_malloc(struct dmctx *ctx, size_t size);
+void *dm_malloc(struct dmctx *ctx, size_t size);
 
 /*
  * Allocate memory for an array of n elements, each of size bytes, initialized to zero.
@@ -58,7 +58,7 @@ void *bbfdm_malloc(struct dmctx *ctx, size_t size);
  * @param size - Size of each element
  * @return Pointer to the allocated memory block
  */
-void *bbfdm_calloc(struct dmctx *ctx, int n, size_t size);
+void *dm_calloc(struct dmctx *ctx, int n, size_t size);
 
 /*
  * Resize the memory block pointed to by n to the new size size.
@@ -67,7 +67,7 @@ void *bbfdm_calloc(struct dmctx *ctx, int n, size_t size);
  * @param size - New size of the memory block
  * @return Pointer to the resized memory block
  */
-void *bbfdm_realloc(struct dmctx *ctx, void *n, size_t size);
+void *dm_realloc(struct dmctx *ctx, void *n, size_t size);
 
 /*
  * Duplicate the string s.
@@ -75,7 +75,7 @@ void *bbfdm_realloc(struct dmctx *ctx, void *n, size_t size);
  * @param s - Pointer to the string to duplicate
  * @return Pointer to the duplicated string
  */
-char *bbfdm_strdup(struct dmctx *ctx, const char *s);
+char *dm_strdup(struct dmctx *ctx, const char *s);
 
 /*
  * Allocate a string with a format similar to printf.
@@ -85,13 +85,13 @@ char *bbfdm_strdup(struct dmctx *ctx, const char *s);
  * @param ... - Additional arguments for the format string
  * @return 0 on success, -1 on failure
  */
-int bbfdm_asprintf(struct dmctx *ctx, char **s, const char *format, ...);
+int dm_asprintf(struct dmctx *ctx, char **s, const char *format, ...);
 
-#define dmmalloc(x) bbfdm_malloc(0, x)
-#define dmcalloc(n, x) bbfdm_calloc(0, n, x)
-#define dmrealloc(x, n) bbfdm_realloc(0, x, n)
-#define dmstrdup(x) bbfdm_strdup(0, x)
-#define dmasprintf(s, format, ...) bbfdm_asprintf(0, s, format, ## __VA_ARGS__)
+#define dmmalloc(x) dm_malloc(0, x)
+#define dmcalloc(n, x) dm_calloc(0, n, x)
+#define dmrealloc(x, n) dm_realloc(0, x, n)
+#define dmstrdup(x) dm_strdup(0, x)
+#define dmasprintf(s, format, ...) dm_asprintf(0, s, format, ## __VA_ARGS__)
 
 #define dm_dynamic_malloc(m, x) __dmmalloc(m, x)
 #define dm_dynamic_calloc(m, n, x) __dmcalloc(m, n, x)

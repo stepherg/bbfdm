@@ -11,7 +11,7 @@
 #ifndef __SECURITY_H
 #define __SECURITY_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "libbbfdm-api/legacy/dmcommon.h"
 
 extern DMOBJ tSecurityObj[];
 extern DMLEAF tSecurityParams[];

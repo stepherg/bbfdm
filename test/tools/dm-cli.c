@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include <libubox/blobmsg.h>
 
-#include "../../libbbfdm-api/dmapi.h"
-#include "../../libbbfdm-ubus/bbfdm-ubus.h"
-#include "../../libbbfdm-api/dmentry.h"
-#include "../../libbbfdm-ubus/plugin.h"
+#include <libbbfdm-api/dmapi.h>
+#include <libbbfdm-ubus/bbfdm-ubus.h>
+#include <libbbfdm-api/dmentry.h>
 
+#include "../../libbbfdm-ubus/plugin.h"
 #include "../../libbbfdm/device.h"
 
 static int cli_exec_schema(struct dmctx *bbfdm_ctx, char *in_path)

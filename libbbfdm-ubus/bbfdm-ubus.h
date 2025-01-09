@@ -5,7 +5,7 @@
 #include <libubox/blobmsg.h>
 #include <libubox/list.h>
 
-#include <libbbfdm-api/dmbbf.h>
+#include "libbbfdm-api/legacy/dmbbf.h"
 
 #define BBFDM_DEFAULT_UBUS_OBJ "bbfdm"
 

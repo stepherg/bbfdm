@@ -12,7 +12,7 @@
 #ifndef __TEST_VENDOR_H
 #define __TEST_VENDOR_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "libbbfdm-api/legacy/dmcommon.h"
 
 extern DM_MAP_OBJ tVendorExtensionOverwriteTEST[];
 extern DM_MAP_OBJ tVendorExtensionTEST[];

@@ -450,7 +450,7 @@
         "libdm/tr104/*.c"
       ],
       "extra_dependencies": [
-        "-I /builds/bbf/bbfdm/libbbfdm-api",
+        "-I /builds/bbf/bbfdm/libbbfdm-api/legacy",
         "-I libdm/common"
       ]
     },
@@ -489,7 +489,7 @@
         "libdm/extensions/iowrt/*.c"
       ],
       "extra_dependencies": [
-        "-I /builds/bbf/bbfdm/libbbfdm-api",
+        "-I /builds/bbf/bbfdm/libbbfdm-api/legacy",
         "-I libdm/common"
       ]
     }

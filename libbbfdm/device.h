@@ -13,7 +13,7 @@
 #ifndef __DEVICE_H
 #define __DEVICE_H
 
-#include "libbbfdm-api/dmcommon.h"
+#include "libbbfdm-api/legacy/dmcommon.h"
 
 extern DM_MAP_OBJ tDynamicObj[];
 

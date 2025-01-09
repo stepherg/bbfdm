@@ -14,7 +14,7 @@
 #include <libubox/utils.h>
 #include <libubox/list.h>
 
-#include <libbbfdm-api/dmcommon.h>
+#include <libbbfdm-api/legacy/dmcommon.h>
 #include "bbfdm-ubus.h"
 
 #define STRINGIFY(x) #x

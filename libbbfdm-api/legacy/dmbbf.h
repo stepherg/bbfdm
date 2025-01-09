@@ -81,21 +81,16 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
 #endif
 
 // Macros for different log levels
-#define BBF_ERR(MESSAGE, ...) do { \
-	syslog(LOG_ERR, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-} while(0)
+#define BBF_ERR(MESSAGE, ...) \
+	BBFDM_ERR(MESSAGE, ##__VA_ARGS__)
 
-#define BBF_WARNING(MESSAGE, ...) do { \
-	syslog(LOG_WARNING, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-} while(0)
+#define BBF_WARNING(MESSAGE, ...) \
+	BBFDM_WARNING(MESSAGE, ##__VA_ARGS__)
 
-#define BBF_INFO(MESSAGE, ...) do { \
-	syslog(LOG_INFO, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-} while(0)
+#define BBF_INFO(MESSAGE, ...) \
+	BBFDM_INFO(MESSAGE, ##__VA_ARGS__)
 
-#define BBF_DEBUG(MESSAGE, ...) do { \
-	syslog(LOG_DEBUG, "[%s:%d] " MESSAGE, __FUNCTION__, __LINE__, ##__VA_ARGS__); /* Flawfinder: ignore */ \
-} while(0)
-
+#define BBF_DEBUG(MESSAGE, ...) \
+	BBFDM_DEBUG(MESSAGE, ##__VA_ARGS__)
 
 #endif //__DMBBF_H__
