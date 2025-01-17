@@ -23,7 +23,8 @@
           "-DSYSMNGR_FIRMWARE_IMAGE",
           "-DSYSMNGR_REBOOTS",
           "-DSYSMNGR_NETWORK_PROPERTIES",
-          "-DSYSMNGR_VENDOR_EXTENSIONS"
+          "-DSYSMNGR_VENDOR_EXTENSIONS",
+          "-DCUSTOM_PREFIX=\\\"X_IOPSYS_EU_\\\""
         ],
         "dm_files": [
             "src/deviceinfo.c",
@@ -159,6 +160,18 @@
       "version": "devel",
       "dm_files": [
         "src/bbf_plugin/hosts.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/hostmngr.git",
+      "proto": "git",
+      "version": "devel",
+      "extra_dependencies": [
+        "-DHAS_VENDOR_EXT",
+        "-DCUSTOM_PREFIX=\\\"X_IOPSYS_EU_\\\""
+      ],
+      "dm_files": [
+        "src/bbf_plugin/hosts_ext.c"
       ]
     },
     {
