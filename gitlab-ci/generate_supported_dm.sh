@@ -16,6 +16,8 @@ if [ -n "${CI_SERVER_HOST}" ]; then
 fi
 
 install_cmph
+install_libeasy
+install_libethernet
 
 # Make sure that all plugins are removed
 [ ! -d "${BBFDM_PLUGIN_DIR}" ] && mkdir -p "${BBFDM_PLUGIN_DIR}"

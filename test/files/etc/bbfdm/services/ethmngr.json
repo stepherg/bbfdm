@@ -1,0 +1,16 @@
+{
+  "daemon": {
+    "enable": "1",
+    "service_name": "ethmngr",
+    "unified_daemon": true,
+    "services": [
+      {
+        "parent_dm": "Device.",
+        "object": "Ethernet"
+      }
+    ],
+    "config": {
+      "loglevel": "3"
+    }
+  }
+}

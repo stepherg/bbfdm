@@ -40,7 +40,6 @@ run_tools_test:
   allow_failure: false
   script:
   - "./gitlab-ci/pipeline_setup.sh"
-  - "./gitlab-ci/install-unified-dependencies.sh"
   - "./gitlab-ci/setup.sh ms"
   - "./gitlab-ci/tools-test.sh"
   - "./gitlab-ci/generate_supported_dm.sh"

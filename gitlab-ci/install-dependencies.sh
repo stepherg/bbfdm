@@ -38,4 +38,6 @@ else
 	#install Network Data Model as a micro-service
 	echo "Installing Network Data Model (netmngr) as a micro-service"
 	install_netmngr_as_micro_service
+
+	install_ethmngr_as_micro_service
 fi

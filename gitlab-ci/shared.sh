@@ -134,13 +134,55 @@ function install_wifidmd_as_micro_service()
 	generate_input_schema_with_output_name "wifidmd" "WiFi" > /etc/bbfdm/services/wifidmd.json
 }
 
+function install_libeasy()
+{
+	[ -d "/opt/dev/libeasy" ] && return 0
+
+	exec_cmd git clone https://dev.iopsys.eu/iopsys/libeasy.git /opt/dev/libeasy
+	(
+
+		cd /opt/dev/libeasy
+		exec_cmd make
+		mkdir -p /usr/include/easy
+		cp -a libeasy*.so* /usr/lib
+		cp -a *.h /usr/include/easy/
+	)
+}
+
+function install_libethernet()
+{
+	[ -d "/opt/dev/libethernet" ] && return 0
+
+	exec_cmd git clone https://dev.iopsys.eu/iopsys/libethernet.git /opt/dev/libethernet
+	(
+		 cd /opt/dev/libethernet
+		 make PLATFORM=TEST
+		 cp ethernet.h /usr/include
+		 cp -a libethernet*.so* /usr/lib
+		 sudo ldconfig
+	)
+}
+
+function install_ethmngr_as_micro_service()
+{
+	[ -d "/opt/dev/ethmngr" ] && return 0
+
+	install_libeasy
+	install_libethernet
+
+	exec_cmd git clone https://dev.iopsys.eu/hal/ethmngr.git /opt/dev/ethmngr
+	exec_cmd make -C /opt/dev/ethmngr
+	exec_cmd cp /opt/dev/ethmngr/ethmngr /usr/sbin/ethmngr
+}
+
 function install_netmngr_as_micro_service()
 {
 	[ -d "/opt/dev/netmngr" ] && return 0
 
 	exec_cmd git clone https://dev.iopsys.eu/network/netmngr.git /opt/dev/netmngr
 
-	exec_cmd make -C /opt/dev/netmngr/src/ clean && make -C /opt/dev/netmngr/src/ CFLAGS="-D'BBF_VENDOR_PREFIX=\"X_IOPSYS_EU_\"'"
+	exec_cmd make -C /opt/dev/netmngr/src/ clean
+	exec_cmd make -C /opt/dev/netmngr/src/ NETMNGR_GRE_OBJ=y NETMNGR_IP_OBJ=y NETMNGR_ROUTING_OBJ=y NETMNGR_PPP_OBJ=y NETMNGR_ROUTER_ADVERTISEMENT_OBJ=y NETMNGR_IPV6RD_OBJ=y
 	exec_cmd cp -f /opt/dev/netmngr/src/libnetmngr.so /usr/share/bbfdm/micro_services/netmngr.so
 	exec_cmd cp -f /opt/dev/netmngr/src/libinterface_stack.so /usr/share/bbfdm/plugins
 	exec_cmd mkdir -p /usr/share/bbfdm/micro_services/netmngr
@@ -211,7 +253,7 @@ function generate_report()
 
 function install_cmph()
 {
-	[ -d "/opt/dev/cmph" ] && rm -rf /opt/dev/cmph
+	[ -d "/opt/dev/cmph" ] && return 0
 
 	exec_cmd git clone https://git.code.sf.net/p/cmph/git /opt/dev/cmph
 	(
@@ -222,3 +264,4 @@ function install_cmph()
 		exec_cmd sudo make install
 	)
 }
+
