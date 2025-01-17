@@ -420,6 +420,14 @@
       "repo": "https://dev.iopsys.eu/network/netmngr.git",
       "proto": "git",
       "version": "devel",
+      "extra_dependencies": [
+        "-DNETMNGR_GRE_OBJ",
+        "-DNETMNGR_IP_OBJ",
+        "-DNETMNGR_ROUTING_OBJ",
+        "-DNETMNGR_PPP_OBJ",
+        "-DNETMNGR_ROUTER_ADVERTISEMENT_OBJ",
+        "-DNETMNGR_IPV6RD_OBJ"
+      ],
       "dm_files": [
         "src/net_plugin.c",
         "src/gre.c",
