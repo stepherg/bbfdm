@@ -414,6 +414,7 @@
         "src/ppp.c",
         "src/routeradvertisement.c",
         "src/routing.c",
+        "src/ipv6rd.c"
         "src/common.c"
       ]
     },
