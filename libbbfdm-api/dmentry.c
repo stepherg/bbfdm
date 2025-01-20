@@ -230,7 +230,6 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 		break;
 	}
 
-	dmuci_save();
 	return bbf_fault_map(ctx, fault);
 }
 
