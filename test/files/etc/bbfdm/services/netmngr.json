@@ -23,6 +23,10 @@
       {
         "parent_dm": "Device.",
         "object": "RouterAdvertisement"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "IPv6rd"
       }
     ],
     "config": {

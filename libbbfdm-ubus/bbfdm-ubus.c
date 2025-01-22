@@ -683,7 +683,7 @@ static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *o
 	memset(&bb, 0, sizeof(struct blob_buf));
 	blob_buf_init(&bb, 0);
 
-	array = blobmsg_open_array(&bb, "registered_service");
+	array = blobmsg_open_array(&bb, "registered_services");
 	get_list_of_registered_service(&head_registered_service, &bb);
 	blobmsg_close_array(&bb, array);
 

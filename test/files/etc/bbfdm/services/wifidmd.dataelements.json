@@ -1,0 +1,16 @@
+{
+  "daemon": {
+    "enable": "1",
+    "service_name": "wifidmd.dataelements",
+    "unified_daemon": false,
+    "services": [
+      {
+        "parent_dm": "Device.",
+        "object": "WiFi"
+      }
+    ],
+    "config": {
+      "loglevel": "3"
+    }
+  }
+}

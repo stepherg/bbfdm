@@ -39,5 +39,7 @@ else
 	echo "Installing Network Data Model (netmngr) as a micro-service"
 	install_netmngr_as_micro_service
 
+	#install Ethernet Data Model as a micro-service
+	echo "Installing Ethernet Data Model (ethmngr) as a micro-service"
 	install_ethmngr_as_micro_service
 fi
