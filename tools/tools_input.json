@@ -24,18 +24,21 @@
           "-DSYSMNGR_REBOOTS",
           "-DSYSMNGR_NETWORK_PROPERTIES",
           "-DSYSMNGR_VENDOR_EXTENSIONS",
+          "-DSYSMNGR_TEMPERATURE_STATUS",
           "-DCUSTOM_PREFIX=\\\"X_IOPSYS_EU_\\\""
         ],
         "dm_files": [
             "src/deviceinfo.c",
             "src/configs.c",
+            "src/fwbank.c",
             "src/fw_images.c",
             "src/memory.c",
             "src/processes.c",
             "src/reboots.c",
             "src/supported_dm.c",
             "src/network.c",
-            "src/utils.c"
+            "src/utils.c",
+            "src/temperature.c"
         ]
     },
     {
@@ -54,8 +57,7 @@
         "-D_GNU_SOURCE"
       ],
       "dm_files": [
-        "src/datamodel.c",
-        "src/utils.c"
+        "src/datamodel.c"
       ]
     },
     {
