@@ -48,9 +48,12 @@ struct ev_handler_node {
 typedef struct bbfdm_data {
 	struct ubus_context *ctx;
 	struct ubus_request_data *req;
+	struct ubus_request_data amin_new_req; //new
 	struct list_head *plist;
 	struct dmctx bbf_ctx;
 	struct blob_buf bb;
+	char path[256];  //new
+	int pending_requests; //new
 	uint8_t depth;
 	bool is_raw;
 } bbfdm_data_t;

@@ -195,6 +195,7 @@ struct dmctx {
 	unsigned int dm_type;
 	unsigned char inparam_isparam;
 	unsigned char findparam;
+	unsigned int amin_num_of_ms;
 
 	char *in_param;
 	char *in_value;
@@ -261,6 +262,7 @@ enum browse_type_enum {
 
 enum {
 	BBF_GET_VALUE,
+	BBF_GET_VALUE_ASYNC,
 	BBF_SCHEMA,
 	BBF_INSTANCES,
 	BBF_GET_NAME,

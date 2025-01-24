@@ -266,6 +266,171 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 	return 0;
 }
 
+static bbfdm_data_t *amin_data = NULL;
+
+struct request_tracker {
+    struct ubus_request ubus_req;
+    struct uloop_timeout timeout;
+    char object_name[128];
+};
+
+static void request_timeout_handler(struct uloop_timeout *t)
+{
+	struct request_tracker *tracker = container_of(t, struct request_tracker, timeout);
+
+	BBF_ERR("Timeout occurred for object: %s\n", tracker->object_name);
+
+	ubus_abort_request(amin_data->ctx, &tracker->ubus_req);
+
+	// Add a timeout response to the consolidated response
+	blobmsg_add_string(&amin_data->bb, "timeout", "called");
+
+	// Decrement the pending request count
+	amin_data->pending_requests--;
+
+	// Check if all requests are done
+	if (amin_data->pending_requests == 0) {
+		BBF_ERR("All requests completed.\n");
+		ubus_send_reply(amin_data->ctx, &amin_data->amin_new_req, amin_data->bb.head);
+		ubus_complete_deferred_request(amin_data->ctx, &amin_data->amin_new_req, UBUS_STATUS_OK);
+		blob_buf_free(&amin_data->bb);
+	}
+
+	// Clean up the tracker
+	FREE(tracker);
+}
+
+static void ubus_result_callback(struct ubus_request *req, int type, struct blob_attr *msg)
+{
+	struct request_tracker *tracker = container_of(req, struct request_tracker, ubus_req);
+
+	/*if (msg) {
+		char *result = blobmsg_format_json_indent(msg, true, -1);
+		BBF_ERR("Response from object %s: %s\n", tracker->object_name, result);
+		FREE(result);
+	}*/
+
+	blobmsg_add_string(&amin_data->bb, "result_callback", "true");
+
+	// Cancel the timeout for this request
+	uloop_timeout_cancel(&tracker->timeout);
+
+	// Decrement the pending request count
+	amin_data->pending_requests--;
+
+	// Check if all requests are done
+	if (amin_data->pending_requests == 0) {
+		BBF_ERR("All requests completed.");
+		ubus_send_reply(amin_data->ctx, &amin_data->amin_new_req, amin_data->bb.head);
+		ubus_complete_deferred_request(amin_data->ctx, &amin_data->amin_new_req, UBUS_STATUS_OK);
+		blob_buf_free(&amin_data->bb);
+	}
+}
+
+static void ubus_request_complete(struct ubus_request *req, int ret)
+{
+	BBF_ERR("Request completed with status: %d", ret);
+	struct request_tracker *tracker = container_of(req, struct request_tracker, ubus_req);
+
+	FREE(tracker);
+}
+
+static void invoke_object(const char *object_name)
+{
+	struct blob_buf req_buf = {0};
+	uint32_t id;
+
+	// Look up the object ID
+	if (ubus_lookup_id(amin_data->ctx, object_name, &id)) {
+		BBF_ERR("Failed to lookup object: %s", object_name);
+		return;
+	}
+
+	memset(&req_buf, 0, sizeof(struct blob_buf));
+	blob_buf_init(&req_buf, 0);
+
+	struct request_tracker *tracker = calloc(1, sizeof(struct request_tracker));
+	if (!tracker) {
+		BBF_ERR("Failed to allocate memory for request tracker");
+		blob_buf_free(&req_buf);
+		return;
+	}
+
+	snprintf(tracker->object_name, sizeof(tracker->object_name), "%s", object_name);
+
+	tracker->timeout.cb = request_timeout_handler;
+	uloop_timeout_set(&tracker->timeout, 5000);
+
+	// Invoke the method asynchronously
+	if (ubus_invoke_async(amin_data->ctx, id, "status", req_buf.head, &tracker->ubus_req)) {
+		BBF_ERR("Failed to invoke method asynchronously for object: %s", object_name);
+		uloop_timeout_cancel(&tracker->timeout);
+		free(tracker);
+	} else {
+		tracker->ubus_req.data_cb = ubus_result_callback;
+		tracker->ubus_req.complete_cb = ubus_request_complete;
+		ubus_complete_request_async(amin_data->ctx, &tracker->ubus_req);
+	}
+
+	blob_buf_free(&req_buf);
+}
+
+static int bbfdm_get_async_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
+		    struct ubus_request_data *req, const char *method __attribute__((unused)),
+		    struct blob_attr *msg)
+{
+	struct blob_attr *tb[__DM_GET_MAX];
+
+	bbfdm_data_t *data = calloc(1, sizeof(bbfdm_data_t));
+	struct bbfdm_context *u;
+
+	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
+	if (u == NULL) {
+		BBF_ERR("Failed to get the bbfdm context");
+		return UBUS_STATUS_UNKNOWN_ERROR;
+	}
+
+	memset(data, 0, sizeof(bbfdm_data_t));
+
+	if (blobmsg_parse(dm_get_policy, __DM_GET_MAX, tb, blob_data(msg), blob_len(msg))) {
+		BBF_ERR("Failed to parse blob");
+		return UBUS_STATUS_UNKNOWN_ERROR;
+	}
+
+	if (tb[DM_GET_PATH]) {
+		char *path = blobmsg_get_string(tb[DM_GET_PATH]);
+		snprintf(data->path, sizeof(data->path), "%s", path);
+	} else {
+		return UBUS_STATUS_INVALID_ARGUMENT;
+	}
+
+	data->ctx = ctx;
+	data->req = req;
+
+	fill_optional_data(data, tb[DM_GET_OPTIONAL]);
+
+	memset(&data->bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&data->bb, 0);
+
+	blobmsg_add_string(&data->bb, "path", data->path);
+
+	ubus_defer_request(ctx, req, &data->amin_new_req);
+
+	//bbfdm_get_value_async(&data);
+
+	const char *objects[] = { "wifi.dataelements.collector", "wifi.ap.test1_0", "wifi" };
+	int num_objects = sizeof(objects) / sizeof(objects[0]);
+
+	data->pending_requests = num_objects;
+	amin_data = data;
+
+	for (int i = 0; i < num_objects; i++) {
+		invoke_object(objects[i]);
+	}
+
+	return 0;
+}
+
 static const struct blobmsg_policy dm_schema_policy[] = {
 	[DM_SCHEMA_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
 	[DM_SCHEMA_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
@@ -735,6 +900,7 @@ static int bbfdm_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 
 static struct ubus_method bbf_methods[] = {
 	UBUS_METHOD("get", bbfdm_get_handler, dm_get_policy),
+	UBUS_METHOD("get_async", bbfdm_get_async_handler, dm_get_policy),
 	UBUS_METHOD("schema", bbfdm_schema_handler, dm_schema_policy),
 	UBUS_METHOD("instances", bbfdm_instances_handler, dm_instances_policy),
 	UBUS_METHOD("set", bbfdm_set_handler, dm_set_policy),

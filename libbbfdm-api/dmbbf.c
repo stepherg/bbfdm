@@ -1173,6 +1173,42 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	return 0;
 }
 
+static int get_ubus_value_async(struct dmctx *dmctx, struct dmnode *node)
+{
+	char *ubus_name = node->obj->checkdep;
+	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
+	struct blob_buf blob = {0};
+	int timeout = 5000;
+
+	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
+		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+		return 0;
+	}
+
+	if (node->obj->bbfdm_type == BBFDM_CWMP) {
+		timeout = 10000;
+	}
+
+	memset(&blob, 0, sizeof(struct blob_buf));
+	blob_buf_init(&blob, 0);
+
+	blobmsg_add_string(&blob, "path", in_path);
+	prepare_optional_table(dmctx, &blob);
+
+	BBF_ERR("UBUS GET: ubus call %s get '{\"path\":\"%s\"}'", ubus_name, in_path);
+	int res = ubus_call_blob_msg(ubus_name, "get", &blob, timeout, __get_ubus_value, dmctx);
+
+	blob_buf_free(&blob);
+
+	if (res)
+		return FAULT_9005;
+
+	if (dmctx->faultcode)
+		return dmctx->faultcode;
+
+	return 0;
+}
+
 static void __get_ubus_supported_dm(struct ubus_request *req, int type, struct blob_attr *msg)
 {
 	struct blob_attr *cur = NULL;
@@ -1876,6 +1912,139 @@ int dm_entry_get_value(struct dmctx *dmctx)
 		dmctx->checkleaf = (dmctx->iswildcard) ? plugin_leaf_wildcard_match : plugin_leaf_match;
 		dmctx->method_obj = mobj_get_value_in_param;
 		dmctx->method_param = mparam_get_value_in_param;
+		findparam_check = (dmctx->iswildcard) ? 1 : 0;
+	}
+
+	err = dm_browse(dmctx, &node, root, NULL, NULL);
+
+	return (findparam_check && dmctx->findparam) ? 0 : err;
+}
+
+/* **********
+ * get value async
+ * **********/
+static int get_value_async_obj(DMOBJECT_ARGS)
+{
+	return 0;
+}
+
+static int get_value_async_param(DMPARAM_ARGS)
+{
+	if (node->is_ubus_service) {
+		return get_ubus_value_async(dmctx, node);
+	} else {
+		char full_param[MAX_DM_PATH] = {0};
+		char *value = dmstrdup("");
+
+		snprintf(full_param, sizeof(full_param), "%s%s", node->current_object, leaf->parameter);
+
+		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
+
+		if ((leaf->dm_flags & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
+			value = dmstrdup("");
+		} else if (value && *value) {
+			if (leaf->dm_flags & DM_FLAG_REFERENCE) {
+				value = get_value_by_reference(dmctx, value);
+			} else {
+				value = check_value_by_type(value, leaf->type);
+			}
+		} else {
+			value = get_default_value_by_type(leaf->type);
+		}
+
+		fill_blob_param(&dmctx->bb, full_param, value, DMT_TYPE[leaf->type], leaf->dm_flags);
+	}
+
+	return 0;
+}
+
+static int mobj_get_value_async_in_param(DMOBJECT_ARGS)
+{
+	return 0;
+}
+static int mparam_get_value_async_in_param(DMPARAM_ARGS)
+{
+	if (node->is_ubus_service) {
+		int err = get_ubus_value_async(dmctx, node);
+		if (err)
+			return FAULT_9005;
+
+		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
+		dmctx->stop = (dmctx->iswildcard) ? false : true;
+	} else {
+		char full_param[MAX_DM_PATH] = {0};
+		char *value = dmstrdup("");
+
+		snprintf(full_param, sizeof(full_param), "%s%s", node->current_object, leaf->parameter);
+
+		if (dmctx->iswildcard) {
+			if (dm_strcmp_wildcard(dmctx->in_param, full_param) != 0)
+				return FAULT_9005;
+		} else {
+			if (DM_STRCMP(dmctx->in_param, full_param) != 0)
+				return FAULT_9005;
+		}
+
+		(leaf->getvalue)(full_param, dmctx, data, instance, &value);
+
+		if ((leaf->dm_flags & DM_FLAG_SECURE) && (dmctx->dm_type == BBFDM_CWMP)) {
+			value = dmstrdup("");
+		} else if (value && *value) {
+			if (leaf->dm_flags & DM_FLAG_REFERENCE) {
+				value = get_value_by_reference(dmctx, value);
+			} else
+				value = check_value_by_type(value, leaf->type);
+		} else {
+			value = get_default_value_by_type(leaf->type);
+		}
+
+		fill_blob_param(&dmctx->bb, full_param, value, DMT_TYPE[leaf->type], leaf->dm_flags);
+
+		dmctx->findparam = (dmctx->iswildcard) ? 1 : 0;
+		dmctx->stop = (dmctx->iswildcard) ? false : true;
+	}
+
+	return 0;
+}
+
+int dm_entry_get_value_async(struct dmctx *dmctx)
+{
+	int err = 0;
+	unsigned char findparam_check = 0;
+	DMOBJ *root = dmctx->dm_entryobj;
+	DMNODE node = {.current_object = ""};
+	unsigned int len = DM_STRLEN(dmctx->in_param);
+
+	if ((len > 2 && dmctx->in_param[len - 1] == '.' && dmctx->in_param[len - 2] == '*') ||
+			(dmctx->in_param[0] == '.' && len == 1))
+		return FAULT_9005;
+
+	if (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, root->obj) == 0) {
+		dmctx->inparam_isparam = 0;
+		dmctx->method_obj = get_value_obj;
+		dmctx->method_param = get_value_param;
+		dmctx->checkobj = NULL;
+		dmctx->checkleaf = NULL;
+		dmctx->findparam = 1;
+		dmctx->stop = 0;
+		findparam_check = 1;
+	} else if (dmctx->in_param[len - 1] == '.') {
+		dmctx->inparam_isparam = 0;
+		dmctx->findparam = 0;
+		dmctx->stop = 0;
+		dmctx->checkobj = (dmctx->iswildcard) ? plugin_obj_wildcard_match : plugin_obj_match;
+		dmctx->checkleaf = (dmctx->iswildcard) ? plugin_leaf_wildcard_match : plugin_leaf_match;
+		dmctx->method_obj = get_value_async_obj;
+		dmctx->method_param = get_value_async_param;
+		findparam_check = 1;
+	} else {
+		dmctx->inparam_isparam = 1;
+		dmctx->findparam = 0;
+		dmctx->stop = 0;
+		dmctx->checkobj = (dmctx->iswildcard) ? plugin_obj_wildcard_match : plugin_obj_match;
+		dmctx->checkleaf = (dmctx->iswildcard) ? plugin_leaf_wildcard_match : plugin_leaf_match;
+		dmctx->method_obj = mobj_get_value_async_in_param;
+		dmctx->method_param = mparam_get_value_async_in_param;
 		findparam_check = (dmctx->iswildcard) ? 1 : 0;
 	}
 

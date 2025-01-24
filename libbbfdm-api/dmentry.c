@@ -204,6 +204,11 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 	case BBF_GET_VALUE:
 		fault = dm_entry_get_value(ctx);
 		break;
+	case BBF_GET_VALUE_ASYNC:
+		BBF_ERR("ctx->in_param=%s", ctx->in_param);
+		fault = dm_entry_get_value_async(ctx);
+		BBF_ERR("fault=%d", fault);
+		break;
 	case BBF_SCHEMA:
 		fault = dm_entry_get_supported_dm(ctx);
 		break;
