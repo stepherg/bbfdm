@@ -266,113 +266,35 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 	return 0;
 }
 
-static bbfdm_data_t *amin_data = NULL;
-
-struct request_tracker {
-    struct ubus_request ubus_req;
-    struct uloop_timeout timeout;
-    char object_name[128];
-};
-
-static void request_timeout_handler(struct uloop_timeout *t)
+static void bbfdm_get_value_async(bbfdm_data_t *data)
 {
-	struct request_tracker *tracker = container_of(t, struct request_tracker, timeout);
+	int fault = 0;
 
-	BBF_ERR("Timeout occurred for object: %s\n", tracker->object_name);
+	memset(&data->bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&data->bb, 0);
 
-	ubus_abort_request(amin_data->ctx, &tracker->ubus_req);
+	bbf_init(&data->bbf_ctx);
 
-	// Add a timeout response to the consolidated response
-	blobmsg_add_string(&amin_data->bb, "timeout", "called");
+	data->bbf_ctx.in_param = data->path;
+	data->bbf_ctx.amin_ctx = data->ctx;
+	data->bbf_ctx.amin_new_req = &data->amin_new_req;
+	data->bbf_ctx.amin_bb = &data->bb;
 
-	// Decrement the pending request count
-	amin_data->pending_requests--;
+	fault = bbfdm_cmd_exec(&data->bbf_ctx, BBF_GET_VALUE_ASYNC);
+	if (data->bbf_ctx.amin_num_of_ms == 0) {
 
-	// Check if all requests are done
-	if (amin_data->pending_requests == 0) {
-		BBF_ERR("All requests completed.\n");
-		ubus_send_reply(amin_data->ctx, &amin_data->amin_new_req, amin_data->bb.head);
-		ubus_complete_deferred_request(amin_data->ctx, &amin_data->amin_new_req, UBUS_STATUS_OK);
-		blob_buf_free(&amin_data->bb);
-	}
+		BBF_ERR("No micro-services fault=%d && data->bbf_ctx.amin_num_of_ms=%d", fault, data->bbf_ctx.amin_num_of_ms);
+		blobmsg_add_string(&data->bb, "path", data->path);
+		blobmsg_add_string(&data->bb, "amin_num_of_ms", "0");
+		ubus_send_reply(data->ctx, &data->amin_new_req, data->bb.head);
+		blob_buf_free(&data->bb);
+		ubus_complete_deferred_request(data->ctx, &data->amin_new_req, UBUS_STATUS_OK);
 
-	// Clean up the tracker
-	FREE(tracker);
-}
-
-static void ubus_result_callback(struct ubus_request *req, int type, struct blob_attr *msg)
-{
-	struct request_tracker *tracker = container_of(req, struct request_tracker, ubus_req);
-
-	/*if (msg) {
-		char *result = blobmsg_format_json_indent(msg, true, -1);
-		BBF_ERR("Response from object %s: %s\n", tracker->object_name, result);
-		FREE(result);
-	}*/
-
-	blobmsg_add_string(&amin_data->bb, "result_callback", "true");
-
-	// Cancel the timeout for this request
-	uloop_timeout_cancel(&tracker->timeout);
-
-	// Decrement the pending request count
-	amin_data->pending_requests--;
-
-	// Check if all requests are done
-	if (amin_data->pending_requests == 0) {
-		BBF_ERR("All requests completed.");
-		ubus_send_reply(amin_data->ctx, &amin_data->amin_new_req, amin_data->bb.head);
-		ubus_complete_deferred_request(amin_data->ctx, &amin_data->amin_new_req, UBUS_STATUS_OK);
-		blob_buf_free(&amin_data->bb);
-	}
-}
-
-static void ubus_request_complete(struct ubus_request *req, int ret)
-{
-	BBF_ERR("Request completed with status: %d", ret);
-	struct request_tracker *tracker = container_of(req, struct request_tracker, ubus_req);
-
-	FREE(tracker);
-}
-
-static void invoke_object(const char *object_name)
-{
-	struct blob_buf req_buf = {0};
-	uint32_t id;
-
-	// Look up the object ID
-	if (ubus_lookup_id(amin_data->ctx, object_name, &id)) {
-		BBF_ERR("Failed to lookup object: %s", object_name);
-		return;
-	}
-
-	memset(&req_buf, 0, sizeof(struct blob_buf));
-	blob_buf_init(&req_buf, 0);
-
-	struct request_tracker *tracker = calloc(1, sizeof(struct request_tracker));
-	if (!tracker) {
-		BBF_ERR("Failed to allocate memory for request tracker");
-		blob_buf_free(&req_buf);
-		return;
-	}
-
-	snprintf(tracker->object_name, sizeof(tracker->object_name), "%s", object_name);
-
-	tracker->timeout.cb = request_timeout_handler;
-	uloop_timeout_set(&tracker->timeout, 5000);
-
-	// Invoke the method asynchronously
-	if (ubus_invoke_async(amin_data->ctx, id, "status", req_buf.head, &tracker->ubus_req)) {
-		BBF_ERR("Failed to invoke method asynchronously for object: %s", object_name);
-		uloop_timeout_cancel(&tracker->timeout);
-		free(tracker);
+		bbf_cleanup(&data->bbf_ctx);
 	} else {
-		tracker->ubus_req.data_cb = ubus_result_callback;
-		tracker->ubus_req.complete_cb = ubus_request_complete;
-		ubus_complete_request_async(amin_data->ctx, &tracker->ubus_req);
+		BBF_ERR("there are micro-services fault=%d && data->bbf_ctx.amin_num_of_ms=%d", fault, data->bbf_ctx.amin_num_of_ms);
+		BBF_ERR("Wait for answer");
 	}
-
-	blob_buf_free(&req_buf);
 }
 
 static int bbfdm_get_async_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
@@ -409,24 +331,9 @@ static int bbfdm_get_async_handler(struct ubus_context *ctx, struct ubus_object 
 
 	fill_optional_data(data, tb[DM_GET_OPTIONAL]);
 
-	memset(&data->bb, 0, sizeof(struct blob_buf));
-	blob_buf_init(&data->bb, 0);
-
-	blobmsg_add_string(&data->bb, "path", data->path);
-
 	ubus_defer_request(ctx, req, &data->amin_new_req);
 
-	//bbfdm_get_value_async(&data);
-
-	const char *objects[] = { "wifi.dataelements.collector", "wifi.ap.test1_0", "wifi" };
-	int num_objects = sizeof(objects) / sizeof(objects[0]);
-
-	data->pending_requests = num_objects;
-	amin_data = data;
-
-	for (int i = 0; i < num_objects; i++) {
-		invoke_object(objects[i]);
-	}
+	bbfdm_get_value_async(data);
 
 	return 0;
 }

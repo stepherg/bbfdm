@@ -1173,41 +1173,124 @@ static int get_ubus_value(struct dmctx *dmctx, struct dmnode *node)
 	return 0;
 }
 
+struct request_tracker {
+	struct dmctx *dmctx;
+    struct ubus_request ubus_req;
+    struct uloop_timeout timeout;
+    char object_name[128];
+};
+
+static void request_timeout_handler(struct uloop_timeout *t)
+{
+	struct request_tracker *tracker = container_of(t, struct request_tracker, timeout);
+
+	BBF_ERR("Timeout occurred for object: %s\n", tracker->object_name);
+
+	ubus_abort_request(tracker->dmctx->amin_ctx, &tracker->ubus_req);
+
+	// Add a timeout response to the consolidated response
+	blobmsg_add_string(tracker->dmctx->amin_bb, "timeout", "called");
+
+	// Decrement the pending request count
+	tracker->dmctx->amin_num_of_ms--;
+
+	// Check if all requests are done
+	if (tracker->dmctx->amin_num_of_ms == 0) {
+		BBF_ERR("All requests completed.\n");
+		ubus_send_reply(tracker->dmctx->amin_ctx, tracker->dmctx->amin_new_req, tracker->dmctx->amin_bb->head);
+		ubus_complete_deferred_request(tracker->dmctx->amin_ctx, tracker->dmctx->amin_new_req, UBUS_STATUS_OK);
+		blob_buf_free(tracker->dmctx->amin_bb);
+	}
+
+	// Clean up the tracker
+	FREE(tracker);
+}
+
+static void ubus_result_callback(struct ubus_request *req, int type, struct blob_attr *msg)
+{
+	struct request_tracker *tracker = container_of(req, struct request_tracker, ubus_req);
+
+	/*if (msg) {
+		char *result = blobmsg_format_json_indent(msg, true, -1);
+		BBF_ERR("Response from object '%s': %s\n", tracker->object_name, result);
+		FREE(result);
+	}*/
+
+	blobmsg_add_string(tracker->dmctx->amin_bb, "result_callback", tracker->object_name);
+
+	// Cancel the timeout for this request
+	uloop_timeout_cancel(&tracker->timeout);
+
+	// Decrement the pending request count
+	tracker->dmctx->amin_num_of_ms--;
+
+	// Check if all requests are done
+	if (tracker->dmctx->amin_num_of_ms == 0) {
+		BBF_ERR("All requests completed.");
+		ubus_send_reply(tracker->dmctx->amin_ctx, tracker->dmctx->amin_new_req, tracker->dmctx->amin_bb->head);
+		ubus_complete_deferred_request(tracker->dmctx->amin_ctx, tracker->dmctx->amin_new_req, UBUS_STATUS_OK);
+		blob_buf_free(tracker->dmctx->amin_bb);
+	}
+}
+
+static void ubus_request_complete(struct ubus_request *req, int ret)
+{
+	struct request_tracker *tracker = container_of(req, struct request_tracker, ubus_req);
+	BBF_ERR("Request completed for '%s' with status: %d", tracker->object_name, ret);
+	FREE(tracker);
+}
+
 static int get_ubus_value_async(struct dmctx *dmctx, struct dmnode *node)
 {
 	char *ubus_name = node->obj->checkdep;
 	char *in_path = (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, "Device") == 0) ? node->current_object : dmctx->in_param;
-	struct blob_buf blob = {0};
-	int timeout = 5000;
+	struct blob_buf req_buf = {0};
+	uint32_t id;
 
-	if ((dm_is_micro_service() == false) && ((dmctx->dm_type & node->obj->bbfdm_type) == false)) {
-		BBF_DEBUG("[%s] Ignore unsupported proto objects [%s], in[%d], datamodel[%d]", __func__, ubus_name, dmctx->dm_type, node->obj->bbfdm_type);
+	// Look up the object ID
+	if (ubus_lookup_id(dmctx->amin_ctx, ubus_name, &id)) {
+		BBF_ERR("Failed to lookup object: %s", ubus_name);
 		return 0;
 	}
 
-	if (node->obj->bbfdm_type == BBFDM_CWMP) {
-		timeout = 10000;
+	BBF_ERR("UBUS GET: ubus call %s get '{\"path\":\"%s\"}'", ubus_name, in_path);
+	dmctx->amin_num_of_ms++;
+
+	memset(&req_buf, 0, sizeof(struct blob_buf));
+	blob_buf_init(&req_buf, 0);
+
+	blobmsg_add_string(&req_buf, "path", in_path);
+	prepare_optional_table(dmctx, &req_buf);
+
+	struct request_tracker *tracker = calloc(1, sizeof(struct request_tracker));
+	if (!tracker) {
+		BBF_ERR("Failed to allocate memory for request tracker");
+		blob_buf_free(&req_buf);
+		return 0;
 	}
 
-	memset(&blob, 0, sizeof(struct blob_buf));
-	blob_buf_init(&blob, 0);
+	snprintf(tracker->object_name, sizeof(tracker->object_name), "%s", ubus_name);
 
-	blobmsg_add_string(&blob, "path", in_path);
-	prepare_optional_table(dmctx, &blob);
+	tracker->dmctx = dmctx;
 
-	BBF_ERR("UBUS GET: ubus call %s get '{\"path\":\"%s\"}'", ubus_name, in_path);
-	int res = ubus_call_blob_msg(ubus_name, "get", &blob, timeout, __get_ubus_value, dmctx);
+	tracker->timeout.cb = request_timeout_handler;
+	uloop_timeout_set(&tracker->timeout, 5000);
 
-	blob_buf_free(&blob);
+	// Invoke the method asynchronously
+	if (ubus_invoke_async(dmctx->amin_ctx, id, "get", req_buf.head, &tracker->ubus_req)) {
+		BBF_ERR("Failed to invoke method asynchronously for object: %s", ubus_name);
+		uloop_timeout_cancel(&tracker->timeout);
+		FREE(tracker);
+	} else {
+		tracker->ubus_req.data_cb = ubus_result_callback;
+		tracker->ubus_req.complete_cb = ubus_request_complete;
+		ubus_complete_request_async(dmctx->amin_ctx, &tracker->ubus_req);
+	}
 
-	if (res)
-		return FAULT_9005;
-
-	if (dmctx->faultcode)
-		return dmctx->faultcode;
-
+	blob_buf_free(&req_buf);
 	return 0;
 }
+
 
 static void __get_ubus_supported_dm(struct ubus_request *req, int type, struct blob_attr *msg)
 {
@@ -2021,8 +2104,8 @@ int dm_entry_get_value_async(struct dmctx *dmctx)
 
 	if (dmctx->in_param[0] == '\0' || rootcmp(dmctx->in_param, root->obj) == 0) {
 		dmctx->inparam_isparam = 0;
-		dmctx->method_obj = get_value_obj;
-		dmctx->method_param = get_value_param;
+		dmctx->method_obj = get_value_async_obj;
+		dmctx->method_param = get_value_async_param;
 		dmctx->checkobj = NULL;
 		dmctx->checkleaf = NULL;
 		dmctx->findparam = 1;

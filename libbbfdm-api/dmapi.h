@@ -195,7 +195,11 @@ struct dmctx {
 	unsigned int dm_type;
 	unsigned char inparam_isparam;
 	unsigned char findparam;
-	unsigned int amin_num_of_ms;
+
+	unsigned int amin_num_of_ms; //new
+	struct ubus_context *amin_ctx; //new
+	struct ubus_request_data *amin_new_req; //new
+	struct blob_buf *amin_bb; //new
 
 	char *in_param;
 	char *in_value;
