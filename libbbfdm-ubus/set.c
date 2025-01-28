@@ -17,10 +17,9 @@
 int bbfdm_set_value(bbfdm_data_t *data)
 {
 	struct pvNode *pv = NULL;
-	void *array = NULL;
 	int fault = 0;
 
-	array = blobmsg_open_array(&data->bb, "results");
+	void *array = blobmsg_open_array(&data->bb, "results");
 
 	list_for_each_entry(pv, data->plist, list) {
 		data->bbf_ctx.in_param = pv->param;
@@ -43,39 +42,8 @@ int bbfdm_set_value(bbfdm_data_t *data)
 	return fault;
 }
 
-static int set_resolved_paths(bbfdm_data_t *data, char *path, char *value, char *type, struct list_head *pv_list)
+int fill_pvlist_set(char *param_name, char *param_value, char *data_type, struct blob_attr *blob_table, struct list_head *pv_list)
 {
-	int fault = 0;
-
-	if (!path || !value || !pv_list)
-		return -1;
-
-	LIST_HEAD(resolved_paths);
-	bbf_sub_init(&data->bbf_ctx);
-
-	fault = get_resolved_paths(&data->bbf_ctx, path, &resolved_paths);
-
-	if (!fault) {
-		struct pathNode *p;
-
-		list_for_each_entry(p, &resolved_paths, list) {
-			add_pv_list(p->path, value, type, pv_list);
-		}
-	}
-
-	bbf_sub_cleanup(&data->bbf_ctx);
-	free_path_list(&resolved_paths);
-
-	return fault;
-}
-
-int fill_pvlist_set(bbfdm_data_t *data, char *param_name, char *param_value, char *type, struct blob_attr *blob_table, struct list_head *pv_list)
-{
-	struct blob_attr *attr;
-	struct blobmsg_hdr *hdr;
-	char path[MAX_DM_PATH], value[MAX_DM_VALUE];
-	int fault = 0;
-
 	size_t plen = DM_STRLEN(param_name);
 	if (plen == 0)
 		return USP_FAULT_INVALID_PATH;
@@ -86,14 +54,17 @@ int fill_pvlist_set(bbfdm_data_t *data, char *param_name, char *param_value, cha
 	if (param_name[plen - 1] == '.')
 		return USP_FAULT_INVALID_PATH;
 
-	fault = set_resolved_paths(data, param_name, param_value, type, pv_list);
-	if (fault)
-		return fault;
+	add_pv_list(param_name, param_value, data_type, pv_list);
+	return 0;
 
 blob__table:
 
 	if (!blob_table)
 		return 0;
+
+	struct blob_attr *attr;
+	struct blobmsg_hdr *hdr;
+	char path[MAX_DM_PATH], value[MAX_DM_VALUE];
 
 	size_t tlen = (size_t)blobmsg_data_len(blob_table);
 
@@ -122,9 +93,7 @@ blob__table:
 		}
 
 		snprintf(path, MAX_DM_PATH, "%s%s", param_name, (char *)hdr->name);
-		fault = set_resolved_paths(data, path, value, NULL, pv_list);
-		if (fault)
-			return fault;
+		add_pv_list(path, value, NULL, pv_list);
 	}
 
 	return 0;

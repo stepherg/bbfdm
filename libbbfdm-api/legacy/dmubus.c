@@ -43,19 +43,6 @@ static json_object *json_res = NULL;
 
 static const struct dm_ubus_cache_entry * dm_ubus_cache_lookup(unsigned hash);
 
-static struct ubus_context *dm_libubus_init()
-{
-	return ubus_connect(NULL);
-}
-
-static void dm_libubus_free()
-{
-	if (ubus_ctx) {
-		ubus_free(ubus_ctx);
-		ubus_ctx = NULL;
-	}
-}
-
 static void prepare_blob_message(struct blob_buf *b, const struct ubus_arg u_args[], int u_args_size)
 {
 	if (!b)
@@ -103,11 +90,8 @@ static int __dm_ubus_call_internal(const char *obj, const char *method, int time
 	json_res = NULL;
 
 	if (ubus_ctx == NULL) {
-		ubus_ctx = dm_libubus_init();
-		if (ubus_ctx == NULL) {
-			BBF_ERR("UBUS context is null");
-			return -1;
-		}
+		BBF_ERR("UBUS context is null");
+		return -1;
 	}
 
 	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
@@ -332,11 +316,8 @@ static int dmubus_call_blob_internal(const char *obj, const char *method, json_o
 	if (resp) *resp = NULL;
 
 	if (ubus_ctx == NULL) {
-		ubus_ctx = dm_libubus_init();
-		if (ubus_ctx == NULL) {
-			printf("UBUS context is null\n\r");
-			return -1;
-		}
+		BBF_ERR("UBUS context is null");
+		return -1;
 	}
 
 	memset(&blob, 0, sizeof(struct blob_buf));
@@ -395,11 +376,8 @@ static int dmubus_call_blob_msg_internal(const char *obj, const char *method, st
 		*resp = NULL;
 
 	if (ubus_ctx == NULL) {
-		ubus_ctx = dm_libubus_init();
-		if (ubus_ctx == NULL) {
-			BBF_ERR("UBUS context is null");
-			return -1;
-		}
+		BBF_ERR("UBUS context is null");
+		return -1;
 	}
 
 	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
@@ -578,9 +556,8 @@ bool dmubus_object_method_exists(const char *object)
 		return false;
 
 	if (ubus_ctx == NULL) {
-		ubus_ctx = dm_libubus_init();
-		if (ubus_ctx == NULL)
-			return false;
+		BBF_ERR("UBUS context is null");
+		return false;
 	}
 
 	snprintf(ubus_object, sizeof(ubus_object), "%s", object);
@@ -601,8 +578,17 @@ bool dmubus_object_method_exists(const char *object)
 	return true;
 }
 
-void dmubus_free()
+void dm_ubus_init(struct dmctx *bbf_ctx)
+{
+	bbf_ctx->ubus_ctx = ubus_ctx = ubus_connect(NULL);
+}
+
+void dm_ubus_free(struct dmctx *bbf_ctx)
 {
 	dm_ubus_cache_entry_free();
-	dm_libubus_free();
+
+	if (bbf_ctx->ubus_ctx) {
+		ubus_free(bbf_ctx->ubus_ctx);
+		bbf_ctx->ubus_ctx = ubus_ctx = NULL;
+	}
 }

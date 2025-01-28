@@ -62,7 +62,8 @@ int dmubus_call_blob_set(const char *obj, const char *method, json_object *value
 
 int dmubus_call_blob_msg_set(const char *obj, const char *method, struct blob_buf *blob_msg);
 
-void dmubus_free();
+void dm_ubus_init(struct dmctx *bbf_ctx);
+void dm_ubus_free(struct dmctx *bbf_ctx);
 
 bool dmubus_object_method_exists(const char *obj);
 

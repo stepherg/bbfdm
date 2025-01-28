@@ -1,37 +1,38 @@
 {
   "daemon": {
     "enable": "1",
-    "service_name": "netmngr",
+    "service_name": "core",
     "unified_daemon": false,
     "services": [
       {
         "parent_dm": "Device.",
-        "object": "IP"
+        "object": "LANConfigSecurity"
       },
       {
         "parent_dm": "Device.",
-        "object": "GRE"
+        "object": "Schedules"
       },
       {
         "parent_dm": "Device.",
-        "object": "PPP"
+        "object": "Security",
+        "proto": "cwmp"
       },
       {
         "parent_dm": "Device.",
-        "object": "Routing"
+        "object": "GatewayInfo"
       },
       {
         "parent_dm": "Device.",
-        "object": "RouterAdvertisement"
+        "object": "RootDataModelVersion"
       },
       {
         "parent_dm": "Device.",
-        "object": "IPv6rd"
-      },
-      {
-        "parent_dm": "Device.",
-        "object": "InterfaceStack"
-      }
+        "object": "Reboot()"
+        },
+        {
+          "parent_dm": "Device.",
+          "object": "FactoryReset()"
+        }
     ],
     "config": {
       "loglevel": "3"

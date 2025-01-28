@@ -299,20 +299,20 @@ static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmc
 ***********************************************************************************************************************************/
 /* *** Device.Security. *** */
 DMOBJ tSecurityObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_CWMP, NULL},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_CWMP},
 {0}
 };
 
 DMLEAF tSecurityParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"CertificateNumberOfEntries", &DMREAD, DMT_UNINT, get_Security_CertificateNumberOfEntries, NULL, BBFDM_CWMP},
 {0}
 };
 
 /* *** Device.Security.Certificate.{i}. *** */
 DMLEAF tSecurityCertificateParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 //{"Enable", &DMWRITE, DMT_BOOL, get_SecurityCertificate_Enable, set_SecurityCertificate_Enable, BBFDM_CWMP},
 {"LastModif", &DMREAD, DMT_TIME, get_SecurityCertificate_LastModif, NULL, BBFDM_CWMP},
 {"SerialNumber", &DMREAD, DMT_STRING, get_SecurityCertificate_SerialNumber, NULL, BBFDM_CWMP, DM_FLAG_UNIQUE},

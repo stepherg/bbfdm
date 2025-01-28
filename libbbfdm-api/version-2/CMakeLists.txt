@@ -8,7 +8,7 @@ FILE(GLOB BBFDM_API_SOURCES *.c)
 
 ADD_LIBRARY(bbfdm-api-v2 SHARED ${BBFDM_API_SOURCES})
 
-TARGET_LINK_LIBRARIES(bbfdm-api-v2 uci ubus)
+TARGET_LINK_LIBRARIES(bbfdm-api-v2 uci ubus ubox)
 
 INSTALL(TARGETS bbfdm-api-v2
 		LIBRARY DESTINATION usr/lib)

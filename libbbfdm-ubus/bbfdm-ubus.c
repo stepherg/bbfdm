@@ -1,7 +1,7 @@
 /*
  * bbfdm-ubus.c: bbfdm-ubus API to expose Data Model over ubus
  *
- * Copyright (C) 2023-2024 IOPSYS Software Solutions AB. All rights reserved.
+ * Copyright (C) 2023-2025 IOPSYS Software Solutions AB. All rights reserved.
  *
  * Author: Vivek Dutta <vivek.dutta@iopsys.eu>
  * Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
@@ -24,16 +24,10 @@
 #include "operate.h"
 #include "add_delete.h"
 #include "events.h"
-#include "pretty_print.h"
 #include "get_helper.h"
 #include "plugin.h"
 
-#define BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH "/etc/bbfdm/services"
-#define BBFDM_DEFAULT_MODULES_PATH "/usr/share/bbfdm"
-#define BBFDM_DEFAULT_PLUGINS_PATH BBFDM_DEFAULT_MODULES_PATH"/plugins"
-#define BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH BBFDM_DEFAULT_MODULES_PATH"/micro_services"
-
-LIST_HEAD(head_registered_service);
+#define BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH "/usr/share/bbfdm/micro_services"
 
 // Global variables
 static void *deamon_lib_handle = NULL;
@@ -42,12 +36,8 @@ static void bbfdm_ctx_cleanup(struct bbfdm_context *u)
 {
 	bbf_global_clean(DEAMON_DM_ROOT_OBJ);
 
-	free_path_list(&u->config.list_objs);
-
-	/* Main daemon */
-	if (dm_is_micro_service() == false) {
-		free_services_from_list(&head_registered_service);
-	}
+	free_path_list(&u->linker_list);
+	free_path_list(&u->obj_list);
 
 	/* DotSo Plugin */
 	bbfdm_free_dotso_plugin(u, &deamon_lib_handle);
@@ -63,8 +53,10 @@ static bool is_sync_operate_cmd(bbfdm_data_t *data __attribute__((unused)))
 
 static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 {
-	struct blob_attr *attr;
-	size_t rem;
+	struct blob_attr *tb[1] = {0};
+	const struct blobmsg_policy p[1] = {
+			{ "proto", BLOBMSG_TYPE_STRING }
+	};
 
 	if (!data)
 		return;
@@ -74,19 +66,49 @@ static void fill_optional_data(bbfdm_data_t *data, struct blob_attr *msg)
 	if (!msg)
 		return;
 
-	blobmsg_for_each_attr(attr, msg, rem) {
+	blobmsg_parse(p, 1, tb, blobmsg_data(msg), blobmsg_len(msg));
 
-		if (is_str_eq(blobmsg_name(attr), "proto")) {
-			const char *val = blobmsg_get_string(attr);
-			data->bbf_ctx.dm_type = get_proto_type(val);
-		}
+	if (tb[0]) {
+		const char *val = blobmsg_get_string(tb[0]);
+		data->bbf_ctx.dm_type = get_proto_type(val);
+		BBF_DEBUG("Proto:|%s|", (data->bbf_ctx.dm_type == BBFDM_BOTH) ? "both" : (data->bbf_ctx.dm_type == BBFDM_CWMP) ? "cwmp" : "usp");
+	}
+}
 
-		if (is_str_eq(blobmsg_name(attr), "format"))
-			data->is_raw = is_str_eq(blobmsg_get_string(attr), "raw") ? true : false;
+static char *get_value_by_reference_path(struct dmctx *ctx, char *reference_path)
+{
+	char path[MAX_DM_PATH] = {0};
+	char key_name[256], key_value[256];
+	char *reference_value = NULL;
+	regmatch_t pmatch[2];
+
+	if (!ctx || !reference_path)
+		return NULL;
+
+	if (!match(reference_path, "\\[(.*?)\\]", 2, pmatch))
+		return NULL;
+
+	snprintf(path, pmatch[0].rm_so + 1, "%s", reference_path);
+	int len = DM_STRLEN(path);
+	if (!len)
+		return NULL;
+
+	char *match_str = reference_path + pmatch[1].rm_so;
+	if (DM_STRLEN(match_str) == 0)
+		return NULL;
+
+	int n = sscanf(match_str, "%255[^=]==\"%255[^\"]\"", key_name, key_value);
+	if (n != 2) {
+		n = sscanf(match_str, "%255[^=]==%255[^]]", key_name, key_value);
+		if (n != 2)
+			return NULL;
 	}
 
-	char *proto = (data->bbf_ctx.dm_type == BBFDM_BOTH) ? "both" : (data->bbf_ctx.dm_type == BBFDM_CWMP) ? "cwmp" : "usp";
-	BBF_DEBUG("Proto:|%s|, is_raw:|%d|", proto, data->is_raw);
+	snprintf(path + len, sizeof(path) - len, "*.%s", key_name);
+
+	adm_entry_get_reference_param(ctx, path, key_value, &reference_value);
+
+	return reference_value;
 }
 
 static void async_req_free(struct bbfdm_async_req *r)
@@ -105,11 +127,9 @@ static void async_complete_cb(struct uloop_process *p, __attribute__((unused)) i
 		ubus_send_reply(r->ctx, &r->req, bb->head);
 		BBF_INFO("pid(%d) blob data sent raw(%zu)", r->process.pid, blob_raw_len(bb->head));
 		ubus_complete_deferred_request(r->ctx, &r->req, 0);
-
 		munmap(r->result, DEF_IPC_DATA_LEN);
 		async_req_free(r);
 	}
-
 }
 
 static struct bbfdm_async_req *async_req_new(void)
@@ -124,7 +144,7 @@ static struct bbfdm_async_req *async_req_new(void)
 	return r;
 }
 
-static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t *data, void *d), bool is_operate)
+static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t *data, void *d))
 {
 	struct bbfdm_async_req *r = NULL;
 	pid_t child;
@@ -177,7 +197,6 @@ static int bbfdm_start_deferred(bbfdm_data_t *data, void (*EXEC_CB)(bbfdm_data_t
 	r->ctx = data->ctx;
 	r->process.pid = child;
 	r->process.cb = async_complete_cb;
-	r->is_operate = is_operate;
 	uloop_process_add(&r->process);
 	ubus_defer_request(data->ctx, data->req, &r->req);
 	return 0;
@@ -194,26 +213,15 @@ err_out:
 
 static const struct blobmsg_policy dm_get_policy[] = {
 	[DM_GET_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
-	[DM_GET_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
-	[DM_GET_MAXDEPTH] = { .name = "maxdepth", .type = BLOBMSG_TYPE_INT32 },
 	[DM_GET_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE},
 };
 
-static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj __attribute__((unused)),
-		    struct ubus_request_data *req, const char *method __attribute__((unused)),
-		    struct blob_attr *msg)
+static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj,
+		    struct ubus_request_data *req, const char *method, struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_GET_MAX];
 	LIST_HEAD(paths_list);
 	bbfdm_data_t data;
-	uint8_t maxdepth = 0;
-	struct bbfdm_context *u;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		BBF_ERR("Failed to get the bbfdm context");
-		return UBUS_STATUS_UNKNOWN_ERROR;
-	}
 
 	memset(&data, 0, sizeof(bbfdm_data_t));
 
@@ -222,37 +230,20 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 		return UBUS_STATUS_UNKNOWN_ERROR;
 	}
 
-	if (!(tb[DM_GET_PATH]) && !(tb[DM_GET_PATHS]))
+	if (!tb[DM_GET_PATH])
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	if (tb[DM_GET_PATH]) {
-		char *path = blobmsg_get_string(tb[DM_GET_PATH]);
-		add_path_list(path, &paths_list);
-	}
-
-	if (tb[DM_GET_PATHS]) {
-		struct blob_attr *paths = tb[DM_GET_PATHS];
-		struct blob_attr *path = NULL;
-		size_t rem;
-
-		blobmsg_for_each_attr(path, paths, rem) {
-			char *path_str = blobmsg_get_string(path);
-
-			add_path_list(path_str, &paths_list);
-		}
-	}
-
-	if (tb[DM_GET_MAXDEPTH])
-		maxdepth = blobmsg_get_u32(tb[DM_GET_MAXDEPTH]);
+	add_path_list(blobmsg_get_string(tb[DM_GET_PATH]), &paths_list);
 
 	data.ctx = ctx;
 	data.req = req;
 	data.plist = &paths_list;
-	data.depth = maxdepth;
 
 	fill_optional_data(&data, tb[DM_GET_OPTIONAL]);
 
-	bbfdm_get_value(&data, NULL);
+	BBF_INFO("ubus method|%s|, name|%s|", method, obj->name);
+
+	bbfdm_get(&data, BBF_GET_VALUE);
 
 	free_path_list(&paths_list);
 	return 0;
@@ -260,7 +251,6 @@ static int bbfdm_get_handler(struct ubus_context *ctx, struct ubus_object *obj _
 
 static const struct blobmsg_policy dm_schema_policy[] = {
 	[DM_SCHEMA_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
-	[DM_SCHEMA_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
 	[DM_SCHEMA_FIRST_LEVEL] = { .name = "first_level", .type = BLOBMSG_TYPE_BOOL},
 	[DM_SCHEMA_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE},
 };
@@ -274,39 +264,24 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 	bbfdm_data_t data;
 	struct bbfdm_context *u;
 
+	memset(&data, 0, sizeof(bbfdm_data_t));
+
 	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
 	if (u == NULL) {
 		BBF_ERR("Failed to get the bbfdm context");
 		return UBUS_STATUS_UNKNOWN_ERROR;
 	}
 
-	memset(&data, 0, sizeof(bbfdm_data_t));
-
 	if (blobmsg_parse(dm_schema_policy, __DM_SCHEMA_MAX, tb, blob_data(msg), blob_len(msg))) {
 		BBF_ERR("Failed to parse blob");
 		return UBUS_STATUS_UNKNOWN_ERROR;
 	}
 
-	if (!(tb[DM_SCHEMA_PATH]) && !(tb[DM_SCHEMA_PATHS]))
+	if (!tb[DM_SCHEMA_PATH])
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	if (tb[DM_SCHEMA_PATH]) {
-		char *path = blobmsg_get_string(tb[DM_SCHEMA_PATH]);
-
-		add_path_list(path, &paths_list);
-	}
-
-	if (tb[DM_SCHEMA_PATHS]) {
-		struct blob_attr *paths = tb[DM_GET_PATHS];
-		struct blob_attr *path = NULL;
-		size_t rem;
-
-		blobmsg_for_each_attr(path, paths, rem) {
-			char *path_str = blobmsg_get_string(path);
-
-			add_path_list(path_str, &paths_list);
-		}
-	}
+	char *path = blobmsg_get_string(tb[DM_SCHEMA_PATH]);
+	add_path_list(path, &paths_list);
 
 	fill_optional_data(&data, tb[DM_SCHEMA_OPTIONAL]);
 
@@ -322,12 +297,16 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 
 #ifdef BBF_SCHEMA_FULL_TREE
 	data.bbf_ctx.isinfo = true;
-	bbfdm_get_supported_dm(&data);
+	bbfdm_get(&data, BBF_SCHEMA);
 #else
-	if (dm_type == BBFDM_CWMP)
-		bbfdm_get_names(&data);
-	else
-		bbfdm_get_supported_dm(&data);
+	if (dm_type == BBFDM_CWMP) {
+		char *service_name = strdup(u->config.service_name);
+		data.bbf_ctx.in_value = (dm_type == BBFDM_CWMP) ? service_name : NULL;
+		bbfdm_get(&data, BBF_GET_NAME);
+		FREE(service_name);
+	} else {
+		bbfdm_get(&data, BBF_SCHEMA);
+	}
 #endif
 
 	free_path_list(&paths_list);
@@ -336,8 +315,6 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 
 static const struct blobmsg_policy dm_instances_policy[] = {
 	[DM_INSTANCES_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
-	[DM_INSTANCES_PATHS] = { .name = "paths", .type = BLOBMSG_TYPE_ARRAY },
-	[DM_INSTANCES_FIRST_LEVEL] = { .name = "first_level", .type = BLOBMSG_TYPE_BOOL },
 	[DM_INSTANCES_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
@@ -356,34 +333,19 @@ static int bbfdm_instances_handler(struct ubus_context *ctx, struct ubus_object 
 		return UBUS_STATUS_UNKNOWN_ERROR;
 	}
 
-	if (!(tb[DM_INSTANCES_PATH]) && !(tb[DM_INSTANCES_PATHS]))
+	if (!tb[DM_INSTANCES_PATH])
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	if (tb[DM_INSTANCES_PATH]) {
-		char *path = blobmsg_get_string(tb[DM_INSTANCES_PATH]);
-		add_path_list(path, &paths_list);
-	}
-
-	if (tb[DM_INSTANCES_PATHS]) {
-		struct blob_attr *paths = tb[DM_INSTANCES_PATHS];
-		struct blob_attr *path = NULL;
-		size_t rem;
-
-		blobmsg_for_each_attr(path, paths, rem) {
-			char *path_str = blobmsg_get_string(path);
-
-			add_path_list(path_str, &paths_list);
-		}
-	}
+	char *path = blobmsg_get_string(tb[DM_INSTANCES_PATH]);
+	add_path_list(path, &paths_list);
 
 	data.ctx = ctx;
 	data.req = req;
-	data.bbf_ctx.nextlevel = (tb[DM_INSTANCES_FIRST_LEVEL]) ? blobmsg_get_bool(tb[DM_INSTANCES_FIRST_LEVEL]) : false;
 	data.plist = &paths_list;
 
 	fill_optional_data(&data, tb[DM_INSTANCES_OPTIONAL]);
 
-	bbfdm_get_instances(&data);
+	bbfdm_get(&data, BBF_INSTANCES);
 
 	free_path_list(&paths_list);
 	return 0;
@@ -402,7 +364,6 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	    struct blob_attr *msg)
 {
 	struct blob_attr *tb[__DM_SET_MAX] = {NULL};
-	char path[PATH_MAX] = {'\0'};
 	bbfdm_data_t data;
 	int fault = 0;
 	LIST_HEAD(pv_list);
@@ -420,22 +381,17 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	if (!tb[DM_SET_VALUE] && !tb[DM_SET_OBJ_PATH])
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	snprintf(path, PATH_MAX, "%s", (char *)blobmsg_data(tb[DM_SET_PATH]));
+	char *path = blobmsg_get_string(tb[DM_SET_PATH]);
+	char *value = blobmsg_get_string(tb[DM_SET_VALUE]);
+	char *type = tb[DM_SET_TYPE] ? blobmsg_get_string(tb[DM_SET_TYPE]) : NULL;
 
 	fill_optional_data(&data, tb[DM_SET_OPTIONAL]);
 
 	BBF_INFO("ubus method|%s|, name|%s|, path(%s)", method, obj->name, path);
 
 	blob_buf_init(&data.bb, 0);
-	bbf_init(&data.bbf_ctx);
 
-	data.ctx = ctx;
-	data.bbf_ctx.in_param = path;
-
-	char *value = tb[DM_SET_VALUE] ? blobmsg_get_string(tb[DM_SET_VALUE]) : NULL;
-	char *type = tb[DM_SET_TYPE] ? blobmsg_get_string(tb[DM_SET_TYPE]) : NULL;
-
-	fault = fill_pvlist_set(&data, path, value, type, tb[DM_SET_OBJ_PATH], &pv_list);
+	fault = fill_pvlist_set(path, value, type, tb[DM_SET_OBJ_PATH], &pv_list);
 	if (fault) {
 		BBF_ERR("Fault in fill pvlist set path |%s| : |%d|", data.bbf_ctx.in_param, fault);
 		fill_err_code_array(&data, fault);
@@ -451,14 +407,16 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	data.plist = &pv_list;
 
+	bbf_init(&data.bbf_ctx);
 	fault = bbfdm_set_value(&data);
 
-end:
-	if ((data.bbf_ctx.dm_type == BBFDM_BOTH) && (dm_is_micro_service() == false)) {
+	if (data.bbf_ctx.dm_type == BBFDM_BOTH) {
 		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, true);
 	}
 
 	bbf_cleanup(&data.bbf_ctx);
+
+end:
 	free_pv_list(&pv_list);
 
 	ubus_send_reply(ctx, req, data.bb.head);
@@ -468,7 +426,7 @@ end:
 }
 
 static const struct blobmsg_policy dm_operate_policy[__DM_OPERATE_MAX] = {
-	[DM_OPERATE_COMMAND] = { .name = "command", .type = BLOBMSG_TYPE_STRING },
+	[DM_OPERATE_COMMAND] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
 	[DM_OPERATE_COMMAND_KEY] = { .name = "command_key", .type = BLOBMSG_TYPE_STRING },
 	[DM_OPERATE_INPUT] = { .name = "input", .type = BLOBMSG_TYPE_TABLE },
 	[DM_OPERATE_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
@@ -512,7 +470,7 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 	if (is_sync_operate_cmd(&data)) {
 		bbfdm_operate_cmd(&data, NULL);
 	} else {
-		bbfdm_start_deferred(&data, bbfdm_operate_cmd, true);
+		bbfdm_start_deferred(&data, bbfdm_operate_cmd);
 	}
 
 	FREE(str);
@@ -567,7 +525,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 		snprintf(path, PATH_MAX, "%s%s.", (char *)blobmsg_data(tb[DM_ADD_PATH]), data.bbf_ctx.addobj_instance);
 
-		fault = fill_pvlist_set(&data, path, NULL, NULL, tb[DM_ADD_OBJ_PATH], &pv_list);
+		fault = fill_pvlist_set(path, NULL, NULL, tb[DM_ADD_OBJ_PATH], &pv_list);
 		if (fault) {
 			BBF_ERR("Fault in fill pvlist set path |%s|", path);
 			fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
@@ -583,7 +541,7 @@ int bbfdm_add_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	}
 
 end:
-	if ((data.bbf_ctx.dm_type == BBFDM_BOTH) && (dm_is_micro_service() == false)) {
+	if (data.bbf_ctx.dm_type == BBFDM_BOTH) {
 		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, true);
 	}
 
@@ -651,7 +609,7 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 
 	fault = create_del_response(&data);
 
-	if ((data.bbf_ctx.dm_type == BBFDM_BOTH) && (dm_is_micro_service() == false)) {
+	if (data.bbf_ctx.dm_type == BBFDM_BOTH) {
 		bbf_entry_services(data.bbf_ctx.dm_type, (!fault) ? true : false, true);
 	}
 
@@ -664,44 +622,23 @@ int bbfdm_del_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	return 0;
 }
 
-static int bbfdm_service_handler(struct ubus_context *ctx, struct ubus_object *obj,
-			    struct ubus_request_data *req __attribute__((unused)), const char *method,
-			    struct blob_attr *msg)
+int bbfdm_ref_path_handler(struct ubus_context *ctx, struct ubus_object *obj,
+			struct ubus_request_data *req, const char *method,
+			struct blob_attr *msg)
 {
-	struct blob_buf bb;
-	void *array = NULL;
-
-	memset(&bb, 0, sizeof(struct blob_buf));
-	blob_buf_init(&bb, 0);
-
-	array = blobmsg_open_array(&bb, "registered_service");
-	get_list_of_registered_service(&head_registered_service, &bb);
-	blobmsg_close_array(&bb, array);
-
-	ubus_send_reply(ctx, req, bb.head);
-	blob_buf_free(&bb);
-
-	return 0;
-}
-
-enum {
-	BBF_NOTIFY_NAME,
-	BBF_NOTIFY_PRAMS,
-	__BBF_NOTIFY_MAX,
-};
-
-static const struct blobmsg_policy dm_notify_event_policy[] = {
-	[BBF_NOTIFY_NAME] = { .name = "name", .type = BLOBMSG_TYPE_STRING },
-	[BBF_NOTIFY_PRAMS] = { .name = "input", .type = BLOBMSG_TYPE_ARRAY },
-};
-
-static int bbfdm_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
-			    struct ubus_request_data *req __attribute__((unused)), const char *method,
-			    struct blob_attr *msg)
-{
-	struct blob_attr *tb[__BBF_NOTIFY_MAX] = {NULL};
-	char method_name[256] = {0};
+	struct blob_attr *tb[__DM_GET_MAX];
 	struct bbfdm_context *u;
+	struct pvNode *node = NULL;
+	struct blob_buf bb;
+	bool reference_value_found = false;
+
+	if (blobmsg_parse(dm_get_policy, __DM_GET_MAX, tb, blob_data(msg), blob_len(msg))) {
+		BBF_ERR("Failed to parse blob");
+		return UBUS_STATUS_UNKNOWN_ERROR;
+	}
+
+	if (!tb[DM_GET_PATH])
+		return UBUS_STATUS_INVALID_ARGUMENT;
 
 	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
 	if (u == NULL) {
@@ -709,17 +646,86 @@ static int bbfdm_notify_event(struct ubus_context *ctx, struct ubus_object *obj,
 		return UBUS_STATUS_UNKNOWN_ERROR;
 	}
 
-	if (blobmsg_parse(dm_notify_event_policy, __BBF_NOTIFY_MAX, tb, blob_data(msg), blob_len(msg))) {
+	BBFDM_INFO("ubus method|%s|, name|%s|", method, obj->name);
+
+	char *path = blobmsg_get_string(tb[DM_GET_PATH]);
+
+	if (!match_with_path_list(&u->obj_list, path))
+		return UBUS_STATUS_INVALID_ARGUMENT;
+
+	memset(&bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&bb, 0);
+
+	list_for_each_entry(node, &u->linker_list, list) {
+		if (strcmp(node->param, path) == 0) {
+			bb_add_string(&bb, "data", node->val);
+			reference_value_found = true;
+			break;
+		}
+	}
+
+	if (!reference_value_found) {
+		struct dmctx bbf_ctx = {0};
+
+		bbf_init(&bbf_ctx);
+		char *reference_path = get_value_by_reference_path(&bbf_ctx, path);
+
+		add_pv_list(path, reference_path, NULL, &u->linker_list);
+		bb_add_string(&bb, "data", reference_path ? reference_path : "");
+
+		bbf_cleanup(&bbf_ctx);
+	}
+
+	ubus_send_reply(ctx, req, bb.head);
+	blob_buf_free(&bb);
+
+	return 0;
+}
+
+int bbfdm_ref_value_handler(struct ubus_context *ctx, struct ubus_object *obj,
+			struct ubus_request_data *req, const char *method,
+			struct blob_attr *msg)
+{
+	struct blob_attr *tb[__DM_GET_MAX];
+	struct bbfdm_context *u;
+	struct dmctx bbf_ctx = {0};
+	char *reference_value = NULL;
+	struct blob_buf bb;
+
+	if (blobmsg_parse(dm_get_policy, __DM_GET_MAX, tb, blob_data(msg), blob_len(msg))) {
 		BBF_ERR("Failed to parse blob");
 		return UBUS_STATUS_UNKNOWN_ERROR;
 	}
 
-	if (!tb[BBF_NOTIFY_NAME])
+	if (!tb[DM_GET_PATH])
 		return UBUS_STATUS_INVALID_ARGUMENT;
 
-	BBF_INFO("ubus method|%s|, name|%s|", method, obj->name);
-	snprintf(method_name, sizeof(method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
-	ubus_send_event(ctx, method_name, msg);
+	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
+	if (u == NULL) {
+		BBF_ERR("failed to get the bbfdm context");
+		return UBUS_STATUS_UNKNOWN_ERROR;
+	}
+
+	BBFDM_INFO("ubus method|%s|, name|%s|", method, obj->name);
+
+	char *reference_path = blobmsg_get_string(tb[DM_GET_PATH]);
+
+	if (!match_with_path_list(&u->obj_list, reference_path))
+		return UBUS_STATUS_INVALID_ARGUMENT;
+
+	memset(&bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&bb, 0);
+
+	bbf_init(&bbf_ctx);
+
+	adm_entry_get_reference_value(&bbf_ctx, reference_path, &reference_value);
+
+	bb_add_string(&bb, "data", reference_value ? reference_value : "");
+
+	bbf_cleanup(&bbf_ctx);
+
+	ubus_send_reply(ctx, req, bb.head);
+	blob_buf_free(&bb);
 
 	return 0;
 }
@@ -732,8 +738,8 @@ static struct ubus_method bbf_methods[] = {
 	UBUS_METHOD("operate", bbfdm_operate_handler, dm_operate_policy),
 	UBUS_METHOD("add", bbfdm_add_handler, dm_add_policy),
 	UBUS_METHOD("del", bbfdm_del_handler, dm_del_policy),
-	UBUS_METHOD("notify_event", bbfdm_notify_event, dm_notify_event_policy),
-	UBUS_METHOD_NOARG("service", bbfdm_service_handler),
+	UBUS_METHOD("reference_path", bbfdm_ref_path_handler, dm_get_policy),
+	UBUS_METHOD("reference_value", bbfdm_ref_value_handler, dm_get_policy),
 };
 
 static struct ubus_object_type bbf_type = UBUS_OBJECT_TYPE("", bbf_methods);
@@ -745,218 +751,8 @@ static struct ubus_object bbf_object = {
 	.n_methods = ARRAY_SIZE(bbf_methods)
 };
 
-static int _fill_daemon_input_option(json_object *daemon_obj, bbfdm_config_t *config)
-{
-	char opt_val[MAX_DM_PATH] = {0};
-
-	if (!config || strlen(config->service_name) == 0) {
-		BBF_ERR("Invalid input options for service name \n");
-		return -1;
-	}
-
-	if (strchr(config->service_name, '/')) { // absolute path
-		char *srv_name = dmjson_get_value(daemon_obj, 1, "service_name");
-		if (strlen(srv_name)) {
-			strncpyt(config->service_name, srv_name, sizeof(config->service_name));
-		}
-	}
-
-	// check if the service plugin is DotSO plugin
-	snprintf(opt_val, MAX_DM_PATH, "%s/%s.so", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
-	if (!file_exists(opt_val)) {
-		snprintf(opt_val, MAX_DM_PATH, "%s/%s.json", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
-	}
-
-	if (!file_exists(opt_val)) {
-		BBF_ERR("Failed to load service plugin %s opt_val=%s\n", config->service_name, opt_val);
-		return -1;
-	}
-
-	strncpyt(config->in_name, opt_val, sizeof(config->in_name));
-
-	snprintf(opt_val, MAX_DM_PATH, "%s/%s", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
-	if (folder_exists(opt_val)) {
-		strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
-	}
-
-	return 0;
-}
-
-static int _fill_daemon_output_options(json_object *daemon_obj, bbfdm_config_t *config)
-{
-	char *opt_val = NULL;
-
-	if (!config || !daemon_obj) {
-		BBF_ERR("Invalid input options \n");
-		return -1;
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "output", "root_obj");
-	if (DM_STRLEN(opt_val)) {
-		strncpyt(config->out_root_obj, opt_val, sizeof(config->out_root_obj));
-	} else { // for main process, there is no root obj
-		strncpyt(config->out_root_obj, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_root_obj));
-	}
-
-	opt_val = dmjson_get_value(daemon_obj, 2, "output", "name");
-	if (strlen(opt_val)) {
-		snprintf(config->out_name, sizeof(config->out_name), "%s.%s", BBFDM_DEFAULT_UBUS_OBJ, opt_val);
-	}
-
-	return 0;
-}
-
-static int daemon_load_config_external_plugin(bbfdm_config_t *config)
-{
-	json_object *json_obj = NULL;
-	char json_path[MAX_DM_PATH] = {0};
-	int err = 0;
-
-	if (!config || !strlen(config->service_name))
-		return -1;
-
-	if (strchr(config->service_name, '/')) { // absolute path
-		strncpyt(json_path, config->service_name, MAX_DM_PATH);
-	} else {
-		snprintf(json_path, MAX_DM_PATH, "%s/%s.json", BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH, config->service_name);
-	}
-
-	json_obj = json_object_from_file(json_path);
-	if (!json_obj) {
-		BBF_ERR("Failed to read input %s file \n", json_path);
-		return -1;
-	}
-
-	json_object *daemon_obj = dmjson_get_obj(json_obj, 1, "daemon");
-	if (!daemon_obj) {
-		err = -1;
-		goto exit;
-	}
-
-	err = _fill_daemon_input_option(daemon_obj, config);
-	if (err == -1) {
-		goto exit;
-	}
-
-	err = _fill_daemon_output_options(daemon_obj, config);
-
-exit:
-	if (json_obj) {
-		json_object_put(json_obj);
-	}
-
-	return err;
-}
-
-static int daemon_load_config_internal_plugin(bbfdm_config_t *config)
-{
-	char opt_val[MAX_DM_PATH] = {0};
-
-	if (strlen(config->service_name) == 0 && dm_is_micro_service() == false) { // default value for main process
-		strncpyt(config->service_name, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->service_name));
-	}
-
-	if (!config || strlen(config->service_name) == 0) {
-		BBF_ERR("Invalid input options for service name \n");
-		return -1;
-	}
-
-	if(dm_is_micro_service() == false) {
-		strncpyt(config->in_plugin_dir, BBFDM_DEFAULT_PLUGINS_PATH, sizeof(config->in_plugin_dir));
-		snprintf(config->out_name, sizeof(config->out_name), "%s", BBFDM_DEFAULT_UBUS_OBJ);
-	} else {
-		snprintf(opt_val, MAX_DM_PATH, "%s/%s", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
-		if (folder_exists(opt_val)) {
-			strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
-		}
-
-		strncpyt(config->out_root_obj, BBFDM_DEFAULT_UBUS_OBJ, sizeof(config->out_root_obj));
-	}
-
-	return 0;
-}
-
-static int daemon_load_services(const char *name, const char *json_path)
-{
-	json_object *json_obj = NULL;
-	json_object *jserv = NULL, *jservices = NULL;
-	int idx = 0, err = 0;
-	char buffer[MAX_DM_PATH/2] = {0}, service_name[MAX_DM_PATH] = {0};
-	bool is_unified = false;
-
-	if (!name || !json_path) {
-		BBF_ERR("Invalid service name or json file path");
-		return -1;
-	}
-
-	json_obj = json_object_from_file(json_path);
-	if (!json_obj) {
-		BBF_ERR("Failed to read input %s file for services", json_path);
-		return -1;
-	}
-
-	json_object *daemon_obj = dmjson_get_obj(json_obj, 1, "daemon");
-	if (!daemon_obj) {
-		err = -1;
-		goto exit;
-	}
-
-	strncpyt(buffer, name, sizeof(buffer));
-	// Remove .json from the end
-	size_t len = strlen(buffer) - strlen(".json");
-	buffer[len] = '\0';
-
-	snprintf(service_name, sizeof(service_name), "%s.%s", BBFDM_DEFAULT_UBUS_OBJ, buffer);
-	string_to_bool(dmjson_get_value((daemon_obj), 1, "unified_daemon"), &is_unified);
-
-	dmjson_foreach_obj_in_array(daemon_obj, jservices, jserv, idx, 1, "services") {
-		if (jserv) {
-			char parent[MAX_DM_PATH] = {0}, obj[MAX_DM_PATH] = {0};
-			char *tmp;
-
-			tmp = dmjson_get_value(jserv, 1, "parent_dm");
-			replace_str(tmp, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, parent, sizeof(parent));
-
-			tmp = dmjson_get_value(jserv, 1, "object");
-			replace_str(tmp, "{BBF_VENDOR_PREFIX}", BBF_VENDOR_PREFIX, obj, sizeof(obj));
-
-			if ((DM_STRLEN(parent) == 0) || (DM_STRLEN(obj) == 0)) {
-				BBF_ERR("Skip empty registration parent_dm[%s] or object[%s]", parent, obj);
-				continue;
-			}
-
-			tmp = dmjson_get_value(jserv, 1, "proto");
-			BBF_INFO("Registering [%s :: %s :: %s :: %d :: %s]", service_name, parent, obj, is_unified, tmp);
-			load_service(DEAMON_DM_ROOT_OBJ, &head_registered_service, service_name, parent, obj, is_unified, get_proto_type(tmp));
-		}
-	}
-exit:
-	if (json_obj) {
-		json_object_put(json_obj);
-	}
-
-	return err;
-}
-
-static int daemon_load_config(bbfdm_config_t *config)
-{
-	int err = 0;
-
-	if (INTERNAL_ROOT_TREE) {
-		err = daemon_load_config_internal_plugin(config);
-		BBF_INFO("Loading Config Internal plugin (%s)", config->service_name);
-	} else {
-		// This API will only be called with micro-services
-		err = daemon_load_config_external_plugin(config);
-		BBF_INFO("Loading Config External plugin (%s)", config->service_name);
-	}
-
-	return err;
-}
-
 static int regiter_ubus_object(struct ubus_context *ctx)
 {
-	int ret;
 	struct bbfdm_context *u;
 
 	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
@@ -967,32 +763,123 @@ static int regiter_ubus_object(struct ubus_context *ctx)
 
 	bbf_object.name = u->config.out_name;
 	bbf_object.type->name = u->config.out_name;
-	if (dm_is_micro_service()) {
-		bbf_object.n_methods = bbf_object.n_methods - 2;
-		bbf_object.type->n_methods = bbf_object.n_methods;
-		ret = ubus_add_object(ctx, &bbf_object);
-	} else {
-		ret = ubus_add_object(ctx, &bbf_object);
+
+	return ubus_add_object(ctx, &bbf_object);
+}
+
+static void send_linker_response_event(struct ubus_context *ctx, const char *reference_path, const char *reference_value)
+{
+	struct blob_buf bb;
+
+	memset(&bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&bb, 0);
+
+	bb_add_string(&bb, reference_path, reference_value ? reference_value : "");
+
+	ubus_send_event(ctx, "bbfdm.linker.response", bb.head);
+	blob_buf_free(&bb);
+}
+
+static void bbfdm_linker_cb(struct ubus_context *ctx, struct ubus_event_handler *ev,
+				const char *type, struct blob_attr *msg)
+{
+	if (!type || !msg)
+		return;
+
+	struct bbfdm_context *u;
+
+	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
+	if (u == NULL) {
+		BBF_ERR("failed to get the bbfdm context");
+		return;
 	}
-	return ret;
+
+	if (strcmp(type, "bbfdm.linker.cleanup") == 0) {
+		//BBF_ERR("bbfdm.linker.cleanup");
+		free_pv_list(&u->linker_list);
+	} else if (strcmp(type, "bbfdm.linker.request") == 0) {
+		//BBF_ERR("bbfdm.linker.request");
+
+		struct dmctx bbf_ctx = {0};
+		struct blob_attr *tb[1] = {0};
+		const struct blobmsg_policy p[1] = {
+				{ "path", BLOBMSG_TYPE_STRING }
+		};
+
+		blobmsg_parse(p, 1, tb, blobmsg_data(msg), blobmsg_len(msg));
+
+		char *reference_path = tb[0] ? blobmsg_get_string(tb[0]) : "";
+
+		if (DM_STRLEN(reference_path) == 0)
+			return;
+
+		if (!match_with_path_list(&u->obj_list, reference_path))
+			return;
+
+		if (present_in_pv_list(&u->linker_list, reference_path))
+			return;
+
+		bbf_init(&bbf_ctx);
+
+		char *reference_value = get_value_by_reference_path(&bbf_ctx, reference_path);
+
+		add_pv_list(reference_path, reference_value, NULL, &u->linker_list);
+		send_linker_response_event(ctx, reference_path, reference_value);
+
+		bbf_cleanup(&bbf_ctx);
+	}
 }
 
 static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 {
+	INIT_LIST_HEAD(&bbfdm_ctx->linker_list);
+	INIT_LIST_HEAD(&bbfdm_ctx->obj_list);
 	INIT_LIST_HEAD(&bbfdm_ctx->event_handlers);
-	INIT_LIST_HEAD(&bbfdm_ctx->config.list_objs);
 }
 
-static int daemon_load_data_model(struct bbfdm_context *daemon_ctx)
+static int load_micro_service_config(bbfdm_config_t *config)
+{
+	char opt_val[MAX_DM_PATH] = {0};
+
+	if (!config || strlen(config->service_name) == 0) {
+		BBF_ERR("Invalid input options for service name");
+		return -1;
+	}
+
+	if (INTERNAL_ROOT_TREE == NULL) {
+		// This API will only be called with micro-services started with '-m' option
+
+		snprintf(opt_val, MAX_DM_PATH, "%s/%s.so", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
+		if (!file_exists(opt_val)) {
+			snprintf(opt_val, MAX_DM_PATH, "%s/%s.json", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
+		}
+
+		if (!file_exists(opt_val)) {
+			BBF_ERR("Failed to load service plugin %s opt_val=%s", config->service_name, opt_val);
+			return -1;
+		}
+
+		strncpyt(config->in_name, opt_val, sizeof(config->in_name));
+	}
+
+	snprintf(opt_val, MAX_DM_PATH, "%s/%s", BBFDM_DEFAULT_MICROSERVICE_MODULE_PATH, config->service_name);
+	if (folder_exists(opt_val)) {
+		strncpyt(config->in_plugin_dir, opt_val, sizeof(config->in_plugin_dir));
+	}
+
+	return 0;
+}
+
+static int load_micro_service_data_model(struct bbfdm_context *daemon_ctx)
 {
 	int err = 0;
 
 	if (INTERNAL_ROOT_TREE) {
 		BBF_INFO("Loading Data Model Internal plugin (%s)", daemon_ctx->config.service_name);
-		err = bbfdm_load_internal_plugin(daemon_ctx, INTERNAL_ROOT_TREE, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
+		err = bbfdm_load_internal_plugin(daemon_ctx, INTERNAL_ROOT_TREE, &DEAMON_DM_ROOT_OBJ);
 	} else {
 		BBF_INFO("Loading Data Model External plugin (%s)", daemon_ctx->config.service_name);
-		err = bbfdm_load_external_plugin(daemon_ctx, &deamon_lib_handle, &daemon_ctx->config, &DEAMON_DM_ROOT_OBJ);
+		err = bbfdm_load_external_plugin(daemon_ctx, &deamon_lib_handle, &DEAMON_DM_ROOT_OBJ);
 	}
 
 	if (err)
@@ -1006,58 +893,10 @@ static int daemon_load_data_model(struct bbfdm_context *daemon_ctx)
 		return -1;
 	}
 
-	if (dm_is_micro_service()) {
-		if (DM_STRLEN(daemon_ctx->config.out_parent_dm) == 0) {
-			BBF_ERR("output parent dm not defined");
-			return -1;
-		}
-
-		if (list_empty(&daemon_ctx->config.list_objs)) {
-			BBF_ERR("output objects is not defined");
-			return -1;
-		}
-
-		if (DM_STRLEN(daemon_ctx->config.out_root_obj) == 0) {
-			BBF_ERR("output root obj not defined");
-			return -1;
-		}
-	}
-
 	return 0;
 }
 
-static int register_micro_services()
-{
-	DIR *dir_tmp = NULL;
-	struct dirent *d_file = NULL;
-	int err = 0;
-
-	if (dm_is_micro_service() == true) {
-		return 0;
-	}
-
-	sysfs_foreach_file(BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH, dir_tmp, d_file) {
-		char config_name[512] = {0};
-
-		if (d_file->d_name[0] == '.')
-			continue;
-
-		snprintf(config_name, sizeof(config_name), "%s/%s", BBFDM_DEFAULT_MICROSERVICE_INPUT_PATH, d_file->d_name);
-
-		if (!file_exists(config_name) || !is_regular_file(config_name))
-			continue;
-
-		err = daemon_load_services(d_file->d_name, config_name);
-		if (err) {
-			BBF_ERR("Failed to load micro-services %s", d_file->d_name);
-			break;
-		}
-	}
-	if (dir_tmp) {
-		closedir (dir_tmp);
-	}
-	return err;
-}
+static struct ubus_event_handler bbfdm_linker_handler = { .cb = bbfdm_linker_cb };
 
 int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 {
@@ -1074,22 +913,15 @@ int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 
 	bbfdm_ctx_init(bbfdm_ctx);
 
-	err = daemon_load_config(&bbfdm_ctx->config);
+	err = load_micro_service_config(&bbfdm_ctx->config);
 	if (err) {
-		BBF_ERR("Failed to load config");
+		BBF_ERR("Failed to load micro-service config");
 		return err;
 	}
 
-	err = daemon_load_data_model(bbfdm_ctx);
+	err = load_micro_service_data_model(bbfdm_ctx);
 	if (err) {
-		BBF_ERR("Failed to load data_model");
-		return err;
-	}
-
-	// Pre-load the services
-	err = register_micro_services();
-	if (err) {
-		BBF_ERR("Failed to load micro-services");
+		BBF_ERR("Failed to load micro-service data model");
 		return err;
 	}
 
@@ -1097,7 +929,11 @@ int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 	if (err != UBUS_STATUS_OK)
 		return -1;
 
-	return  register_events_to_ubus(&bbfdm_ctx->ubus_ctx, &bbfdm_ctx->event_handlers);
+	err = register_events_to_ubus(&bbfdm_ctx->ubus_ctx, &bbfdm_ctx->event_handlers);
+	if (err != 0)
+		return err;
+
+	return ubus_register_event_handler(&bbfdm_ctx->ubus_ctx, &bbfdm_linker_handler, "bbfdm.linker.*");
 }
 
 int bbfdm_ubus_regiter_free(struct bbfdm_context *bbfdm_ctx)
@@ -1114,7 +950,6 @@ void bbfdm_ubus_set_service_name(struct bbfdm_context *bbfdm_ctx, const char *sr
 {
 	strncpyt(bbfdm_ctx->config.service_name, srv_name, sizeof(bbfdm_ctx->config.service_name));
 	snprintf(bbfdm_ctx->config.out_name, sizeof(bbfdm_ctx->config.out_name), "%s.%s", BBFDM_DEFAULT_UBUS_OBJ, srv_name);
-	dm_set_micro_service();
 }
 
 void bbfdm_ubus_set_log_level(int log_level)
@@ -1126,6 +961,3 @@ void bbfdm_ubus_load_data_model(DM_MAP_OBJ *DynamicObj)
 {
 	INTERNAL_ROOT_TREE = DynamicObj;
 }
-
-void bbfdm_schedule_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec) {} // To be removed later
-

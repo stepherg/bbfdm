@@ -92,3 +92,19 @@ int bbfdm_ubus_invoke_async(struct ubus_context *ubus_ctx, const char *obj, cons
 	ubus_complete_request_async(ubus_ctx, req);
 	return 0;
 }
+
+int bbfdm_ubus_send_event(struct bbfdm_ctx *bbfdm_ctx, const char *obj, struct blob_attr *msg)
+{
+	if (!bbfdm_ctx || !bbfdm_ctx->ubus_ctx) {
+		BBFDM_ERR("Invalid context or UBUS context is NULL");
+		return -1;
+	}
+
+	int ret = ubus_send_event(bbfdm_ctx->ubus_ctx, obj, msg);
+
+	if (ret != 0) {
+		BBFDM_ERR("UBUS send event failed for obj='%s', error code=%d", obj, ret);
+	}
+
+	return ret;
+}

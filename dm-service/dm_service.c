@@ -1,7 +1,7 @@
 /*
  * dm_service.c: dm-service deamon
  *
- * Copyright (C) 2024 IOPSYS Software Solutions AB. All rights reserved.
+ * Copyright (C) 2024-2025 IOPSYS Software Solutions AB. All rights reserved.
  *
  * Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 {
 	struct bbfdm_context bbfdm_ctx = {0};
 	char proc_name[64] = {0};
-	int log_level = 3; // Default is LOG_ERR
+	int log_level = LOG_ERR;
 	int err = 0, ch;
 
 	memset(&bbfdm_ctx, 0, sizeof(struct bbfdm_context));
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (dm_is_micro_service() == false) {
+	if (strlen(bbfdm_ctx.config.service_name) == 0) {
 		fprintf(stderr, "Failed to start micro-service without providing the name using '-m' option\n");
 		exit(-1);
 	}

@@ -222,6 +222,22 @@ int bbf_set_alias(struct dmctx *ctx, struct uci_section *s, const char *option_n
 	return 0;
 }
 
+static void send_linker_request_event(struct ubus_context *ctx, const char *path)
+{
+	struct blob_buf bb;
+
+	if (DM_STRLEN(path) == 0)
+		return;
+
+	memset(&bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&bb, 0);
+
+	blobmsg_add_string(&bb, "path", path);
+
+	ubus_send_event(ctx, "bbfdm.linker.request", bb.head);
+	blob_buf_free(&bb);
+}
+
 int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_path, const char *key_name, char *key_value, char *out, size_t out_len)
 {
 	char param_path[1024] = {0};
@@ -261,20 +277,20 @@ int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_p
 		}
 
 		snprintf(&out[len], out_len - len, "%s%s", len ? (match_action == MATCH_FIRST ? "," : ";") : "", value);
-		goto end;
+		return 0;
 	}
 
-	if (dm_is_micro_service() == true) { // It's a micro-service instance
-
-		if (out_len - len < strlen(base_path) + strlen(key_name) + strlen(key_value) + 9) { // 9 = 'path[key_name==\"key_value\"].'
-			BBF_ERR("Buffer overflow detected. The output buffer is not large enough to hold the additional data!!!");
-			return -1;
-		}
-
-		snprintf(&out[len], out_len - len, "%s%s[%s==\"%s\"].", len ? (match_action == MATCH_FIRST ? "," : ";") : "", base_path, key_name, key_value);
+	if (out_len - len < strlen(base_path) + strlen(key_name) + strlen(key_value) + 9) { // 9 = 'path[key_name==\"key_value\"].'
+		BBF_ERR("Buffer overflow detected. The output buffer is not large enough to hold the additional data!!!");
+		return -1;
 	}
 
-end:
+	snprintf(param_path, sizeof(param_path), "%s[%s==\"%s\"].", base_path, key_name, key_value);
+
+	send_linker_request_event(ctx->ubus_ctx, param_path);
+
+	snprintf(&out[len], out_len - len, "%s%s", len ? (match_action == MATCH_FIRST ? "," : ";") : "", param_path);
+
 	return 0;
 }
 
@@ -317,68 +333,6 @@ int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct d
 	return 0;
 }
 
-static char *bbfdm_get_reference_value(const char *reference_path)
-{
-	unsigned int reference_path_dot_num = count_occurrences(reference_path, '.');
-	json_object *res = NULL;
-
-	json_object *in_args = json_object_new_object();
-	json_object_object_add(in_args, "proto", json_object_new_string("usp"));
-	json_object_object_add(in_args, "format", json_object_new_string("raw"));
-
-	dmubus_call("bbfdm", "get",
-			UBUS_ARGS{
-						{"path", reference_path, String},
-						{"optional", json_object_to_json_string(in_args), Table}
-			},
-			2, &res);
-
-	json_object_put(in_args);
-
-	if (!res)
-		return NULL;
-
-	json_object *res_array = dmjson_get_obj(res, 1, "results");
-	if (!res_array)
-		return NULL;
-
-	size_t nbre_obj = json_object_array_length(res_array);
-	if (nbre_obj == 0)
-		return NULL;
-
-	for (size_t i = 0; i < nbre_obj; i++) {
-		json_object *res_obj = json_object_array_get_idx(res_array, i);
-
-		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
-			return NULL;
-
-		char *path = dmjson_get_value(res_obj, 1, "path");
-
-		unsigned int path_dot_num = count_occurrences(path, '.');
-		if (path_dot_num > reference_path_dot_num)
-			continue;
-
-		json_object *flags_array = dmjson_get_obj(res_obj, 1, "flags");
-		if (flags_array) {
-			size_t nbre_falgs = json_object_array_length(flags_array);
-
-			for (size_t j = 0; j < nbre_falgs; j++) {
-				json_object *flag_obj = json_object_array_get_idx(flags_array, j);
-
-				const char *flag = json_object_get_string(flag_obj);
-
-				if (DM_LSTRCMP(flag, "Linker") == 0) {
-					char *data = dmjson_get_value(res_obj, 1, "data");
-					return data ? dmstrdup(data) : "";
-				}
-			}
-		}
-	}
-
-	return NULL;
-}
-
 int bbfdm_operate_reference_linker(struct dmctx *ctx, const char *reference_path, char **reference_value)
 {
 	if (!ctx) {
@@ -400,9 +354,6 @@ int bbfdm_operate_reference_linker(struct dmctx *ctx, const char *reference_path
 
 	if (DM_STRLEN(*reference_value) != 0)
 		return 0;
-
-	if (dm_is_micro_service() == true) // It's a micro-service instance
-		*reference_value = bbfdm_get_reference_value(reference_path);
 
 	return 0;
 }
