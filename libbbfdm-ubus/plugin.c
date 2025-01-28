@@ -1,7 +1,7 @@
 /*
  * plugin.c: Plugin file bbfdmd
  *
- * Copyright (C) 2023 IOPSYS Software Solutions AB. All rights reserved.
+ * Copyright (C) 2023-2025 IOPSYS Software Solutions AB. All rights reserved.
  *
  * Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *
@@ -16,7 +16,6 @@
 #include "get_helper.h"
 
 #include "libbbfdm-api/legacy/plugin/json_plugin.h"
-
 
 extern struct list_head loaded_json_files;
 extern struct list_head json_list;
@@ -37,34 +36,9 @@ static uint8_t find_number_of_objects(DM_MAP_OBJ *dynamic_obj)
 	return len;
 }
 
-static void fill_dotso_micro_service_out_args(bbfdm_config_t *config, DMOBJ *entryobj, char *parent_dm)
+int bbfdm_load_internal_plugin(struct bbfdm_context *bbfdm_ctx, DM_MAP_OBJ *dynamic_obj, DMOBJ **main_entry)
 {
-	char ms_name[128] = {0};
-
-	if (!config || !entryobj || !parent_dm)
-		return;
-
-	strncpyt(config->out_parent_dm, parent_dm, sizeof(config->out_parent_dm));
-
-	for (; (entryobj && entryobj->obj); entryobj++) {
-
-		add_path_list(entryobj->obj, &config->list_objs);
-
-		int len = DM_STRLEN(ms_name);
-		if (len == 0) {
-			snprintf(ms_name, sizeof(ms_name), "%s.%s", config->out_root_obj, entryobj->obj);
-		} else {
-			snprintf(ms_name + len, sizeof(ms_name) - len, "_%s", entryobj->obj);
-		}
-	}
-
-	if (DM_STRLEN(config->out_name) == 0)
-		strncpyt(config->out_name, ms_name, sizeof(config->out_name));
-}
-
-int bbfdm_load_internal_plugin(struct bbfdm_context *bbfdm_ctx, DM_MAP_OBJ *dynamic_obj, bbfdm_config_t *config, DMOBJ **main_entry)
-{
-	if (!dynamic_obj || !config || !main_entry) {
+	if (!dynamic_obj || !main_entry) {
 		BBF_ERR("Input validation failed");
 		return -1;
 	}
@@ -92,9 +66,14 @@ int bbfdm_load_internal_plugin(struct bbfdm_context *bbfdm_ctx, DM_MAP_OBJ *dyna
 			return -1;
 		}
 
-		// Fill out arguments if it is running as micro-service
-		if (dm_is_micro_service() == true)
-			fill_dotso_micro_service_out_args(config, dynamic_obj[i].root_obj, node_obj);
+		if (dynamic_obj[i].root_obj != NULL) {
+			struct dm_obj_s *entryobj = dynamic_obj[i].root_obj;
+			for (; (entryobj && entryobj->obj); entryobj++) {
+				char path[MAX_DM_PATH] = {0};
+				snprintf(path, sizeof(path), "%s%s.", node_obj, entryobj->obj);
+				add_path_list(path, &bbfdm_ctx->obj_list);
+			}
+		}
 
 		node_obj[len-1] = 0;
 
@@ -112,9 +91,9 @@ int bbfdm_load_internal_plugin(struct bbfdm_context *bbfdm_ctx, DM_MAP_OBJ *dyna
 	return 0;
 }
 
-int bbfdm_load_dotso_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle, const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
+int bbfdm_load_dotso_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle, const char *file_path, DMOBJ **main_entry)
 {
-	if (!lib_handle || !file_path || !strlen(file_path) || !config || !main_entry) {
+	if (!lib_handle || !file_path || !strlen(file_path) || !main_entry) {
 		BBF_ERR("Input validation failed");
 		return -1;
 	}
@@ -132,7 +111,7 @@ int bbfdm_load_dotso_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle, 
 	//Dynamic Object
 	*(void **) (&dynamic_obj) = dlsym(handle, "tDynamicObj");
 
-	return bbfdm_load_internal_plugin(bbfdm_ctx, dynamic_obj, config, main_entry);
+	return bbfdm_load_internal_plugin(bbfdm_ctx, dynamic_obj, main_entry);
 }
 
 int bbfdm_free_dotso_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle)
@@ -159,28 +138,11 @@ int bbfdm_free_dotso_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle)
 	return 0;
 }
 
-static void fill_json_micro_service_out_args(bbfdm_config_t *config, char *parent_dm, char *obj, char *ms_name, size_t ms_name_len)
-{
-	if (!config || !obj)
-		return;
-
-	strncpyt(config->out_parent_dm, parent_dm, sizeof(config->out_parent_dm));
-	add_path_list(obj, &config->list_objs);
-
-	int len = DM_STRLEN(ms_name);
-	if (len == 0) {
-		snprintf(ms_name, ms_name_len, "%s.%s", config->out_root_obj, obj);
-	} else {
-		snprintf(ms_name + len, ms_name_len - len, "_%s", obj);
-	}
-}
-
-int bbfdm_load_json_plugin(struct list_head *json_plugin, struct list_head *json_list, struct list_head *json_memhead,
-		const char *file_path, bbfdm_config_t *config, DMOBJ **main_entry)
+static int bbfdm_load_json_plugin(struct bbfdm_context *bbfdm_ctx, struct list_head *json_plugin, struct list_head *json_list,
+		struct list_head *json_memhead, const char *file_path, DMOBJ **main_entry)
 {
 	DMOBJ *dm_entryobj = NULL;
 	int json_plugin_version = JSON_VERSION_0;
-	char ms_name[128] = {0};
 	uint8_t idx = 0;
 
 	if (!file_path || !strlen(file_path) || !main_entry) {
@@ -218,7 +180,7 @@ int bbfdm_load_json_plugin(struct list_head *json_plugin, struct list_head *json
 			return -1;
 		}
 
-		char obj_prefix[1024] = {0};
+		char obj_prefix[512] = {0};
 		json_plugin_find_prefix_obj(node_obj, obj_prefix, sizeof(obj_prefix));
 
 		int obj_prefix_len = strlen(obj_prefix);
@@ -234,9 +196,9 @@ int bbfdm_load_json_plugin(struct list_head *json_plugin, struct list_head *json
 			return -1;
 		}
 
-		// Fill out arguments if it is running as micro-service
-		if (dm_is_micro_service() == true)
-			fill_json_micro_service_out_args(config, obj_prefix, obj_name, ms_name, sizeof(ms_name));
+		char path[MAX_DM_PATH] = {0};
+		snprintf(path, sizeof(path), "%s%s.", obj_prefix, obj_name);
+		add_path_list(path, &bbfdm_ctx->obj_list);
 
 		// Remove '.' from object prefix
 		if (obj_prefix[obj_prefix_len - 1] == '.')
@@ -264,9 +226,6 @@ int bbfdm_load_json_plugin(struct list_head *json_plugin, struct list_head *json
 		idx++;
 	}
 
-	if (DM_STRLEN(config->out_name) == 0)
-		strncpyt(config->out_name, ms_name, sizeof(config->out_name));
-
 	*main_entry = dm_entryobj;
 	return 0;
 }
@@ -276,7 +235,7 @@ int bbfdm_free_json_plugin(void)
 	return free_json_plugins();
 }
 
-int bbfdm_load_external_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle, bbfdm_config_t *config, DMOBJ **main_entry)
+int bbfdm_load_external_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handle, DMOBJ **main_entry)
 {
 	char file_path[128] = {0};
 	int err = -1;
@@ -293,10 +252,10 @@ int bbfdm_load_external_plugin(struct bbfdm_context *bbfdm_ctx, void **lib_handl
 		BBF_ERR("Input file without extension");
 	} else if (strcasecmp(ext, ".json") == 0) {
 		BBF_INFO("Loading JSON plugin %s", file_path);
-		err = bbfdm_load_json_plugin(&loaded_json_files, &json_list, &json_memhead, file_path, config, main_entry);
+		err = bbfdm_load_json_plugin(bbfdm_ctx, &loaded_json_files, &json_list, &json_memhead, file_path, main_entry);
 	} else if (strcasecmp(ext, ".so") == 0) {
 		BBF_INFO("Loading DotSo plugin %s", file_path);
-		err = bbfdm_load_dotso_plugin(bbfdm_ctx, lib_handle, file_path, config, main_entry);
+		err = bbfdm_load_dotso_plugin(bbfdm_ctx, lib_handle, file_path, main_entry);
 	} else {
 		BBF_ERR("Input type %s not supported", ext);
 	}

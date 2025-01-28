@@ -90,7 +90,6 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 			.iscommand = false,
 			.isevent = true,
 			.isinfo = false,
-			.disable_mservice_browse = true,
 			.dm_type = BBFDM_USP
 	};
 
@@ -107,7 +106,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 		if (!e_args)
 			goto end;
 
-		snprintf(e_args->method_name, sizeof(e_args->method_name), "%s.%s", DM_STRLEN(u->config.out_root_obj) ? u->config.out_root_obj : u->config.out_name, BBF_EVENT_NAME);
+		snprintf(e_args->method_name, sizeof(e_args->method_name), "%s.%s", BBFDM_DEFAULT_UBUS_OBJ, BBF_EVENT_NAME);
 
 		e_args->blob_data = (struct blob_attr *)calloc(1, blob_data_len);
 
@@ -155,7 +154,6 @@ int register_events_to_ubus(struct ubus_context *ctx, struct list_head *ev_list)
 			.iscommand = false,
 			.isevent = true,
 			.isinfo = false,
-			.disable_mservice_browse = true,
 			.dm_type = BBFDM_USP
 	};
 

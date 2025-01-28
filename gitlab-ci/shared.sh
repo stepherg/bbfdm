@@ -43,40 +43,6 @@ function exec_cmd_verbose()
 	fi
 }
 
-generate_input_schema()
-{
-	service_name="$1"
-	schema='{
-  "daemon": {
-    "enable": "1",
-    "service_name": "'"$service_name"'",
-    "config": {
-      "loglevel": "4"
-    }
-  }
-}'
-	echo "$schema"
-}
-
-generate_input_schema_with_output_name()
-{
-	service_name="$1"
-	output_name="$2"
-	schema='{
-  "daemon": {
-    "enable": "1",
-    "service_name": "'"$service_name"'",
-    "config": {
-      "loglevel": "4"
-    },
-    "output": {
-      "name": "'"$output_name"'"
-    }
-  }
-}'
-	echo "$schema"
-}
-
 function install_plugin()
 {
 	exec_cmd cp -f "${1}" ${BBFDM_PLUGIN_DIR}/
@@ -124,14 +90,10 @@ function install_wifidmd_as_micro_service()
 {
 	[ -d "/opt/dev/wifidmd" ] && return 0
 
-	exec_cmd git clone https://dev.iopsys.eu/bbf/wifidmd.git /opt/dev/wifidmd
+	exec_cmd git clone -b bbfdm_core https://dev.iopsys.eu/bbf/wifidmd.git /opt/dev/wifidmd
 
-	exec_cmd make -C /opt/dev/wifidmd/src/ clean && make -C /opt/dev/wifidmd/src/ CFLAGS="-D'BBF_VENDOR_PREFIX=\"X_IOPSYS_EU_\"'"
+	exec_cmd make -C /opt/dev/wifidmd/src/ clean && make -C /opt/dev/wifidmd/src/ CFLAGS="-D'BBF_VENDOR_PREFIX=\"X_IOPSYS_EU_\"'" WIFIDMD_WIFI_DATAELEMENTS='y'
 	exec_cmd cp -f /opt/dev/wifidmd/src/libwifi.so /usr/share/bbfdm/micro_services/wifidmd.so
-	exec_cmd mkdir -p /usr/share/bbfdm/micro_services/wifidmd
-	exec_cmd cp -f /opt/dev/wifidmd/src/libdataelements.so /usr/share/bbfdm/micro_services/wifidmd
-
-	generate_input_schema_with_output_name "wifidmd" "WiFi" > /etc/bbfdm/services/wifidmd.json
 }
 
 function install_libeasy()
@@ -172,26 +134,27 @@ function install_ethmngr_as_micro_service()
 
 	exec_cmd git clone https://dev.iopsys.eu/hal/ethmngr.git /opt/dev/ethmngr
 	exec_cmd make -C /opt/dev/ethmngr
-	exec_cmd cp /opt/dev/ethmngr/ethmngr /usr/sbin/ethmngr
+	exec_cmd cp -f /opt/dev/ethmngr/ethmngr /usr/sbin/ethmngr
 }
 
 function install_netmngr_as_micro_service()
 {
 	[ -d "/opt/dev/netmngr" ] && return 0
 
-	exec_cmd git clone https://dev.iopsys.eu/network/netmngr.git /opt/dev/netmngr
+	exec_cmd git clone -b bbfdm_core https://dev.iopsys.eu/network/netmngr.git /opt/dev/netmngr
+	
+	exec_cmd apt install iproute2 -y
 
 	exec_cmd make -C /opt/dev/netmngr/src/ clean
 	exec_cmd make -C /opt/dev/netmngr/src/ NETMNGR_GRE_OBJ=y NETMNGR_IP_OBJ=y NETMNGR_ROUTING_OBJ=y NETMNGR_PPP_OBJ=y NETMNGR_ROUTER_ADVERTISEMENT_OBJ=y NETMNGR_IPV6RD_OBJ=y
 	exec_cmd cp -f /opt/dev/netmngr/src/libnetmngr.so /usr/share/bbfdm/micro_services/netmngr.so
-	exec_cmd cp -f /opt/dev/netmngr/src/libinterface_stack.so /usr/share/bbfdm/plugins
 	exec_cmd mkdir -p /usr/share/bbfdm/micro_services/netmngr
-
-	generate_input_schema_with_output_name "netmngr" "Network" > /etc/bbfdm/services/netmngr.json
 
 	exec_cmd git clone https://dev.iopsys.eu/bbf/tr143d.git /opt/dev/tr143d
 	exec_cmd make -C /opt/dev/tr143d/src/ clean && make -C /opt/dev/tr143d/src/
 	exec_cmd cp -f /opt/dev/tr143d/src/libtr143d.so /usr/share/bbfdm/micro_services/netmngr
+	exec_cmd cp -f utilities/files/usr/share/bbfdm/scripts/bbf_api /usr/share/bbfdm/scripts/
+	exec_cmd cp -rf /opt/dev/tr143d/scripts/* /usr/share/bbfdm/scripts/
 
 	exec_cmd git clone https://dev.iopsys.eu/bbf/tr471d.git /opt/dev/tr471d
 	exec_cmd make -C /opt/dev/tr471d/src/ clean && make -C /opt/dev/tr471d/src/
@@ -210,7 +173,7 @@ function install_sysmngr_as_micro_service()
 {
 	[ -d "/opt/dev/sysmngr" ] && return 0
 
-	exec_cmd git clone https://dev.iopsys.eu/system/sysmngr.git /opt/dev/sysmngr
+	exec_cmd git clone -b bbfdm_core https://dev.iopsys.eu/system/sysmngr.git /opt/dev/sysmngr
 
 	exec_cmd make -C /opt/dev/sysmngr/src/ clean && \
 	exec_cmd make -C /opt/dev/sysmngr/src/ \
@@ -225,7 +188,7 @@ function install_sysmngr_as_micro_service()
 		SYSMNGR_VENDOR_EXTENSIONS='y' \
 		SYSMNGR_FWBANK_UBUS_SUPPORT='y'
 
-	exec_cmd cp /opt/dev/sysmngr/src/sysmngr /usr/sbin/
+	exec_cmd cp -f /opt/dev/sysmngr/src/sysmngr /usr/sbin/
 	exec_cmd mkdir /etc/sysmngr
 }
 

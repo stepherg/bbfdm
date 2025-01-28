@@ -1,20 +1,22 @@
 /*
- * cli.c: Cli command for bbfdmd
+ * Copyright (C) 2023-2025 iopsys Software Solutions AB
  *
- * Copyright (C) 2023 IOPSYS Software Solutions AB. All rights reserved.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License version 2.1
+ * as published by the Free Software Foundation
  *
- * Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
+ *	  Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *
- * See LICENSE file for license related information.
  */
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include <libubus.h>
 
 #include "common.h"
-#include "plugin.h"
-
-#define UNUSED  __attribute__((unused))
 
 typedef struct {
 	char *cmd;
@@ -28,7 +30,7 @@ typedef struct {
     char *usage;
 } cli_cmd_t;
 
-static int cli_exec_help(cli_data_t *cli_data UNUSED, const char *path UNUSED, const char *value UNUSED);
+static int cli_exec_help(cli_data_t *cli_data __attribute__((unused)), const char *path __attribute__((unused)), const char *value __attribute__((unused)));
 static int cli_exec_cmd(cli_data_t *cli_data, const char *path, const char *value);
 
 cli_cmd_t cli_commands[] = {
@@ -138,10 +140,10 @@ static void __ubus_callback(struct ubus_request *req, int msgtype __attribute__(
 		} else if (strcmp(cli_data->cmd, "instances") == 0) {
 			printf("%s\n", name);
 		} else if (strcmp(cli_data->cmd, "schema") == 0) {
-			char *type = tb[2] ? blobmsg_get_string(tb[2]) : "";
-			int cmd = get_dm_type(type);
+			//char *type = tb[2] ? blobmsg_get_string(tb[2]) : "";
+			//int cmd = get_dm_type(type);
 
-			printf("%s %s %s\n", name, type, (cmd != DMT_EVENT && cmd != DMT_COMMAND) ? data : "0");
+			//printf("%s %s %s\n", name, type, (cmd != DMT_EVENT && cmd != DMT_COMMAND) ? data : "0"); //TODO
 		}
 
 		cli_data->ubus_status = true;
@@ -151,7 +153,6 @@ static void __ubus_callback(struct ubus_request *req, int msgtype __attribute__(
 static int cli_exec_cmd(cli_data_t *cli_data, const char *path, const char *value)
 {
 	struct blob_buf b = {0};
-	void *table = NULL;
 	int err = EXIT_SUCCESS;
 
 	memset(&b, 0, sizeof(struct blob_buf));
@@ -159,21 +160,17 @@ static int cli_exec_cmd(cli_data_t *cli_data, const char *path, const char *valu
 	blob_buf_init(&b, 0);
 
 	blobmsg_add_string(&b, "path", path);
-	if (value) blobmsg_add_string(&b, "value", value);
+	blobmsg_add_string(&b, "value", value ? value : "");
 
-	table = blobmsg_open_table(&b, "optional");
-	blobmsg_add_string(&b, "format", "raw");
-	blobmsg_close_table(&b, table);
-
-	int e = bbfdm_ubus_invoke(BBFDM_DEFAULT_UBUS_OBJ, cli_data->cmd, b.head, __ubus_callback, cli_data);
+	int e = bbfdm_ubus_invoke(BBFDM_UBUS_OBJECT, cli_data->cmd, b.head, __ubus_callback, cli_data);
 
 	if (e < 0) {
-		printf("ERROR: ubus invoke for [object:%s method:%s] exit with error(%d)\n", BBFDM_DEFAULT_UBUS_OBJ, cli_data->cmd, e);
+		printf("ERROR: ubus invoke for [object:%s method:%s] exit with error(%d)\n", BBFDM_UBUS_OBJECT, cli_data->cmd, e);
 		err = EXIT_FAILURE;
 	}
 
 	if (cli_data->ubus_status == false) {
-		printf("ERROR: ubus call for [object:%s method:%s] exit with error\n", BBFDM_DEFAULT_UBUS_OBJ, cli_data->cmd);
+		printf("ERROR: ubus call for [object:%s method:%s] exit with error\n", BBFDM_UBUS_OBJECT, cli_data->cmd);
 		err = EXIT_FAILURE;
 	}
 
@@ -182,7 +179,7 @@ static int cli_exec_cmd(cli_data_t *cli_data, const char *path, const char *valu
 	return err;
 }
 
-static int cli_exec_help(cli_data_t *cli_data UNUSED, const char *path UNUSED, const char *value UNUSED)
+static int cli_exec_help(cli_data_t *cli_data __attribute__((unused)), const char *path __attribute__((unused)), const char *value __attribute__((unused)))
 {
 	cli_cmd_t *cli_cmd;
 
@@ -236,7 +233,7 @@ end:
 	return err;
 }
 
-int bbfdm_cli_exec_command(int argc, char *argv[])
+int bbfdmd_cli_exec_command(int argc, char *argv[])
 {
 	cli_data_t cli_data = {0};
 

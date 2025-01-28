@@ -177,20 +177,11 @@ struct dmctx {
 	bool iscommand;
 	bool isevent;
 	bool isinfo;
-	bool disable_mservice_browse;
 
 	int (*method_param)(DMPARAM_ARGS);
 	int (*method_obj)(DMOBJECT_ARGS);
 	int (*checkobj)(DMOBJECT_ARGS);
 	int (*checkleaf)(DMOBJECT_ARGS);
-
-	struct list_head *memhead;
-	struct blob_buf bb;
-
-	DMOBJ *dm_entryobj;
-	struct uci_context *config_uci_ctx;
-	struct uci_context *dmmap_uci_ctx;
-	struct uci_context *varstate_uci_ctx;
 
 	int faultcode;
 	int setaction;
@@ -206,6 +197,15 @@ struct dmctx {
 	char *linker_param;
 	char *inst_buf[16];
 	char fault_msg[256];
+
+	struct blob_buf bb;
+
+	DMOBJ *dm_entryobj;
+	struct uci_context *config_uci_ctx;
+	struct uci_context *dmmap_uci_ctx;
+	struct uci_context *varstate_uci_ctx;
+	struct ubus_context *ubus_ctx;
+	struct list_head *memhead;
 };
 
 typedef struct dmnode {
@@ -220,7 +220,6 @@ typedef struct dmnode {
 	unsigned char browse_type;
 	int max_instance;
 	int num_of_entries;
-	bool is_ubus_service;
 } DMNODE;
 
 typedef struct {
@@ -387,7 +386,6 @@ enum bbfdm_type_enum {
 enum {
 	INDX_JSON_MOUNT,
 	INDX_LIBRARY_MOUNT,
-	INDX_SERVICE_MOUNT,
 	__INDX_DYNAMIC_MAX
 };
 

@@ -742,31 +742,6 @@
           }
         }
       }
-    },
-    "notify_event": {
-      "title": "notify occurance of an event on ubus",
-      "type": "object",
-      "required": [
-        "input"
-      ],
-      "properties": {
-        "input": {
-          "type": "object",
-          "required": [
-            "name"
-          ],
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "input": {
-              "type": "array",
-              "properties": {}
-            }
-          }
-        },
-        "output": {}
-      }
     }
   }
 }

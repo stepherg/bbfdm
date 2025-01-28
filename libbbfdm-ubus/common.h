@@ -49,7 +49,6 @@ bool validate_msglen(bbfdm_data_t *data);
 
 int get_dm_type(char *dm_type);
 
-int get_resolved_paths(struct dmctx *bbf_ctx, char *qpath, struct list_head *resolved_paths);
 void strncpyt(char *dst, const char *src, size_t n);
 
 #endif /* COMMON_H */

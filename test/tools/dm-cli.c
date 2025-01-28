@@ -54,7 +54,6 @@ int main(int argc, char **argv)
 	DMOBJ *CLI_DM_ROOT_OBJ = NULL;
 	void *cli_lib_handle = NULL;
 	struct dmctx bbfdm_ctx = {0};
-	bbfdm_config_t bbfdm_config = {0};
 	char *plugin_path = NULL, *plugin_dir = NULL, *dm_path = NULL;
 	unsigned int proto = BBFDM_BOTH;
 	int err = 0, ch;
@@ -83,9 +82,9 @@ int main(int argc, char **argv)
 	}
 
 	if (plugin_path == NULL) {
-		err = bbfdm_load_internal_plugin(NULL, tDynamicObj, &bbfdm_config, &CLI_DM_ROOT_OBJ);
+		err = bbfdm_load_internal_plugin(NULL, tDynamicObj, &CLI_DM_ROOT_OBJ);
 	} else {
-		err = bbfdm_load_dotso_plugin(NULL, &cli_lib_handle, plugin_path, &bbfdm_config, &CLI_DM_ROOT_OBJ);
+		err = bbfdm_load_dotso_plugin(NULL, &cli_lib_handle, plugin_path, &CLI_DM_ROOT_OBJ);
 	}
 
 	if (err || !CLI_DM_ROOT_OBJ) {

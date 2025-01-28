@@ -26,6 +26,10 @@ else
 	# Create directories for micro-service configuration and shared files
 	mkdir -p /etc/bbfdm/services
 	mkdir -p /usr/share/bbfdm/micro_services
+	
+	#install Core Data Model as a micro-service
+	echo "Installing Core (libbbfdm) Data Model as a micro-service"	
+	exec_cmd cp /usr/lib/libcore.so /usr/share/bbfdm/micro_services/core.so
 
 	#install SYSMNGR Data Model as a micro-service
 	echo "Installing System Manager (SYSMNGR) Data Model as a micro-service"
@@ -39,5 +43,7 @@ else
 	echo "Installing Network Data Model (netmngr) as a micro-service"
 	install_netmngr_as_micro_service
 
+	#install Ethernet Data Model as a micro-service
+	echo "Installing Ethernet Data Model (ethmngr) as a micro-service"
 	install_ethmngr_as_micro_service
 fi

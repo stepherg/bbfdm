@@ -98,6 +98,38 @@ int bbfdm_ubus_invoke_async(struct ubus_context *ubus_ctx, const char *obj, cons
 		bbfdm_free_ctx(&ctx); \
 	} while (0)
 
+/**
+ * @brief Sends an event to a UBUS object.
+ *
+ * This function sends an event to the specified UBUS object with the provided
+ * message data. The event is transmitted using the UBUS system.
+ *
+ * @param[in] bbfdm_ctx Pointer to the BBFDM context.
+ * @param[in] obj Name of the UBUS object to send the event to.
+ * @param[in] msg Pointer to a `blob_attr` message containing event data.
+ * @return 0 on success, -1 on failure.
+ */
+int bbfdm_ubus_send_event(struct bbfdm_ctx *bbfdm_ctx, const char *obj, struct blob_attr *msg);
+
+/**
+ * @brief Sends an event to a UBUS object.
+ *
+ * This macro simplifies the process of initializing a context, sending an event,
+ * and cleaning up the context.
+ *
+ * @param obj The name of the UBUS object to send the event to.
+ * @param msg Pointer to a `blob_attr` message containing event data.
+ * @return Always returns 0.
+ */
+#define BBFDM_UBUS_SEND_EVENT(obj, msg) \
+	do { \
+		struct bbfdm_ctx ctx = {0}; \
+		memset(&ctx, 0, sizeof(struct bbfdm_ctx)); \
+		bbfdm_init_ctx(&ctx); \
+		bbfdm_ubus_send_event(&ctx, obj, msg); \
+		bbfdm_free_ctx(&ctx); \
+	} while (0)
+
 #ifdef __cplusplus
 }
 #endif

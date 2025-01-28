@@ -49,6 +49,7 @@ void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 	ctx->dm_entryobj = tEntryObj;
 	dm_init_mem(ctx);
 	dm_uci_init(ctx);
+	dm_ubus_init(ctx);
 }
 
 void bbf_ctx_clean(struct dmctx *ctx)
@@ -57,7 +58,7 @@ void bbf_ctx_clean(struct dmctx *ctx)
 
 	dm_uci_exit(ctx);
 	dm_clean_mem(ctx);
-	dmubus_free();
+	dm_ubus_free(ctx);
 }
 
 void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj)
@@ -273,13 +274,10 @@ int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, 
 {
 	struct dmctx dmctx = {0};
 
-	*value = dmstrdup("");
-
-	if (!param || !linker || *linker == 0)
+	if (DM_STRLEN(param) == 0 || DM_STRLEN(linker) == 0)
 		return 0;
 
-	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
-
+	dmctx.dm_entryobj = ctx->dm_entryobj;
 	dmctx.iswildcard = 1;
 	dmctx.inparam_isparam = 1;
 	dmctx.in_param = param;
@@ -287,9 +285,8 @@ int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, 
 
 	dm_entry_get_reference_param(&dmctx);
 
-	*value = dmctx.linker_param ? dmctx.linker_param : dmstrdup("");
+	*value = dmctx.linker_param;
 
-	bbf_ctx_clean_sub(&dmctx);
 	return 0;
 }
 
@@ -317,7 +314,7 @@ int adm_entry_get_reference_value(struct dmctx *ctx, const char *param, char **v
 	return 0;
 }
 
-bool adm_entry_object_exists(struct dmctx *ctx, const char *param) // To be removed later!!!!!!!!!!!! (After moving all Objects outside bbfdm core)
+bool adm_entry_object_exists(struct dmctx *ctx, const char *param) // To be removed later
 {
 	struct dmctx dmctx = {0};
 	char linker[256] = {0};
