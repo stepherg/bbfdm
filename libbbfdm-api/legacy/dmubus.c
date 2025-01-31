@@ -111,7 +111,7 @@ static int __dm_ubus_call_internal(const char *obj, const char *method, int time
 	}
 
 	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
-		BBF_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		BBF_ERR("Failed to lookup UBUS object ID for '%s' using method '%s'", obj, method);
 		return -1;
 	}
 
@@ -350,7 +350,7 @@ static int dmubus_call_blob_internal(const char *obj, const char *method, json_o
 	}
 
 	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
-		BBF_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		BBF_ERR("Failed to lookup UBUS object ID for '%s' using method '%s'", obj, method);
 		blob_buf_free(&blob);
 		return rc;
 	}
@@ -403,7 +403,7 @@ static int dmubus_call_blob_msg_internal(const char *obj, const char *method, st
 	}
 
 	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
-		BBF_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		BBF_ERR("Failed to lookup UBUS object ID for '%s' using method '%s'", obj, method);
 		return -1;
 	}
 

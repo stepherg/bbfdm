@@ -1055,7 +1055,7 @@ static int ubus_call_blob_msg(const char *obj, const char *method, struct blob_b
 	}
 
 	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
-		BBF_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		BBF_ERR("Failed to lookup UBUS object ID for '%s' using method '%s'", obj, method);
 		ubus_free(ubus_ctx);
 		return -1;
 	}

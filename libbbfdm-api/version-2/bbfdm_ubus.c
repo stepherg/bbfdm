@@ -42,7 +42,7 @@ int bbfdm_ubus_invoke_sync(struct bbfdm_ctx *bbfdm_ctx, const char *obj, const c
 	}
 
 	if (ubus_lookup_id(bbfdm_ctx->ubus_ctx, obj, &id)) {
-		BBFDM_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		BBFDM_ERR("Failed to lookup UBUS object ID for '%s' using method '%s'", obj, method);
 		return -1;
 	}
 
@@ -67,7 +67,7 @@ int bbfdm_ubus_invoke_async(struct ubus_context *ubus_ctx, const char *obj, cons
 	}
 
 	if (ubus_lookup_id(ubus_ctx, obj, &id)) {
-		BBFDM_ERR("Failed to lookup UBUS object ID for '%s'", obj);
+		BBFDM_ERR("Failed to lookup UBUS object ID for '%s' using method '%s'", obj, method);
 		return -1;
 	}
 
