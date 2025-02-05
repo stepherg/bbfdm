@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 PROJECT(bbfdmd)
 
-ADD_DEFINITIONS(-fstrict-aliasing -Wall -Wextra -Werror -Wformat -Wformat-signedness -g -fPIC -D_GNU_SOURCE)
+ADD_DEFINITIONS(-fstrict-aliasing -Wall -Wextra -Werror -Wformat -Wformat-signedness -g3 -fPIC -D_GNU_SOURCE)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${CMAKE_SOURCE_DIR} -I${CMAKE_SOURCE_DIR}/libbbfdm-api/legacy -I${CMAKE_SOURCE_DIR}/libbbfdm-api/version-2 -I${CMAKE_SOURCE_DIR}/libbbfdm-ubus")
 

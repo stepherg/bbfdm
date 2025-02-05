@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 PROJECT(libbbfdm-api-version-2)
 
-ADD_DEFINITIONS(-Wall -Werror -g -D_GNU_SOURCE)
+ADD_DEFINITIONS(-Wall -Werror -g3 -D_GNU_SOURCE)
 
 FILE(GLOB BBFDM_API_SOURCES *.c)
 
