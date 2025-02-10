@@ -15,8 +15,8 @@ include:
        - if: $CI_COMMIT_BRANCH == "devel"
 
 stages:
-    - static_code_analysis
     - unit_test
+    - static_code_analysis
     - functional_test
     - deploy
 
@@ -39,6 +39,12 @@ run_tools_test:
   image: ${COMMON_IMAGE}
   allow_failure: false
   script:
+  - |
+      echo "
+      machine dev.iopsys.eu
+      login gitlab-ci-token
+      password $CI_JOB_TOKEN
+      " > ~/.netrc
   - "./gitlab-ci/pipeline_setup.sh"
   - "./gitlab-ci/setup.sh ms"
   - "./gitlab-ci/tools-test.sh"

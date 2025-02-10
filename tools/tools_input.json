@@ -8,7 +8,7 @@
   "dm_json_files": [
     "tools/datamodel.json"
   ],
-  "vendor_prefix": "X_IOPSYS_EU_",
+  "vendor_prefix": "X_IOWRT_EU_",
   "plugins": [
     {
         "repo": "https://dev.iopsys.eu/system/sysmngr.git",
@@ -491,6 +491,62 @@
       "extra_dependencies": [
         "-I /builds/bbf/bbfdm/libbbfdm-api/legacy",
         "-I libdm/common"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "package/gnx-files-ftth/bbf_plugin/link_forwarding.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "genexis-packages/gnx-ux-manager/src/bbf_plugin/datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "genexis-packages/gnx-catv/datamodel/datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "genexis-packages/easywifi/files/wifi_extn.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "genexis-packages/dhcp-on-boarding/src/datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "genexis-packages/gnx-loop-detector/datamodel/datamodel.c"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
+      "proto": "git",
+      "version": "devel",
+      "dm_files": [
+        "genexis-packages/gnx-sfp/src/bbf_plugin/datamodel.c"
       ]
     }
   ],
