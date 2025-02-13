@@ -35,10 +35,6 @@
 
 LIST_HEAD(head_registered_service);
 
-static void periodic_instance_updater(struct uloop_timeout *t);
-static void bbfdm_register_instance_refresh_timer(struct ubus_context *ctx, int start_in);
-static void bbfdm_cancel_instance_refresh_timer(struct ubus_context *ctx);
-
 // Global variables
 static void *deamon_lib_handle = NULL;
 
@@ -46,8 +42,6 @@ static void bbfdm_ctx_cleanup(struct bbfdm_context *u)
 {
 	bbf_global_clean(DEAMON_DM_ROOT_OBJ);
 
-	free_path_list(&u->instances);
-	free_path_list(&u->old_instances);
 	free_path_list(&u->config.list_objs);
 
 	/* Main daemon */
@@ -111,9 +105,7 @@ static void async_complete_cb(struct uloop_process *p, __attribute__((unused)) i
 		ubus_send_reply(r->ctx, &r->req, bb->head);
 		BBF_INFO("pid(%d) blob data sent raw(%zu)", r->process.pid, blob_raw_len(bb->head));
 		ubus_complete_deferred_request(r->ctx, &r->req, 0);
-		if (r->is_operate) {
-			bbfdm_register_instance_refresh_timer(r->ctx, 0);
-		}
+
 		munmap(r->result, DEF_IPC_DATA_LEN);
 		async_req_free(r);
 	}
@@ -520,7 +512,6 @@ static int bbfdm_operate_handler(struct ubus_context *ctx, struct ubus_object *o
 	if (is_sync_operate_cmd(&data)) {
 		bbfdm_operate_cmd(&data, NULL);
 	} else {
-		bbfdm_cancel_instance_refresh_timer(ctx);
 		bbfdm_start_deferred(&data, bbfdm_operate_cmd, true);
 	}
 
@@ -754,126 +745,6 @@ static struct ubus_object bbf_object = {
 	.n_methods = ARRAY_SIZE(bbf_methods)
 };
 
-static void broadcast_add_del_event(struct ubus_context *ctx, const char *method, struct list_head *inst, bool is_add)
-{
-	struct blob_buf bb;
-	struct pathNode *ptr;
-	char method_name[40];
-	void *a;
-
-	if (list_empty(inst)) {
-		return;
-	}
-
-	memset(&bb, 0, sizeof(struct blob_buf));
-	blob_buf_init(&bb, 0);
-
-	a = blobmsg_open_array(&bb, "instances");
-	list_for_each_entry(ptr, inst, list) {
-		blobmsg_add_string(&bb, NULL, ptr->path);
-		BBF_DEBUG("#%s:: %s, method %s #", (is_add)?"Add":"Del", ptr->path, method);
-	}
-	blobmsg_close_array(&bb, a);
-
-	snprintf(method_name, sizeof(method_name), "%s.%s", method, is_add ? BBF_ADD_EVENT : BBF_DEL_EVENT);
-
-	if (is_add)
-		ubus_send_event(ctx, method_name, bb.head);
-	else
-		ubus_send_event(ctx, method_name, bb.head);
-
-	blob_buf_free(&bb);
-}
-
-static void update_instances_list(struct list_head *inst)
-{
-	int ret;
-	struct dmctx bbf_ctx = {
-			.in_param = ROOT_NODE,
-			.nextlevel = false,
-			.disable_mservice_browse = true,
-			.dm_type = BBFDM_USP
-	};
-
-	bbf_init(&bbf_ctx);
-
-	ret = bbfdm_cmd_exec(&bbf_ctx, BBF_INSTANCES);
-	if (ret == 0) {
-		struct blob_attr *cur = NULL;
-		size_t rem = 0;
-
-		// Apply all bbfdm changes
-		dmuci_commit_bbfdm();
-
-		blobmsg_for_each_attr(cur, bbf_ctx.bb.head, rem) {
-			struct blob_attr *tb[1] = {0};
-			const struct blobmsg_policy p[1] = {
-					{ "path", BLOBMSG_TYPE_STRING }
-			};
-
-			blobmsg_parse(p, 1, tb, blobmsg_data(cur), blobmsg_len(cur));
-
-			char *name = (tb[0]) ? blobmsg_get_string(tb[0]) : "";
-
-			add_path_list(name, inst);
-		}
-	} else {
-		BBF_WARNING("Failed to get instances, err code %d", ret);
-	}
-
-	bbf_cleanup(&bbf_ctx);
-}
-
-static void instance_compare_publish(struct bbfdm_context *daemon_ctx)
-{
-	struct pathNode *ptr;
-	LIST_HEAD(inst_list);
-	struct list_head *new_inst, *old_inst;
-	const char *method;
-
-	new_inst = &daemon_ctx->instances;
-	old_inst = &daemon_ctx->old_instances;
-
-	method = DM_STRLEN(daemon_ctx->config.out_root_obj) ? daemon_ctx->config.out_root_obj : daemon_ctx->config.out_name;
-	list_for_each_entry(ptr, old_inst, list) {
-		if (!present_in_path_list(new_inst, ptr->path)) {
-			add_path_list(ptr->path, &inst_list);
-		}
-	}
-	broadcast_add_del_event(&daemon_ctx->ubus_ctx, method, &inst_list, false);
-	free_path_list(&inst_list);
-
-	list_for_each_entry(ptr, new_inst, list) {
-		if (!present_in_path_list(old_inst, ptr->path)) {
-			add_path_list(ptr->path, &inst_list);
-		}
-	}
-	broadcast_add_del_event(&daemon_ctx->ubus_ctx, method, &inst_list, true);
-	free_path_list(&inst_list);
-}
-
-static void periodic_instance_updater(struct uloop_timeout *t)
-{
-	struct bbfdm_context *u;
-
-	u = container_of(t, struct bbfdm_context, instance_timer);
-	if (u == NULL) {
-		BBF_ERR("Failed to get the bbfdm context");
-		return;
-	}
-
-	free_path_list(&u->old_instances);
-	if (!list_empty(&u->instances)) {
-		list_splice_init(&u->instances, &u->old_instances);
-	}
-
-	update_instances_list(&u->instances);
-	if (!list_empty(&u->instances)) {
-		BBF_INFO("Comparing instances ...");
-		instance_compare_publish(u);
-	}
-}
-
 static int _fill_daemon_input_option(json_object *daemon_obj, bbfdm_config_t *config)
 {
 	char opt_val[MAX_DM_PATH] = {0};
@@ -1106,53 +977,8 @@ static int regiter_ubus_object(struct ubus_context *ctx)
 	return ret;
 }
 
-static void bbfdm_register_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec)
-{
-	struct bbfdm_context *u;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		BBF_ERR("Failed to get the bbfdm context");
-		return;
-	}
-
-	if (start_in_sec >= 0) {
-		BBF_INFO("Register instance refresh timer in %d sec...", start_in_sec);
-		u->instance_timer.cb = periodic_instance_updater;
-		uloop_timeout_set(&u->instance_timer, start_in_sec * 1000);
-	}
-}
-
-static void bbfdm_cancel_instance_refresh_timer(struct ubus_context *ctx)
-{
-	struct bbfdm_context *u;
-
-	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
-	if (u == NULL) {
-		BBF_ERR("Failed to get the bbfdm context");
-		return;
-	}
-
-	BBF_DEBUG("Cancelling Instance refresh timer");
-	uloop_timeout_cancel(&u->instance_timer);
-}
-
-static void bbf_config_change_cb(struct ubus_context *ctx, struct ubus_event_handler *ev,
-				const char *type, struct blob_attr *msg)
-{
-	(void)ev;
-	(void)ctx;
-	(void)msg;
-
-	BBF_INFO("Config updated, Scheduling instance refresh timers");
-
-	bbfdm_schedule_instance_refresh_timer(ctx, 0);
-}
-
 static void bbfdm_ctx_init(struct bbfdm_context *bbfdm_ctx)
 {
-	INIT_LIST_HEAD(&bbfdm_ctx->instances);
-	INIT_LIST_HEAD(&bbfdm_ctx->old_instances);
 	INIT_LIST_HEAD(&bbfdm_ctx->event_handlers);
 	INIT_LIST_HEAD(&bbfdm_ctx->config.list_objs);
 }
@@ -1233,8 +1059,6 @@ static int register_micro_services()
 	return err;
 }
 
-static struct ubus_event_handler config_change_handler = { .cb = bbf_config_change_cb };
-
 int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 {
 	int err = 0;
@@ -1273,14 +1097,7 @@ int bbfdm_ubus_regiter_init(struct bbfdm_context *bbfdm_ctx)
 	if (err != UBUS_STATUS_OK)
 		return -1;
 
-	bbfdm_register_instance_refresh_timer(&bbfdm_ctx->ubus_ctx, 1);
-	err = register_events_to_ubus(&bbfdm_ctx->ubus_ctx, &bbfdm_ctx->event_handlers);
-	if (err != 0)
-		return err;
-
-	err = ubus_register_event_handler(&bbfdm_ctx->ubus_ctx, &config_change_handler, "bbf.config.change");
-
-	return err;
+	return  register_events_to_ubus(&bbfdm_ctx->ubus_ctx, &bbfdm_ctx->event_handlers);
 }
 
 int bbfdm_ubus_regiter_free(struct bbfdm_context *bbfdm_ctx)
@@ -1310,8 +1127,5 @@ void bbfdm_ubus_load_data_model(DM_MAP_OBJ *DynamicObj)
 	INTERNAL_ROOT_TREE = DynamicObj;
 }
 
-void bbfdm_schedule_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec)
-{
-	bbfdm_cancel_instance_refresh_timer(ctx);
-	bbfdm_register_instance_refresh_timer(ctx, start_in_sec);
-}
+void bbfdm_schedule_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec) {} // To be removed later
+

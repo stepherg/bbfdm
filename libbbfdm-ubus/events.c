@@ -100,8 +100,6 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 	if (ret)
 		goto end;
 
-	bbfdm_schedule_instance_refresh_timer(ctx, 2);
-
 	size_t blob_data_len = blob_raw_len(bbf_ctx.bb.head);
 
 	if (blob_data_len) {
