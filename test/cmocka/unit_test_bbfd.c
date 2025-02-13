@@ -23,6 +23,7 @@ static int setup(void **state)
 		return -1;
 
 	bbf_ctx_init(ctx, TR181_ROOT_TREE);
+	ctx->dm_type = BBFDM_BOTH;
 
 	*state = ctx;
 
@@ -546,7 +547,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.InterfaceStack.";
+	ctx->in_param = "Device.X_IOPSYS_EU_TEST.";
 
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
