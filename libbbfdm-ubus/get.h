@@ -31,6 +31,6 @@ void bbfdm_get_names(bbfdm_data_t *data);
 
 void bbfdm_get_instances(bbfdm_data_t *data);
 
-int bbfdm_get_supported_dm(bbfdm_data_t *data);
+void bbfdm_get_supported_dm(bbfdm_data_t *data);
 
 #endif /* GET_H */

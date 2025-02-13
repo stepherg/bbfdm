@@ -21,8 +21,6 @@
 #define TO_STR(x) STRINGIFY(x)
 
 #define ROOT_NODE "Device."
-#define BBF_ADD_EVENT "AddObj"
-#define BBF_DEL_EVENT "DelObj"
 #define BBF_EVENT_NAME "event"
 
 #define MAX_DM_KEY_LEN 256

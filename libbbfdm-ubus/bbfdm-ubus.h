@@ -31,11 +31,7 @@ typedef struct bbfdm_config {
 struct bbfdm_context {
 	bbfdm_config_t config;
 	struct ubus_context ubus_ctx;
-	struct uloop_timeout instance_timer;
 	struct list_head event_handlers;
-	struct list_head instances;
-	struct list_head old_instances;
-	int schema_len;
 };
 
 struct ev_handler_node {
@@ -62,6 +58,6 @@ void bbfdm_ubus_set_service_name(struct bbfdm_context *bbfdm_ctx, const char *sr
 void bbfdm_ubus_set_log_level(int log_level);
 void bbfdm_ubus_load_data_model(DM_MAP_OBJ *DynamicObj);
 
-void bbfdm_schedule_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec);
+void bbfdm_schedule_instance_refresh_timer(struct ubus_context *ctx, int start_in_sec);  // To be removed later
 
 #endif /* BBFDM_UBUS_H */
