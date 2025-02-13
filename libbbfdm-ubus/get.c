@@ -962,10 +962,9 @@ void bbfdm_get_instances(bbfdm_data_t *data)
 	bbf_cleanup(&data->bbf_ctx);
 }
 
-int bbfdm_get_supported_dm(bbfdm_data_t *data)
+void bbfdm_get_supported_dm(bbfdm_data_t *data)
 {
 	struct pathNode *pn = NULL;
-	int schema_len = 0;
 	int fault = 0;
 
 	bbf_init(&data->bbf_ctx);
@@ -991,12 +990,8 @@ int bbfdm_get_supported_dm(bbfdm_data_t *data)
 
 	blobmsg_close_array(&data->bbf_ctx.bb, array);
 
-	schema_len = blobmsg_len(data->bbf_ctx.bb.head);
-
 	if (data->ctx && data->req)
 		ubus_send_reply(data->ctx, data->req, data->bbf_ctx.bb.head);
 
 	bbf_cleanup(&data->bbf_ctx);
-
-	return schema_len;
 }
