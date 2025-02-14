@@ -46,6 +46,14 @@ def move_file(source_path, destination_path):
     shutil.move(source_path, destination_path)
 
 
+def install_json_plugin(source_path, destination_path, vendor_extn):
+    with open(source_path, 'r', encoding='UTF-8') as src, open(destination_path, 'w', encoding='UTF-8') as dest:
+        data = src.read()
+        data = data.replace("{BBF_VENDOR_PREFIX}", vendor_extn)
+
+        dest.write(data)
+
+
 def remove_file(file_path):
     try:
         os.remove(file_path)
@@ -60,13 +68,9 @@ def create_folder(folder_path):
         pass
 
 
-def rmtree_handler(_func, path, _exc_info):
-    print(f'Failed to remove {path}')
-
-
 def remove_folder(folder_path):
     if os.path.isdir(folder_path):
-        shutil.rmtree(folder_path, onerror=rmtree_handler)
+        shutil.rmtree(folder_path)
 
 
 def cd_dir(path):
@@ -138,15 +142,16 @@ def clear_list(input_list):
     input_list.clear()
 
 
-def generate_shared_library(dm_name, source_files, vendor_prefix, extra_dependencies, is_microservice=False):
+def generate_shared_library(dm_name, source_files, vendor_prefix,
+                            extra_dependencies, is_microservice=False):
     # Return if source_files (list) is empty
     if len(source_files) == 0:
         return
 
     if is_microservice:
-        outdir=BBF_MS_DIR
+        outdir = BBF_MS_DIR
     else:
-        outdir=BBF_PLUGIN_DIR
+        outdir = BBF_PLUGIN_DIR
 
     output_library = outdir + dm_name
 
@@ -162,7 +167,9 @@ def generate_shared_library(dm_name, source_files, vendor_prefix, extra_dependen
             print(f"     Error: Source file {source_file} does not exist.")
             return False
 
-    cmd = ['gcc', '-shared', '-o', output_library, '-fPIC', '-DBBF_VENDOR_PREFIX=\\"{}\\"'.format(VENDOR_PREFIX)] + source_files + extra_dependencies
+    cmd = ['gcc', '-shared', '-o', output_library, '-fPIC',
+           '-DBBF_VENDOR_PREFIX=\\"{}\\"'.format(VENDOR_PREFIX)]
+    cmd = cmd + source_files + extra_dependencies
     # Compile the shared library
     try:
         cmdstr = ' '.join(str(e) for e in cmd)
@@ -261,13 +268,13 @@ def fill_list_dm(proto, dm_list, dm_name=None):
     try:
         # Run the command
         result = subprocess.run(command, shell=True, text=True, capture_output=True, check=True)
-        
+
         # Get the output from the result
         output = result.stdout
 
         # Split the output into lines
         lines = output.strip().split('\n')
-        
+
         # Iterate through each line and parse the information
         for line in lines:
             parts = line.split()
@@ -284,7 +291,7 @@ def fill_list_dm(proto, dm_list, dm_name=None):
     except subprocess.CalledProcessError as e:
         # Handle subprocess errors here
         print(f"Error running command: {e}")
-        sys.exit(1)    
+        sys.exit(1)
 
 
 def remove_duplicate_elements(input_list):
@@ -315,8 +322,9 @@ def fill_list_supported_dm():
                 DB.sort(key=lambda x: x['param'], reverse=False)
                 DB[:] = remove_duplicate_elements(DB)
 
+
 def clone_git_repository(repo, version=None):
-    repo_path='/tmp/repo/'+os.path.basename(repo).replace('.git','')
+    repo_path = '/tmp/repo/'+os.path.basename(repo).replace('.git', '')
     if os.path.exists(repo_path):
         print(f'    {repo} already exists at {repo_path} !')
         return True
@@ -356,8 +364,12 @@ def download_and_build_plugins(plugins, vendor_prefix):
         is_microservice = get_option_value(plugin, "is_microservice")
         extra_dependencies = get_option_value(plugin, "extra_dependencies", [])
         dm_desc_file = get_option_value(plugin, "dm_info_file", "")
+        prefix = get_option_value(plugin, "vendor_prefix", None)
         repo_path = None
-        name=os.path.basename(repo).replace('.git','')
+        name = os.path.basename(repo).replace('.git', '')
+
+        if not prefix:
+            prefix = vendor_prefix
 
         if repo is None or proto is None or dm_files is None or not isinstance(dm_files, list):
             BBF_ERROR_CODE += 1
@@ -370,17 +382,14 @@ def download_and_build_plugins(plugins, vendor_prefix):
             repo_path = "/tmp/repo/"+name
             version = get_option_value(plugin, "version")
 
-
             if not clone_git_repository(repo, version):
                 BBF_ERROR_CODE += 1
                 print(f"# Failed to clone {repo} {BBF_ERROR_CODE}")
                 continue
-                
             print(f'    Processing {get_repo_version_info(repo, version)}')
         elif proto == "local":
             repo_path = repo
             print(f'    Processing {get_repo_version_info(repo, proto)}')
-            
         if repo_path is None:
             BBF_ERROR_CODE += 1
             print(f"# Repository path not defined {BBF_ERROR_CODE}!!!")
@@ -402,7 +411,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
                     if filename.endswith('.c'):
                         LIST_FILES.append(filename)
                     elif filename.endswith('.json'):
-                        move_file(filename, "/usr/share/bbfdm/plugins")
+                        install_json_plugin(filename, "/usr/share/bbfdm/plugins/"+f"{plugin_index}_{name}.json", prefix)
                     else:
                         BBF_ERROR_CODE += 1
                         print(f"# Unknown file format {filename} {BBF_ERROR_CODE}")
@@ -411,7 +420,7 @@ def download_and_build_plugins(plugins, vendor_prefix):
                     print(f"# Error: File not accessible {filename} {BBF_ERROR_CODE}!!!!!!")
 
         if len(LIST_FILES) > 0:
-            if not generate_shared_library(f"{plugin_index}_{name}.so", LIST_FILES, vendor_prefix, extra_dependencies, is_microservice):
+            if not generate_shared_library(f"{plugin_index}_{name}.so", LIST_FILES, prefix, extra_dependencies, is_microservice):
                 BBF_ERROR_CODE += 1
                 print(f"# Error: Failed to generate shared library for {plugin_index}_{name}, error {BBF_ERROR_CODE}")
 
@@ -441,4 +450,3 @@ def generate_supported_dm(vendor_prefix=None, plugins=None):
 
     # Fill the list supported data model
     fill_list_supported_dm()
-
