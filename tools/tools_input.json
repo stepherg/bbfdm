@@ -497,6 +497,7 @@
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
       "version": "devel",
+      "vendor_prefix": "X_GENEXIS_EU_",
       "dm_files": [
         "package/gnx-files-ftth/bbf_plugin/link_forwarding.json"
       ]
@@ -505,6 +506,7 @@
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
       "version": "devel",
+      "vendor_prefix": "X_GENEXIS_EU_",
       "dm_files": [
         "genexis-packages/gnx-ux-manager/src/bbf_plugin/datamodel.c"
       ]
@@ -513,6 +515,7 @@
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
       "version": "devel",
+      "vendor_prefix": "X_GENEXIS_EU_",
       "dm_files": [
         "genexis-packages/gnx-catv/datamodel/datamodel.c"
       ]
@@ -521,6 +524,7 @@
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
       "version": "devel",
+      "vendor_prefix": "X_GENEXIS_EU_",
       "dm_files": [
         "genexis-packages/easywifi/files/wifi_extn.json"
       ]
@@ -529,6 +533,7 @@
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
       "version": "devel",
+      "vendor_prefix": "X_GENEXIS_EU_",
       "dm_files": [
         "genexis-packages/dhcp-on-boarding/src/datamodel.c"
       ]
@@ -537,6 +542,7 @@
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
       "version": "devel",
+      "vendor_prefix": "X_GENEXIS_EU_",
       "dm_files": [
         "genexis-packages/gnx-loop-detector/datamodel/datamodel.c"
       ]
@@ -545,6 +551,7 @@
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
       "version": "devel",
+      "vendor_prefix": "X_GENEXIS_EU_",
       "dm_files": [
         "genexis-packages/gnx-sfp/src/bbf_plugin/datamodel.c"
       ]
