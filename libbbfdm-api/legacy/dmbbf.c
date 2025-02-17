@@ -187,6 +187,17 @@ static int plugin_leaf_onlyobj_match(DMOBJECT_ARGS)
 
 static int plugin_obj_nextlevel_match(DMOBJECT_ARGS)
 {
+	if (strcmp(dmctx->in_param, "Device") ==0 && strcmp(dmctx->in_value, "core") !=0)
+		return FAULT_9005;
+
+	if (node->obj && node->obj->obj && strncmp(node->obj->obj, ROOT_NODE, strlen(ROOT_NODE)) == 0) {
+		unsigned int parent_path_dot_num = count_occurrences(node->obj->obj, '.');
+		unsigned int in_path_dot_num = count_occurrences(dmctx->in_param, '.');
+
+		if (parent_path_dot_num >= in_path_dot_num)
+			return FAULT_9005;
+	}	
+
 	if (node->matched > 1)
 		return FAULT_9005;
 
@@ -1070,6 +1081,12 @@ static int mobj_get_name(DMOBJECT_ARGS)
 	char *refparam = node->current_object;
 	char *perm = permission->val;
 
+	if (strcmp(node->current_object, ROOT_NODE) == 0 && strcmp(dmctx->in_value, "core") != 0)
+		return 0;
+
+	if (node->obj && node->obj->obj && strncmp(node->obj->obj, ROOT_NODE, strlen(ROOT_NODE)) == 0)
+		return 0;
+
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
@@ -1150,6 +1167,12 @@ static int mobj_get_name_in_obj(DMOBJECT_ARGS)
 
 	if (!node->matched)
 		return FAULT_9005;
+
+	if (strcmp(node->current_object, ROOT_NODE) == 0 && strcmp(dmctx->in_value, "core") != 0)
+		return 0;
+
+	if (node->obj && node->obj->obj && strncmp(node->obj->obj, ROOT_NODE, strlen(ROOT_NODE)) == 0)
+		return 0;
 
 	if (dmctx->iswildcard) {
 		if (dmctx->nextlevel && dm_strcmp_wildcard(node->current_object, dmctx->in_param) == 0)
@@ -1365,14 +1388,8 @@ int dm_entry_get_instances(struct dmctx *ctx)
 	ctx->inparam_isparam = 0;
 	ctx->findparam = 0;
 	ctx->stop = 0;
-
-	if (ctx->iswildcard) {
-		ctx->checkobj = (ctx->nextlevel) ? plugin_obj_wildcard_nextlevel_match : plugin_obj_wildcard_match;
-		ctx->checkleaf = (ctx->nextlevel) ? plugin_leaf_wildcard_nextlevel_match : plugin_leaf_wildcard_match;
-	} else {
-		ctx->checkobj = (ctx->nextlevel) ? plugin_obj_nextlevel_match : plugin_obj_match;
-		ctx->checkleaf = (ctx->nextlevel) ? plugin_leaf_nextlevel_match : plugin_leaf_match;
-	}
+	ctx->checkobj = (ctx->iswildcard) ? plugin_obj_wildcard_match : plugin_obj_match;
+	ctx->checkleaf = (ctx->iswildcard) ? plugin_leaf_wildcard_match : plugin_leaf_match;
 	ctx->method_obj = mobj_get_instances_in_obj;
 	ctx->method_param = mparam_get_instances_in_obj;
 

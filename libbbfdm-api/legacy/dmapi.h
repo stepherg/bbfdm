@@ -28,6 +28,8 @@
 
 #include "libbbfdm-api/version-2/bbfdm_api.h"
 
+#define ROOT_NODE "Device."
+
 extern struct dm_permession_s DMREAD;
 extern struct dm_permession_s DMWRITE;
 extern struct dm_permession_s DMSYNC;

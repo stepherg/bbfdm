@@ -262,8 +262,15 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 	struct blob_attr *tb[__DM_SCHEMA_MAX];
 	LIST_HEAD(paths_list);
 	bbfdm_data_t data;
+	struct bbfdm_context *u;
 
 	memset(&data, 0, sizeof(bbfdm_data_t));
+
+	u = container_of(ctx, struct bbfdm_context, ubus_ctx);
+	if (u == NULL) {
+		BBF_ERR("Failed to get the bbfdm context");
+		return UBUS_STATUS_UNKNOWN_ERROR;
+	}
 
 	if (blobmsg_parse(dm_schema_policy, __DM_SCHEMA_MAX, tb, blob_data(msg), blob_len(msg))) {
 		BBF_ERR("Failed to parse blob");
@@ -292,10 +299,14 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 	data.bbf_ctx.isinfo = true;
 	bbfdm_get(&data, BBF_SCHEMA);
 #else
-	if (dm_type == BBFDM_CWMP)
+	if (dm_type == BBFDM_CWMP) {
+		char *service_name = strdup(u->config.service_name);
+		data.bbf_ctx.in_value = (dm_type == BBFDM_CWMP) ? service_name : NULL;
 		bbfdm_get(&data, BBF_GET_NAME);
-	else
+		FREE(service_name);
+	} else {
 		bbfdm_get(&data, BBF_SCHEMA);
+	}
 #endif
 
 	free_path_list(&paths_list);
@@ -304,7 +315,6 @@ static int bbfdm_schema_handler(struct ubus_context *ctx, struct ubus_object *ob
 
 static const struct blobmsg_policy dm_instances_policy[] = {
 	[DM_INSTANCES_PATH] = { .name = "path", .type = BLOBMSG_TYPE_STRING },
-	[DM_INSTANCES_FIRST_LEVEL] = { .name = "first_level", .type = BLOBMSG_TYPE_BOOL },
 	[DM_INSTANCES_OPTIONAL] = { .name = "optional", .type = BLOBMSG_TYPE_TABLE },
 };
 
@@ -331,7 +341,6 @@ static int bbfdm_instances_handler(struct ubus_context *ctx, struct ubus_object 
 
 	data.ctx = ctx;
 	data.req = req;
-	data.bbf_ctx.nextlevel = (tb[DM_INSTANCES_FIRST_LEVEL]) ? blobmsg_get_bool(tb[DM_INSTANCES_FIRST_LEVEL]) : false;
 	data.plist = &paths_list;
 
 	fill_optional_data(&data, tb[DM_INSTANCES_OPTIONAL]);
