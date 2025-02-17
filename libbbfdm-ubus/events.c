@@ -106,7 +106,7 @@ static void bbfdm_event_handler(struct ubus_context *ctx, struct ubus_event_hand
 		if (!e_args)
 			goto end;
 
-		snprintf(e_args->method_name, sizeof(e_args->method_name), "%s.%s", BBFDM_DEFAULT_UBUS_OBJ, BBF_EVENT_NAME);
+		snprintf(e_args->method_name, sizeof(e_args->method_name), "%s.event", BBFDM_DEFAULT_UBUS_OBJ);
 
 		e_args->blob_data = (struct blob_attr *)calloc(1, blob_data_len);
 
