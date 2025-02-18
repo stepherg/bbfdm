@@ -880,6 +880,30 @@ static char *get_default_value_by_type(const char *param_name, int type)
 	}
 }
 
+static void convert_to_regex(const char *input, char *output)
+{
+	int j = 0;
+
+	for (int i = 0; input[i] != '\0'; i++) {
+		if (input[i] == '.') {
+			output[j++] = '\\';  // Escape '.'
+			output[j++] = '.';
+		} else if (input[i] == '*') {
+			output[j++] = '[';   // Replace '*' with '[^.]+'
+			output[j++] = '^';
+			output[j++] = '.';
+			output[j++] = ']';
+			output[j++] = '+';
+		} else {
+			output[j++] = input[i];  // Copy other characters
+		}
+	}
+
+	output[j++] = '.';  // Allow anything after the base match
+	output[j++] = '*';
+	output[j] = '\0';   // Null-terminate the string
+}
+
 static bool is_same_reference_path(const char *curr_value, const char *in_value, char *out, size_t out_len)
 {
 	char *pch = NULL, *pchr = NULL;
@@ -902,9 +926,11 @@ static bool is_same_reference_path(const char *curr_value, const char *in_value,
 
 		char *p = strchr(pch, '[');
 		if (p) {
+			char regex_pattern[MAX_DM_PATH * 2] = {0};
 			char path[MAX_DM_PATH] = {0};
 			char key_name[256], key_value[256];
 			regmatch_t pmatch[2];
+			regmatch_t p_match[1];
 
 			if (!match(pch, "\\[(.*?)\\]", 2, pmatch))
 				continue;
@@ -929,8 +955,11 @@ static bool is_same_reference_path(const char *curr_value, const char *in_value,
 			if (!tag)
 				continue;
 
-			if (strncmp(path, in_value, strlen(path)) == 0 && strncmp(key_value, tag + 2, strlen(key_value)) == 0)
+			convert_to_regex(path, regex_pattern);
+
+			if (match(in_value, regex_pattern, 1, p_match) && strncmp(key_value, tag + 2, strlen(key_value)) == 0) {
 				return true;
+			}
 		} else {
 			if (strncmp(pch, in_value, strlen(pch)) == 0)
 				return true;
