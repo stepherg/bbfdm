@@ -187,16 +187,14 @@ static int plugin_leaf_onlyobj_match(DMOBJECT_ARGS)
 
 static int plugin_obj_nextlevel_match(DMOBJECT_ARGS)
 {
-	if (strcmp(dmctx->in_param, "Device") ==0 && strcmp(dmctx->in_value, "core") !=0)
+	if (strcmp(dmctx->in_param, "Device") == 0 && strcmp(dmctx->in_value, "core") != 0)
 		return FAULT_9005;
 
-	if (node->obj && node->obj->obj && strncmp(node->obj->obj, ROOT_NODE, strlen(ROOT_NODE)) == 0) {
-		unsigned int parent_path_dot_num = count_occurrences(node->obj->obj, '.');
-		unsigned int in_path_dot_num = count_occurrences(dmctx->in_param, '.');
+	unsigned int current_object_dot_num = count_occurrences(node->current_object, '.');
+	unsigned int in_path_dot_num = count_occurrences(dmctx->in_param, '.');
 
-		if (parent_path_dot_num >= in_path_dot_num)
-			return FAULT_9005;
-	}	
+	if (current_object_dot_num > in_path_dot_num + 1)
+		return FAULT_9005;
 
 	if (node->matched > 1)
 		return FAULT_9005;
@@ -270,6 +268,15 @@ static int plugin_leaf_wildcard_match(DMOBJECT_ARGS)
 
 static int plugin_obj_wildcard_nextlevel_match(DMOBJECT_ARGS)
 {
+	if (strcmp(dmctx->in_param, "Device") == 0 && strcmp(dmctx->in_value, "core") != 0)
+		return FAULT_9005;
+
+	unsigned int current_object_dot_num = count_occurrences(node->current_object, '.');
+	unsigned int in_path_dot_num = count_occurrences(dmctx->in_param, '.');
+
+	if (current_object_dot_num > in_path_dot_num + 1)
+		return FAULT_9005;
+
 	if (node->matched > 1)
 		return FAULT_9005;
 
@@ -1113,9 +1120,6 @@ static int mobj_get_name(DMOBJECT_ARGS)
 	if (strcmp(node->current_object, ROOT_NODE) == 0 && strcmp(dmctx->in_value, "core") != 0)
 		return 0;
 
-	if (node->obj && node->obj->obj && strncmp(node->obj->obj, ROOT_NODE, strlen(ROOT_NODE)) == 0)
-		return 0;
-
 	if (permission->get_permission != NULL)
 		perm = permission->get_permission(refparam, dmctx, data, instance);
 
@@ -1200,9 +1204,6 @@ static int mobj_get_name_in_obj(DMOBJECT_ARGS)
 	if (strcmp(node->current_object, ROOT_NODE) == 0 && strcmp(dmctx->in_value, "core") != 0)
 		return 0;
 
-	if (node->obj && node->obj->obj && strncmp(node->obj->obj, ROOT_NODE, strlen(ROOT_NODE)) == 0)
-		return 0;
-
 	if (dmctx->iswildcard) {
 		if (dmctx->nextlevel && dm_strcmp_wildcard(node->current_object, dmctx->in_param) == 0)
 			return 0;
@@ -1268,7 +1269,7 @@ int dm_entry_get_name(struct dmctx *ctx)
 		ctx->checkleaf = plugin_leaf_nextlevel_match;
 		ctx->method_obj = mobj_get_name;
 		ctx->method_param = mparam_get_name;
-		ctx->in_param = root->obj;
+		ctx->in_param = "Device";
 		node.matched = 1;
 		findparam_check = 1;
 	} else if (*(ctx->in_param + len - 1) == '.') {
