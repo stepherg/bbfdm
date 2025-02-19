@@ -12,6 +12,7 @@ static int setup_teardown(void **state)
 {
 	dm_init_mem(&bbf_ctx);
 	dm_uci_init(&bbf_ctx);
+	dm_ubus_init(&bbf_ctx);
 	bbf_ctx.dm_type = BBFDM_USP;
 	return 0;
 }
@@ -20,7 +21,7 @@ static int group_teardown(void **state)
 {
 	dm_uci_exit(&bbf_ctx);
 	dm_clean_mem(&bbf_ctx);
-	dmubus_free();
+	dm_ubus_free(&bbf_ctx);
 	return 0;
 }
 
