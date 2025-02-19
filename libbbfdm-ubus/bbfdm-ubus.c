@@ -401,7 +401,6 @@ int bbfdm_set_handler(struct ubus_context *ctx, struct ubus_object *obj,
 	if (list_empty(&pv_list)) {
 		BBF_ERR("Fault in fill pvlist set path |%s| : |list is empty|", data.bbf_ctx.in_param);
 		fill_err_code_array(&data, USP_FAULT_INTERNAL_ERROR);
-		fault = USP_FAULT_INTERNAL_ERROR;
 		goto end;
 	}
 

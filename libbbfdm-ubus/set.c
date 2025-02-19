@@ -64,11 +64,11 @@ blob__table:
 
 	struct blob_attr *attr;
 	struct blobmsg_hdr *hdr;
-	char path[MAX_DM_PATH], value[MAX_DM_VALUE];
 
 	size_t tlen = (size_t)blobmsg_data_len(blob_table);
 
 	__blob_for_each_attr(attr, blobmsg_data(blob_table), tlen) {
+		char path[MAX_DM_PATH] = {0}, value[MAX_DM_VALUE] = {0};
 		hdr = blob_data(attr);
 
 		switch (blob_id(attr)) {

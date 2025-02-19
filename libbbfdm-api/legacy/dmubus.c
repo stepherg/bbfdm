@@ -368,7 +368,7 @@ int dmubus_call_blob_set(const char *obj, const char *method, json_object *value
 static int dmubus_call_blob_msg_internal(const char *obj, const char *method, struct blob_buf *data, int timeout, json_object **resp)
 {
 	uint32_t id = 0;
-	int rc = -1;
+	int rc;
 
 	json_res = NULL;
 
@@ -511,8 +511,8 @@ int dmubus_call(const char *obj, const char *method, struct ubus_arg u_args[], i
 
 int dmubus_call_blocking(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res)
 {
-	int rc = 0;
 	struct blob_buf bmsg;
+	int rc;
 
 	memset(&bmsg, 0, sizeof(struct blob_buf));
 	prepare_blob_message(&bmsg, u_args, u_args_size);

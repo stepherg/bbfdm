@@ -31,11 +31,11 @@ struct async_request_context {
 	struct ubus_event_handler linker_handler;
 	struct list_head linker_list;
 	struct blob_buf tmp_bb;
-	char requested_path[MAX_PATH_LENGTH];
-	char ubus_method[32];
 	bool service_list_processed;
 	bool path_matched;
 	int pending_requests;
+	char requested_path[MAX_PATH_LENGTH];
+	char ubus_method[32];
 };
 
 struct ubus_request_tracker {

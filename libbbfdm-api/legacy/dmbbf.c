@@ -1269,7 +1269,7 @@ int dm_entry_get_name(struct dmctx *ctx)
 		ctx->checkleaf = plugin_leaf_nextlevel_match;
 		ctx->method_obj = mobj_get_name;
 		ctx->method_param = mparam_get_name;
-		ctx->in_param = "Device";
+		ctx->in_param = dmstrdup("Device");
 		node.matched = 1;
 		findparam_check = 1;
 	} else if (*(ctx->in_param + len - 1) == '.') {

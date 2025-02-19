@@ -13,9 +13,9 @@
 #define BBFDMD_SERVICE_H
 
 typedef struct {
+	enum bbfdmd_type_enum protocol;
 	char parent_path[MAX_PATH_LENGTH - 256];
 	char object_name[256];
-	enum bbfdmd_type_enum protocol;
 } service_object_t;
 
 typedef struct service_entry {

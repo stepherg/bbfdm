@@ -197,8 +197,6 @@ struct dmctx {
 	char *addobj_instance;
 	char *linker;
 	char *linker_param;
-	char *inst_buf[16];
-	char fault_msg[256];
 
 	struct blob_buf bb;
 
@@ -208,6 +206,9 @@ struct dmctx {
 	struct uci_context *varstate_uci_ctx;
 	struct ubus_context *ubus_ctx;
 	struct list_head *memhead;
+
+	char *inst_buf[16];
+	char fault_msg[256];
 };
 
 typedef struct dmnode {
