@@ -824,6 +824,12 @@ static int get_deviceinfo_modelnumber(char *refparam, struct dmctx *ctx, void *d
 	return 0;
 }
 
+static int get_deviceinfo_wanip(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+{
+	db_get_value_string("device", "deviceinfo", "WanIp", value);
+	return 0;
+}
+
 static int get_vcf_name(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_value_by_section_string((struct uci_section *)data, "name", value);
@@ -1628,6 +1634,7 @@ DMLEAF tDeviceInfoParams[] = {
 	{"CID", &DMREAD, DMT_STRING, get_deviceinfo_cid, NULL, BBFDM_USP},
 	{"PEN", &DMREAD, DMT_STRING, get_deviceinfo_pen, NULL, BBFDM_USP},
 	{"ModelNumber", &DMREAD, DMT_STRING, get_deviceinfo_modelnumber, NULL, BBFDM_BOTH},
+	{"X_COMCAST-COM_WAN_IP", &DMREAD, DMT_STRING, get_deviceinfo_wanip, NULL, BBFDM_BOTH},
 	{0}};
 
 /* *** Device.DeviceInfo.VendorConfigFile.{i}. *** */
