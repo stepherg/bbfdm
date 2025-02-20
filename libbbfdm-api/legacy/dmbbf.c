@@ -1638,6 +1638,15 @@ static int mparam_set_value(DMPARAM_ARGS)
 			return 0;
 		}
 	} else {
+		int len = DM_STRLEN(param_value);
+
+		// Remove linker value from the provided value if it is not marked as reference value 'Device.XXX.=>XX##'
+		if (len > 7 && DM_STRNCMP(param_value, ROOT_NODE, strlen(ROOT_NODE)) == 0 &&
+				param_value[len - 1] == '#' && param_value[len - 2] == '#') {
+			char *p = DM_STRSTR(param_value, "=>");
+			if (p) *p = 0;
+		}
+
 		if (DM_STRCMP(value, dmctx->in_value) == 0) {
 			BBF_DEBUG("Requested value (%s) is same as current value (%s)...", dmctx->in_value, value);
 			return 0;
