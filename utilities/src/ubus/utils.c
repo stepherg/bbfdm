@@ -27,6 +27,34 @@ void strncpyt(char *dst, const char *src, size_t n)
         }
 }
 
+bool file_exists(const char *path)
+{
+	struct stat buffer;
+
+	if (!path)
+		return false;
+
+	return stat(path, &buffer) == 0;
+}
+
+static bool is_wifi_configs(const char *config_name, uint32_t *wifi_config_flags)
+{
+	if (!config_name && !wifi_config_flags)
+		return false;
+
+	if (strcmp(config_name, "wireless") == 0) {
+		*wifi_config_flags |= WIRELESS_CONFIG;
+		return true;
+	}
+
+	if (strcmp(config_name, "mapcontroller") == 0) {
+		*wifi_config_flags |= MAPCONTROLLER_CONFIG;
+		return true;
+	}
+
+	return false;
+}
+
 int bbf_config_call(struct ubus_context *ctx, const char *object, const char *method, struct blob_buf *data, ubus_data_handler_t callback, void *arg)
 {
 	int fault = 0;
@@ -77,7 +105,8 @@ static void reload_service(struct ubus_context *ctx, const char *config_name, bo
 	blob_buf_free(&bb);
 }
 
-void reload_specified_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir, struct blob_attr *services, bool is_commit, bool reload)
+void reload_specified_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir, struct blob_attr *services,
+		bool is_commit, bool reload, uint32_t *wifi_config_flags)
 {
 	struct uci_context *uci_ctx = NULL;
 	struct blob_attr *service = NULL;
@@ -127,6 +156,9 @@ void reload_specified_services(struct ubus_context *ctx, const char *conf_dir, c
 		}
 
 		if (reload) {
+			if (is_wifi_configs(config_name, wifi_config_flags))
+				continue;
+
 			ULOG_INFO("Reloading service '%s'", config_name);
 			reload_service(ctx, config_name, is_commit);
 		}
@@ -136,7 +168,8 @@ void reload_specified_services(struct ubus_context *ctx, const char *conf_dir, c
 	uci_free_context(uci_ctx);
 }
 
-void reload_all_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir, bool is_commit,  bool reload)
+void reload_all_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir,
+		bool is_commit,  bool reload, uint32_t *wifi_config_flags)
 {
 	struct uci_context *uci_ctx = NULL;
 	char **configs = NULL, **p = NULL;
@@ -193,6 +226,9 @@ void reload_all_services(struct ubus_context *ctx, const char *conf_dir, const c
 		}
 
 		if (reload) {
+			if (is_wifi_configs(*p, wifi_config_flags))
+				continue;
+
 			ULOG_INFO("Reloading service for config '%s'", *p);
 			reload_service(ctx, *p, is_commit);
 		}
@@ -202,6 +238,25 @@ void reload_all_services(struct ubus_context *ctx, const char *conf_dir, const c
 
 exit:
 	uci_free_context(uci_ctx);
+}
+
+void wifi_reload_handler_script(uint32_t wifi_config_flags)
+{
+#define WIFI_CONFIG_RELOAD_SCRIPT "/etc/wifidmd/bbf_config_reload.sh"
+	char cmd[512] = {0};
+
+	if (!file_exists(WIFI_CONFIG_RELOAD_SCRIPT))
+		return;
+
+	snprintf(cmd, sizeof(cmd), "sh %s '{\"wireless\":\"%d\",\"mapcontroller\":\"%d\"}'",
+			WIFI_CONFIG_RELOAD_SCRIPT,
+			wifi_config_flags & WIRELESS_CONFIG ? 1 : 0,
+			wifi_config_flags & MAPCONTROLLER_CONFIG ? 1 : 0);
+
+	FILE *pp = popen(cmd, "r"); // flawfinder: ignore
+	if (pp) {
+		pclose(pp);
+	}
 }
 
 void uci_apply_changes(const char *conf_dir, const char *save_dir, bool is_commit)

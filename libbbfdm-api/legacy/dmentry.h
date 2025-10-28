@@ -30,12 +30,8 @@ void bbf_global_clean(DMOBJ *dm_entryobj);
 
 int dm_validate_allowed_objects(struct dmctx *ctx, struct dm_reference *reference, char *objects[]);
 
-bool adm_entry_object_exists(struct dmctx *ctx, const char *param); // To be removed later!!!!!!!!!!!! (After moving all Objects outside bbfdm core)
+bool adm_entry_object_exists(struct dmctx *ctx, const char *param); // To be removed later
 
 void bbf_entry_services(unsigned int proto, bool is_commit, bool reload_required);
-
-void get_list_of_registered_service(struct list_head *srvlist, struct blob_buf *bb);
-bool load_service(DMOBJ *main_dm, struct list_head *srv_list, const char *srv_name, const char *srv_parent_dm, const char *srv_obj, bool is_unified, uint8_t proto);
-void free_services_from_list(struct list_head *clist);
 
 #endif //__DMENTRY_H__

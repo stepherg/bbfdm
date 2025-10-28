@@ -634,6 +634,7 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 	struct blob_attr *tb[__MAX];
 	bool monitor = false, reload = true;
 	unsigned char idx = 0;
+	uint32_t wifi_config_flags = 0;
 
 	ULOG_INFO("Commit handler called");
 
@@ -700,10 +701,15 @@ static int bbf_config_commit_handler(struct ubus_context *ctx, struct ubus_objec
 		}
 
 		ULOG_INFO("Committing changes for specified services and reloading");
-		reload_specified_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, async_req->services, true, reload);
+		reload_specified_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, async_req->services, true, reload, &wifi_config_flags);
 	} else {
 		ULOG_INFO("Committing changes for all services and reloading");
-		reload_all_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, true, reload);
+		reload_all_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, true, reload, &wifi_config_flags);
+	}
+
+	if (wifi_config_flags) {
+		ULOG_ERR("Reloading changes for wifi services");
+		wifi_reload_handler_script(wifi_config_flags);
 	}
 
 	if (monitor) {
@@ -757,10 +763,10 @@ static int bbf_config_revert_handler(struct ubus_context *ctx, struct ubus_objec
 
 	if (arr_len) {
 		ULOG_INFO("Reverting specified services");
-		reload_specified_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, services, false, false);
+		reload_specified_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, services, false, false, NULL);
 	} else {
 		ULOG_INFO("Reverting all services");
-		reload_all_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, false, false);
+		reload_all_services(ctx, CONFIG_CONFDIR, supported_protocols[idx].config_savedir, false, false, NULL);
 	}
 
 	ULOG_INFO("Applying changes to revert all UCI dmmap configurations");

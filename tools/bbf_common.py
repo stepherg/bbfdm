@@ -1,19 +1,16 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2024 iopsys Software Solutions AB
+# Copyright (C) 2024-2025 iopsys Software Solutions AB
 # Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
 
 import sys
 import os
 import subprocess
 import shutil
-import glob
 
 # Constants
 BBF_ERROR_CODE = 0
 CURRENT_PATH = os.getcwd()
-BBF_PLUGIN_DIR = "/usr/share/bbfdm/plugins/"
-BBF_MS_DIR = "/usr/share/bbfdm/micro_services/"
 
 DM_JSON_FILE = os.path.join(CURRENT_PATH, "tools", "datamodel.json")
 
@@ -35,25 +32,6 @@ Array_Types = {
 }
 
 
-def rename_file(old_path, new_path):
-    try:
-        os.rename(old_path, new_path)
-    except OSError:
-        pass
-
-
-def move_file(source_path, destination_path):
-    shutil.move(source_path, destination_path)
-
-
-def install_json_plugin(source_path, destination_path, vendor_extn):
-    with open(source_path, 'r', encoding='UTF-8') as src, open(destination_path, 'w', encoding='UTF-8') as dest:
-        data = src.read()
-        data = data.replace("{BBF_VENDOR_PREFIX}", vendor_extn)
-
-        dest.write(data)
-
-
 def remove_file(file_path):
     try:
         os.remove(file_path)
@@ -71,13 +49,6 @@ def create_folder(folder_path):
 def remove_folder(folder_path):
     if os.path.isdir(folder_path):
         shutil.rmtree(folder_path)
-
-
-def cd_dir(path):
-    try:
-        os.chdir(path)
-    except OSError:
-        pass
 
 
 def obj_has_child(value):
@@ -138,146 +109,37 @@ def is_proto_exist(value, proto):
     return proto in protocols
 
 
-def clear_list(input_list):
-    input_list.clear()
+def build_command(plugin, proto):
+    service_name = get_option_value(plugin, "service_name")
+    unified = get_option_value(plugin, "unified_daemon", False)
+    daemon_name = get_option_value(plugin, "daemon_name", "")
 
+    if not service_name:
+        return None  # skip this plugin
 
-def generate_shared_library(dm_name, source_files, vendor_prefix,
-                            extra_dependencies, is_microservice=False):
-    # Return if source_files (list) is empty
-    if len(source_files) == 0:
-        return
-
-    if is_microservice:
-        outdir = BBF_MS_DIR
+    if unified:
+        base_cmd = f"{daemon_name}"
     else:
-        outdir = BBF_PLUGIN_DIR
+        base_cmd = f"dm-service -m {service_name}"
 
-    output_library = outdir + dm_name
-
-    # Set vendor prefix
-    if vendor_prefix is not None:
-        VENDOR_PREFIX = vendor_prefix
-    else:
-        VENDOR_PREFIX = "X_IOPSYS_EU_"
-
-    # Ensure that the source files exist
-    for source_file in source_files:
-        if not os.path.exists(source_file):
-            print(f"     Error: Source file {source_file} does not exist.")
-            return False
-
-    cmd = ['gcc', '-shared', '-o', output_library, '-fPIC',
-           '-DBBF_VENDOR_PREFIX=\\"{}\\"'.format(VENDOR_PREFIX)]
-    cmd = cmd + source_files + extra_dependencies
-    # Compile the shared library
-    try:
-        cmdstr = ' '.join(str(e) for e in cmd)
-        subprocess.run(cmdstr, shell=True, check=True)
-        print(f"     Shared library {output_library} successfully created.")
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"     Error during compilation: {e}")
-        return False
-
-
-def build_and_install_bbfdm(vendor_prefix):
-    print("Compiling and installing bbfdmd in progress ...")
-
-    create_folder(os.path.join(CURRENT_PATH, "build"))
-    cd_dir(os.path.join(CURRENT_PATH, "build"))
-
-    # Set vendor prefix
-    if vendor_prefix is not None:
-        VENDOR_PREFIX = vendor_prefix
-    else:
-        VENDOR_PREFIX = "X_IOPSYS_EU_"
-
-    # Build and install bbfdm
-    cmake_command = [
-        "cmake",
-        "../",
-        "-DBBF_SCHEMA_FULL_TREE=ON",
-        f"-DBBF_VENDOR_PREFIX={VENDOR_PREFIX}",
-        "-DBBF_MAX_OBJECT_INSTANCES=255",
-        "-DBBFDMD_MAX_MSG_LEN=1048576",
-        "-DCMAKE_INSTALL_PREFIX=/"
-    ]
-    make_command = ["make"]
-    make_install_command = ["make", "install"]
-
-    try:
-        subprocess.check_call(cmake_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.check_call(make_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.check_call(make_install_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError as e:
-        print(f"Error running commands: {e}")
-        sys.exit(1)
-
-    cd_dir(CURRENT_PATH)
-    remove_folder(os.path.join(CURRENT_PATH, "build"))
-    print('Compiling and installing bbfdmd done')
-
-
-def build_and_install_dmcli():
-    print("Compiling and installing dm-cli in progress ...")
-
-    create_folder(os.path.join(CURRENT_PATH, "build"))
-    cd_dir(os.path.join(CURRENT_PATH, "build"))
-
-    # GCC command to compile dm-cli
-    gcc_command = [
-        "gcc",
-        "../test/tools/dm-cli.c",
-        "-lbbfdm-api",
-        "-lbbfdm-ubus",
-        "-lubox",
-        "-lblobmsg_json",
-        "-lbbfdm",
-        "-ljson-c",
-        "-lssl",
-        "-lcrypto",
-        "-o", "dm-cli"
-    ]
-
-    try:
-        subprocess.check_call(gcc_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.check_call(["mv", "dm-cli", "/usr/sbin/dm-cli"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError as e:
-        print(f"Error running commands: {e}")
-        sys.exit(1)
-
-    cd_dir(CURRENT_PATH)
-    remove_folder(os.path.join(CURRENT_PATH, "build"))
-    print('Compiling and installing dm-cli done')
-
-
-def fill_list_dm(proto, dm_list, dm_name=None):
-    # Determine the base command depending on the presence of dm_name
-    if dm_name:
-        command = f"dm-cli -l {dm_name}"
-    else:
-        command = "dm-cli -p /usr/share/bbfdm/plugins"
-
-    # Add the appropriate flag (-c or -u) based on the proto value
     if proto == "cwmp":
-        command += " -c Device."
+        base_cmd += " -d"
     elif proto == "usp":
-        command += " -u Device."
+        base_cmd += " -dd"
 
+    return base_cmd
+
+
+def fill_list_dm(command, dm_list):
     try:
-        # Run the command
         result = subprocess.run(command, shell=True, text=True, capture_output=True, check=True)
-
-        # Get the output from the result
         output = result.stdout
-
-        # Split the output into lines
         lines = output.strip().split('\n')
 
-        # Iterate through each line and parse the information
         for line in lines:
             parts = line.split()
+            if len(parts) < 3:
+                continue
             path, n_type, data = parts[0], parts[1], parts[2]
             permission = "readWrite" if data == "1" else "readOnly"
             p_type = n_type[4:]
@@ -289,8 +151,7 @@ def fill_list_dm(proto, dm_list, dm_name=None):
             dm_list.append(entry)
 
     except subprocess.CalledProcessError as e:
-        # Handle subprocess errors here
-        print(f"Error running command: {e}")
+        print(f"Error running command '{command}': {e}")
         sys.exit(1)
 
 
@@ -307,146 +168,30 @@ def remove_duplicate_elements(input_list):
     return result_list
 
 
-def fill_list_supported_dm():
-    for proto, DB in [("usp", LIST_SUPPORTED_USP_DM), ("cwmp", LIST_SUPPORTED_CWMP_DM)]:
-        fill_list_dm(proto, DB)
-        DB.sort(key=lambda x: x['param'], reverse=False)
-        DB[:] = remove_duplicate_elements(DB)
-
-    for file in os.listdir(BBF_MS_DIR):
-        f = os.path.join(BBF_MS_DIR, file)
-
-        if os.path.isfile(f):
-            for proto, DB in [("usp", LIST_SUPPORTED_USP_DM), ("cwmp", LIST_SUPPORTED_CWMP_DM)]:
-                fill_list_dm(proto, DB, f)
-                DB.sort(key=lambda x: x['param'], reverse=False)
-                DB[:] = remove_duplicate_elements(DB)
-
-
-def clone_git_repository(repo, version=None):
-    repo_path = '/tmp/repo/'+os.path.basename(repo).replace('.git', '')
-    if os.path.exists(repo_path):
-        print(f'    {repo} already exists at {repo_path} !')
-        return True
-    try:
-        cmd = ["git", "clone", repo, repo_path]
-        if version is not None:
-            cmd.extend(["-b", version])
-        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-        return True
-    except (OSError, subprocess.SubprocessError):
-        print(f'    Failed to clone {repo} !!!!!')
-        return False
-
-
-def get_repo_version_info(repo, version=None):
-    if version is None:
-        return repo
-    return f'{repo}^{version}'
-
-
-def download_and_build_plugins(plugins, vendor_prefix):
-    global BBF_ERROR_CODE
+def fill_list_supported_dm(plugins):
 
     if plugins is None or not isinstance(plugins, list) or not plugins:
         print("No plugins provided.")
         return
 
-    print("Generating data models from defined plugins...")
+    for proto, DB in [("usp", LIST_SUPPORTED_USP_DM), ("cwmp", LIST_SUPPORTED_CWMP_DM)]:
+        for plugin in plugins:
+            command = build_command(plugin, proto)
+            if command:
+                print(f"Running command for {proto}: {command}")
+                fill_list_dm(command, DB)
 
-    remove_folder("/tmp/repo")
-
-    for plugin_index, plugin in enumerate(plugins):
-
-        repo = get_option_value(plugin, "repo")
-        proto = get_option_value(plugin, "proto")
-        dm_files = get_option_value(plugin, "dm_files")
-        is_microservice = get_option_value(plugin, "is_microservice")
-        extra_dependencies = get_option_value(plugin, "extra_dependencies", [])
-        dm_desc_file = get_option_value(plugin, "dm_info_file", "")
-        prefix = get_option_value(plugin, "vendor_prefix", None)
-        repo_path = None
-        name = os.path.basename(repo).replace('.git', '')
-
-        if not prefix:
-            prefix = vendor_prefix
-
-        if repo is None or proto is None or dm_files is None or not isinstance(dm_files, list):
-            BBF_ERROR_CODE += 1
-            print(f"# Necessary input missing {BBF_ERROR_CODE}")
-            continue
-
-        print(f' - Processing plugin: MS({is_microservice}) {plugin}')
-
-        if proto == "git":
-            repo_path = "/tmp/repo/"+name
-            version = get_option_value(plugin, "version")
-
-            if not clone_git_repository(repo, version):
-                BBF_ERROR_CODE += 1
-                print(f"# Failed to clone {repo} {BBF_ERROR_CODE}")
-                continue
-            print(f'    Processing {get_repo_version_info(repo, version)}')
-        elif proto == "local":
-            repo_path = repo
-            print(f'    Processing {get_repo_version_info(repo, proto)}')
-        if repo_path is None:
-            BBF_ERROR_CODE += 1
-            print(f"# Repository path not defined {BBF_ERROR_CODE}!!!")
-            continue
-
-        create_folder("/tmp/repo/dm_info")
-        if dm_desc_file.endswith('.json'):
-            dest_file = "/tmp/repo/dm_info/" + os.path.basename(dm_desc_file).replace('.json', f"_{plugin_index}.json")
-            rename_file(repo_path + "/" + dm_desc_file, dest_file)
-
-        LIST_FILES = []
-        os.chdir(repo_path)
-        for dm_file in dm_files:
-            filename = dm_file
-            if filename.endswith('*.c'):
-                LIST_FILES.extend(glob.glob(filename))
-            else:
-                if os.path.isfile(filename):
-                    if filename.endswith('.c'):
-                        LIST_FILES.append(filename)
-                    elif filename.endswith('.json'):
-                        install_json_plugin(filename, "/usr/share/bbfdm/plugins/"+f"{plugin_index}_{name}.json", prefix)
-                    else:
-                        BBF_ERROR_CODE += 1
-                        print(f"# Unknown file format {filename} {BBF_ERROR_CODE}")
-                else:
-                    BBF_ERROR_CODE += 1
-                    print(f"# Error: File not accessible {filename} {BBF_ERROR_CODE}!!!!!!")
-
-        if len(LIST_FILES) > 0:
-            if not generate_shared_library(f"{plugin_index}_{name}.so", LIST_FILES, prefix, extra_dependencies, is_microservice):
-                BBF_ERROR_CODE += 1
-                print(f"# Error: Failed to generate shared library for {plugin_index}_{name}, error {BBF_ERROR_CODE}")
-
-        clear_list(LIST_FILES)
-        cd_dir(CURRENT_PATH)
-
-    print(f'Generating plugins completed, error {BBF_ERROR_CODE}')
+        DB.sort(key=lambda x: x['param'], reverse=False)
+        DB[:] = remove_duplicate_elements(DB)
 
 
-def generate_supported_dm(vendor_prefix=None, plugins=None):
+def generate_supported_dm(plugins=None):
     '''
     Generates supported data models and performs necessary actions.
 
     Args:
-        vendor_prefix (str, optional): Vendor prefix for shared libraries.
         plugins (list, optional): List of plugin configurations.
     '''
 
-    # Build && Install bbfdm
-    build_and_install_bbfdm(vendor_prefix)
-
-    # Build && Install dm-cli
-    build_and_install_dmcli()
-
-    # Download && Build Plugins Data Models
-    download_and_build_plugins(plugins, vendor_prefix)
-
     # Fill the list supported data model
-    fill_list_supported_dm()
+    fill_list_supported_dm(plugins)

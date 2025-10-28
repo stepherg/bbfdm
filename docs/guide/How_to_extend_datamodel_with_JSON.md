@@ -147,7 +147,7 @@ The JSON Plugin V2 operates by parsing the JSON file. Then it checks the parent 
 
 Examples
 
- - Device.WiFi.AccessPoint.{i}.Security.X_IOPSYS_EU_KeyPassphrase: This parameter will be extended to the core data model since it does not exist.
+ - Device.WiFi.AccessPoint.{i}.Security.X_IOWRT_EU_KeyPassphrase: This parameter will be extended to the core data model since it does not exist.
  - Device.WiFi.AccessPoint.{i}.Security.WEPKey: This parameter will be overwritten in the core data model since it already exists.
  - Device.WiFi.AccessPoint.{i}.Security.SAEPassphrase: This parameter will be excluded from the core data model since it exists, but the new protocol defined is `none`.
 
@@ -192,7 +192,7 @@ More example(s):
 - **UCI command:** uci show wireless | grep wifi-device
 
 ```bash
-"Device.X_IOPSYS_EU_Radio.{i}.": {
+"Device.X_IOWRT_EU_Radio.{i}.": {
     "type": "object",
     "protocols": [
         "cwmp",
@@ -626,7 +626,7 @@ If we consider multi-instance objects, they are kind of special because we have 
 ## How to have different mappings for get/set:
 ```json
 {
-  "Device.X_IOPSYS_EU-UserInterface.": {
+  "Device.X_IOWRT_EU-UserInterface.": {
     "type": "object",
     "protocols": [
       "cwmp",
@@ -707,7 +707,7 @@ These are special parameters all with a suffix "NumberOfEntries", which has coun
 For multi-instance on ubus mapping, it has to point to an array of objects, so for NumberOfEntries, we need to get the size of that array, which is refered here as `@Count`
 ```bash
 {
-  "Device.X_IOPSYS_EU_WiFi.RadioNumberOfEntries": {
+  "Device.X_IOWRT_EU_WiFi.RadioNumberOfEntries": {
 	"type": "unsignedInt",
     "protocols": [
       "cwmp",
@@ -734,7 +734,7 @@ For multi-instance on ubus mapping, it has to point to an array of objects, so f
 For multi-instance object mapped on uci, it has to point a uci section, so for NumberOfEntries it basically has the count of the sections.
 ```json
 {
-  "Device.X_IOPSYS_EU_DropbearNumberOfEntries": {
+  "Device.X_IOWRT_EU_DropbearNumberOfEntries": {
     "type": "unsignedInt",
     "protocols": [
       "cwmp",
@@ -765,7 +765,7 @@ Multi-instance mapping either maps to array of json objects or uci section, so f
 
 ```json
 {
-  "Device.X_IOPSYS_EU_Dropbear.{i}.": {
+  "Device.X_IOWRT_EU_Dropbear.{i}.": {
     "type": "object",
     "protocols": [
       "cwmp",
@@ -847,7 +847,7 @@ Multi-instance mapping either maps to array of json objects or uci section, so f
 Ubus example for the same
 ```json
 {
-  "Device.X_IOPSYS_EU_WiFi.Radio.{i}.": {
+  "Device.X_IOWRT_EU_WiFi.Radio.{i}.": {
     "type": "object",
     "protocols": [
       "cwmp",

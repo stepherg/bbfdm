@@ -26,22 +26,84 @@ uci_get_bbf_dmmap() {
 }
 
 get_ip_addr_used() {
-	protocol=$1
-	interface=$2
+	TARGET="$1"
+	PROTO="$2"
+	IFACE="$3"
 
-	if [ "$protocol" = "IPv6" ]; then
-		if [ -n "$interface" ]; then
-			ip_addr_used=$(ifstatus "$interface" | jsonfilter -e '@["ipv6-address"][0].address')
+	# Function to check if the input is an IPv6 address format
+	is_ipv6_format() {
+		echo "$1" | grep -q ":"
+	}
+
+	# Function to resolve domain name to IP address based on the protocol version
+	resolve_ip() {
+		nslookup "$2" 2>/dev/null | awk -v proto="$1" '
+			proto == "IPv6" && /^Address: .*:.*$/ { print $2; exit }
+			proto == "IPv4" && /^Address: / && $2 !~ /:/ { print $2; exit }
+		'
+	}
+
+	# Function to extract host from a URL or return the input if it's not a URL
+	extract_host() {
+		input="$1"
+		# Check if it's a URL (contains "://")
+		if echo "$input" | grep -q '://'; then
+			# Remove the scheme (http://, https://, ftp://, etc.)
+			input=$(echo "$input" | sed -E 's|^[a-zA-Z]+://||')
+			
+			# If input starts with [, it's an IPv6 address in the form of [fd7d::1]:port
+			if echo "$input" | grep -q '^\[.*\]'; then
+				echo "$input" | sed -E 's/^\[([0-9a-fA-F:]+)\].*/\1/'
+			else
+				# Strip everything after the first colon or slash (to handle domain:port or domain/path)
+				echo "$input" | sed -E 's/[:/].*//'
+			fi
 		else
-			ip_addr_used=$(ip -6 route | grep default | awk -F ' ' '{print $3}' | head -n 1)
+			# Return the input as-is if it's not a URL
+			echo "$input"
 		fi
-	else
-		if [ -n "$interface" ]; then
-			ip_addr_used=$(ifstatus "$interface" | jsonfilter -e '@["ipv4-address"][0].address')
+	}
+
+	# Normalize input
+	HOST=$(extract_host "${TARGET}")
+	RESOLVED_IP=""
+
+	case "${PROTO}" in
+		IPv4)
+			IP_VERSION=4
+			RESOLVED_IP=$(echo "$HOST" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' || resolve_ip "IPv4" "$HOST")
+			ROUTE_CMD="ip route get"
+			;;
+		IPv6)
+			IP_VERSION=6
+			RESOLVED_IP=$(is_ipv6_format "$HOST" && echo "$HOST" || resolve_ip "IPv6" "$HOST")
+			ROUTE_CMD="ip -6 route get"
+			;;
+		Any | *)
+			RESOLVED_IP=$(echo "$HOST" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' || resolve_ip "IPv4" "$HOST")
+			if [ -n "${RESOLVED_IP}" ]; then
+				IP_VERSION=4
+				ROUTE_CMD="ip route get"
+			else
+				RESOLVED_IP=$(is_ipv6_format "$HOST" && echo "$HOST" || resolve_ip "IPv6" "$HOST")
+				IP_VERSION=6
+				ROUTE_CMD="ip -6 route get"
+			fi
+			;;
+	esac
+
+	if [ -n "${RESOLVED_IP}" ]; then
+		if [ -n "${IFACE}" ]; then
+			IFACE_DEV=$(ifstatus "${IFACE}" | jsonfilter -e @.l3_device)
+			if [ "$IP_VERSION" -eq 6 ]; then
+				SRC_IP=$(ip -6 addr show "${IFACE_DEV}" | awk '/inet6 / && $2 !~ /fe80/ { sub(/\/.*/, "", $2); print $2; exit }')
+			else
+				SRC_IP=$(ip addr show "${IFACE_DEV}" | awk '/inet / { sub(/\/.*/, "", $2); print $2; exit }')
+			fi
 		else
-			ip_addr_used=$(ip route | grep default | awk -F ' ' '{print $9}')
+			SRC_IP=$(${ROUTE_CMD} "${RESOLVED_IP}" 2>/dev/null | sed -n 's/.*src \([0-9a-fA-F:.]*\).*/\1/p' | head -n1)
 		fi
 	fi
-	
-	echo "${ip_addr_used}"
+
+	echo "${SRC_IP}"
 }

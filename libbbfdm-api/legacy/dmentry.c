@@ -49,6 +49,7 @@ void bbf_ctx_init(struct dmctx *ctx, DMOBJ *tEntryObj)
 	ctx->dm_entryobj = tEntryObj;
 	dm_init_mem(ctx);
 	dm_uci_init(ctx);
+	dm_ubus_init(ctx);
 }
 
 void bbf_ctx_clean(struct dmctx *ctx)
@@ -57,7 +58,7 @@ void bbf_ctx_clean(struct dmctx *ctx)
 
 	dm_uci_exit(ctx);
 	dm_clean_mem(ctx);
-	dmubus_free();
+	dm_ubus_free(ctx);
 }
 
 void bbf_ctx_init_sub(struct dmctx *ctx, DMOBJ *tEntryObj)
@@ -228,6 +229,9 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 	case BBF_EVENT:
 		fault = dm_entry_event(ctx);
 		break;
+	case BBF_REFERENCES_DB:
+		fault = dm_entry_references_db(ctx);
+		break;
 	}
 
 	return bbf_fault_map(ctx, fault);
@@ -236,12 +240,14 @@ int bbf_entry_method(struct dmctx *ctx, int cmd)
 void bbf_global_init(DMOBJ *dm_entryobj, const char *plugin_path)
 {
 	dm_dynamic_initmem(&global_memhead);
+	dm_ubus_cache_init();
 	load_plugins(dm_entryobj, plugin_path);
 }
 
 void bbf_global_clean(DMOBJ *dm_entryobj)
 {
 	free_plugins(dm_entryobj);
+	dm_ubus_cache_free();
 	dm_dynamic_cleanmem(&global_memhead);
 }
 
@@ -273,23 +279,20 @@ int adm_entry_get_reference_param(struct dmctx *ctx, char *param, char *linker, 
 {
 	struct dmctx dmctx = {0};
 
-	*value = dmstrdup("");
-
-	if (!param || !linker || *linker == 0)
+	if (DM_STRLEN(param) == 0 || DM_STRLEN(linker) == 0)
 		return 0;
 
-	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
-
+	dmctx.dm_entryobj = ctx->dm_entryobj;
 	dmctx.iswildcard = 1;
 	dmctx.inparam_isparam = 1;
 	dmctx.in_param = param;
 	dmctx.linker = linker;
+	dmctx.dm_type = ctx->dm_type;
 
 	dm_entry_get_reference_param(&dmctx);
 
-	*value = dmctx.linker_param ? dmctx.linker_param : dmstrdup("");
+	*value = dmctx.linker_param;
 
-	bbf_ctx_clean_sub(&dmctx);
 	return 0;
 }
 
@@ -308,6 +311,7 @@ int adm_entry_get_reference_value(struct dmctx *ctx, const char *param, char **v
 	bbf_ctx_init_sub(&dmctx, ctx->dm_entryobj);
 
 	dmctx.in_param = linker;
+	dmctx.dm_type = ctx->dm_type;
 
 	dm_entry_get_reference_value(&dmctx);
 
@@ -317,7 +321,7 @@ int adm_entry_get_reference_value(struct dmctx *ctx, const char *param, char **v
 	return 0;
 }
 
-bool adm_entry_object_exists(struct dmctx *ctx, const char *param) // To be removed later!!!!!!!!!!!! (After moving all Objects outside bbfdm core)
+bool adm_entry_object_exists(struct dmctx *ctx, const char *param) // To be removed later
 {
 	struct dmctx dmctx = {0};
 	char linker[256] = {0};
@@ -332,6 +336,7 @@ bool adm_entry_object_exists(struct dmctx *ctx, const char *param) // To be remo
 	blob_buf_init(&dmctx.bb, 0);
 
 	dmctx.in_param = linker;
+	dmctx.dm_type = ctx->dm_type;
 
 	dm_entry_object_exists(&dmctx);
 

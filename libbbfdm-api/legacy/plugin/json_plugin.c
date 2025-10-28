@@ -674,7 +674,7 @@ static char *handle_reference_value(struct dmctx *ctx, struct json_object *linke
 		char *pref = NULL;
 
 		adm_entry_get_reference_param(ctx, linker_path, key_value, &pref);
-		return pref;
+		return pref ? pref : dmstrdup("");
 	} else {
 		char buf_ref[256 + 32] = {0};
 
@@ -1424,7 +1424,7 @@ static int uci_set_value(json_object *mapping_obj, int json_version, char *refpa
 	struct json_object *list_name = NULL;
 	struct json_object *linker_jobj = NULL;
 	char *opt_temp = NULL;
-	char buf_value[1024] = {0};
+	char buf_value[4096] = {0};
 	int res = 0;
 
 	json_object_object_get_ex(mapping_obj, "uci", &uci_obj);
@@ -1598,7 +1598,7 @@ static int uci_v1_set_value(json_object *mapping_obj, int json_version, char *re
 {
 	struct json_object *data_s = NULL;
 	struct json_object *key = NULL, *list = NULL, *linker_jobj = NULL;
-	char buf_value[1024] = {0};
+	char buf_value[4096] = {0};
 
 	json_object_object_get_ex(mapping_obj, "data", &data_s);
 	json_object_object_get_ex(mapping_obj, "key", &key);
@@ -2084,7 +2084,6 @@ static void create_parse_obj(DMOBJ *dm_entryobj, char *obj_path, json_object *jo
 		dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
 		dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
 		dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
 	}
 
 	if (dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].nextobj == NULL) {
@@ -2114,7 +2113,6 @@ static void create_parse_param(DMOBJ *dm_entryobj, char *obj_path, char *param, 
 		dm_entryobj->dynamicleaf = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
 		dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
 		dm_entryobj->dynamicleaf[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-		dm_entryobj->dynamicleaf[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
 	}
 
 	if (dm_entryobj->dynamicleaf[INDX_JSON_MOUNT].nextleaf == NULL) {

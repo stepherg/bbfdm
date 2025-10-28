@@ -2,7 +2,7 @@
   "daemon": {
     "enable": "1",
     "service_name": "wifidmd",
-    "unified_daemon": false,
+    "unified_daemon": true,
     "services": [
       {
         "parent_dm": "Device.",

@@ -25,13 +25,22 @@
 #define ULOG_DEBUG(fmt, ...) ulog(LOG_DEBUG, fmt, ## __VA_ARGS__)
 #endif
 
+enum wifi_config_flags_enum {
+	WIRELESS_CONFIG = 1,
+	MAPCONTROLLER_CONFIG = 1<<1,
+};
+
 void strncpyt(char *dst, const char *src, size_t n);
 
 int bbf_config_call(struct ubus_context *ctx, const char *object, const char *method, struct blob_buf *data, ubus_data_handler_t callback, void *arg);
 
-void reload_specified_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir, struct blob_attr *services, bool is_commit,  bool reload);
+void reload_specified_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir, struct blob_attr *services,
+		bool is_commit, bool reload, uint32_t *wifi_config_flags);
 
-void reload_all_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir, bool is_commit,  bool reload);
+void reload_all_services(struct ubus_context *ctx, const char *conf_dir, const char *save_dir,
+		bool is_commit, bool reload, uint32_t *wifi_config_flags);
+
+void wifi_reload_handler_script(uint32_t wifi_config_flags);
 
 void uci_apply_changes(const char *conf_dir, const char *save_dir, bool is_commit);
 

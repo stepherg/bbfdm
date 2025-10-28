@@ -24,7 +24,6 @@ def print_dm_usage():
 if len(sys.argv) < 2:
     print_dm_usage()
 
-VENDOR_PREFIX = None
 PLUGINS = None
 OUTPUT = None
 DM_JSON_FILES = None
@@ -62,10 +61,6 @@ for option, value in json_data.items():
         bbf_xml.SOFTWARE_VERSION = value
         continue
 
-    elif option == "vendor_prefix":
-        VENDOR_PREFIX = value
-        continue
-
     elif option == "dm_json_files":
         DM_JSON_FILES = value
         continue
@@ -82,43 +77,39 @@ for option, value in json_data.items():
         print_dm_usage()
         exit(1)
 
-if OUTPUT is None:
-    bbf.download_and_build_plugins(PLUGINS, VENDOR_PREFIX)
-else:
-    bbf.generate_supported_dm(VENDOR_PREFIX, PLUGINS)
+bbf.generate_supported_dm(PLUGINS)
 
-    file_format = bbf.get_option_value(OUTPUT, "file_format", ['xml'])
-    output_file_prefix = bbf.get_option_value(OUTPUT, "output_file_prefix", "datamodel")
-    output_dir = bbf.get_option_value(OUTPUT, "output_dir", "./out")
-    
-    bbf.create_folder(output_dir)
+file_format = bbf.get_option_value(OUTPUT, "file_format", ['xml'])
+output_file_prefix = bbf.get_option_value(OUTPUT, "output_file_prefix", "datamodel")
+output_dir = bbf.get_option_value(OUTPUT, "output_dir", "./out")
 
-    print("Dumping default DM_JSON_FILES")
-    print(DM_JSON_FILES)
-    DM_JSON_FILES.extend(glob.glob('/tmp/repo/dm_info/*.json'))
-    print("Dumping all")
-    print(DM_JSON_FILES)
+bbf.create_folder(output_dir)
 
+print("Dumping default DM_JSON_FILES")
+print(DM_JSON_FILES)
+DM_JSON_FILES.extend(glob.glob('/tmp/desc_files/*.json'))
+print("Dumping all")
+print(DM_JSON_FILES)
 
-    if isinstance(file_format, list):
-        for _format in file_format:
-    
-            if _format == "xml":
-                acs = bbf.get_option_value(OUTPUT, "acs", ['default'])
-                if isinstance(acs, list):
-                    for acs_format in acs:
-    
-                        output_file_name = output_dir + '/' + output_file_prefix + '_' + acs_format + '.xml'
-                        if acs_format == "hdm":
-                            bbf_xml.generate_xml('HDM', DM_JSON_FILES, output_file_name)
-    
-                        if acs_format == "default":
-                            bbf_xml.generate_xml('default', DM_JSON_FILES, output_file_name)
-    
-            if _format == "xls":
-                output_file_name = output_dir + '/' + output_file_prefix + '.xls'
-                bbf_excel.generate_excel(output_file_name)
-    
-    print("Datamodel generation completed, aritifacts shall be available in out directory or as per input json configuration")
+if isinstance(file_format, list):
+    for _format in file_format:
+
+        if _format == "xml":
+            acs = bbf.get_option_value(OUTPUT, "acs", ['default'])
+            if isinstance(acs, list):
+                for acs_format in acs:
+
+                    output_file_name = output_dir + '/' + output_file_prefix + '_' + acs_format + '.xml'
+                    if acs_format == "hdm":
+                        bbf_xml.generate_xml('HDM', DM_JSON_FILES, output_file_name)
+
+                    if acs_format == "default":
+                        bbf_xml.generate_xml('default', DM_JSON_FILES, output_file_name)
+
+        if _format == "xls":
+            output_file_name = output_dir + '/' + output_file_prefix + '.xls'
+            bbf_excel.generate_excel(output_file_name)
+
+print("Datamodel generation completed, aritifacts shall be available in out directory or as per input json configuration")
 
 sys.exit(bbf.BBF_ERROR_CODE)

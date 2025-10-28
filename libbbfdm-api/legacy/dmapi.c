@@ -261,20 +261,18 @@ int bbfdm_get_references(struct dmctx *ctx, int match_action, const char *base_p
 		}
 
 		snprintf(&out[len], out_len - len, "%s%s", len ? (match_action == MATCH_FIRST ? "," : ";") : "", value);
-		goto end;
+		return 0;
 	}
 
-	if (dm_is_micro_service() == true) { // It's a micro-service instance
-
-		if (out_len - len < strlen(base_path) + strlen(key_name) + strlen(key_value) + 9) { // 9 = 'path[key_name==\"key_value\"].'
-			BBF_ERR("Buffer overflow detected. The output buffer is not large enough to hold the additional data!!!");
-			return -1;
-		}
-
-		snprintf(&out[len], out_len - len, "%s%s[%s==\"%s\"].", len ? (match_action == MATCH_FIRST ? "," : ";") : "", base_path, key_name, key_value);
+	if (out_len - len < strlen(base_path) + strlen(key_name) + strlen(key_value) + 7) { // 7 = 'path[key_name=="key_value"].'
+		BBF_ERR("Buffer overflow detected. The output buffer is not large enough to hold the additional data!!!");
+		return -1;
 	}
 
-end:
+	snprintf(param_path, sizeof(param_path), "%s[%s==%s].", base_path, key_name, key_value);
+
+	snprintf(&out[len], out_len - len, "%s%s", len ? (match_action == MATCH_FIRST ? "," : ";") : "", param_path);
+
 	return 0;
 }
 
@@ -291,92 +289,30 @@ int _bbfdm_get_references(struct dmctx *ctx, const char *base_path, const char *
 
 int bbfdm_get_reference_linker(struct dmctx *ctx, char *reference_path, struct dm_reference *reference_args)
 {
-	if (DM_STRLEN(reference_path) == 0) {
-		bbfdm_set_fault_message(ctx, "%s: reference path should not be empty", __func__);
+	char hash_str[9] = {0};
+	char *uci_val = NULL;
+
+	if (!reference_path || !reference_args)
 		return -1;
-	}
 
 	reference_args->path = reference_path;
 
-	char *separator = strstr(reference_path, "=>");
-	if (!separator) {
-		bbfdm_set_fault_message(ctx, "%s: reference path must contain '=>' symbol to separate the path and value", __func__);
-		return -1;
-	}
+	if (DM_STRLEN(reference_args->path) == 0)
+		return 0;
 
-	*separator = 0;
+	calculate_hash(reference_path, hash_str, sizeof(hash_str));
 
-	reference_args->value = separator + 2;
+	int res = dmuci_get_option_value_string_varstate("bbfdm_reference_db", "reference_value", hash_str, &uci_val);
 
-	char *valid_path = strstr(separator + 2, "##");
-	if (valid_path) {
+	if (uci_val && uci_val[0] == '#' && uci_val[1] == '\0') {
+		reference_args->value = dmstrdup("");
 		reference_args->is_valid_path = true;
-		*valid_path = 0;
+	} else {
+		reference_args->value = uci_val;
+		reference_args->is_valid_path = (res == 0) ? true : false;
 	}
 
 	return 0;
-}
-
-static char *bbfdm_get_reference_value(const char *reference_path)
-{
-	unsigned int reference_path_dot_num = count_occurrences(reference_path, '.');
-	json_object *res = NULL;
-
-	json_object *in_args = json_object_new_object();
-	json_object_object_add(in_args, "proto", json_object_new_string("usp"));
-	json_object_object_add(in_args, "format", json_object_new_string("raw"));
-
-	dmubus_call("bbfdm", "get",
-			UBUS_ARGS{
-						{"path", reference_path, String},
-						{"optional", json_object_to_json_string(in_args), Table}
-			},
-			2, &res);
-
-	json_object_put(in_args);
-
-	if (!res)
-		return NULL;
-
-	json_object *res_array = dmjson_get_obj(res, 1, "results");
-	if (!res_array)
-		return NULL;
-
-	size_t nbre_obj = json_object_array_length(res_array);
-	if (nbre_obj == 0)
-		return NULL;
-
-	for (size_t i = 0; i < nbre_obj; i++) {
-		json_object *res_obj = json_object_array_get_idx(res_array, i);
-
-		char *fault = dmjson_get_value(res_obj, 1, "fault");
-		if (DM_STRLEN(fault))
-			return NULL;
-
-		char *path = dmjson_get_value(res_obj, 1, "path");
-
-		unsigned int path_dot_num = count_occurrences(path, '.');
-		if (path_dot_num > reference_path_dot_num)
-			continue;
-
-		json_object *flags_array = dmjson_get_obj(res_obj, 1, "flags");
-		if (flags_array) {
-			size_t nbre_falgs = json_object_array_length(flags_array);
-
-			for (size_t j = 0; j < nbre_falgs; j++) {
-				json_object *flag_obj = json_object_array_get_idx(flags_array, j);
-
-				const char *flag = json_object_get_string(flag_obj);
-
-				if (DM_LSTRCMP(flag, "Linker") == 0) {
-					char *data = dmjson_get_value(res_obj, 1, "data");
-					return data ? dmstrdup(data) : "";
-				}
-			}
-		}
-	}
-
-	return NULL;
 }
 
 int bbfdm_operate_reference_linker(struct dmctx *ctx, const char *reference_path, char **reference_value)
@@ -400,9 +336,6 @@ int bbfdm_operate_reference_linker(struct dmctx *ctx, const char *reference_path
 
 	if (DM_STRLEN(*reference_value) != 0)
 		return 0;
-
-	if (dm_is_micro_service() == true) // It's a micro-service instance
-		*reference_value = bbfdm_get_reference_value(reference_path);
 
 	return 0;
 }

@@ -58,8 +58,9 @@ supervisorctl stop all
 supervisorctl status
 
 cp /tmp/memory-*.xml .
-check_valgrind_xml "memory-report.xml" "bbfdmd"
-check_valgrind_xml "memory-config-report.xml" "bbf.config"
+for file in memory-*.xml; do
+    check_valgrind_xml "$file"
+done
 
 #report part
 #GitLab-CI output

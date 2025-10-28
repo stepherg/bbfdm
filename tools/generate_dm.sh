@@ -2,7 +2,7 @@
 
 # Set variables
 CONTAINER_NAME="generate_dm_tools"
-IMAGE_NAME="dev.iopsys.eu:5050/bbf/bbfdm/tools:latest"
+IMAGE_NAME="dev.iopsys.eu:5050/bbf/bbfdm/tools:2.0"
 INPUT=""
 root="${PWD/tools}"
 
@@ -23,9 +23,9 @@ usages()
 runner()
 {
 	# Create and start the Docker container
-	docker run --rm -it -v"${root}:/bbfdm" -w "/bbfdm" \
+	docker run --rm -it -v ~/.ssh:/home/dev/.ssh -v"${root}:/builds/bbf/bbfdm" \
 		--entrypoint=/bin/bash --name "$CONTAINER_NAME" "$IMAGE_NAME" \
-		-c "./gitlab-ci/generate_supported_dm.sh /bbfdm/${1}"
+		-c "./gitlab-ci/generate_supported_dm.sh ${1}"
 }
 
 while getopts n:I:i:h opts

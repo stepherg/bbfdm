@@ -2196,3 +2196,19 @@ bool is_str_eq(const char *s1, const char *s2)
 	return false;
 }
 
+// Function to calculate FNV-1 hash
+void calculate_hash(const char *input, char *output, size_t out_len)
+{
+#define FNV_OFFSET_BASIS 0x811C9DC5
+#define FNV_PRIME 0x1000193
+
+	uint32_t hash = FNV_OFFSET_BASIS;
+
+	while (*input != '\0') {
+		hash *= FNV_PRIME;      // Multiply hash by prime
+		hash ^= (uint8_t)(*input); // XOR with current character
+		input++;
+	}
+
+	snprintf(output, out_len, "%08X", hash);
+}

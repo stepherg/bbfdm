@@ -13,7 +13,6 @@
 #include "device.h"
 #include "lanconfigsecurity.h"
 #include "security.h"
-#include "gatewayinfo.h"
 #include "schedules.h"
 
 /*************************************************************
@@ -31,10 +30,10 @@ static void _exec_reboot(const void *arg1, void *arg2)
 
 	sleep(3);
 	dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
-	sleep(5); // Wait for reboot to happen
+	sleep(30); // Wait for reboot to happen
 	BBF_ERR("Reboot call failed with rpc-sys, trying again with system");
 	dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0);
-	sleep(5); // Wait for reboot
+	sleep(30); // Wait for reboot
 	BBF_ERR("Reboot call failed!!!");
 
 	// Set last_reboot_cause to empty because there is a problem in the system reboot
@@ -58,7 +57,7 @@ static void _exec_factoryreset(const void *arg1, void *arg2)
 **************************************************************/
 static int get_Device_RootDataModelVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup("2.18");
+	*value = dmstrdup("2.19");
 	return 0;
 }
 
@@ -91,12 +90,10 @@ DM_MAP_OBJ tDynamicObj[] = {
 
 /* *** Device. *** */
 DMOBJ tDMRootObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH, NULL},
-{"Schedules", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSchedulesObj, tSchedulesParams, NULL, BBFDM_BOTH, NULL},
-{"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH, NULL},
-{"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH, NULL},
-{"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH},
+{"Schedules", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSchedulesObj, tSchedulesParams, NULL, BBFDM_BOTH},
+{"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_CWMP},
 {0}
 };
 

@@ -40,7 +40,7 @@ DMLEAF tTEST_EthernetRMONStatsParams[] = {
 
 DM_MAP_OBJ tDynamicObj[] = {
 /* parentobj, nextobject, parameter */
-{"Device.", tTEST_DeviceObj, NULL}, // Overwrite 'X_IOPSYS_EU_Dropbear' && Exclude 'USB'
+{"Device.", tTEST_DeviceObj, NULL}, // Overwrite 'X_IOWRT_EU_Dropbear' && Exclude 'USB'
 {"Device.Firewall.Chain.{i}.Rule.{i}.", tTEST_FirewallChainRuleObj, tTEST_FirewallChainRuleParams}, // Extend 'X_TEST_COM_TimeSpan', etc.. && Overwrite 'ExpiryDate'
 {"Device.DeviceInfo.", tTEST_DeviceInfoObj, tTEST_DeviceInfoParams}, // Overwrite 'Manufacturer' && Exclude 'VendorConfigFile' from the tree
 {"Device.DSL.Channel.{i}.", tTEST_DSLChannelObj, NULL}, // Exclude 'Stats' from the tree

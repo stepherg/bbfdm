@@ -10,6 +10,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <sys/stat.h>
@@ -59,4 +60,15 @@ int bbfdm_create_empty_file(const char *path)
 
 	fclose(fp);
 	return 0;
+}
+
+void bbfdm_strncpy(char *dst, const char *src, size_t n)
+{
+	if (dst == NULL || src == NULL)
+		return;
+
+	if (n > 1) {
+		strncpy(dst, src, n - 1);
+		dst[n - 1] = 0;
+	}
 }

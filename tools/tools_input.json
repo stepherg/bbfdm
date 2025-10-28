@@ -2,558 +2,675 @@
   "manufacturer": "IOPSYS",
   "protocol": "DEVICE_PROTOCOL_DSLFTR069v1",
   "manufacturer_oui": "002207",
-  "product_class": "DG400PRIME",
-  "model_name": "DG400PRIME-A",
+  "product_class": "EX75X",
+  "model_name": "EX750",
   "software_version": "1.2.3.4",
   "dm_json_files": [
     "tools/datamodel.json"
   ],
-  "vendor_prefix": "X_IOWRT_EU_",
   "plugins": [
     {
-        "repo": "https://dev.iopsys.eu/system/sysmngr.git",
-        "proto": "git",
-        "version": "devel",
-        "dm_info_file": "src/datamodel_description.json",
-        "extra_dependencies": [
-          "-DSYSMNGR_VENDOR_CONFIG_FILE",
-          "-DSYSMNGR_MEMORY_STATUS",
-          "-DSYSMNGR_PROCESS_STATUS",
-          "-DSYSMNGR_SUPPORTED_DATA_MODEL",
-          "-DSYSMNGR_FIRMWARE_IMAGE",
-          "-DSYSMNGR_REBOOTS",
-          "-DSYSMNGR_NETWORK_PROPERTIES",
-          "-DSYSMNGR_VENDOR_EXTENSIONS",
-          "-DSYSMNGR_TEMPERATURE_STATUS",
-          "-DCUSTOM_PREFIX=\\\"X_IOPSYS_EU_\\\""
-        ],
-        "dm_files": [
-            "src/deviceinfo.c",
-            "src/configs.c",
-            "src/fwbank.c",
-            "src/fw_images.c",
-            "src/memory.c",
-            "src/processes.c",
-            "src/reboots.c",
-            "src/supported_dm.c",
-            "src/network.c",
-            "src/utils.c",
-            "src/temperature.c"
-        ]
+      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
+      "proto": "git",
+      "service_name": "core",
+      "unified_daemon": false,
+      "post_install": [
+        "cp -f /opt/dev/iopsys/bbfdm/bbfdm_service.json /etc/bbfdm/services/core.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
+      "proto": "git",
+      "service_name": "netmode",
+      "unified_daemon": false,
+      "post_install": [
+        "sed 's/{BBF_VENDOR_PREFIX}/X_IOWRT_EU_/g' netmode/files/datamodel.json > /usr/share/bbfdm/micro_services/netmode.json",
+        "sed 's/{BBF_VENDOR_PREFIX}/X_IOWRT_EU_/g' netmode/bbfdm_service.json > /etc/bbfdm/services/netmode.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
+      "proto": "git",
+      "service_name": "ponmngr",
+      "unified_daemon": false,
+      "post_install": [
+        "cp -f /opt/dev/iopsys/ponmngr/files/etc/ponmngr/xpon.json /usr/share/bbfdm/micro_services/ponmngr.json",
+        "cp -f /opt/dev/iopsys/ponmngr/bbfdm_service.json /etc/bbfdm/services/ponmngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
+      "proto": "git",
+      "compile": [
+        "make -C self-diagnostics/src clean",
+        "make -C self-diagnostics/src"
+      ],
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/core",
+        "cp -f /opt/dev/iopsys/self-diagnostics/src/libselftest.so /usr/share/bbfdm/micro_services/core"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
+      "proto": "git",
+      "service_name": "ssdpd",
+      "unified_daemon": false,
+      "compile": [
+        "make -C ssdpd/src clean",
+        "make -C ssdpd/src upnpdm.so"
+      ],
+      "post_install": [
+        "cp -f /opt/dev/iopsys/ssdpd/src/upnpdm.so /usr/share/bbfdm/micro_services/ssdpd.so",
+        "cp -f /opt/dev/iopsys/ssdpd/bbfdm_service.json /etc/bbfdm/services/ssdpd.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/system/sysmngr.git",
+      "proto": "git",
+      "service_name": "sysmngr",
+      "unified_daemon": true,
+      "daemon_name": "/usr/sbin/sysmngr",
+      "dm_info_file": "src/datamodel_description.json",
+      "compile": [
+        "make -C src clean",
+        "make -C src CFLAGS+=\"-DBBF_VENDOR_PREFIX=\\\"X_IOWRT_EU_\\\"\" SYSMNGR_VENDOR_CONFIG_FILE='y' SYSMNGR_MEMORY_STATUS='y' SYSMNGR_PROCESS_STATUS='y' SYSMNGR_SUPPORTED_DATA_MODEL='y' SYSMNGR_FIRMWARE_IMAGE='y' SYSMNGR_REBOOTS='y' SYSMNGR_NETWORK_PROPERTIES='y' SYSMNGR_VENDOR_EXTENSIONS='y' SYSMNGR_FWBANK_UBUS_SUPPORT='y' SYSMNGR_TEMPERATURE_STATUS='y'"
+      ],
+      "post_install": [
+        "mkdir -p /etc/sysmngr",
+        "cp -f src/sysmngr /usr/sbin/",
+        "cp -f /opt/dev/iopsys/sysmngr/bbfdm_service.json /etc/bbfdm/services/sysmngr.json"
+      ]
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/icwmp.git",
       "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "bbf_plugin/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/bbf/bulkdata.git",
-      "proto": "git",
-      "version": "devel",
-      "extra_dependencies": [
-        "-D_GNU_SOURCE"
+      "service_name": "icwmp",
+      "unified_daemon": false,
+      "compile": [
+        "cmake bbf_plugin -DBBF_VENDOR_PREFIX=\"X_IOWRT_EU_\" -DCMAKE_INSTALL_PREFIX=/",
+        "make"
       ],
-      "dm_files": [
-        "src/datamodel.c"
+      "post_install": [
+        "cp -f libcwmpdm.so /usr/share/bbfdm/micro_services/icwmp.so",
+        "cp -f /opt/dev/iopsys/icwmp/bbfdm_service.json /etc/bbfdm/services/icwmp.json",
+        "mkdir -p /usr/share/bbfdm/micro_services/icwmp",
+        "cp -f /opt/dev/iopsys/icwmp/files/etc/bbfdm/json/CWMPManagementServer.json /usr/share/bbfdm/micro_services/icwmp"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/bbf/xmppc.git",
+      "repo": "https://dev.iopsys.eu/bbf/wifidmd.git",
       "proto": "git",
-      "dm_files": [
-        "src/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/bbf/stunc.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/bbf/udpecho.git",
-      "proto": "git",
-      "version": "devel",
-      "is_microservice": true,
-      "dm_files": [
-        "src/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/bbf/twamp-light.git",
-      "proto": "git",
-      "version": "devel",
-      "is_microservice": true,
-      "dm_files": [
-        "src/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/bbf/periodicstats.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/datamodel.c",
-        "src/main.c",
-        "src/config.c",
-        "src/periodicstats.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "icwmp/files/etc/bbfdm/json/CWMPManagementServer.json",
-        "ponmngr/files/etc/ponmngr/xpon.json"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "self-diagnostics/src/selftest.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/feed/iopsys.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "ssdpd/src/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/lcm/swmodd.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/bbf/usermngr.git",
-      "proto": "git",
-      "version": "devel",
-      "extra_dependencies": [
-        "-lcrypt"
+      "service_name": "wifidmd",
+      "unified_daemon": true,
+      "daemon_name": "/usr/sbin/wifidmd",
+      "dm_info_file": "src/datamodel_description.json",
+      "compile": [
+        "make -C src clean",
+        "make -C src CFLAGS+='-DBBF_VENDOR_PREFIX=\\\"X_IOWRT_EU_\\\"' WIFIDMD_ENABLE_WIFI_DATAELEMENTS='y'"
       ],
-      "dm_files": [
-        "src/users.c"
+      "post_install": [
+        "cp -f src/wifidmd /usr/sbin/",
+        "cp -f /opt/dev/iopsys/wifidmd/bbfdm_service.json /etc/bbfdm/services/wifidmd.json"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/network/parental-control.git",
+      "repo": "https://dev.iopsys.eu/hal/ethmngr.git",
       "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/parentalcontrol.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/iopsys/hostmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/bbf_plugin/hosts.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/iopsys/hostmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "extra_dependencies": [
-        "-DHAS_VENDOR_EXT",
-        "-DCUSTOM_PREFIX=\\\"X_IOPSYS_EU_\\\""
+      "service_name": "ethmngr",
+      "unified_daemon": true,
+      "daemon_name": "/usr/sbin/ethmngr",
+      "dm_info_file": "src/datamodel_description.json",
+      "compile": [
+        "make clean",
+        "make CFLAGS+='-DETHMNGR_MACVLAN_EXTENSION'"
       ],
-      "dm_files": [
-        "src/bbf_plugin/hosts_ext.c"
+      "post_install": [
+        "cp -f ethmngr /usr/sbin/",
+        "cp -f /opt/dev/iopsys/ethmngr/bbfdm_service.json /etc/bbfdm/services/ethmngr.json"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/bbf/timemngr.git",
+      "repo": "https://dev.iopsys.eu/network/netmngr.git",
       "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/times.c",
-        "src/helper.c"
+      "service_name": "netmngr",
+      "compile": [
+        "apt install iproute2 -y",
+        "make -C src clean",
+        "make -C src NETMNGR_GRE_OBJ=y NETMNGR_IP_OBJ=y NETMNGR_ROUTING_OBJ=y NETMNGR_PPP_OBJ=y NETMNGR_ROUTER_ADVERTISEMENT_OBJ=y NETMNGR_IPV6RD_OBJ=y"
       ],
-      "dm_info_file": "src/datamodel_description.json"
-    },
-    {
-      "repo": "https://dev.iopsys.eu/bbf/timemngr.git",
-      "proto": "git",
-      "version": "devel",
-      "is_microservice": true,
-      "dm_files": [
-        "src/vendor.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/feed/openwrt-packages.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "net/openvpn/files/bbfdm/OpenVPN_DM.json",
-        "net/mosquitto/bbf_plugin/mqtt_broker_plugin.json"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/ddnsmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/dynamicdnsmngr.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/dhcpmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/dhcpmngr.c",
-        "src/dhcpv4.c",
-        "src/dhcpv6.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/dnsmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/dnsmngr.c",
-        "src/dnsmasq_backend.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/dnsmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "is_microservice": true,
-      "dm_files": [
-        "src/dns_sd.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/hal/qosmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "bbf_plugin/qos_bbf.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/sshmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/sshmngr.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/firewallmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/firewallmngr.c",
-        "src/firewall.c",
-        "src/nat.c",
-        "src/nat_porttrigger.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/hal/dslmngr.git",
-      "proto": "git",
-      "dm_files": [
-        "bbf_plugin/*.c"
-      ]
-    },
-    {
-        "repo": "https://dev.iopsys.eu/hal/ethmngr.git",
-        "proto": "git",
-        "version": "devel",
-        "dm_info_file": "src/datamodel_description.json",
-        "extra_dependencies": [
-          "-DETHMNGR_MACVLAN_EXTENSION",
-	  "-leasy",
-	  "-lethernet"
-        ],
-        "dm_files": [
-          "src/ethmngr.c",
-          "src/ethernet.c",
-          "src/dmlayer.c",
-          "src/helper.c",
-          "src/vendor_ethernet.c"
-        ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/system/usbmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/bridgemngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_info_file": "src/driver_vlan_backend/datamodel_description.json",
-      "dm_files": [
-        "src/driver_vlan_backend/bridging.c",
-        "src/driver_vlan_backend/common.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/bridgemngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/driver_vlan_backend/vendor.c",
-        "src/driver_vlan_backend/common.c"
+      "post_install": [
+        "cp -f src/libnetmngr.so /usr/share/bbfdm/micro_services/netmngr.so",
+        "cp -f /opt/dev/iopsys/netmngr/bbfdm_service.json /etc/bbfdm/services/netmngr.json"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/tr143d.git",
       "proto": "git",
-      "version": "devel",
-      "is_microservice": true,
-      "dm_files": [
-        "src/diagnostics.c"
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "cp -rf scripts/* /usr/share/bbfdm/scripts/",
+        "mkdir -p /usr/share/bbfdm/micro_services/netmngr",
+        "cp -f src/libtr143d.so /usr/share/bbfdm/micro_services/netmngr"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/tr471d.git",
       "proto": "git",
-      "version": "devel",
-      "is_microservice": true,
-      "dm_files": [
-        "src/iplayercap.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/multi-ap/ieee1905.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "tr181/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/bbf/packet-capture-diagnostics.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/packetcapture.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/bbf/wifidmd.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/wifi.c"
+      "compile": [
+        "make -C src clean",
+        "make -C src"
       ],
-      "extra_dependencies": [
-        "-lm"
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/netmngr",
+        "cp -f src/libtr471d.so /usr/share/bbfdm/micro_services/netmngr"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/bbf/wifidmd.git",
+      "repo": "https://dev.iopsys.eu/bbf/twamp-light.git",
       "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/dataelements.c"
+      "compile": [
+        "make clean",
+        "make"
+      ],
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/netmngr",
+        "cp -f libtwamp.so /usr/share/bbfdm/micro_services/netmngr"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/udpecho.git",
+      "proto": "git",
+      "compile": [
+        "make -C src/ clean",
+        "make -C src/"
+      ],
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/netmngr",
+        "cp -f src/libudpechoserver.so /usr/share/bbfdm/micro_services/netmngr"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/bulkdata.git",
+      "proto": "git",
+      "service_name": "bulkdata",
+      "unified_daemon": true,
+      "daemon_name": "/usr/sbin/bulkdatad",
+      "compile": [
+        "make clean",
+        "make"
+      ],
+      "post_install": [
+        "cp -f bulkdatad /usr/sbin/",
+        "cp -f /opt/dev/iopsys/bulkdata/bbfdm_service.json /etc/bbfdm/services/bulkdata.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/xmppc.git",
+      "proto": "git",
+      "compile": [
+        "apt install libstrophe-dev -y",
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/icwmp",
+        "cp -f src/libxmppc.so /usr/share/bbfdm/micro_services/icwmp"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/stunc.git",
+      "proto": "git",
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/icwmp",
+        "cp -f src/libstunc.so /usr/share/bbfdm/micro_services/icwmp"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/periodicstats.git",
+      "proto": "git",
+      "service_name": "periodicstats",
+      "unified_daemon": true,
+      "daemon_name": "/usr/sbin/periodicstatsd",
+      "compile": [
+        "make clean",
+        "make"
+      ],
+      "post_install": [
+        "cp -f periodicstatsd /usr/sbin/",
+        "cp -f /opt/dev/iopsys/periodicstats/bbfdm_service.json /etc/bbfdm/services/periodicstats.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/lcm/swmodd.git",
+      "proto": "git",
+      "service_name": "swmodd",
+      "unified_daemon": false,
+      "compile": [
+        "apt install uuid-dev -y",
+        "make -C src clean",
+        "make -C src libswmodd.so"
+      ],
+      "post_install": [
+        "cp -f src/libswmodd.so /usr/share/bbfdm/micro_services/swmodd.so",
+        "cp -f /opt/dev/iopsys/swmodd/bbfdm_service.json /etc/bbfdm/services/swmodd.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/usermngr.git",
+      "proto": "git",
+      "service_name": "usermngr",
+      "unified_daemon": true,
+      "daemon_name": "/usr/sbin/usermngr",
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "cp -f src/usermngr /usr/sbin/",
+        "cp -f /opt/dev/iopsys/usermngr/bbfdm_service.json /etc/bbfdm/services/usermngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/parental-control.git",
+      "proto": "git",
+      "service_name": "parentalcontrol",
+      "unified_daemon": true,
+      "daemon_name": "/usr/sbin/urlfilter",
+      "dm_info_file": "src/datamodel_description.json",
+      "compile": [
+        "apt install libnetfilter-queue-dev -y",
+        "make clean",
+        "make CFLAGS+='-DBBF_VENDOR_PREFIX=\\\"X_IOWRT_EU_\\\" -DPARENTAL_CONTROL_ULRFILTER'"
+      ],
+      "post_install": [
+        "cp -f urlfilter /usr/sbin/",
+        "cp -f /opt/dev/iopsys/parental-control/bbfdm_service.json /etc/bbfdm/services/parentalcontrol.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/iopsys/hostmngr.git",
+      "proto": "git",
+      "service_name": "hostmngr",
+      "unified_daemon": false,
+      "dm_info_file": "src/bbf_plugin/datamodel_description.json",
+      "compile": [
+        "make -C src clean",
+        "make -C src libhostmngr.so",
+        "make -C src libhostext.so CFLAGS+='-DCUSTOM_PREFIX=\\\"X_IOWRT_EU_\\\" -DHAS_VENDOR_EXT'"
+      ],
+      "post_install": [
+        "cp -f src/bbf_plugin/libhostmngr.so /usr/share/bbfdm/micro_services/hostmngr.so",
+        "cp -f /opt/dev/iopsys/hostmngr/bbfdm_service.json /etc/bbfdm/services/hostmngr.json",
+        "mkdir -p /usr/share/bbfdm/micro_services/hostmngr",
+        "cp -f src/bbf_plugin/libhostext.so /usr/share/bbfdm/micro_services/hostmngr"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/timemngr.git",
+      "proto": "git",
+      "service_name": "timemngr",
+      "unified_daemon": true,
+      "daemon_name": "/usr/sbin/timemngr",
+      "dm_info_file": "src/datamodel_description.json",
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "cp -f src/timemngr /usr/sbin/",
+        "cp -f /opt/dev/iopsys/timemngr/bbfdm_service.json /etc/bbfdm/services/timemngr.json",
+        "mkdir -p /usr/share/bbfdm/micro_services/timemngr",
+        "cp -f src/libtimeext.so /usr/share/bbfdm/micro_services/timemngr"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/dnsmngr.git",
+      "proto": "git",
+      "service_name": "dnsmngr",
+      "unified_daemon": false,
+      "compile": [
+        "make -C src clean",
+        "make -C src all CFLAGS+=\"-DDNSMASQ_BACKEND\""
+      ],
+      "post_install": [
+        "cp -f src/libdnsmngr.so /usr/share/bbfdm/micro_services/dnsmngr.so",
+        "cp -f /opt/dev/iopsys/dnsmngr/bbfdm_service.json /etc/bbfdm/services/dnsmngr.json",
+        "mkdir -p /usr/share/bbfdm/micro_services/dnsmngr",
+        "cp -f src/libdns_sd.so /usr/share/bbfdm/micro_services/dnsmngr"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/dhcpmngr.git",
+      "proto": "git",
+      "service_name": "dhcpmngr",
+      "unified_daemon": false,
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "cp -f src/libdhcpmngr.so /usr/share/bbfdm/micro_services/dhcpmngr.so",
+        "cp -f /opt/dev/iopsys/dhcpmngr/bbfdm_service.json /etc/bbfdm/services/dhcpmngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/hal/qosmngr.git",
+      "proto": "git",
+      "service_name": "qosmngr",
+      "unified_daemon": true,
+      "daemon_name": "/usr/sbin/qosmngr",
+      "dm_info_file": "src/datamodel_description.json",
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "cp -f src/qosmngr /usr/sbin/",
+        "cp -f /opt/dev/iopsys/qosmngr/bbfdm_service.json /etc/bbfdm/services/qosmngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/system/logmngr.git",
+      "proto": "git",
+      "unified_daemon": false,
+      "compile": [
+        "make -C bbf_plugin clean",
+        "make -C bbf_plugin"
+      ],
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/sysmngr",
+        "cp -f bbf_plugin/libbbflogrotate.so /usr/share/bbfdm/micro_services/sysmngr",
+        "cp -f bbf_plugin/libbbfvendorlog.so /usr/share/bbfdm/micro_services/sysmngr",
+        "mkdir -p /usr/share/bbfdm/micro_services/core",
+        "cp -f bbf_plugin/libbbfsyslog.so /usr/share/bbfdm/micro_services/core"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/voice/tr104.git",
+      "proto": "git",
+      "service_name": "tr104",
+      "unified_daemon": false,
+      "dm_info_file": "libdm/extensions/iowrt/datamodel_description.json",
+      "compile": [
+        "export CFLAGS=\"-I/usr/include/libbbfdm-api -Wall\"",
+        "cmake -DBBF_VENDOR_PREFIX:String=X_IOWRT_EU_ -DTR104_EXTENSION_DIR:String=iowrt -DRUNAS_BBFDM_MICROSERVICE:BOOL=ON",
+        "cd libdm",
+        "make"
+      ],
+      "post_install": [
+        "cp -f libdm/tr104/libtr104.so /usr/share/bbfdm/micro_services/tr104.so",
+        "mkdir -p /usr/share/bbfdm/micro_services/tr104",
+        "cp -f libdm/extensions/iowrt/libtr104ext.so /usr/share/bbfdm/micro_services/tr104",
+        "cp -f /opt/dev/iopsys/tr104/bbfdm_service.json /etc/bbfdm/services/tr104.json"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/hal/mcastmngr.git",
       "proto": "git",
-      "version": "devel",
+      "service_name": "mcastmngr",
+      "unified_daemon": false,
       "dm_info_file": "bbf_plugin/datamodel_description.json",
-      "dm_files": [
-        "bbf_plugin/mcast_bbf.c",
-        "bbf_plugin/x_iopsys_eu_igmp.c",
-        "bbf_plugin/x_iopsys_eu_mld.c",
-        "bbf_plugin/x_iopsys_eu_common.c"
+      "compile": [
+        "make -C bbf_plugin clean",
+        "make -C bbf_plugin CFLAGS+='-DBBF_VENDOR_PREFIX=\\\"X_IOWRT_EU_\\\"'"
+      ],
+      "post_install": [
+        "cp -f bbf_plugin/libmcast_bbf.so /usr/share/bbfdm/micro_services/mcastmngr.so",
+        "cp -f /opt/dev/iopsys/mcastmngr/bbfdm_service.json /etc/bbfdm/services/mcastmngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/bbf/packet-capture-diagnostics.git",
+      "proto": "git",
+      "unified_daemon": false,
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/core",
+        "cp -f src/libpackcapture.so /usr/share/bbfdm/micro_services/core"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/multi-ap/ieee1905.git",
+      "proto": "git",
+      "service_name": "ieee1905",
+      "unified_daemon": false,
+      "compile": [
+        "make -C tr181 clean",
+        "make -C tr181"
+      ],
+      "post_install": [
+        "cp -f tr181/ieee1905dm.so /usr/share/bbfdm/micro_services/ieee1905.so",
+        "cp -f /opt/dev/iopsys/ieee1905/bbfdm_service.json /etc/bbfdm/services/ieee1905.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/bridgemngr.git",
+      "proto": "git",
+      "service_name": "bridgemngr",
+      "unified_daemon": false,
+      "dm_info_file": "src/driver_vlan_backend/datamodel_description.json",
+      "compile": [
+        "make -C src clean",
+        "make -C src CFLAGS+='-DBBF_VENDOR_PREFIX=\\\"X_IOWRT_EU_\\\"'"
+      ],
+      "post_install": [
+        "cp -f src/libbridgemngr.so /usr/share/bbfdm/micro_services/bridgemngr.so",
+        "mkdir -p /usr/share/bbfdm/micro_services/bridgemngr",
+        "cp -f src/libbridgeext.so /usr/share/bbfdm/micro_services/bridgemngr",
+        "cp -f /opt/dev/iopsys/bridgemngr/files/VLAN_Filtering_Extension.json /usr/share/bbfdm/micro_services/bridgemngr",
+        "cp -f /opt/dev/iopsys/bridgemngr/bbfdm_service.json /etc/bbfdm/services/bridgemngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/openwrt-packages.git",
+      "proto": "git",
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/core",
+        "cp -f net/openvpn/files/bbfdm/OpenVPN_DM.json /usr/share/bbfdm/micro_services/core",
+        "mkdir -p /usr/share/bbfdm/micro_services/obuspa",
+        "cp -f net/mosquitto/bbf_plugin/mqtt_broker_plugin.json /usr/share/bbfdm/micro_services/obuspa"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/ddnsmngr.git",
+      "proto": "git",
+      "service_name": "ddnsmngr",
+      "unified_daemon": false,
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "cp -f src/libddnsmngr.so /usr/share/bbfdm/micro_services/ddnsmngr.so",
+        "cp -f /opt/dev/iopsys/ddnsmngr/bbfdm_service.json /etc/bbfdm/services/ddnsmngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/sshmngr.git",
+      "proto": "git",
+      "service_name": "sshmngr",
+      "unified_daemon": false,
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "cp -f src/libsshmngr.so /usr/share/bbfdm/micro_services/sshmngr.so",
+        "cp -f /opt/dev/iopsys/sshmngr/bbfdm_service.json /etc/bbfdm/services/sshmngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/network/firewallmngr.git",
+      "proto": "git",
+      "service_name": "firewallmngr",
+      "unified_daemon": false,
+      "compile": [
+        "make -C src clean",
+        "make -C src CFLAGS+='-DINCLUDE_PORT_TRIGGER'"
+      ],
+      "post_install": [
+        "cp -f src/libfirewallmngr.so /usr/share/bbfdm/micro_services/firewallmngr.so",
+        "cp -f /opt/dev/iopsys/firewallmngr/bbfdm_service.json /etc/bbfdm/services/firewallmngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/hal/dslmngr.git",
+      "proto": "git",
+      "service_name": "dslmngr",
+      "unified_daemon": false,
+      "compile": [
+        "make clean",
+        "make libbbfdsl.so"
+      ],
+      "post_install": [
+        "cp -f libbbfdsl.so /usr/share/bbfdm/micro_services/dslmngr.so",
+        "cp -f /opt/dev/iopsys/dslmngr/bbfdm_service.json /etc/bbfdm/services/dslmngr.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/system/usbmngr.git",
+      "proto": "git",
+      "service_name": "usbmngr",
+      "unified_daemon": false,
+      "compile": [
+        "make -C src clean",
+        "make -C src"
+      ],
+      "post_install": [
+        "cp -f src/dm_usb.so /usr/share/bbfdm/micro_services/usbmngr.so",
+        "cp -f /opt/dev/iopsys/usbmngr/bbfdm_service.json /etc/bbfdm/services/usbmngr.json"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/bbf/obuspa.git",
       "proto": "git",
-      "version": "devel",
-      "extra_dependencies": [
-        "-I src/vendor",
-        "-DENABLE_MQTT",
-        "-DENABLE_COAP",
-        "-DENABLE_WEBSOCKETS",
-        "-DENABLE_UDS"
+      "service_name": "obuspa",
+      "unified_daemon": false,
+      "compile": [
+        "gcc -shared -o libuspagentdm.so -fPIC -DBBF_VENDOR_PREFIX=\"_IOWRT_EU_\" -I src/vendor -DENABLE_MQTT -DENABLE_COAP -DENABLE_WEBSOCKETS -DENABLE_UDS src/vendor/bbf_plugin/common.c src/vendor/bbf_plugin/mqtt_dm.c src/vendor/bbf_plugin/stomp_dm.c src/vendor/bbf_plugin/uspagent_dm.c"
       ],
-      "dm_files": [
-         "src/vendor/bbf_plugin/common.c",
-         "src/vendor/bbf_plugin/mqtt_dm.c",
-         "src/vendor/bbf_plugin/stomp_dm.c",
-         "src/vendor/bbf_plugin/uspagent_dm.c"
+      "post_install": [
+        "cp -f libuspagentdm.so /usr/share/bbfdm/micro_services/obuspa.so",
+        "cp -f test/obuspa_core_dm.json /usr/share/bbfdm/micro_services/obuspa",
+        "cp -f /opt/dev/iopsys/obuspa/bbfdm_service.json /etc/bbfdm/services/obuspa.json"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/bbf/obuspa.git",
+      "repo": "https://dev.iopsys.eu/bbf/gateway-info.git",
       "proto": "git",
-      "version": "devel",
-      "dm_files": [
-         "test/obuspa_core_dm.json"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/netmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "src/interfacestack.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/network/netmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "extra_dependencies": [
-        "-DNETMNGR_GRE_OBJ",
-        "-DNETMNGR_IP_OBJ",
-        "-DNETMNGR_ROUTING_OBJ",
-        "-DNETMNGR_PPP_OBJ",
-        "-DNETMNGR_ROUTER_ADVERTISEMENT_OBJ",
-        "-DNETMNGR_IPV6RD_OBJ"
+      "service_name": "gateway-info",
+      "unified_daemon": false,
+      "compile": [
+        "make -C src clean",
+        "make -C src"
       ],
-      "dm_files": [
-        "src/net_plugin.c",
-        "src/gre.c",
-        "src/ip.c",
-        "src/ppp.c",
-        "src/routeradvertisement.c",
-        "src/routing.c",
-        "src/ipv6rd.c",
-        "src/common.c"
+      "post_install": [
+        "cp -f src/libgwinfo.so /usr/share/bbfdm/micro_services/gateway-info.so",
+        "cp -f /opt/dev/iopsys/gateway-info/files/bbfdm_service.json /etc/bbfdm/services/gateway-info.json"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/voice/tr104.git",
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
-      "version": "devel",
-      "dm_info_file": "libdm/extensions/iowrt/datamodel_description.json",
-      "dm_files": [
-        "libdm/tr104/*.c"
+      "dm_info_file": "package/gnx-files-ftth/bbf_plugin/datamodel_description.json",
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/ethmngr",
+        "sed 's/{BBF_VENDOR_PREFIX}/X_GENEXIS_EU_/g' package/gnx-files-ftth/bbf_plugin/link_forwarding.json > /usr/share/bbfdm/micro_services/ethmngr/link_forwarding.json"
+      ]
+    },
+    {
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
+      "proto": "git",
+      "service_name": "gnx-ux-manager",
+      "unified_daemon": false,
+      "compile": [
+        "cd genexis-packages/gnx-ux-manager",
+        "cmake src/bbf_plugin -DCMAKE_INSTALL_PREFIX=/",
+        "make"
       ],
-      "extra_dependencies": [
-        "-I /builds/bbf/bbfdm/libbbfdm-api/legacy",
-        "-I libdm/common"
+      "post_install": [
+        "cp -f genexis-packages/gnx-ux-manager/libleddm.so /usr/share/bbfdm/micro_services/gnx-ux-manager.so",
+        "cp -f genexis-packages/gnx-ux-manager/bbfdm_service.json /etc/bbfdm/services/gnx-ux-manager.json"
       ]
     },
     {
-      "repo": "https://dev.iopsys.eu/system/logmngr.git",
+      "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "bbf_plugin/deviceinfologrotate.c",
-        "bbf_plugin/common.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/system/logmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "bbf_plugin/deviceinfovendorlog.c",
-        "bbf_plugin/common.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/system/logmngr.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "bbf_plugin/syslog.c",
-        "bbf_plugin/common.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/voice/tr104.git",
-      "proto": "git",
-      "version": "devel",
-      "dm_files": [
-        "libdm/extensions/iowrt/*.c"
+      "service_name": "gnx-catv",
+      "unified_daemon": false,
+      "dm_info_file": "genexis-packages/gnx-catv/datamodel/datamodel_description.json",
+      "compile": [
+        "cd genexis-packages/gnx-catv",
+        "make -C datamodel CFLAGS+='-DBBF_VENDOR_PREFIX=\\\"X_GENEXIS_EU_\\\"'"
       ],
-      "extra_dependencies": [
-        "-I /builds/bbf/bbfdm/libbbfdm-api/legacy",
-        "-I libdm/common"
+      "post_install": [
+        "cp -f genexis-packages/gnx-catv/datamodel/libgnx-bbf-catv.so /usr/share/bbfdm/micro_services/gnx-catv.so",
+        "sed 's/{BBF_VENDOR_PREFIX}/X_GENEXIS_EU_/g' genexis-packages/gnx-catv/bbfdm_service.json > /etc/bbfdm/services/gnx-catv.json"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
-      "version": "devel",
-      "vendor_prefix": "X_GENEXIS_EU_",
-      "dm_files": [
-        "package/gnx-files-ftth/bbf_plugin/link_forwarding.json"
+      "dm_info_file": "genexis-packages/easywifi/files/datamodel_description.json",
+      "post_install": [
+        "mkdir -p /usr/share/bbfdm/micro_services/wifidmd",
+        "sed 's/{BBF_VENDOR_PREFIX}/X_GENEXIS_EU_/g' genexis-packages/easywifi/files/wifi_extn.json > /usr/share/bbfdm/micro_services/wifidmd/wifi_extn.json"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
-      "version": "devel",
-      "vendor_prefix": "X_GENEXIS_EU_",
-      "dm_files": [
-        "genexis-packages/gnx-ux-manager/src/bbf_plugin/datamodel.c"
+      "service_name": "dhcp-on-boarding",
+      "unified_daemon": false,
+      "dm_info_file": "genexis-packages/dhcp-on-boarding/src/datamodel_description.json",
+      "compile": [
+        "cd genexis-packages/dhcp-on-boarding",
+        "make -C src CFLAGS+='-DBBF_VENDOR_PREFIX=\\\"X_GENEXIS_EU_\\\"'"
+      ],
+      "post_install": [
+        "cp -f genexis-packages/dhcp-on-boarding/src/lib_dhcp_onboarding.so /usr/share/bbfdm/micro_services/dhcp-on-boarding.so",
+        "sed 's/{BBF_VENDOR_PREFIX}/X_GENEXIS_EU_/g' genexis-packages/dhcp-on-boarding/bbfdm_service.json > /etc/bbfdm/services/dhcp-on-boarding.json"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
-      "version": "devel",
-      "vendor_prefix": "X_GENEXIS_EU_",
-      "dm_files": [
-        "genexis-packages/gnx-catv/datamodel/datamodel.c"
+      "service_name": "gnx-loop-detector",
+      "unified_daemon": false,
+      "dm_info_file": "genexis-packages/gnx-loop-detector/datamodel/datamodel_description.json",
+      "compile": [
+        "cd genexis-packages/gnx-loop-detector",
+        "make -C datamodel CFLAGS+='-DBBF_VENDOR_PREFIX=\\\"X_GENEXIS_EU_\\\"'"
+      ],
+      "post_install": [
+        "cp -f genexis-packages/gnx-loop-detector/datamodel/libloopdetection.so /usr/share/bbfdm/micro_services/gnx-loop-detector.so",
+        "sed 's/{BBF_VENDOR_PREFIX}/X_GENEXIS_EU_/g' genexis-packages/gnx-loop-detector/bbfdm_service.json > /etc/bbfdm/services/gnx-loop-detector.json"
       ]
     },
     {
       "repo": "https://dev.iopsys.eu/feed/gnx.git",
       "proto": "git",
-      "version": "devel",
-      "vendor_prefix": "X_GENEXIS_EU_",
-      "dm_files": [
-        "genexis-packages/easywifi/files/wifi_extn.json"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/feed/gnx.git",
-      "proto": "git",
-      "version": "devel",
-      "vendor_prefix": "X_GENEXIS_EU_",
-      "dm_files": [
-        "genexis-packages/dhcp-on-boarding/src/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/feed/gnx.git",
-      "proto": "git",
-      "version": "devel",
-      "vendor_prefix": "X_GENEXIS_EU_",
-      "dm_files": [
-        "genexis-packages/gnx-loop-detector/datamodel/datamodel.c"
-      ]
-    },
-    {
-      "repo": "https://dev.iopsys.eu/feed/gnx.git",
-      "proto": "git",
-      "version": "devel",
-      "vendor_prefix": "X_GENEXIS_EU_",
-      "dm_files": [
-        "genexis-packages/gnx-sfp/src/bbf_plugin/datamodel.c"
+      "service_name": "gnx-sfp",
+      "unified_daemon": false,
+      "dm_info_file": "genexis-packages/gnx-sfp/src/bbf_plugin/datamodel_description.json",
+      "compile": [
+        "cd genexis-packages/gnx-sfp",
+        "cmake src/bbf_plugin -DCMAKE_INSTALL_PREFIX=/ -DCMAKE_C_FLAGS='-DBBF_VENDOR_PREFIX=\\\"X_GENEXIS_EU_\\\"'",
+        "make"
+      ],
+      "post_install": [
+        "cp -f genexis-packages/gnx-sfp/libopticaldm.so /usr/share/bbfdm/micro_services/gnx-sfp.so",
+        "cp -f genexis-packages/gnx-sfp/bbfdm_service.json /etc/bbfdm/services/gnx-sfp.json"
       ]
     }
   ],

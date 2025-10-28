@@ -92,11 +92,11 @@ Examples:
 This tool helps in validating the json schema, which is very helpful in the development of a JSON based plugins.
 
 ```bash
-$ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/X_IOPSYS_EU_TEST.json
+$ ./tools/validate_json_plugin.py test/files/etc/bbfdm/json/TEST.json
 $ ./tools/validate_json_plugin.py tools/datamodel.json
 ```
 
-More examples available in [this path](../test/files/usr/share/bbfdm/plugins).
+More examples available in [this path](../test/files/usr/share/bbfdm/micro_services/core).
 
 ### generate_dm.sh
 
@@ -136,7 +136,7 @@ The parameters/keys used in tools_input.json file are mostly self-explanatory bu
 | model_name | The model name, e.g., "DG400PRIME-A" |
 | software_version | The software version, e.g., "1.2.3.4" |
 | dm_json_files | This should contain the list of json file path, where each file contains the definition of DM objects/parameters |
-| vendor_prefix | The prefix used by vendor for vendor extension in DM objects/parameters, e.g., "X_IOPSYS_EU_" |
+| vendor_prefix | The prefix used by vendor for vendor extension in DM objects/parameters, e.g., "X_IOWRT_EU_" |
 | plugins | A list of plugins with associated repositories and data model files |
 | | repo: The path of the plugin repository. Could be 'URL' or 'folder_path' |
 | | proto: The protocol of the plugin repository. Could be 'git' or 'local' |
@@ -168,7 +168,7 @@ The input json file should be defined as follow:
 	"dm_json_files": [
 		"tools/datamodel.json"
 	]
-	"vendor_prefix": "X_IOPSYS_EU_",
+	"vendor_prefix": "X_IOWRT_EU_",
 	"plugins": [
 		{
 			"repo": "https://dev.iopsys.eu/bbf/mydatamodel.git",

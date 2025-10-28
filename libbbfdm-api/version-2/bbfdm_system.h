@@ -56,6 +56,18 @@ bool bbfdm_is_regular_file(const char *path);
  */
 int bbfdm_create_empty_file(const char *path);
 
+/**
+ * @brief Copy a string with a guaranteed null termination.
+ *
+ * This function copies up to `n - 1` characters from `src` to `dst` and ensures
+ * the destination string is null-terminated. If `n` is 1 or less, no copying occurs.
+ *
+ * @param[out] dst Destination buffer.
+ * @param[in] src Source string.
+ * @param[in] n Size of the destination buffer.
+ */
+void bbfdm_strncpy(char *dst, const char *src, size_t n);
+
 #ifdef __cplusplus
 }
 #endif

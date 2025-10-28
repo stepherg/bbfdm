@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 iopsys Software Solutions AB
+ * Copyright (C) 2023-2025 iopsys Software Solutions AB
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1
@@ -13,141 +13,6 @@
 
 #include "plugin/json_plugin.h"
 #include "plugin/dotso_plugin.h"
-
-extern struct list_head global_memhead;
-
-struct service
-{
-	bool is_unified_daemon;
-	enum bbfdm_type_enum proto;
-	struct list_head list;
-	char *name;
-	char *parent_dm;
-	char *object;
-};
-
-static bool add_service_to_main_tree(DMOBJ *main_dm, const char *srv_name, const char *srv_parent_dm, const char *srv_obj, uint8_t proto)
-{
-	DMOBJ *dm_entryobj = find_entry_obj(main_dm, srv_parent_dm);
-	if (!dm_entryobj)
-		return false;
-
-	// Disable service object if it already exists in the main tree
-	disable_entry_obj(dm_entryobj, srv_obj, srv_parent_dm, srv_name);
-
-	if (dm_entryobj->nextdynamicobj == NULL) {
-		dm_entryobj->nextdynamicobj = calloc(__INDX_DYNAMIC_MAX, sizeof(struct dm_dynamic_obj));
-		dm_entryobj->nextdynamicobj[INDX_JSON_MOUNT].idx_type = INDX_JSON_MOUNT;
-		dm_entryobj->nextdynamicobj[INDX_LIBRARY_MOUNT].idx_type = INDX_LIBRARY_MOUNT;
-		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].idx_type = INDX_SERVICE_MOUNT;
-	}
-
-	if (dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj == NULL) {
-		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj = calloc(2, sizeof(DMOBJ *));
-	}
-
-	if (dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] == NULL) {
-		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] = dm_dynamic_calloc(&global_memhead, 2, sizeof(struct dm_obj_s));
-		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).obj = dm_dynamic_strdup(&global_memhead, srv_obj);
-		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).checkdep = dm_dynamic_strdup(&global_memhead, srv_name);
-		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[0]).bbfdm_type = proto;
-	} else {
-		int idx = get_entry_obj_idx(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0]);
-		dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] = dm_dynamic_realloc(&global_memhead, dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0], (idx + 2) * sizeof(struct dm_obj_s));
-		memset(dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0] + (idx + 1), 0, sizeof(struct dm_obj_s));
-		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).obj = dm_dynamic_strdup(&global_memhead, srv_obj);
-		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).checkdep = dm_dynamic_strdup(&global_memhead, srv_name);
-		((dm_entryobj->nextdynamicobj[INDX_SERVICE_MOUNT].nextobj[0])[idx]).bbfdm_type = proto;
-	}
-
-	return true;
-}
-
-static bool is_service_registered(struct list_head *srvlist, const char *srv_name, const char *srv_parent_dm, const char *srv_obj)
-{
-	struct service *srv = NULL;
-
-	list_for_each_entry(srv, srvlist, list) {
-		if (DM_STRCMP(srv->name, srv_name) == 0 &&
-			DM_STRCMP(srv->parent_dm, srv_parent_dm) == 0 &&
-			DM_STRCMP(srv->object, srv_obj) == 0)
-			return true;
-	}
-
-	return false;
-}
-
-static void add_service_to_list(struct list_head *srvlist, const char *srv_name, const char *srv_parent_dm, const char *srv_object, uint8_t proto, bool is_unified)
-{
-	struct service *srv = NULL;
-
-	srv = calloc(1, sizeof(struct service));
-	list_add_tail(&srv->list, srvlist);
-
-	srv->name = strdup(srv_name);
-	srv->parent_dm = strdup(srv_parent_dm);
-	srv->object = strdup(srv_object);
-	srv->is_unified_daemon = is_unified;
-	srv->proto = proto;
-}
-
-void free_services_from_list(struct list_head *clist)
-{
-	struct service *srv = NULL, *tmp = NULL;
-
-	list_for_each_entry_safe(srv, tmp, clist, list) {
-		list_del(&srv->list);
-		free(srv->name);
-		free(srv->parent_dm);
-		free(srv->object);
-		free(srv);
-	}
-}
-
-bool load_service(DMOBJ *main_dm, struct list_head *srv_list, const char *srv_name, const char *srv_parent_dm, const char *srv_obj, bool is_unified, uint8_t proto)
-{
-	if (!main_dm || !srv_list || !srv_name || !srv_parent_dm || !srv_obj) {
-		BBF_ERR("Invalid arguments: main_dm, srv_list, srv_name, srv_parent_dm, and srv_obj must not be NULL.");
-		return false;
-	}
-
-	if (is_service_registered(srv_list, srv_name, srv_parent_dm, srv_obj)) {
-		BBF_DEBUG("Service registration failed: Service '%s' with parent DM '%s' and object '%s' is already registered.",
-				srv_name, srv_parent_dm, srv_obj);
-		return false;
-	}
-
-	if (!add_service_to_main_tree(main_dm, srv_name, srv_parent_dm, srv_obj, proto)) {
-		BBF_ERR("Failed to add service '%s' to main tree with parent DM '%s' and object '%s'.",
-				srv_name, srv_parent_dm, srv_obj);
-		return false;
-	}
-
-	add_service_to_list(srv_list, srv_name, srv_parent_dm, srv_obj, proto, is_unified);
-	return true;
-}
-
-void get_list_of_registered_service(struct list_head *srvlist, struct blob_buf *bb)
-{
-	struct service *srv = NULL;
-	void *table = NULL;
-
-	list_for_each_entry(srv, srvlist, list) {
-		table = blobmsg_open_table(bb, NULL);
-		blobmsg_add_string(bb, "name", srv->name);
-		blobmsg_add_string(bb, "parent_dm", srv->parent_dm);
-		blobmsg_add_string(bb, "object", srv->object);
-		if (srv->proto == BBFDM_USP) {
-			blobmsg_add_string(bb, "proto", "usp");
-		} else if (srv->proto == BBFDM_CWMP) {
-			blobmsg_add_string(bb, "proto", "cwmp");
-		} else {
-			blobmsg_add_string(bb, "proto", "both");
-		}
-		blobmsg_add_u8(bb, "unified_daemon", srv->is_unified_daemon);
-		blobmsg_close_table(bb, table);
-	}
-}
 
 static void free_all_dynamic_nodes(DMOBJ *entryobj)
 {
@@ -356,47 +221,45 @@ int get_leaf_idx(DMLEAF **entryleaf)
 	return idx;
 }
 
+static int filter(const struct dirent *entry)
+{
+	return entry->d_name[0] != '.';
+}
+
+static int compare(const struct dirent **a, const struct dirent **b)
+{
+	return strcasecmp((*a)->d_name, (*b)->d_name);
+}
+
 void load_plugins(DMOBJ *dm_entryobj, const char *plugin_path)
 {
+	struct dirent **namelist;
+
 	if (DM_STRLEN(plugin_path) == 0) // If empty, return without further action
 		return;
 
 	if (!folder_exists(plugin_path)) {
-		BBF_ERR("(%s) doesn't exist", plugin_path);
+		BBF_ERR("Folder plugin (%s) doesn't exist", plugin_path);
 		return;
 	}
 
-	struct dirent *ent = NULL;
-	int num_files = 0;
-	char *files[256];
-
-	DIR *dir = opendir(plugin_path);
-	if (dir == NULL) {
-		BBF_ERR("Cannot open (%s) directory", plugin_path);
-		return;
-	}
-
-	while ((ent = readdir(dir)) != NULL && num_files < 256) {
-		files[num_files++] = strdup(ent->d_name);
-	}
-
-	closedir(dir);
-
-	qsort(files, num_files, sizeof(char *), compare_strings);
+	int num_files = scandir(plugin_path, &namelist, filter, compare);
 
 	for (int i = 0; i < num_files; i++) {
-		char buf[512] = {0};
+		char file_path[512] = {0};
 
-		snprintf(buf, sizeof(buf), "%s/%s", plugin_path, files[i]);
+		snprintf(file_path, sizeof(file_path), "%s/%s", plugin_path, namelist[i]->d_name);
 
-		if (DM_LSTRSTR(files[i], ".json")) {
-			load_json_plugins(dm_entryobj, buf);
-		} else if (DM_LSTRSTR(files[i], ".so")) {
-			load_dotso_plugins(dm_entryobj, buf);
+		if (DM_LSTRSTR(namelist[i]->d_name, ".json")) {
+			load_json_plugins(dm_entryobj, file_path);
+		} else if (DM_LSTRSTR(namelist[i]->d_name, ".so")) {
+			load_dotso_plugins(dm_entryobj, file_path);
 		}
 
-		free(files[i]);
+		FREE(namelist[i]);
 	}
+
+	FREE(namelist);
 }
 
 void free_plugins(DMOBJ *dm_entryobj)
