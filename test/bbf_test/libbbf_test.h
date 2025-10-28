@@ -13,9 +13,9 @@
 
 extern DMOBJ tDynamicDeviceObj[];
 extern DMLEAF tDynamicDeviceParams[];
-extern DMLEAF tX_IOPSYS_EU_SyslogParam[];
-extern DMLEAF tX_IOPSYS_EU_PingTESTParam[];
-extern DMLEAF tX_IOPSYS_EU_EventTESTParam[];
+extern DMLEAF tX_IOWRT_EU_SyslogParam[];
+extern DMLEAF tX_IOWRT_EU_PingTESTParam[];
+extern DMLEAF tX_IOWRT_EU_EventTESTParam[];
 
 #endif //__LIBBBFD_TEST_H
 

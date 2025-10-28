@@ -1,7 +1,7 @@
 /*
  * dm_service.c: dm-service deamon
  *
- * Copyright (C) 2024 IOPSYS Software Solutions AB. All rights reserved.
+ * Copyright (C) 2024-2025 IOPSYS Software Solutions AB. All rights reserved.
  *
  * Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *
@@ -20,7 +20,8 @@ static void usage(char *prog)
 	fprintf(stderr, "options:\n");
 	fprintf(stderr, "    -m <ms name>        micro-service name\n");
 	fprintf(stderr, "    -l <loglevel>       log verbosity value as per standard syslog\n");
-	fprintf(stderr, "    -h                  Displays this help\n");
+	fprintf(stderr, "    -d                  Display the schema data model supported by micro-service\n");
+	fprintf(stderr, "    -h                  Display this help\n");
 	fprintf(stderr, "\n");
 }
 
@@ -28,12 +29,12 @@ int main(int argc, char **argv)
 {
 	struct bbfdm_context bbfdm_ctx = {0};
 	char proc_name[64] = {0};
-	int log_level = 3; // Default is LOG_ERR
-	int err = 0, ch;
+	int log_level = LOG_ERR;
+	int err = 0, ch, dm_type = 0;
 
 	memset(&bbfdm_ctx, 0, sizeof(struct bbfdm_context));
 
-	while ((ch = getopt(argc, argv, "hl:m:")) != -1) {
+	while ((ch = getopt(argc, argv, "hdl:m:")) != -1) {
 		switch (ch) {
 		case 'm':
 			bbfdm_ubus_set_service_name(&bbfdm_ctx, optarg);
@@ -42,8 +43,11 @@ int main(int argc, char **argv)
 			if (optarg) {
 				log_level = (int)strtod(optarg, NULL);
 				if (log_level < 0 || log_level > 7)
-					log_level = 3;
+					log_level = 7;
 			}
+			break;
+		case 'd':
+			dm_type++;
 			break;
 		case 'h':
 			usage(argv[0]);
@@ -53,16 +57,21 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (dm_is_micro_service() == false) {
+	if (strlen(bbfdm_ctx.config.service_name) == 0) {
 		fprintf(stderr, "Failed to start micro-service without providing the name using '-m' option\n");
 		exit(-1);
 	}
 
-	bbfdm_ubus_set_log_level(log_level);
-
+	if (dm_type > 0) {
+		int res = bbfdm_print_data_model_schema(&bbfdm_ctx, dm_type);
+		exit(res);
+	}
 	openlog(bbfdm_ctx.config.service_name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
-	err = bbfdm_ubus_regiter_init(&bbfdm_ctx);
+	bbfdm_ubus_set_log_level(log_level);
+	bbfdm_ubus_load_data_model(NULL);
+
+	err = bbfdm_ubus_register_init(&bbfdm_ctx);
 	if (err != 0)
 		goto exit;
 
@@ -76,9 +85,7 @@ int main(int argc, char **argv)
 	uloop_run();
 
 exit:
-	if (err != -5) // Error code is not -5, indicating that ubus_ctx is connected, proceed with shutdown
-		bbfdm_ubus_regiter_free(&bbfdm_ctx);
-
+	bbfdm_ubus_register_free(&bbfdm_ctx);
 	closelog();
 
 	return err;

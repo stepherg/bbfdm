@@ -1,0 +1,27 @@
+
+config netmode 'global'
+	option enabled '0'
+	option mode 'routed-pppoe'
+
+config supported_modes 'mode_1'
+	option name 'routed-dhcp'
+	option description 'WAN with DHCP proto (Layer 3)'
+
+config supported_modes 'mode_2'
+	option name 'routed-pppoe'
+	option description 'WAN with PPPoE (Layer 3)'
+
+config supported_args 'mode_2_supprted_args_1'
+	option name 'username'
+	option description 'PPPoE username'
+	option required '1'
+	option type 'string'
+	option dm_parent 'mode_2'
+
+config supported_args 'mode_2_supprted_args_2'
+	option name 'password'
+	option description 'PPPoE password'
+	option required '1'
+	option type 'string'
+	option dm_parent 'mode_2'
+

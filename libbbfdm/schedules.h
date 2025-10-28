@@ -16,5 +16,8 @@
 extern DMOBJ tSchedulesObj[];
 extern DMLEAF tSchedulesParams[];
 extern DMLEAF tScheduleParams[];
+
+void dmmap_synchronizeSchedulesSchedule(struct dmctx *dmctx);
+
 #endif
 

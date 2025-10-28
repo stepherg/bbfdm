@@ -1,0 +1,54 @@
+{
+  "daemon": {
+    "enable": "1",
+    "service_name": "core",
+    "unified_daemon": false,
+    "services": [
+      {
+        "parent_dm": "Device.",
+        "object": "LANConfigSecurity"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "Schedules"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "Security",
+        "proto": "cwmp"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "PacketCaptureDiagnostics"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "SelfTestDiagnostics"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "Syslog"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "{BBF_VENDOR_PREFIX}OpenVPN",
+        "proto": "usp"
+      },	  
+      {
+        "parent_dm": "Device.",
+        "object": "RootDataModelVersion"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "Reboot()"
+      },
+      {
+        "parent_dm": "Device.",
+        "object": "FactoryReset()"
+      }
+    ],
+    "config": {
+      "loglevel": "3"
+    }
+  }
+}

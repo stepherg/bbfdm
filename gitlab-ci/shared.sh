@@ -1,8 +1,10 @@
 #!/bin/bash
 
-BBFDM_PLUGIN_DIR="/usr/share/bbfdm/plugins"
+BBFDM_TOOLS_INPUT_FILE="$(pwd)/tools/tools_input.json"
+BBFDM_PLUGIN_DEST="/opt/dev"
 BBFDM_MS_DIR="/usr/share/bbfdm/micro_services"
-BBFDM_LOG_FILE="/tmp/bbfdm.log"
+BBFDM_MS_CONF="/etc/bbfdm/services"
+BBFDM_DMMAP_DIR="etc/bbfdm/dmmap/"
 
 if [ -z "${CI_PROJECT_PATH}" ]; then
 	CI_PROJECT_PATH=${PWD}
@@ -43,54 +45,31 @@ function exec_cmd_verbose()
 	fi
 }
 
-generate_input_schema()
+function install_ms()
 {
-	service_name="$1"
-	schema='{
-  "daemon": {
-    "enable": "1",
-    "service_name": "'"$service_name"'",
-    "config": {
-      "loglevel": "4"
-    }
-  }
-}'
-	echo "$schema"
+	exec_cmd cp -f "${1}" ${BBFDM_MS_DIR}/${2}.so
 }
 
-generate_input_schema_with_output_name()
+function install_ms_plugin()
 {
-	service_name="$1"
-	output_name="$2"
-	schema='{
-  "daemon": {
-    "enable": "1",
-    "service_name": "'"$service_name"'",
-    "config": {
-      "loglevel": "4"
-    },
-    "output": {
-      "name": "'"$output_name"'"
-    }
-  }
-}'
-	echo "$schema"
+	exec_cmd mkdir -p ${BBFDM_MS_DIR}/${2}
+	exec_cmd cp -f "${1}" ${BBFDM_MS_DIR}/${2}/
 }
 
-function install_plugin()
+function install_ms_config()
 {
-	exec_cmd cp -f "${1}" ${BBFDM_PLUGIN_DIR}/
+	exec_cmd cp -f "${1}" ${BBFDM_MS_CONF}/${2}.json
 }
 
 function install_libbbf()
 {
-	# Enable coverage flags only for test
-	if [ -z "${1}" ]; then
+	# Enable coverage flags only for bbfdm test
+	if [ "$1" == "bbfdm" ]; then
 		COV_CFLAGS='-fprofile-arcs -ftest-coverage'
 		COV_LDFLAGS='--coverage'
 	fi
 
-	VENDOR_PREFIX='X_IOPSYS_EU_'
+	VENDOR_PREFIX='X_IOWRT_EU_'
 
 	echo "Compiling libbbf"
 	if [ -d build ]; then
@@ -99,7 +78,27 @@ function install_libbbf()
 
 	mkdir -p build
 	cd build
-	cmake ../ -DCMAKE_C_FLAGS="$COV_CFLAGS " -DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS -lm" -DBBF_VENDOR_PREFIX="$VENDOR_PREFIX" -DBBF_MAX_OBJECT_INSTANCES=255 -DBBFDMD_MAX_MSG_LEN=1048576 -DCMAKE_INSTALL_PREFIX=/
+
+	# Construct the CMake command as an array for safety
+	cmake_args=(
+		../
+		-DCMAKE_C_FLAGS="$COV_CFLAGS"
+		-DCMAKE_EXE_LINKER_FLAGS="$COV_LDFLAGS -lm"
+		-DBBF_VENDOR_PREFIX="$VENDOR_PREFIX"
+		-DBBF_MAX_OBJECT_INSTANCES=255
+		-DBBFDMD_MAX_MSG_LEN=1048576
+		-DCMAKE_INSTALL_PREFIX=/
+	)
+
+	# Add this flag only if $1 is "tools"
+	if [ "$1" == "tools" ]; then
+		cmake_args+=(-DBBF_SCHEMA_FULL_TREE=ON)
+	fi
+
+	# Run cmake with arguments
+	cmake "${cmake_args[@]}"
+
+	# Compile and install
 	exec_cmd_verbose make
 
 	echo "installing libbbf"
@@ -107,6 +106,8 @@ function install_libbbf()
 	echo "371d530c95a17d1ca223a29b7a6cdc97e1135c1e0959b51106cca91a0b148b5e42742d372a359760742803f2a44bd88fca67ccdcfaeed26d02ce3b6049cb1e04" > /etc/bbfdm/.secure_hash
 	cd ..
 	exec_cmd cp utilities/bbf_configd /usr/sbin/
+	exec_cmd cp -f utilities/files/usr/share/bbfdm/scripts/bbf_api /usr/share/bbfdm/scripts/
+	install_ms build/libbbfdm/libcore.so core
 }
 
 function install_libbbf_test()
@@ -117,104 +118,115 @@ function install_libbbf_test()
 	exec_cmd_verbose make -C test/bbf_test/
 
 	echo "installing libbbf_test"
-	install_plugin ./test/bbf_test/libbbf_test.so
+	install_ms_plugin ./test/bbf_test/libbbf_test.so core
 }
 
 function install_wifidmd_as_micro_service()
 {
-	[ -d "/opt/dev/wifidmd" ] && return 0
+	[ -d "${BBFDM_PLUGIN_DEST}/wifidmd" ] && return 0
 
-	exec_cmd git clone https://dev.iopsys.eu/bbf/wifidmd.git /opt/dev/wifidmd
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/bbf/wifidmd.git ${BBFDM_PLUGIN_DEST}/wifidmd
 
-	exec_cmd make -C /opt/dev/wifidmd/src/ clean && make -C /opt/dev/wifidmd/src/ CFLAGS="-D'BBF_VENDOR_PREFIX=\"X_IOPSYS_EU_\"'"
-	exec_cmd cp -f /opt/dev/wifidmd/src/libwifi.so /usr/share/bbfdm/micro_services/wifidmd.so
-	exec_cmd mkdir -p /usr/share/bbfdm/micro_services/wifidmd
-	exec_cmd cp -f /opt/dev/wifidmd/src/libdataelements.so /usr/share/bbfdm/micro_services/wifidmd
-
-	generate_input_schema_with_output_name "wifidmd" "WiFi" > /etc/bbfdm/services/wifidmd.json
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/wifidmd/src/ clean && make -C ${BBFDM_PLUGIN_DEST}/wifidmd/src/ WIFIDMD_ENABLE_WIFI_DATAELEMENTS='y'
+	exec_cmd cp -f ${BBFDM_PLUGIN_DEST}/wifidmd/src/wifidmd /usr/sbin/
 }
 
 function install_libeasy()
 {
-	[ -d "/opt/dev/libeasy" ] && return 0
+	[ -d "${BBFDM_PLUGIN_DEST}/libeasy" ] && return 0
 
-	exec_cmd git clone https://dev.iopsys.eu/iopsys/libeasy.git /opt/dev/libeasy
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/iopsys/libeasy.git ${BBFDM_PLUGIN_DEST}/libeasy
 	(
 
-		cd /opt/dev/libeasy
+		cd ${BBFDM_PLUGIN_DEST}/libeasy
+		exec_cmd cmake -DCMAKE_INSTALL_PREFIX=/usr .
 		exec_cmd make
-		mkdir -p /usr/include/easy
-		cp -a libeasy*.so* /usr/lib
-		cp -a *.h /usr/include/easy/
+		exec_cmd make install
+	)
+}
+
+function install_libqos()
+{
+	[ -d "${BBFDM_PLUGIN_DEST}/libqos" ] && return 0
+
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/hal/libqos.git ${BBFDM_PLUGIN_DEST}/libqos
+	(
+
+		cd ${BBFDM_PLUGIN_DEST}/libqos
+		exec_cmd make
+		sudo mkdir -p /usr/include/
+		sudo cp -a libqos*.so* /usr/lib/
+		sudo cp -a include/*.h /usr/include/
 	)
 }
 
 function install_libethernet()
 {
-	[ -d "/opt/dev/libethernet" ] && return 0
+	[ -d "${BBFDM_PLUGIN_DEST}/libethernet" ] && return 0
 
-	exec_cmd git clone https://dev.iopsys.eu/iopsys/libethernet.git /opt/dev/libethernet
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/iopsys/libethernet.git ${BBFDM_PLUGIN_DEST}/libethernet
 	(
-		 cd /opt/dev/libethernet
+		 cd ${BBFDM_PLUGIN_DEST}/libethernet
 		 make PLATFORM=TEST
-		 cp ethernet.h /usr/include
-		 cp -a libethernet*.so* /usr/lib
+		 sudo cp ethernet.h /usr/include
+		 sudo cp -a libethernet*.so* /usr/lib
 		 sudo ldconfig
 	)
 }
 
 function install_ethmngr_as_micro_service()
 {
-	[ -d "/opt/dev/ethmngr" ] && return 0
+	[ -d "${BBFDM_PLUGIN_DEST}/ethmngr" ] && return 0
 
 	install_libeasy
 	install_libethernet
+	install_libqos
 
-	exec_cmd git clone https://dev.iopsys.eu/hal/ethmngr.git /opt/dev/ethmngr
-	exec_cmd make -C /opt/dev/ethmngr
-	exec_cmd cp /opt/dev/ethmngr/ethmngr /usr/sbin/ethmngr
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/hal/ethmngr.git ${BBFDM_PLUGIN_DEST}/ethmngr
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/ethmngr
+	exec_cmd sudo cp -f ${BBFDM_PLUGIN_DEST}/ethmngr/ethmngr /usr/sbin/ethmngr
 }
 
 function install_netmngr_as_micro_service()
 {
-	[ -d "/opt/dev/netmngr" ] && return 0
+	[ -d "${BBFDM_PLUGIN_DEST}/netmngr" ] && return 0
 
-	exec_cmd git clone https://dev.iopsys.eu/network/netmngr.git /opt/dev/netmngr
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/network/netmngr.git ${BBFDM_PLUGIN_DEST}/netmngr
+	
+	exec_cmd apt install iproute2 -y
 
-	exec_cmd make -C /opt/dev/netmngr/src/ clean
-	exec_cmd make -C /opt/dev/netmngr/src/ NETMNGR_GRE_OBJ=y NETMNGR_IP_OBJ=y NETMNGR_ROUTING_OBJ=y NETMNGR_PPP_OBJ=y NETMNGR_ROUTER_ADVERTISEMENT_OBJ=y NETMNGR_IPV6RD_OBJ=y
-	exec_cmd cp -f /opt/dev/netmngr/src/libnetmngr.so /usr/share/bbfdm/micro_services/netmngr.so
-	exec_cmd cp -f /opt/dev/netmngr/src/libinterface_stack.so /usr/share/bbfdm/plugins
-	exec_cmd mkdir -p /usr/share/bbfdm/micro_services/netmngr
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/netmngr/src/ clean
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/netmngr/src/ NETMNGR_GRE_OBJ=y NETMNGR_IP_OBJ=y NETMNGR_ROUTING_OBJ=y NETMNGR_PPP_OBJ=y NETMNGR_ROUTER_ADVERTISEMENT_OBJ=y NETMNGR_IPV6RD_OBJ=y
+	install_ms ${BBFDM_PLUGIN_DEST}/netmngr/src/libnetmngr.so netmngr
 
-	generate_input_schema_with_output_name "netmngr" "Network" > /etc/bbfdm/services/netmngr.json
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/bbf/tr143d.git ${BBFDM_PLUGIN_DEST}/tr143d
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/tr143d/src/ clean && make -C ${BBFDM_PLUGIN_DEST}/tr143d/src/
+	exec_cmd cp -f utilities/files/usr/share/bbfdm/scripts/bbf_api /usr/share/bbfdm/scripts/
+	exec_cmd cp -rf ${BBFDM_PLUGIN_DEST}/tr143d/scripts/* /usr/share/bbfdm/scripts/
+	install_ms_plugin ${BBFDM_PLUGIN_DEST}/tr143d/src/libtr143d.so netmngr
 
-	exec_cmd git clone https://dev.iopsys.eu/bbf/tr143d.git /opt/dev/tr143d
-	exec_cmd make -C /opt/dev/tr143d/src/ clean && make -C /opt/dev/tr143d/src/
-	exec_cmd cp -f /opt/dev/tr143d/src/libtr143d.so /usr/share/bbfdm/micro_services/netmngr
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/bbf/tr471d.git ${BBFDM_PLUGIN_DEST}/tr471d
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/tr471d/src/ clean && make -C ${BBFDM_PLUGIN_DEST}/tr471d/src/
+	install_ms_plugin ${BBFDM_PLUGIN_DEST}/tr471d/src/libtr471d.so netmngr
 
-	exec_cmd git clone https://dev.iopsys.eu/bbf/tr471d.git /opt/dev/tr471d
-	exec_cmd make -C /opt/dev/tr471d/src/ clean && make -C /opt/dev/tr471d/src/
-	exec_cmd cp -f /opt/dev/tr471d/src/libtr471d.so /usr/share/bbfdm/micro_services/netmngr
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/bbf/twamp-light.git ${BBFDM_PLUGIN_DEST}/twamp
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/twamp clean && make -C ${BBFDM_PLUGIN_DEST}/twamp
+	install_ms_plugin ${BBFDM_PLUGIN_DEST}/twamp/libtwamp.so netmngr
 
-	exec_cmd git clone https://dev.iopsys.eu/bbf/twamp-light.git /opt/dev/twamp
-	exec_cmd make -C /opt/dev/twamp clean && make -C /opt/dev/twamp
-	exec_cmd cp -f /opt/dev/twamp/libtwamp.so /usr/share/bbfdm/micro_services/netmngr
-
-	exec_cmd git clone https://dev.iopsys.eu/bbf/udpecho.git /opt/dev/udpecho
-	exec_cmd make -C /opt/dev/udpecho/src/ clean && make -C /opt/dev/udpecho/src/
-	exec_cmd cp -f /opt/dev/udpecho/src/libudpechoserver.so /usr/share/bbfdm/micro_services/netmngr
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/bbf/udpecho.git ${BBFDM_PLUGIN_DEST}/udpecho
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/udpecho/src/ clean && make -C ${BBFDM_PLUGIN_DEST}/udpecho/src/
+	install_ms_plugin ${BBFDM_PLUGIN_DEST}/udpecho/src/libudpechoserver.so netmngr
 }
 
 function install_sysmngr_as_micro_service()
 {
-	[ -d "/opt/dev/sysmngr" ] && return 0
+	[ -d "${BBFDM_PLUGIN_DEST}/sysmngr" ] && return 0
 
-	exec_cmd git clone https://dev.iopsys.eu/system/sysmngr.git /opt/dev/sysmngr
+	exec_cmd git clone -b ${BRANCH:-devel} --depth=1 https://dev.iopsys.eu/system/sysmngr.git ${BBFDM_PLUGIN_DEST}/sysmngr
 
-	exec_cmd make -C /opt/dev/sysmngr/src/ clean && \
-	exec_cmd make -C /opt/dev/sysmngr/src/ \
-		CFLAGS+="-DBBF_VENDOR_PREFIX=\\\"X_IOPSYS_EU_\\\"" \
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/sysmngr/src/ clean && \
+	exec_cmd make -C ${BBFDM_PLUGIN_DEST}/sysmngr/src/ \
+		CFLAGS+="-DBBF_VENDOR_PREFIX=\\\"X_IOWRT_EU_\\\"" \
 		SYSMNGR_VENDOR_CONFIG_FILE='y' \
 		SYSMNGR_MEMORY_STATUS='y' \
 		SYSMNGR_PROCESS_STATUS='y' \
@@ -225,7 +237,7 @@ function install_sysmngr_as_micro_service()
 		SYSMNGR_VENDOR_EXTENSIONS='y' \
 		SYSMNGR_FWBANK_UBUS_SUPPORT='y'
 
-	exec_cmd cp /opt/dev/sysmngr/src/sysmngr /usr/sbin/
+	exec_cmd cp -f ${BBFDM_PLUGIN_DEST}/sysmngr/src/sysmngr /usr/sbin/
 	exec_cmd mkdir /etc/sysmngr
 }
 
@@ -233,7 +245,7 @@ function error_on_zero()
 {
 	ret=$1
 	if [ "$ret" -eq 0 ]; then
-		echo "Validation of last command failed, ret(${ret})"
+		echo "Validation of Last command failed, ret(${ret})"
 		cp /tmp/memory-*.xml .
 		exit $ret
 	fi
@@ -253,15 +265,14 @@ function generate_report()
 
 function install_cmph()
 {
-	[ -d "/opt/dev/cmph" ] && return 0
+	[ -d "${BBFDM_PLUGIN_DEST}/cmph" ] && return 0
 
-	exec_cmd git clone https://git.code.sf.net/p/cmph/git /opt/dev/cmph
+	exec_cmd git clone https://git.code.sf.net/p/cmph/git ${BBFDM_PLUGIN_DEST}/cmph
 	(
-		cd /opt/dev/cmph
+		cd ${BBFDM_PLUGIN_DEST}/cmph
 		exec_cmd autoreconf -i
 		exec_cmd ./configure
 		exec_cmd make
 		exec_cmd sudo make install
 	)
 }
-

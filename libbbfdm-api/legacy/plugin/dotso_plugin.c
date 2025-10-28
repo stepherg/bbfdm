@@ -62,14 +62,9 @@ static void dotso_plugin_disable_requested_entries(DMOBJ *entryobj, DMOBJ *reque
 
 int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 {
-#ifndef BBF_SCHEMA_FULL_TREE
 	void *handle = dlopen(plugin_path, RTLD_NOW|RTLD_LOCAL);
-#else
-	void *handle = dlopen(plugin_path, RTLD_LAZY);
-#endif
 	if (!handle) {
 		char *err_msg = dlerror();
-		TRACE_FILE("Failed to add DotSo plugin '%s', [%s]\n", plugin_path, err_msg);
 		BBF_ERR("Failed to add DotSo plugin '%s', [%s]\n", plugin_path, err_msg);
 		return 0;
 	}
@@ -88,7 +83,6 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 
 		DMOBJ *dm_entryobj = find_entry_obj(entryobj, dynamic_obj[i].path);
 		if (!dm_entryobj) {
-			TRACE_FILE("Failed to add DotSo plugin '%s' to main tree with parent DM index '%d' => '%s'", plugin_path, i, dynamic_obj[i].path);
 			BBF_ERR("Failed to add DotSo plugin '%s' to main tree with parent DM index '%d' => '%s'", plugin_path, i, dynamic_obj[i].path);
 			continue;
 		}
@@ -134,6 +128,9 @@ int load_dotso_plugins(DMOBJ *entryobj, const char *plugin_path)
 			}
 
 		}
+
+		if (dynamic_obj[i].init_module)
+			dynamic_obj[i].init_module(NULL);
 	}
 	add_list_loaded_libraries(&loaded_library_list, handle);
 

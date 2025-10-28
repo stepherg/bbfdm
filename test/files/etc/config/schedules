@@ -1,0 +1,26 @@
+
+config global 'global'
+	option enable '1'
+
+config schedule 'schedule_1'
+	option enable '0'
+	list day 'Monday'
+	list day 'Tuesday'
+	list day 'Wednesday'
+	list day 'Thursday'
+	list day 'Friday'
+	list day 'Saturday'
+	list day 'Sunday'
+	option duration '1'
+
+config schedule 'schedule_2'
+	option enable '0'
+	list day 'Monday'
+	list day 'Tuesday'
+	list day 'Wednesday'
+	list day 'Thursday'
+	list day 'Friday'
+	list day 'Saturday'
+	list day 'Sunday'
+	option duration '1'
+

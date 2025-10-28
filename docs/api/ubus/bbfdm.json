@@ -68,12 +68,6 @@
         "Device.WiFi."
       ]
     },
-    "instance_t": {
-      "description": "Multi object instances",
-      "type": "string",
-      "minLength": 6,
-      "maxLength": 256
-    },
     "proto_t": {
       "type": "string",
       "default": "both",
@@ -103,22 +97,6 @@
       "type": "integer",
       "minimum": 7000,
       "maximum": 9050
-    },
-    "trans_type_t": {
-      "type": "string",
-      "enum": [
-        "start",
-        "commit",
-        "abort",
-        "status"
-      ]    
-    },
-    "srv_type_t": {
-      "type": "string",
-      "enum": [
-        "register",
-        "list"
-      ]    
     },
     "format_t": {
       "type": "string",
@@ -150,30 +128,9 @@
             "path": {
               "$ref": "#/definitions/query_path_t"
             },
-            "paths": {
-              "type": "array",
-              "uniqueItems": true,
-              "items": [
-                {
-                  "$ref": "#/definitions/query_path_t"
-                }
-              ]
-            },
             "first_level": {
               "type": "boolean",
               "description": "gets only first level objects if true"
-            },
-            "commands": {
-              "type": "boolean",
-              "description": "includes commands in the list if true"
-            },
-            "events": {
-              "type": "boolean",
-              "description": "includes events in the list if true"
-            },
-            "params": {
-              "type": "boolean",
-              "description": "includes objs/params in the list if true"
             },
             "optional": {
               "type": "object",
@@ -278,19 +235,6 @@
             "path": {
               "$ref": "#/definitions/query_path_t"
             },
-            "paths": {
-              "type": "array",
-              "uniqueItems": true,
-              "items": [
-                {
-                  "$ref": "#/definitions/query_path_t"
-                }
-              ]
-            },
-            "maxdepth": {
-              "type": "integer",
-              "description": "Integer to decide the depth of data model to be parsed"
-            },
             "optional": {
               "type": "object",
               "properties": {
@@ -357,10 +301,6 @@
           "properties": {
             "path": {
               "$ref": "#/definitions/query_path_t"
-            },
-            "first_level": {
-              "type": "boolean",
-              "description": "gets only first level objects if true"
             },
             "optional": {
               "type": "object",
@@ -625,10 +565,10 @@
         "input": {
           "type": "object",
           "required": [
-            "command"
+            "path"
           ],
           "properties": {
-            "command": {
+            "path": {
               "$ref": "#/definitions/operate_path_t"
             },
             "command_key": {
@@ -645,9 +585,6 @@
             "optional": {
               "type": "object",
               "properties": {
-                "format": {
-                  "$ref": "#/definitions/format_t"
-                },
                 "proto": {
                   "$ref": "#/definitions/proto_t"
                 }
@@ -709,8 +646,8 @@
         }
       }
     },
-    "service": {
-      "title": "show the list of micro-service registred in the core Data Model",
+    "services": {
+      "title": "show the list of micro-service registred in the Data Model",
       "type": "object",
       "required": [
         "output"
@@ -724,13 +661,21 @@
               "type": "string",
               "Description": "Name of the micro-service ubus object"
             },
-            "parent_dm": {
-              "type": "string",
-              "Description": "Object path where the micro-service object will be added"
-            },
-            "object": {
-              "type": "string",
-              "Description": "Name of the micro-service object"
+            "objects": {
+              "type": "object",
+              "properties": {
+                "parent_dm": {
+                  "type": "string",
+                  "Description": "Object path where the micro-service object will be added"
+                },
+                "object": {
+                  "type": "string",
+                  "Description": "Name of object will be added"
+                },
+                "proto": {
+                  "$ref": "#/definitions/proto_t"
+                }  
+              }
             },
             "proto": {
               "$ref": "#/definitions/proto_t"
@@ -741,31 +686,6 @@
             }
           }
         }
-      }
-    },
-    "notify_event": {
-      "title": "notify occurance of an event on ubus",
-      "type": "object",
-      "required": [
-        "input"
-      ],
-      "properties": {
-        "input": {
-          "type": "object",
-          "required": [
-            "name"
-          ],
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "input": {
-              "type": "array",
-              "properties": {}
-            }
-          }
-        },
-        "output": {}
       }
     }
   }

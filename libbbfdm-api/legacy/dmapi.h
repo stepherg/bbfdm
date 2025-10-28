@@ -28,6 +28,8 @@
 
 #include "libbbfdm-api/version-2/bbfdm_api.h"
 
+#define ROOT_NODE "Device."
+
 extern struct dm_permession_s DMREAD;
 extern struct dm_permession_s DMWRITE;
 extern struct dm_permession_s DMSYNC;
@@ -160,12 +162,18 @@ typedef struct dm_map_obj {
 	struct dm_leaf_s *root_leaf;
 	int (*init_module)(void *data);
 	int (*clean_module)(void *data);
+	int (*uci_sync_handler)(void *data);
 } DM_MAP_OBJ;
 
 struct dm_reference {
 	char *path;
 	char *value;
 	bool is_valid_path;
+};
+
+enum {
+	BBFDM_API_V0,
+	BBFDM_API_V1
 };
 
 struct dmctx {
@@ -177,24 +185,16 @@ struct dmctx {
 	bool iscommand;
 	bool isevent;
 	bool isinfo;
-	bool disable_mservice_browse;
 
 	int (*method_param)(DMPARAM_ARGS);
 	int (*method_obj)(DMOBJECT_ARGS);
 	int (*checkobj)(DMOBJECT_ARGS);
 	int (*checkleaf)(DMOBJECT_ARGS);
 
-	struct list_head *memhead;
-	struct blob_buf bb;
-
-	DMOBJ *dm_entryobj;
-	struct uci_context *config_uci_ctx;
-	struct uci_context *dmmap_uci_ctx;
-	struct uci_context *varstate_uci_ctx;
-
 	int faultcode;
 	int setaction;
 	unsigned int dm_type;
+	unsigned int bbfdm_api_version;
 	unsigned char inparam_isparam;
 	unsigned char findparam;
 
@@ -204,7 +204,19 @@ struct dmctx {
 	char *addobj_instance;
 	char *linker;
 	char *linker_param;
-	char *inst_buf[16];
+
+	struct blob_buf bb;
+
+	DMOBJ *dm_entryobj;
+	struct uci_context *config_uci_ctx;
+	struct uci_context *dmmap_uci_ctx;
+	struct uci_context *varstate_uci_ctx;
+	struct ubus_context *ubus_ctx;
+	struct list_head *memhead;
+	struct list_head *modified_uci_head;
+
+	const char *obj_buf[16];
+	const char *inst_buf[16];
 	char fault_msg[256];
 };
 
@@ -212,6 +224,7 @@ typedef struct dmnode {
 	DMOBJ *obj;
 	struct dmnode *parent;
 	char *current_object;
+	char *current_object_file;
 	void *prev_data;
 	char *prev_instance;
 	unsigned char instance_level;
@@ -220,7 +233,6 @@ typedef struct dmnode {
 	unsigned char browse_type;
 	int max_instance;
 	int num_of_entries;
-	bool is_ubus_service;
 } DMNODE;
 
 typedef struct {
@@ -271,6 +283,7 @@ enum {
 	BBF_DEL_OBJECT,
 	BBF_OPERATE,
 	BBF_EVENT,
+	BBF_REFERENCES_DB
 };
 
 enum {
@@ -387,7 +400,6 @@ enum bbfdm_type_enum {
 enum {
 	INDX_JSON_MOUNT,
 	INDX_LIBRARY_MOUNT,
-	INDX_SERVICE_MOUNT,
 	__INDX_DYNAMIC_MAX
 };
 

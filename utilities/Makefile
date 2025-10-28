@@ -4,7 +4,7 @@ OBJS = src/ubus/bbf_config.o src/ubus/utils.o
 
 PROG_CFLAGS = $(CFLAGS) -Wall -Werror
 PROG_LDFLAGS = $(LDFLAGS)
-PROG_LIBS += -luci -lubus -lubox -lblobmsg_json
+PROG_LIBS += -luci -lubus -lubox -lblobmsg_json -ljson-c
 
 INSTALL_DIR = /usr/sbin
 	

@@ -7,11 +7,11 @@ ADD_DEFINITIONS(-Wall -Werror -g3 -D_GNU_SOURCE -DBBF_VENDOR_PREFIX="${BBF_VENDO
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${CMAKE_SOURCE_DIR} -I${CMAKE_CURRENT_SOURCE_DIR} -I${CMAKE_SOURCE_DIR}/libbbfdm-api/version-2")
 FILE(GLOB BBF_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 
-ADD_LIBRARY(bbfdm STATIC ${BBF_SOURCES})
+ADD_LIBRARY(core SHARED ${BBF_SOURCES})
 
-TARGET_LINK_LIBRARIES(bbfdm uci ubus ubox json-c blobmsg_json m bbfdm-api ssl crypto)
+TARGET_LINK_LIBRARIES(core uci ubus ubox json-c blobmsg_json m bbfdm-api ssl crypto)
 
-INSTALL(TARGETS bbfdm
+INSTALL(TARGETS core
 	LIBRARY DESTINATION usr/lib
 )
 
@@ -19,7 +19,6 @@ INSTALL(DIRECTORY DESTINATION etc/bbfdm)
 INSTALL(DIRECTORY DESTINATION etc/bbfdm/dmmap)
 INSTALL(DIRECTORY DESTINATION usr/share/bbfdm)
 INSTALL(DIRECTORY DESTINATION usr/share/bbfdm/scripts)
-INSTALL(DIRECTORY DESTINATION usr/share/bbfdm/plugins)
 INSTALL(DIRECTORY DESTINATION usr/share/bbfdm/micro_services)
 INSTALL(DIRECTORY DESTINATION usr/libexec/rpcd)
 

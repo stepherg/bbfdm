@@ -39,17 +39,32 @@ static void bbfdm_uci_init_ctx(struct uci_context **uci_ctx, const char *confdir
 
 void dm_uci_init(struct dmctx *bbf_ctx)
 {
+	bbfdm_ensure_folder_exists("/tmp/bbfdm/");
+
 	if (bbf_ctx->dm_type == BBFDM_CWMP) {
+		bbfdm_ensure_folder_exists("/tmp/bbfdm/.cwmp/");
+		bbfdm_ensure_folder_exists("/tmp/bbfdm/.cwmp/config/");
+		bbfdm_ensure_folder_exists("/tmp/bbfdm/.cwmp/dmmap/");
+
 		bbfdm_uci_init_ctx(&bbf_ctx->config_uci_ctx, config_dir, "/tmp/bbfdm/.cwmp/config/");
 		bbfdm_uci_init_ctx(&bbf_ctx->dmmap_uci_ctx, bbfdm_dir, "/tmp/bbfdm/.cwmp/dmmap/");
 	} else if (bbf_ctx->dm_type == BBFDM_USP) {
+		bbfdm_ensure_folder_exists("/tmp/bbfdm/.usp/");
+		bbfdm_ensure_folder_exists("/tmp/bbfdm/.usp/config/");
+		bbfdm_ensure_folder_exists("/tmp/bbfdm/.usp/dmmap/");
+
 		bbfdm_uci_init_ctx(&bbf_ctx->config_uci_ctx, config_dir, "/tmp/bbfdm/.usp/config/");
 		bbfdm_uci_init_ctx(&bbf_ctx->dmmap_uci_ctx, bbfdm_dir, "/tmp/bbfdm/.usp/dmmap/");
 	} else {
+		bbfdm_ensure_folder_exists("/tmp/bbfdm/.bbfdm/");
+		bbfdm_ensure_folder_exists("/tmp/bbfdm/.bbfdm/config/");
+		bbfdm_ensure_folder_exists("/tmp/bbfdm/.bbfdm/dmmap/");
+
 		bbfdm_uci_init_ctx(&bbf_ctx->config_uci_ctx, config_dir, "/tmp/bbfdm/.bbfdm/config/");
 		bbfdm_uci_init_ctx(&bbf_ctx->dmmap_uci_ctx, bbfdm_dir, "/tmp/bbfdm/.bbfdm/dmmap/");
 	}
 
+	bbfdm_ensure_folder_exists("/tmp/bbfdm/.varstate/");
 	bbfdm_uci_init_ctx(&bbf_ctx->varstate_uci_ctx, varstate_dir, "/tmp/bbfdm/.varstate/");
 
 	uci_ctx = bbf_ctx->config_uci_ctx;
@@ -105,7 +120,7 @@ char *dmuci_list_to_string(struct uci_list *list, const char *delimitor)
 {
 	if (list) {
 		struct uci_element *e = NULL;
-		char list_val[512] = {0};
+		char list_val[4096] = {0};
 		unsigned pos = 0;
 
 		list_val[0] = 0;
@@ -188,6 +203,17 @@ int dmuci_get_section_type(const char *package, const char *section, char **valu
 		return -1;
 	}
 	return 0;
+}
+
+/**** UCI SECTION EXIST *****/
+struct uci_section *dmuci_get_section(const char *package, const char *section)
+{
+	struct uci_ptr ptr = {0};
+
+	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, NULL, NULL))
+		return NULL;
+
+	return ptr.s;
 }
 
 int dmuci_get_option_value_string(const char *package, const char *section, const char *option, char **value)
@@ -365,8 +391,10 @@ int dmuci_commit_package(char *package)
 	if (uci_lookup_ptr(uci_ctx, &ptr, package, true) != UCI_OK)
 		return -1;
 
-	if (uci_commit(uci_ctx, &ptr.p, false) != UCI_OK)
+	if (uci_commit(uci_ctx, &ptr.p, false) != UCI_OK) {
+		BBF_ERR("Failed to commit UCI package '%s'. confdir: '%s', savedir: '%s'.", package, uci_ctx->confdir, uci_ctx->savedir);
 		return -1;
+	}
 
 	return 0;
 }
@@ -403,117 +431,7 @@ int dmuci_revert_package(char *package)
 	return 0;
 }
 
-
-/**** UCI SET *****/
-int dmuci_set_value(const char *package, const char *section, const char *option, const char *value)
-{
-	struct uci_ptr ptr = {0};
-
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, value))
-		return -1;
-
-	if (uci_set(uci_ctx, &ptr) != UCI_OK)
-		return -1;
-
-	if (uci_save(uci_ctx, ptr.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/**** UCI ADD LIST *****/
-int dmuci_add_list_value(const char *package, const char *section, const char *option, const char *value)
-{
-	struct uci_ptr ptr = {0};
-
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, value))
-		return -1;
-
-	if (uci_add_list(uci_ctx, &ptr) != UCI_OK)
-		return -1;
-
-	if (uci_save(uci_ctx, ptr.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/**** UCI DEL LIST *****/
-int dmuci_del_list_value(const char *package, const char *section, const char *option, const char *value)
-{
-	struct uci_ptr ptr = {0};
-
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, value))
-		return -1;
-
-	if (uci_del_list(uci_ctx, &ptr) != UCI_OK)
-		return -1;
-
-	if (uci_save(uci_ctx, ptr.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/****** UCI ADD *******/
-int dmuci_add_section(const char *package, const char *stype, struct uci_section **s)
-{
-	struct uci_ptr ptr = {0};
-	char fname[128];
-
-	*s = NULL;
-
-	snprintf(fname, sizeof(fname), "%s/%s", uci_ctx->confdir, package);
-
-	if (create_empty_file(fname))
-		return -1;
-
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, NULL, NULL, NULL))
-		return -1;
-
-	if (uci_add_section(uci_ctx, ptr.p, stype, s) != UCI_OK)
-		return -1;
-
-	if (uci_save(uci_ctx, ptr.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/**** UCI DELETE *****/
-int dmuci_delete(const char *package, const char *section, const char *option, const char *value)
-{
-	struct uci_ptr ptr = {0};
-
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, option, NULL))
-		return -1;
-
-	if (uci_delete(uci_ctx, &ptr) != UCI_OK)
-		return -1;
-
-	if (uci_save(uci_ctx, ptr.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/**** UCI RENAME SECTION *****/
-int dmuci_rename_section(const char *package, const char *section, const char *value)
-{
-	struct uci_ptr ptr = {0};
-
-	if (dmuci_lookup_ptr(uci_ctx, &ptr, package, section, NULL, value))
-		return -1;
-
-	if (uci_rename(uci_ctx, &ptr) != UCI_OK)
-		return -1;
-
-	if (uci_save(uci_ctx, ptr.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
+#if 0
 /**** UCI LOOKUP by section pointer ****/
 static int dmuci_lookup_ptr_by_section(struct uci_context *ctx, struct uci_ptr *ptr, struct uci_section *s, const char *option, const char *value)
 {
@@ -545,6 +463,7 @@ lookup:
 
 	return 0;
 }
+#endif
 
 /**** UCI GET by section pointer*****/
 int dmuci_get_value_by_section_string(struct uci_section *s, const char *option, char **value)
@@ -623,133 +542,6 @@ int dmuci_get_value_by_section_list(struct uci_section *s, const char *option, s
 		}
 	}
 	return -1;
-}
-
-/**** UCI SET by section pointer ****/
-int dmuci_set_value_by_section(struct uci_section *s, const char *option, const char *value)
-{
-	struct uci_context *curr_ctx = get_uci_context_by_section(s);
-	struct uci_ptr up = {0};
-
-	if (dmuci_lookup_ptr_by_section(curr_ctx, &up, s, option, value) == -1)
-		return -1;
-
-	if (uci_set(curr_ctx, &up) != UCI_OK)
-		return -1;
-
-	if (uci_save(curr_ctx, up.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/**** UCI DELETE by section pointer *****/
-int dmuci_delete_by_section(struct uci_section *s, const char *option, const char *value)
-{
-	struct uci_context *curr_ctx = get_uci_context_by_section(s);
-	struct uci_ptr up = {0};
-
-	curr_ctx->flags |= UCI_FLAG_EXPORT_NAME;
-
-	if (dmuci_lookup_ptr_by_section(curr_ctx, &up, s, option, value) == -1)
-		return -1;
-
-	if (uci_delete(curr_ctx, &up) != UCI_OK)
-		return -1;
-
-	if (uci_save(curr_ctx, up.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-int dmuci_delete_by_section_unnamed(struct uci_section *s, const char *option, const char *value)
-{
-	struct uci_context *curr_ctx = get_uci_context_by_section(s);
-	struct uci_ptr up = {0};
-
-	if (dmuci_lookup_ptr_by_section(curr_ctx, &up, s, option, value) == -1)
-		return -1;
-
-	if (uci_delete(curr_ctx, &up) != UCI_OK)
-		return -1;
-
-	if (uci_save(curr_ctx, up.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/**** UCI ADD LIST by section pointer *****/
-int dmuci_add_list_value_by_section(struct uci_section *s, const char *option, const char *value)
-{
-	struct uci_context *curr_ctx = get_uci_context_by_section(s);
-	struct uci_ptr up = {0};
-
-	if (dmuci_lookup_ptr_by_section(curr_ctx, &up, s, option, value) == -1)
-		return -1;
-
-	if (uci_add_list(curr_ctx, &up) != UCI_OK)
-		return -1;
-
-	if (uci_save(curr_ctx, up.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/**** UCI DEL LIST by section pointer *****/
-int dmuci_del_list_value_by_section(struct uci_section *s, const char *option, const char *value)
-{
-	struct uci_context *curr_ctx = get_uci_context_by_section(s);
-	struct uci_ptr up = {0};
-
-	if (dmuci_lookup_ptr_by_section(curr_ctx, &up, s, option, value) == -1)
-		return -1;
-
-	if (uci_del_list(curr_ctx, &up) != UCI_OK)
-		return -1;
-
-	if (uci_save(curr_ctx, up.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/**** UCI RENAME SECTION by section pointer *****/
-int dmuci_rename_section_by_section(struct uci_section *s, const char *value)
-{
-	struct uci_context *curr_ctx = get_uci_context_by_section(s);
-	struct uci_ptr up = {0};
-
-	if (dmuci_lookup_ptr_by_section(curr_ctx, &up, s, NULL, value) == -1)
-		return -1;
-
-	if (uci_rename(curr_ctx, &up) != UCI_OK)
-		return -1;
-
-	if (uci_save(curr_ctx, up.p) != UCI_OK)
-		return -1;
-
-	return 0;
-}
-
-/**** UCI REORDER SECTION by section pointer *****/
-int dmuci_reoder_section_by_section(struct uci_section *s, char *pos)
-{
-	struct uci_context *curr_ctx = get_uci_context_by_section(s);
-	struct uci_ptr up = {0};
-
-	if (dmuci_lookup_ptr_by_section(curr_ctx, &up, s, NULL, pos) == -1)
-		return -1;
-
-	if (uci_reorder_section(curr_ctx, up.s, strtoul(up.value, NULL, 10)) != UCI_OK)
-		return -1;
-
-	if (uci_save(curr_ctx, up.p) != UCI_OK)
-		return -1;
-
-	return 0;
 }
 
 /**** UCI WALK SECTIONS *****/
@@ -927,4 +719,277 @@ int dmuci_set_section_name(const char *sec_name, char *str, size_t size)
 	}
 
 	return 0;
+}
+
+enum uci_oper_type {
+	UCI_OP_SET,
+	UCI_OP_ADD_LIST,
+	UCI_OP_DEL_LIST,
+	UCI_OP_ADD,
+	UCI_OP_DEL,
+	UCI_OP_RENAME,
+	UCI_OP_REORDER,
+	__UCI_OP_MAX
+};
+
+typedef struct uci_op_data {
+	//Input
+	const char *package;
+	const char *section;
+	const char *option;
+	const char *value;
+	const char *sec_type;
+	struct uci_context *ucictx;
+	struct dmctx *dmctx;
+
+	//Output
+	struct uci_section **s;
+} bbfdm_uci_op_data;
+
+static int __uci_perform_op(int operation, bbfdm_uci_op_data *op_data)
+{
+	struct uci_ptr ptr = {0};
+
+	if (op_data == NULL)
+		return -1;
+
+	if (dmuci_lookup_ptr(op_data->ucictx, &ptr, op_data->package, op_data->section, op_data->option, op_data->value))
+		return -1;
+
+	switch (operation) {
+	case UCI_OP_SET:
+		if (uci_set(op_data->ucictx, &ptr) != UCI_OK)
+			return -1;
+		break;
+	case UCI_OP_ADD_LIST:
+		if (uci_add_list(op_data->ucictx, &ptr) != UCI_OK)
+			return -1;
+		break;
+	case UCI_OP_DEL_LIST:
+		if (uci_del_list(op_data->ucictx, &ptr) != UCI_OK)
+			return -1;
+		break;
+	case UCI_OP_ADD:
+		if (uci_add_section(op_data->ucictx, ptr.p, op_data->sec_type, op_data->s) != UCI_OK)
+			return -1;
+		break;
+	case UCI_OP_DEL:
+		if (uci_delete(op_data->ucictx, &ptr) != UCI_OK)
+			return -1;
+		break;
+	case UCI_OP_RENAME:
+		if (uci_rename(op_data->ucictx, &ptr) != UCI_OK)
+			return -1;
+		break;
+	case UCI_OP_REORDER:
+		if (uci_reorder_section(op_data->ucictx, ptr.s, strtoul(ptr.value, NULL, 10)) != UCI_OK)
+			return -1;
+		break;
+	default:
+		return -1;
+	}
+
+	if (uci_save(op_data->ucictx, ptr.p) != UCI_OK)
+		return -1;
+
+	add_list_modified_uci(op_data->dmctx, op_data->ucictx->confdir, op_data->package);
+	return 0;
+}
+
+/**** UCI SET by section pointer ****/
+int dmuci_set_value_by_section(struct uci_section *s, const char *option, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = get_uci_context_by_section(s);
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = s ? section_config(s) : "";
+	conf_data.section = s ? section_name(s) : "";
+	conf_data.option = option;
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_SET, &conf_data);
+}
+
+int dmuci_set_value(const char *package, const char *section, const char *option, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = uci_ctx;
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = package;
+	conf_data.section = section;
+	conf_data.option = option;
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_SET, &conf_data);
+}
+
+/**** UCI ADD section *****/
+int dmuci_add_section(const char *package, const char *stype, struct uci_section **s)
+{
+	char fname[128];
+	bbfdm_uci_op_data conf_data = {0};
+
+	if (s == NULL)
+		return -1;
+
+	snprintf(fname, sizeof(fname), "%s/%s", uci_ctx->confdir, package);
+
+	if (create_empty_file(fname))
+		return -1;
+
+	*s = NULL;
+
+	conf_data.s = s;
+	conf_data.ucictx = uci_ctx;
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = package;
+	conf_data.sec_type = stype;
+
+	return __uci_perform_op(UCI_OP_ADD, &conf_data);
+}
+
+/**** UCI DELETE by section pointer *****/
+int dmuci_delete_by_section(struct uci_section *s, const char *option, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = get_uci_context_by_section(s);
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = s ? section_config(s) : "";
+	conf_data.section = s ? section_name(s) : "";
+	conf_data.option = option;
+	conf_data.value = value;
+
+	conf_data.ucictx->flags |= UCI_FLAG_EXPORT_NAME;
+
+	return __uci_perform_op(UCI_OP_DEL, &conf_data);
+}
+
+int dmuci_delete(const char *package, const char *section, const char *option, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = uci_ctx;
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = package;
+	conf_data.section = section;
+	conf_data.option = option;
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_DEL, &conf_data);
+}
+
+int dmuci_delete_by_section_unnamed(struct uci_section *s, const char *option, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = get_uci_context_by_section(s);
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = s ? section_config(s) : "";
+	conf_data.section = s ? section_name(s) : "";
+	conf_data.option = option;
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_DEL, &conf_data);
+}
+
+/**** UCI ADD LIST by section pointer *****/
+int dmuci_add_list_value_by_section(struct uci_section *s, const char *option, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = get_uci_context_by_section(s);
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = s ? section_config(s) : "";
+	conf_data.section = s ? section_name(s) : "";
+	conf_data.option = option;
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_ADD_LIST, &conf_data);
+}
+
+int dmuci_add_list_value(const char *package, const char *section, const char *option, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = uci_ctx;
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = package;
+	conf_data.section = section;
+	conf_data.option = option;
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_ADD_LIST, &conf_data);
+}
+
+/**** UCI DEL LIST by section pointer *****/
+int dmuci_del_list_value_by_section(struct uci_section *s, const char *option, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = get_uci_context_by_section(s);
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = s ? section_config(s) : "";
+	conf_data.section = s ? section_name(s) : "";
+	conf_data.option = option;
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_DEL_LIST, &conf_data);
+}
+
+int dmuci_del_list_value(const char *package, const char *section, const char *option, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = uci_ctx;
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = package;
+	conf_data.section = section;
+	conf_data.option = option;
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_DEL_LIST, &conf_data);
+}
+
+/**** UCI RENAME SECTION by section pointer *****/
+int dmuci_rename_section_by_section(struct uci_section *s, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = get_uci_context_by_section(s);
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = s ? section_config(s) : "";
+	conf_data.section = s ? section_name(s) : "";
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_RENAME, &conf_data);
+}
+
+int dmuci_rename_section(const char *package, const char *section, const char *value)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = uci_ctx;
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = package;
+	conf_data.section = section;
+	conf_data.value = value;
+
+	return __uci_perform_op(UCI_OP_RENAME, &conf_data);
+}
+
+/**** UCI REORDER SECTION by section pointer *****/
+int dmuci_reoder_section_by_section(struct uci_section *s, char *pos)
+{
+	bbfdm_uci_op_data conf_data = {0};
+
+	conf_data.ucictx = get_uci_context_by_section(s);
+	conf_data.dmctx = get_bbfdm_global_dmctx();
+	conf_data.package = s ? section_config(s) : "";
+	conf_data.section = s ? section_name(s) : "";
+	conf_data.value = pos;
+
+	return __uci_perform_op(UCI_OP_REORDER, &conf_data);
 }

@@ -26,7 +26,7 @@ DM_MAP_OBJ tDynamicObj[] = {
 /*************************************************************
 * ENTRY METHOD
 **************************************************************/
-static int browseX_IOPSYS_EU_EventTESTInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
+static int browseX_IOWRT_EU_EventTESTInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	char *inst = NULL;
 
@@ -44,13 +44,13 @@ static int browseX_IOPSYS_EU_EventTESTInst(struct dmctx *dmctx, DMNODE *parent_n
 /*************************************************************
 * GET & SET PARAM
 **************************************************************/
-static int get_X_IOPSYS_EU_Syslog_ServerIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_X_IOWRT_EU_Syslog_ServerIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	dmuci_get_option_value_string("system", "@system[0]", "log_ip", value);
 	return 0;
 }
 
-static int set_X_IOPSYS_EU_Syslog_ServerIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static int set_X_IOWRT_EU_Syslog_ServerIPAddress(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action) {
 		case VALUECHECK:			
@@ -62,13 +62,13 @@ static int set_X_IOPSYS_EU_Syslog_ServerIPAddress(char *refparam, struct dmctx *
 	return 0;
 }
 	
-static int get_X_IOPSYS_EU_Syslog_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_X_IOWRT_EU_Syslog_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmuci_get_option_value_fallback_def("system", "@system[0]", "log_port", "514");
 	return 0;
 }
 
-static int set_X_IOPSYS_EU_Syslog_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static int set_X_IOWRT_EU_Syslog_ServerPort(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action) {
 		case VALUECHECK:			
@@ -80,13 +80,13 @@ static int set_X_IOPSYS_EU_Syslog_ServerPort(char *refparam, struct dmctx *ctx, 
 	return 0;
 }
 
-static int get_X_IOPSYS_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
+static int get_X_IOWRT_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
 	*value = dmuci_get_option_value_fallback_def("system", "@system[0]", "conloglevel", "7");
 	return 0;
 }
 
-static int set_X_IOPSYS_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static int set_X_IOWRT_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	switch (action) {
 		case VALUECHECK:			
@@ -101,7 +101,7 @@ static int set_X_IOPSYS_EU_Syslog_ConsoleLogLevel(char *refparam, struct dmctx *
 /*************************************************************
  * OPERATE COMMANDS
  *************************************************************/
-static int operate_Device_X_IOPSYS_EU_Reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
+static int operate_Device_X_IOWRT_EU_Reboot(char *refparam, struct dmctx *ctx, void *data, char *instance, char *value, int action)
 {
 	TRACE("Reboot sync operate called");
 	return 0;
@@ -221,38 +221,38 @@ static int event_XIOPSYSEUEventTEST_Test(char *refparam, struct dmctx *ctx, void
 /* *** Device. *** */
 DMOBJ tDynamicDeviceObj[] = {
 /* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
-{"X_IOPSYS_EU_Syslog", &DMREAD, NULL, NULL, "file:/etc/config/system", NULL, NULL, NULL, NULL, tX_IOPSYS_EU_SyslogParam, NULL, BBFDM_BOTH},
-{"X_IOPSYS_EU_PingTEST", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tX_IOPSYS_EU_PingTESTParam, NULL, BBFDM_BOTH},
-{"X_IOPSYS_EU_EventTEST", &DMREAD, NULL, NULL, NULL, browseX_IOPSYS_EU_EventTESTInst, NULL, NULL, NULL, tX_IOPSYS_EU_EventTESTParam, NULL, BBFDM_BOTH},
+{"X_IOWRT_EU_Syslog", &DMREAD, NULL, NULL, "file:/etc/config/system", NULL, NULL, NULL, NULL, tX_IOWRT_EU_SyslogParam, NULL, BBFDM_BOTH},
+{"X_IOWRT_EU_PingTEST", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tX_IOWRT_EU_PingTESTParam, NULL, BBFDM_BOTH},
+{"X_IOWRT_EU_EventTEST", &DMREAD, NULL, NULL, NULL, browseX_IOWRT_EU_EventTESTInst, NULL, NULL, NULL, tX_IOWRT_EU_EventTESTParam, NULL, BBFDM_BOTH},
 {0}
 };
 
 DMLEAF tDynamicDeviceParams[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"X_IOPSYS_EU_Reboot()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_X_IOPSYS_EU_Reboot, BBFDM_USP},
-{"X_IOPSYS_EU_Boot!", &DMREAD, DMT_EVENT, get_event_args_XIOPSYSEU_Boot, NULL, BBFDM_USP},
-{"X_IOPSYS_EU_WakeUp!", &DMREAD, DMT_EVENT, NULL, NULL, BBFDM_USP},
+{"X_IOWRT_EU_Reboot()", &DMSYNC, DMT_COMMAND, NULL, operate_Device_X_IOWRT_EU_Reboot, BBFDM_USP},
+{"X_IOWRT_EU_Boot!", &DMREAD, DMT_EVENT, get_event_args_XIOPSYSEU_Boot, NULL, BBFDM_USP},
+{"X_IOWRT_EU_WakeUp!", &DMREAD, DMT_EVENT, NULL, NULL, BBFDM_USP},
 {0}
 };
 
-/*** Device.X_IOPSYS_EU_Syslog. ***/
-DMLEAF tX_IOPSYS_EU_SyslogParam[] = {
+/*** Device.X_IOWRT_EU_Syslog. ***/
+DMLEAF tX_IOWRT_EU_SyslogParam[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
-{"ServerIPAddress", &DMWRITE, DMT_STRING, get_X_IOPSYS_EU_Syslog_ServerIPAddress, set_X_IOPSYS_EU_Syslog_ServerIPAddress, BBFDM_BOTH},
-{"ServerPort", &DMWRITE, DMT_UNINT, get_X_IOPSYS_EU_Syslog_ServerPort, set_X_IOPSYS_EU_Syslog_ServerPort, BBFDM_BOTH},
-{"ConsoleLogLevel", &DMWRITE, DMT_UNINT, get_X_IOPSYS_EU_Syslog_ConsoleLogLevel, set_X_IOPSYS_EU_Syslog_ConsoleLogLevel, BBFDM_BOTH},
+{"ServerIPAddress", &DMWRITE, DMT_STRING, get_X_IOWRT_EU_Syslog_ServerIPAddress, set_X_IOWRT_EU_Syslog_ServerIPAddress, BBFDM_BOTH},
+{"ServerPort", &DMWRITE, DMT_UNINT, get_X_IOWRT_EU_Syslog_ServerPort, set_X_IOWRT_EU_Syslog_ServerPort, BBFDM_BOTH},
+{"ConsoleLogLevel", &DMWRITE, DMT_UNINT, get_X_IOWRT_EU_Syslog_ConsoleLogLevel, set_X_IOWRT_EU_Syslog_ConsoleLogLevel, BBFDM_BOTH},
 {0}
 };
 
-/*** Device.X_IOPSYS_EU_PingTEST. ***/
-DMLEAF tX_IOPSYS_EU_PingTESTParam[] = {
+/*** Device.X_IOWRT_EU_PingTEST. ***/
+DMLEAF tX_IOWRT_EU_PingTESTParam[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Run()", &DMASYNC, DMT_COMMAND, get_operate_args_XIOPSYSEUPingTEST_Run, operate_DeviceXIOPSYSEUPingTEST_Run, BBFDM_USP},
 {0}
 };
 
-/*** Device.X_IOPSYS_EU_EventTEST. ***/
-DMLEAF tX_IOPSYS_EU_EventTESTParam[] = {
+/*** Device.X_IOWRT_EU_EventTEST. ***/
+DMLEAF tX_IOWRT_EU_EventTESTParam[] = {
 /* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"Test!", &DMREAD, DMT_EVENT, get_event_args_XIOPSYSEUEventTEST_Test, event_XIOPSYSEUEventTEST_Test, BBFDM_USP},
 {0}

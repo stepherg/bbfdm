@@ -3,7 +3,6 @@
 
 enum {
 	DM_ADD_PATH,
-	DM_ADD_OBJ_PATH,
 	DM_ADD_OPTIONAL,
 	__DM_ADD_MAX
 };

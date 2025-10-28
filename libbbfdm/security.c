@@ -76,32 +76,46 @@ static char *generate_serial_number(const char *text, int length)
 	return hex;
 }
 
+static int filter(const struct dirent *entry)
+{
+	// Exclude hidden files and files not ending with ".0"
+	return (entry->d_name[0] != '.' && strstr(entry->d_name, ".0") != NULL);
+}
+
+static int compare(const struct dirent **a, const struct dirent **b)
+{
+	// Sort alphabetically (case-insensitive)
+	return strcasecmp((*a)->d_name, (*b)->d_name);
+}
+
 static int fill_certificate_paths(const char *dir_path, int *cidx)
 {
-	struct dirent *d_file = NULL;
-	DIR *dir = NULL;
-	char cert_path[CERT_PATH_LEN];
+	struct dirent **namelist;
 
-	sysfs_foreach_file(dir_path, dir, d_file) {
+	int num_files = scandir(dir_path, &namelist, filter, compare);
 
-		if (d_file->d_name[0] == '.' || !strstr(d_file->d_name, ".0"))
+	for (int i = 0; i < num_files; i++) {
+		char cert_path[CERT_PATH_LEN];
+
+		if (*cidx >= MAX_CERT) {
+			FREE(namelist[i]);
 			continue;
+		}
 
-		if (*cidx >= MAX_CERT)
-			break;
+		snprintf(cert_path, sizeof(cert_path), "%s/%s", dir_path, namelist[i]->d_name);
 
-		snprintf(cert_path, sizeof(cert_path), "%s/%s", dir_path, d_file->d_name);
-
-		if (!file_exists(cert_path) || !is_regular_file(cert_path))
+		if (!file_exists(cert_path) || !is_regular_file(cert_path)) {
+			FREE(namelist[i]);
 			continue;
+		}
 
 		DM_STRNCPY(certifcates_paths[*cidx], cert_path, CERT_PATH_LEN);
 		(*cidx)++;
+
+		FREE(namelist[i]);
 	}
 
-	if (dir)
-		closedir (dir);
-
+	FREE(namelist);
 	return 0;
 }
 
@@ -145,10 +159,9 @@ static int get_certificate_paths(void)
 static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance)
 {
 	struct certificate_profile certificateprofile = {0};
-	struct uci_section *dmmap_sec = NULL;
 	struct dm_data curr_data = {0};
 	char *inst = NULL;
-	int i, status;
+	int i, status, id = 0;
 
 	get_certificate_paths();
 
@@ -167,16 +180,11 @@ static int browseSecurityCertificateInst(struct dmctx *dmctx, DMNODE *parent_nod
 			continue;
 		}
 
-		if ((dmmap_sec = get_dup_section_in_dmmap_opt("dmmap_security", "security_certificate", "path", certifcates_paths[i])) == NULL) {
-			dmuci_add_section_bbfdm("dmmap_security", "security_certificate", &dmmap_sec);
-			dmuci_set_value_by_section_bbfdm(dmmap_sec, "path", certifcates_paths[i]);
-		}
-
 		init_certificate(certifcates_paths[i], cert, &certificateprofile);
 
 		curr_data.additional_data = (void *)&certificateprofile;
 
-		inst = handle_instance(dmctx, parent_node, dmmap_sec, "security_certificate_instance", "security_certificate_alias");
+		inst = handle_instance_without_section(dmctx, parent_node, ++id);
 
 		status = DM_LINK_INST_OBJ(dmctx, parent_node, &curr_data, inst);
 
@@ -299,20 +307,20 @@ static int get_SecurityCertificate_SignatureAlgorithm(char *refparam, struct dmc
 ***********************************************************************************************************************************/
 /* *** Device.Security. *** */
 DMOBJ tSecurityObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_CWMP, NULL},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"Certificate", &DMREAD, NULL, NULL, NULL, browseSecurityCertificateInst, NULL, NULL, NULL, tSecurityCertificateParams, NULL, BBFDM_CWMP},
 {0}
 };
 
 DMLEAF tSecurityParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 {"CertificateNumberOfEntries", &DMREAD, DMT_UNINT, get_Security_CertificateNumberOfEntries, NULL, BBFDM_CWMP},
 {0}
 };
 
 /* *** Device.Security.Certificate.{i}. *** */
 DMLEAF tSecurityCertificateParams[] = {
-/* PARAM, permission, type, getvalue, setvalue, bbfdm_type, version*/
+/* PARAM, permission, type, getvalue, setvalue, bbfdm_type*/
 //{"Enable", &DMWRITE, DMT_BOOL, get_SecurityCertificate_Enable, set_SecurityCertificate_Enable, BBFDM_CWMP},
 {"LastModif", &DMREAD, DMT_TIME, get_SecurityCertificate_LastModif, NULL, BBFDM_CWMP},
 {"SerialNumber", &DMREAD, DMT_STRING, get_SecurityCertificate_SerialNumber, NULL, BBFDM_CWMP, DM_FLAG_UNIQUE},

@@ -1,11 +1,17 @@
 /*
- * cli.c: Cli command for bbfdmd
+ * Copyright (C) 2023-2025 iopsys Software Solutions AB
  *
- * Copyright (C) 2023 IOPSYS Software Solutions AB. All rights reserved.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License version 2.1
+ * as published by the Free Software Foundation
  *
- * Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
+ *	  Author: Amin Ben Romdhane <amin.benromdhane@iopsys.eu>
  *
- * See LICENSE file for license related information.
  */
 
-int bbfdm_cli_exec_command(int argc, char *argv[]);
+#ifndef BBFDMD_CLI_H
+#define BBFDMD_CLI_H
+
+int bbfdmd_cli_exec_command(int argc, char *argv[]);
+
+#endif /* BBFDMD_CLI_H */

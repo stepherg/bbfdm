@@ -54,7 +54,7 @@ static int teardown_revert(void **state)
 
 static int group_init(void **state)
 {
-	bbf_global_init(TR181_ROOT_TREE, "/usr/share/bbfdm/plugins");
+	bbf_global_init(TR181_ROOT_TREE, "/usr/share/bbfdm/micro_services/core");
 	return 0;
 }
 
@@ -82,7 +82,7 @@ static void test_api_bbfdm_get_value_parameter(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.Alias";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.1.Alias";
 
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
@@ -148,7 +148,7 @@ static void test_api_bbfdm_get_name_parameter(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.Verbose";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.1.Verbose";
 	ctx->nextlevel = false;
 
 	fault = bbf_entry_method(ctx, BBF_GET_NAME);
@@ -190,7 +190,7 @@ static void test_api_bbfdm_set_value_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.";
 	ctx->in_value = "test";
 
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
@@ -202,7 +202,7 @@ static void test_api_bbfdm_set_value_parameter(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.BannerFile";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.1.BannerFile";
 	ctx->in_value = "test";
 
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
@@ -226,7 +226,7 @@ static void test_api_bbfdm_set_value_wrong_parameter_path(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.Port";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.Port";
 	ctx->in_value = "test";
 
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
@@ -250,7 +250,7 @@ static void test_api_bbfdm_set_value_parameter_wrong_value(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.RootLogin";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.1.RootLogin";
 	ctx->in_value = "truee";
 
 	fault = bbf_entry_method(ctx, BBF_SET_VALUE);
@@ -262,7 +262,7 @@ static void test_api_bbfdm_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.";
 
 	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, 0);
@@ -276,7 +276,7 @@ static void test_api_bbfdm_add_wrong_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.Users.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.Users.";
 
 	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
@@ -315,7 +315,7 @@ static void test_api_bbfdm_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.1.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
@@ -326,7 +326,7 @@ static void test_api_bbfdm_delete_object_all_instances(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
@@ -337,7 +337,7 @@ static void test_api_bbfdm_delete_wrong_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
@@ -371,7 +371,7 @@ static void test_api_bbfdm_valid_operate(void **state)
 	int fault = 0;
 
 	ctx->dm_type = BBFDM_USP;
-	ctx->in_param = "Device.X_IOPSYS_EU_Reboot()";
+	ctx->in_param = "Device.X_IOWRT_EU_Reboot()";
 
 	fault = bbf_entry_method(ctx, BBF_OPERATE);
 	assert_int_equal(fault, 0);
@@ -476,7 +476,7 @@ static void test_api_bbfdm_get_instances_without_next_level(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.";
 	ctx->nextlevel = false;
 
 	fault = bbf_entry_method(ctx, BBF_INSTANCES);
@@ -493,7 +493,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	/*
 	 * Test of JSON Object Path
 	 */
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
@@ -505,7 +505,7 @@ static void test_api_bbfdm_json_get_value(void **state)
 	/*
 	 * Test of JSON Parameter Path
 	 */
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.Alias";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.1.Alias";
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
 
@@ -517,7 +517,7 @@ static void test_api_bbfdm_json_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.";
 
 	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, 0);
@@ -531,12 +531,12 @@ static void test_api_bbfdm_json_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.1.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.1.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
 
-	ctx->in_param = "Device.X_IOPSYS_EU_Dropbear.";
+	ctx->in_param = "Device.X_IOWRT_EU_Dropbear.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);
@@ -547,7 +547,7 @@ static void test_api_bbfdm_library_get_value(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_TEST.";
+	ctx->in_param = "Device.X_IOWRT_EU_TEST.";
 
 	fault = bbf_entry_method(ctx, BBF_GET_VALUE);
 	assert_int_equal(fault, 0);
@@ -570,7 +570,7 @@ static void test_api_bbfdm_library_add_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_TEST.";
+	ctx->in_param = "Device.X_IOWRT_EU_TEST.";
 
 	fault = bbf_entry_method(ctx, BBF_ADD_OBJECT);
 	assert_int_equal(fault, 0);
@@ -584,12 +584,12 @@ static void test_api_bbfdm_library_delete_object(void **state)
 	struct dmctx *ctx = (struct dmctx *) *state;
 	int fault = 0;
 
-	ctx->in_param = "Device.X_IOPSYS_EU_TEST.2.";
+	ctx->in_param = "Device.X_IOWRT_EU_TEST.2.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, 0);
 
-	ctx->in_param = "Device.X_IOPSYS_EU_TEST.";
+	ctx->in_param = "Device.X_IOWRT_EU_TEST.";
 
 	fault = bbf_entry_method(ctx, BBF_DEL_OBJECT);
 	assert_int_equal(fault, FAULT_9005);

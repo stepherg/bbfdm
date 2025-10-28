@@ -1,8 +1,8 @@
 # API guide and usages
 
-`libbbfdm-api` provides API to define datamodel objects as well as it also provides APIs to traverse the datamodel definitions.
+`libbbfdm-api-legacy` provides API to define datamodel objects as well as it also provides APIs to traverse the datamodel definitions.
 
-Most used datamodel APIs described in [libbbfdm_api.h](../../libbbfdm-api/include/libbbfdm_api.h)
+Most used datamodel APIs described in [libbbfdm_api.h](../../libbbfdm-api/legacy/include/libbbfdm_api.h)
 
 Following is the list of APIs used by bbfdmd for tree traversal:
 
@@ -145,7 +145,7 @@ return
 
 # Deprecated/removed APIs and user defined datatypes
 
-To support new feature sometimes old APIs provided by libbbfdm-api library needs to be updated, this guide provides a better context to the migration.
+To support new feature sometimes old APIs provided by `libbbfdm-api-legacy` library needs to be updated, this guide provides a better context to the migration.
 
 Following table has APIs/datatypes which are now deprecated:
 
@@ -156,7 +156,7 @@ Following table has APIs/datatypes which are now deprecated:
 | stucture | `dmmap_dup`               | `dm_data`                    | Replaced to support the extension for Obj/Param/Operate using JSON plugin |
 
 
-Following table has list of APIs/datatypes which no longer exists in libbbfdm-api, along with new revised APIs replacement:
+Following table has list of APIs/datatypes which no longer exists in `libbbfdm-api-legacy`, along with new revised APIs replacement:
 
 |   Type   |      Removed API                   | New API  	                    	| Comment                                |
 | -------- | ---------------------------------- | ------------------------------------ 	| -------------------------------------- |

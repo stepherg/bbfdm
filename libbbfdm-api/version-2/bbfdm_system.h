@@ -27,6 +27,18 @@ extern "C" {
 bool bbfdm_folder_exists(const char *path);
 
 /**
+ * @brief Ensure that a folder exists at the given path.
+ *
+ * This function checks whether a folder exists at the specified path. If it does not,
+ * the function attempts to create it. If the folder already exists or is successfully
+ * created, the function returns true.
+ *
+ * @param[in] path Path to the folder.
+ * @return true if the folder exists or is successfully created, false otherwise.
+ */
+bool bbfdm_ensure_folder_exists(const char *path);
+
+/**
  * @brief Check if a file exists at the given path.
  *
  * This function verifies the existence of a file at the specified path.
@@ -55,6 +67,18 @@ bool bbfdm_is_regular_file(const char *path);
  * @return 0 on success, -1 on failure.
  */
 int bbfdm_create_empty_file(const char *path);
+
+/**
+ * @brief Copy a string with a guaranteed null termination.
+ *
+ * This function copies up to `n - 1` characters from `src` to `dst` and ensures
+ * the destination string is null-terminated. If `n` is 1 or less, no copying occurs.
+ *
+ * @param[out] dst Destination buffer.
+ * @param[in] src Source string.
+ * @param[in] n Size of the destination buffer.
+ */
+void bbfdm_strncpy(char *dst, const char *src, size_t n);
 
 #ifdef __cplusplus
 }

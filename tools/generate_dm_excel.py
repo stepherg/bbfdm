@@ -197,13 +197,6 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-        '-p', '--vendor-prefix',
-		default = 'X_IOPSYS_EU_',
-		metavar = 'X_IOPSYS_EU_',
-		help = 'Generate data model tree using provided vendor prefix for vendor defined objects'
-    )
-
-    parser.add_argument(
         '-o', '--output',
         default = "datamodel.xls",
         metavar = "supported_datamodel.xls",
@@ -225,7 +218,7 @@ if __name__ == '__main__':
 
             plugins.append(r)
 
-    bbf.generate_supported_dm(args.vendor_prefix, plugins)
+    bbf.generate_supported_dm(plugins)
     generate_excel(args.output)
     print(f'Datamodel generation completed, aritifacts available in {args.output}')
     sys.exit(bbf.BBF_ERROR_CODE)

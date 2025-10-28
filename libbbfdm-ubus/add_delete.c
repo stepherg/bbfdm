@@ -35,6 +35,17 @@ static int bbfdm_add_object(bbfdm_data_t *data)
 
 	blobmsg_close_array(&data->bb, array);
 
+	array = blobmsg_open_array(&data->bb, "modified_uci");
+
+	if (data->bbf_ctx.modified_uci_head != NULL) {
+		struct dm_modified_uci *m;
+		list_for_each_entry(m, data->bbf_ctx.modified_uci_head, list) {
+			bb_add_string(&data->bb, "", m->uci_file);
+		}
+	}
+
+	blobmsg_close_array(&data->bb, array);
+
 	return fault;
 }
 
@@ -63,6 +74,17 @@ static int bbfdm_del_object(bbfdm_data_t *data)
 		}
 
 		bbf_sub_cleanup(&data->bbf_ctx);
+	}
+
+	blobmsg_close_array(&data->bb, array);
+
+	array = blobmsg_open_array(&data->bb, "modified_uci");
+
+	if (data->bbf_ctx.modified_uci_head != NULL) {
+		struct dm_modified_uci *m;
+		list_for_each_entry(m, data->bbf_ctx.modified_uci_head, list) {
+			bb_add_string(&data->bb, "", m->uci_file);
+		}
 	}
 
 	blobmsg_close_array(&data->bb, array);

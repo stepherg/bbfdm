@@ -12,6 +12,7 @@ add_subdirectory(dm-service)
 set(MY_CC "$ENV{CC}")
 set(MY_CFLAGS "$ENV{CFLAGS}")
 set(MY_LDFLAGS "$ENV{LDFLAGS}")
+set(CMAKE_BUILD_TYPE Debug)
 
 # Define a custom target to build the utilities using Makefile
 add_custom_target(

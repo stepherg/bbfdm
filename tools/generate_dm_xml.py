@@ -86,6 +86,7 @@ def get_info_from_json(data, dm_json_files=None):
                 string=string + "."
 
         if len(string) != 0:
+            string = string.replace("X_IOWRT_EU_", "{BBF_VENDOR_PREFIX}").replace("X_GENEXIS_EU_", "{BBF_VENDOR_PREFIX}")
             list_data.append(string)
 
     if len(list_data) == 0:
@@ -103,6 +104,12 @@ def get_info_from_json(data, dm_json_files=None):
 
                 index = -1
                 for key in ob.keys():
+
+                    if key == "json_plugin_version":
+                        continue
+
+                    key = key.replace("X_IOWRT_EU_", "{BBF_VENDOR_PREFIX}").replace("X_GENEXIS_EU_", "{BBF_VENDOR_PREFIX}")
+
                     if key in list_data:
                         index = list_data.index(key)
                         break
@@ -114,8 +121,8 @@ def get_info_from_json(data, dm_json_files=None):
                     if i != (len(list_data) - 1) and list_data[i + 1] == list_data[i] + "{i}.":
                         continue
                     try:
-                        if str(list_data[i]).find("X_IOPSYS_EU_") != -1:
-                            param = str(list_data[i]).replace("X_IOPSYS_EU_", "{BBF_VENDOR_PREFIX}")
+                        if str(list_data[i]).find("X_IOWRT_EU_") != -1 or str(list_data[i]).find("X_GENEXIS_EU_") != -1:
+                            param = str(list_data[i]).replace("X_IOWRT_EU_", "{BBF_VENDOR_PREFIX}").replace("X_GENEXIS_EU_", "{BBF_VENDOR_PREFIX}")
                         else:
                             param = str(list_data[i])
 
@@ -173,6 +180,8 @@ def generate_bbf_xml_file(output_file, dm_json_files=None):
 
             ob_description = ET.SubElement(objec, "description")
             ob_description.text = desc.replace("<", "{").replace(">", "}") if desc is not None else ""
+            if desc is None:
+                print(f'#### Description should be added for {name} object ####')
 
             DM_OBJ_COUNT += 1
         else:
@@ -185,7 +194,9 @@ def generate_bbf_xml_file(output_file, dm_json_files=None):
 
             p_description = ET.SubElement(parameter, "description")
             p_description.text = desc.replace("<", "{").replace(">", "}") if desc is not None else ""
-            
+            if desc is None:
+                print(f'#### Description should be added for {name} parameter ####')
+
             syntax = ET.SubElement(parameter, "syntax")
 
             if list_ob is not None and len(list_ob) != 0:
@@ -391,13 +402,6 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-        '-p', '--vendor-prefix',
-		default = 'X_IOPSYS_EU_',
-		metavar = 'X_IOPSYS_EU_',
-		help = 'Generate data model tree using provided vendor prefix for vendor defined objects.'
-    )
-
-    parser.add_argument(
         '-d', '--device-protocol',
 		default = 'DEVICE_PROTOCOL_DSLFTR069v1',
 		metavar = 'DEVICE_PROTOCOL_DSLFTR069v1',
@@ -476,7 +480,7 @@ if __name__ == '__main__':
 
             plugins.append(r)
 
-    bbf.generate_supported_dm(args.vendor_prefix, plugins)
+    bbf.generate_supported_dm(plugins)
     generate_xml(args.format, args.dm_json_files, args.output)
     print(f'Datamodel generation completed, aritifacts available in {args.output}')
     sys.exit(bbf.BBF_ERROR_CODE)

@@ -10,8 +10,10 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <errno.h>
 #include <sys/stat.h>
 
 bool bbfdm_folder_exists(const char *path)
@@ -22,6 +24,17 @@ bool bbfdm_folder_exists(const char *path)
 		return false;
 
 	return stat(path, &buffer) == 0 && S_ISDIR(buffer.st_mode);
+}
+
+bool bbfdm_ensure_folder_exists(const char *path)
+{
+	if (bbfdm_folder_exists(path))
+		return true;
+
+	if (mkdir(path, 0755) == 0 || errno == EEXIST)
+		return true;
+
+	return false;
 }
 
 bool bbfdm_file_exists(const char *path)
@@ -59,4 +72,15 @@ int bbfdm_create_empty_file(const char *path)
 
 	fclose(fp);
 	return 0;
+}
+
+void bbfdm_strncpy(char *dst, const char *src, size_t n)
+{
+	if (dst == NULL || src == NULL)
+		return;
+
+	if (n > 1) {
+		strncpy(dst, src, n - 1);
+		dst[n - 1] = 0;
+	}
 }

@@ -53,6 +53,7 @@ void dmubus_wait_for_event(const char *event, int timeout, void *ev_data, CB_FUN
 			struct dmubus_ev_subtask *subtask);
 
 int dmubus_call(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
+int dmubus_call_timeout(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, int timeout, json_object **req_res);
 int dmubus_call_blocking(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size, json_object **req_res);
 int dmubus_call_set(const char *obj, const char *method, struct ubus_arg u_args[], int u_args_size);
 
@@ -60,10 +61,16 @@ int dmubus_call_blob(const char *obj, const char *method, json_object *value, js
 int dmubus_call_blob_blocking(const char *obj, const char *method, json_object *value, json_object **resp);
 int dmubus_call_blob_set(const char *obj, const char *method, json_object *value);
 
+int dmubus_call_blob_msg(const char *obj, const char *method, struct blob_buf *blob_msg, json_object **resp);
+int dmubus_call_blob_msg_timeout(const char *obj, const char *method, struct blob_buf *blob_msg, int timeout);
 int dmubus_call_blob_msg_set(const char *obj, const char *method, struct blob_buf *blob_msg);
 
-void dmubus_free();
+void dm_ubus_init(struct dmctx *bbf_ctx);
+void dm_ubus_free(struct dmctx *bbf_ctx);
 
 bool dmubus_object_method_exists(const char *obj);
+
+void dm_ubus_cache_init(void);
+void dm_ubus_cache_free(void);
 
 #endif

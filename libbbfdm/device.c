@@ -13,7 +13,6 @@
 #include "device.h"
 #include "lanconfigsecurity.h"
 #include "security.h"
-#include "gatewayinfo.h"
 #include "schedules.h"
 
 /*************************************************************
@@ -21,33 +20,51 @@
 **************************************************************/
 static void _exec_reboot(const void *arg1, void *arg2)
 {
-	char config_name[16] = {0};
+	struct bbfdm_ctx d_ctx = {0};
+	struct blob_buf bb = {0};
 
-	snprintf(config_name, sizeof(config_name), "%s", "sysmngr");
+	bbfdm_init_ctx(&d_ctx);
+	memset(&bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&bb, 0);
 
 	// Set last_reboot_cause to 'RemoteReboot' because the upcoming reboot will be initiated by USP Operate
-	dmuci_set_value(config_name, "reboots", "last_reboot_cause", "RemoteReboot");
-	dmuci_commit_package(config_name);
-
+	bbfdm_uci_set(&d_ctx, "sysmngr", "reboots", "last_reboot_cause", "RemoteReboot");
+	bbfdm_uci_commit_package(&d_ctx, "sysmngr");
 	sleep(3);
-	dmubus_call_set("rpc-sys", "reboot", UBUS_ARGS{0}, 0);
-	sleep(5); // Wait for reboot to happen
+
+	bbfdm_ubus_invoke_sync(&d_ctx, "rpc-sys", "reboot", bb.head, 5000, NULL, NULL);
+	sleep(30); // Wait for reboot to happen
+
 	BBF_ERR("Reboot call failed with rpc-sys, trying again with system");
-	dmubus_call_set("system", "reboot", UBUS_ARGS{0}, 0);
-	sleep(5); // Wait for reboot
+	bbfdm_ubus_invoke_sync(&d_ctx, "system", "reboot", bb.head, 5000, NULL, NULL);
+	sleep(30); // Wait for reboot
+
 	BBF_ERR("Reboot call failed!!!");
 
 	// Set last_reboot_cause to empty because there is a problem in the system reboot
-	dmuci_set_value(config_name, "reboots", "last_reboot_cause", "");
-	dmuci_commit_package(config_name);
+	bbfdm_uci_set(&d_ctx, "sysmngr", "reboots", "last_reboot_cause", "");
+	bbfdm_uci_commit_package(&d_ctx, "sysmngr");
+	bbfdm_free_ctx(&d_ctx);
+	blob_buf_free(&bb);
 }
 
 static void _exec_factoryreset(const void *arg1, void *arg2)
 {
+	struct bbfdm_ctx d_ctx = {0};
+	struct blob_buf bb = {0};
+
+	bbfdm_init_ctx(&d_ctx);
+	memset(&bb, 0, sizeof(struct blob_buf));
+	blob_buf_init(&bb, 0);
+
 	sleep(2);
-	dmubus_call_set("rpc-sys", "factory", UBUS_ARGS{0}, 0);
+	bbfdm_ubus_invoke_sync(&d_ctx, "rpc-sys", "factory", bb.head, 5000, NULL, NULL);
 	sleep(5); // Wait for reboot to happen
+
 	BBF_ERR("FactoryReset via rpc-sys failed, trying defaultreset");
+	bbfdm_free_ctx(&d_ctx);
+	blob_buf_free(&bb);
+
 	dmcmd_no_wait("/sbin/defaultreset", 0);
 	sleep(5); // Wait for reboot to happen
 	BBF_ERR("FactoryReset call failed!!!");
@@ -58,7 +75,7 @@ static void _exec_factoryreset(const void *arg1, void *arg2)
 **************************************************************/
 static int get_Device_RootDataModelVersion(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value)
 {
-	*value = dmstrdup("2.18");
+	*value = dmstrdup("2.19");
 	return 0;
 }
 
@@ -79,24 +96,36 @@ static int operate_Device_FactoryReset(char *refparam, struct dmctx *ctx, void *
 	return !res ? 0 : USP_FAULT_COMMAND_FAILURE;
 }
 
+/*************************************************************
+* Init & Clean Module
+**************************************************************/
+int init_core_module(void *data)
+{
+	struct dmctx bbf_ctx = {0};
+
+	bbf_ctx_init(&bbf_ctx, NULL);
+	dmmap_synchronizeSchedulesSchedule(&bbf_ctx);
+	bbf_ctx_clean(&bbf_ctx);
+
+	return 0;
+}
+
 /**********************************************************************************************************************************
 *                                            OBJ & LEAF DEFINITION
 ***********************************************************************************************************************************/
 /* *** BBFDM *** */
 DM_MAP_OBJ tDynamicObj[] = {
 /* parentobj, nextobject, parameter */
-{"Device.", tDMRootObj, tDMRootParams},
+{"Device.", tDMRootObj, tDMRootParams, init_core_module, NULL},
 {0}
 };
 
 /* *** Device. *** */
 DMOBJ tDMRootObj[] = {
-/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys, version*/
-{"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH, NULL},
-{"Schedules", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSchedulesObj, tSchedulesParams, NULL, BBFDM_BOTH, NULL},
-{"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_BOTH, NULL},
-{"Services", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, BBFDM_BOTH, NULL},
-{"GatewayInfo", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, NULL, tGatewayInfoParams, NULL, BBFDM_CWMP, NULL},
+/* OBJ, permission, addobj, delobj, checkdep, browseinstobj, nextdynamicobj, dynamicleaf, nextobj, leaf, linker, bbfdm_type, uniqueKeys*/
+{"LANConfigSecurity", &DMREAD, NULL, NULL, "file:/etc/config/users", NULL, NULL, NULL, NULL, tLANConfigSecurityParams, NULL, BBFDM_BOTH},
+{"Schedules", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSchedulesObj, tSchedulesParams, NULL, BBFDM_BOTH},
+{"Security", &DMREAD, NULL, NULL, NULL, NULL, NULL, NULL, tSecurityObj, tSecurityParams, NULL, BBFDM_CWMP},
 {0}
 };
 

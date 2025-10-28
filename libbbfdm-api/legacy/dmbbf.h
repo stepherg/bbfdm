@@ -27,12 +27,17 @@
 #include "dmmem.h"
 #include "dmapi.h"
 
-bool dm_is_micro_service(void);
-void dm_set_micro_service(void);
+int get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int (*browseinstobj)(struct dmctx *ctx, struct dmnode *node, void *data, char *instance)); // To be removed later!!!!!!!!!!!!
 
-int get_number_of_entries(struct dmctx *ctx, void *data, char *instance, int (*browseinstobj)(struct dmctx *ctx, struct dmnode *node, void *data, char *instance));
 char *handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct uci_section *s, const char *inst_opt, const char *alias_opt);
 char *handle_instance_without_section(struct dmctx *dmctx, DMNODE *parent_node, int inst_nbr);
+
+struct uci_section *create_dmmap_obj(struct dmctx *dmctx, unsigned char instance_level,
+		const char *obj_file, const char *obj_name, struct uci_section *config_sec,
+		char **instance);
+int generic_browse(struct dmctx *dmctx, DMNODE *parent_node, void *prev_data, char *prev_instance);
+char *uci_handle_instance(struct dmctx *dmctx, DMNODE *parent_node, struct dm_data *data);
+
 int get_empty(char *refparam, struct dmctx *ctx, void *data, char *instance, char **value);
 
 void fill_blob_param(struct blob_buf *bb, const char *path, const char *data, const char *type, uint32_t dm_flags);
@@ -40,7 +45,6 @@ void fill_blob_event(struct blob_buf *bb, const char *path, const char *type, vo
 void fill_blob_operate(struct blob_buf *bb, const char *path, const char *data, const char *type, void *in_out);
 
 int string_to_bool(const char *v, bool *b);
-char *get_value_by_reference(struct dmctx *ctx, char *value);
 int dm_entry_get_value(struct dmctx *dmctx);
 int dm_entry_get_name(struct dmctx *ctx);
 int dm_entry_get_supported_dm(struct dmctx *ctx);
@@ -51,6 +55,7 @@ int dm_entry_set_value(struct dmctx *dmctx);
 int dm_entry_object_exists(struct dmctx *dmctx);
 int dm_entry_operate(struct dmctx *dmctx);
 int dm_entry_event(struct dmctx *dmctx);
+int dm_entry_references_db(struct dmctx *ctx);
 int dm_entry_get_reference_param(struct dmctx *dmctx);
 int dm_entry_get_reference_value(struct dmctx *dmctx);
 int dm_link_inst_obj(struct dmctx *dmctx, DMNODE *parent_node, void *data, char *instance);
@@ -59,7 +64,9 @@ static inline int DM_LINK_INST_OBJ(struct dmctx *dmctx, DMNODE *parent_node, voi
 {
 	dmctx->faultcode = dm_link_inst_obj(dmctx, parent_node, data, instance);
 	if (dmctx->stop || parent_node->num_of_entries >= BBF_MAX_OBJECT_INSTANCES) {
-		BBFDM_ERR("%s has reached max %d number of entries", parent_node->current_object, BBF_MAX_OBJECT_INSTANCES);
+		if (parent_node->num_of_entries >= BBF_MAX_OBJECT_INSTANCES) {
+			BBFDM_ERR("%s has reached max %d number of entries", parent_node->current_object, BBF_MAX_OBJECT_INSTANCES);
+		}
 		return DM_STOP;
 	}
 	return DM_OK;
